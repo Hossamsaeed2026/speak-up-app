@@ -1,0 +1,2946 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Speak Up Speech Therapy - نظام الإدارة المتكامل (مطابق لبيانات الشيت)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap');
+    * { font-family: 'Cairo', system-ui, -apple-system, sans-serif; }
+    .badge-att { background-color: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+    .badge-can { background-color: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+    .badge-exc { background-color: #fef9c3; color: #a16207; border: 1px solid #fef08a; }
+    .badge-sde { background-color: #ffedd5; color: #c2410c; border: 1px solid #fed7aa; }
+    .badge-tca { background-color: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+    .badge-scheduled { background-color: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+
+    @media print {
+      body * { visibility: hidden; }
+      #print-area, #print-area * { visibility: visible; }
+      #print-area { position: absolute; left: 0; top: 0; width: 100%; }
+      .no-print { display: none !important; }
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen">
+  <div id="app" class="flex flex-col min-h-screen">
+    
+    <!-- Header -->
+    <header id="mainHeader" class="bg-indigo-900 text-white shadow-md sticky top-0 z-40 transition-colors duration-300">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+          <div class="flex items-center space-x-3 space-x-reverse">
+            <div id="headerLogoContainer" class="w-14 h-14 rounded-full bg-gradient-to-tr from-cyan-400 to-indigo-500 flex items-center justify-center text-white shadow-md font-bold text-2xl overflow-hidden transition-all shrink-0">
+              <span id="headerLogoEmoji">🗣️</span>
+              <img id="headerLogoImg" class="w-full h-full object-cover hidden" src="" alt="Logo">
+            </div>
+            <div>
+              <div class="font-extrabold text-lg tracking-tight flex items-center gap-2">
+                <span id="headerCenterName">Speak Up Speech Therapy</span>
+                <span class="text-xs bg-emerald-600 text-white px-2 py-0.5 rounded-full font-bold">متطابق مع AppSheet</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <!-- Branch filter -->
+            <div id="headerBranchFilter" class="flex items-center bg-indigo-800/80 rounded-lg p-1 text-xs border border-indigo-700">
+              <span class="text-indigo-300 px-2 font-medium">الفرع:</span>
+              <button onclick="setBranchFilter('all')" id="btn-branch-all" class="px-2.5 py-1 rounded-md transition font-semibold bg-white text-indigo-900 shadow-sm">الكل</button>
+              <button onclick="setBranchFilter('B001')" id="btn-branch-bitash" class="px-2.5 py-1 rounded-md transition font-medium text-indigo-200 hover:text-white">البيطاش</button>
+              <button onclick="setBranchFilter('B002')" id="btn-branch-smouha" class="px-2.5 py-1 rounded-md transition font-medium text-indigo-200 hover:text-white">سموحه</button>
+              <button onclick="setBranchFilter('B003')" id="btn-branch-online" class="px-2.5 py-1 rounded-md transition font-medium text-indigo-200 hover:text-white">أونلاين</button>
+              <button onclick="setBranchFilter('B004')" id="btn-branch-private" class="px-2.5 py-1 rounded-md transition font-medium text-indigo-200 hover:text-white">Private</button>
+            </div>
+
+            <!-- Logged-in User Account Info & Logout Button -->
+            <div id="userInfoHeader" class="flex items-center gap-2 bg-indigo-800/80 rounded-lg px-2.5 py-1 text-xs border border-indigo-700">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span id="headerUserName" class="font-extrabold text-white">أ. حسام سعيد طه</span>
+              <span id="headerUserRoleBadge" class="bg-cyan-500/20 text-cyan-200 text-[10px] px-2 py-0.5 rounded-full font-bold border border-cyan-400/30">👑 المدير</span>
+              
+              <!-- Fast Role Switcher (Admin) -->
+              <select id="userRoleSelect" onchange="setUserRole(this.value)" class="bg-indigo-900 text-white font-semibold rounded px-2 py-0.5 border-0 focus:ring-1 focus:ring-cyan-400 cursor-pointer text-xs mr-1">
+                <option value="admin">صلاحية المدير</option>
+                <option value="secretary">صلاحية السكرتيرة</option>
+                <option value="therapist">صلاحية الأخصائي</option>
+              </select>
+
+              <button onclick="handleLogout()" class="bg-rose-600/90 hover:bg-rose-600 text-white font-bold px-2 py-0.5 rounded text-xs transition flex items-center gap-1 shadow-sm mr-1" title="تسجيل الخروج من النظام">
+                <span>خروج 🚪</span>
+              </button>
+            </div>
+
+            <button id="headerAddStaffBtn" onclick="openNewStaffModal()" class="bg-indigo-700 hover:bg-indigo-600 text-white font-bold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1 transition shadow border border-indigo-500">
+              <span>+ إضافة أخصائي</span>
+            </button>
+
+            <button id="headerAddSessionBtn" onclick="openNewSessionModal()" class="bg-cyan-500 hover:bg-cyan-400 text-indigo-950 font-bold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1.5 transition shadow">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+              <span>جلسة جديدة</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation Bar (Full Row OR Compact Dropdown Menu) -->
+      <nav class="bg-indigo-950/80 border-t border-indigo-800/50 px-4 relative">
+        
+        <!-- Option 1: Full Row Navigation Tabs -->
+        <div id="fullNavRow" class="max-w-7xl mx-auto flex items-center space-x-1 space-x-reverse overflow-x-auto py-1 scrollbar-none text-xs">
+          <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-tab px-3 py-2 rounded-lg font-bold transition flex items-center gap-1.5 bg-indigo-600 text-white">
+            📊 لوحة التحكم والإحصائيات
+          </button>
+          <button onclick="switchTab('secretary')" id="nav-secretary" class="nav-tab px-3 py-2 rounded-lg font-medium transition flex items-center gap-1.5 text-indigo-200 hover:text-white hover:bg-indigo-800">
+            ⚡ كشف الحضور اليومي السريع (منة)
+          </button>
+          <button onclick="switchTab('calendar')" id="nav-calendar" class="nav-tab px-3 py-2 rounded-lg font-medium transition flex items-center gap-1.5 text-indigo-200 hover:text-white hover:bg-indigo-800">
+            📅 الكاليندر والمواعيد
+          </button>
+          <button onclick="switchTab('clients')" id="nav-clients" class="nav-tab px-3 py-2 rounded-lg font-medium transition flex items-center gap-1.5 text-indigo-200 hover:text-white hover:bg-indigo-800">
+            👶 العملاء والجدول الأسبوعي (<span id="clients-nav-badge">0</span>)
+          </button>
+          <button onclick="switchTab('sessions')" id="nav-sessions" class="nav-tab px-3 py-2 rounded-lg font-medium transition flex items-center gap-1.5 text-indigo-200 hover:text-white hover:bg-indigo-800">
+            📋 سجل الجلسات الكامل
+          </button>
+          <button onclick="switchTab('invoices')" id="nav-invoices" class="nav-tab px-3 py-2 rounded-lg font-medium transition flex items-center gap-1.5 text-indigo-200 hover:text-white hover:bg-indigo-800">
+            🧾 الفواتير الشهرية (Billing)
+          </button>
+          <button onclick="switchTab('payments')" id="nav-payments" class="nav-tab px-3 py-2 rounded-lg font-medium transition flex items-center gap-1.5 text-indigo-200 hover:text-white hover:bg-indigo-800">
+            💵 المدفوعات وسندات القبض
+          </button>
+          <button onclick="switchTab('staff')" id="nav-staff" class="nav-tab px-3 py-2 rounded-lg font-medium transition flex items-center gap-1.5 text-indigo-200 hover:text-white hover:bg-indigo-800">
+            👩‍⚕️ الأخصائيين والفروع (HR)
+          </button>
+          <button onclick="switchTab('settings')" id="nav-settings" class="nav-tab px-3 py-2 rounded-lg font-medium transition flex items-center gap-1.5 text-indigo-200 hover:text-white hover:bg-indigo-800">
+            ⚙️ إعدادات النظام والصلاحيات
+          </button>
+        </div>
+
+        <!-- Option 2: Compact Nav Row with Dropdown Menu -->
+        <div id="compactNavRow" class="hidden max-w-7xl mx-auto flex items-center justify-between py-1.5 scrollbar-none text-xs">
+          <div class="flex items-center gap-3">
+            <!-- Mega Menu Toggle Button -->
+            <div class="relative">
+              <button onclick="toggleMegaMenu()" class="bg-cyan-500 hover:bg-cyan-400 text-indigo-950 font-black px-4 py-2 rounded-xl flex items-center gap-2 shadow transition cursor-pointer">
+                <span>☰ أقسام النظام والخدمات</span>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+              </button>
+
+              <!-- Mega Menu Dropdown Box -->
+              <div id="megaMenuDropdown" class="hidden absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-slate-200 z-50 p-4 space-y-4 text-slate-800 text-xs transition-all">
+                
+                <!-- Category 1: الإحصائيات والكشوف -->
+                <div class="space-y-1">
+                  <div class="text-[10px] font-black text-indigo-600 uppercase tracking-wider px-2">📊 الإحصائيات والكشوف المباشرة</div>
+                  <button id="mega-nav-dashboard" onclick="switchTab('dashboard'); closeMegaMenu();" class="w-full text-right px-3 py-2 rounded-xl font-bold hover:bg-indigo-50 hover:text-indigo-900 transition flex items-center gap-2">
+                    <span>📊 لوحة التحكم والإحصائيات العامة</span>
+                  </button>
+                  <button id="mega-nav-secretary" onclick="switchTab('secretary'); closeMegaMenu();" class="w-full text-right px-3 py-2 rounded-xl font-bold hover:bg-indigo-50 hover:text-indigo-900 transition flex items-center gap-2">
+                    <span>⚡ كشف الحضور اليومي السريع (أ. منة)</span>
+                  </button>
+                  <button id="mega-nav-calendar" onclick="switchTab('calendar'); closeMegaMenu();" class="w-full text-right px-3 py-2 rounded-xl font-bold hover:bg-indigo-50 hover:text-indigo-900 transition flex items-center gap-2">
+                    <span>📅 الكاليندر والمواعيد الأسبوعية</span>
+                  </button>
+                </div>
+
+                <!-- Category 2: العملاء والجلسات -->
+                <div class="space-y-1 border-t pt-2">
+                  <div class="text-[10px] font-black text-indigo-600 uppercase tracking-wider px-2">👶 العملاء والجلسات</div>
+                  <button id="mega-nav-clients" onclick="switchTab('clients'); closeMegaMenu();" class="w-full text-right px-3 py-2 rounded-xl font-bold hover:bg-indigo-50 hover:text-indigo-900 transition flex items-center gap-2">
+                    <span>👶 العملاء والجدول الأسبوعي الثابت</span>
+                  </button>
+                  <button id="mega-nav-sessions" onclick="switchTab('sessions'); closeMegaMenu();" class="w-full text-right px-3 py-2 rounded-xl font-bold hover:bg-indigo-50 hover:text-indigo-900 transition flex items-center gap-2">
+                    <span>📋 سجل الجلسات اليومي الكامل</span>
+                  </button>
+                </div>
+
+                <!-- Category 3: المالية والتقارير -->
+                <div class="space-y-1 border-t pt-2">
+                  <div class="text-[10px] font-black text-emerald-600 uppercase tracking-wider px-2">💵 الحسابات والماليات</div>
+                  <button id="mega-nav-invoices" onclick="switchTab('invoices'); closeMegaMenu();" class="w-full text-right px-3 py-2 rounded-xl font-bold hover:bg-indigo-50 hover:text-indigo-900 transition flex items-center gap-2">
+                    <span>🧾 الفواتير الشهرية والتقارير (Billing)</span>
+                  </button>
+                  <button id="mega-nav-payments" onclick="switchTab('payments'); closeMegaMenu();" class="w-full text-right px-3 py-2 rounded-xl font-bold hover:bg-indigo-50 hover:text-indigo-900 transition flex items-center gap-2">
+                    <span>💵 المدفوعات وسندات القبض النقدية</span>
+                  </button>
+                </div>
+
+                <!-- Category 4: الإدارة والسيستم -->
+                <div class="space-y-1 border-t pt-2">
+                  <div class="text-[10px] font-black text-slate-500 uppercase tracking-wider px-2">⚙️ الإدارة وإعدادات النظام</div>
+                  <button id="mega-nav-staff" onclick="switchTab('staff'); closeMegaMenu();" class="w-full text-right px-3 py-2 rounded-xl font-bold hover:bg-indigo-50 hover:text-indigo-900 transition flex items-center gap-2">
+                    <span>👩‍⚕️ الأخصائيين وأسعار الفروع (HR)</span>
+                  </button>
+                  <button id="mega-nav-settings" onclick="switchTab('settings'); closeMegaMenu();" class="w-full text-right px-3 py-2 rounded-xl font-bold hover:bg-indigo-50 hover:text-indigo-900 transition flex items-center gap-2 text-indigo-700 bg-indigo-50/50">
+                    <span>⚙️ إعدادات النظام، الثيم، والصلاحيات</span>
+                  </button>
+                </div>
+
+              </div>
+            </div>
+
+            <!-- Active Tab Indicator Badge -->
+            <div class="flex items-center gap-2 font-bold text-white text-xs bg-indigo-900/60 px-3 py-1.5 rounded-xl border border-indigo-700/50">
+              <span class="text-indigo-300">القسم الحالي:</span>
+              <span id="compactActiveTabName" class="text-cyan-300 font-extrabold">📊 لوحة التحكم والإحصائيات</span>
+            </div>
+          </div>
+        </div>
+
+      </nav>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-6">
+      
+      <!-- 1. Dashboard Tab -->
+      <section id="tab-dashboard" class="tab-content space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-2xl">👶</div>
+            <div>
+              <div class="text-xs text-slate-500 font-medium">العملاء النشطون</div>
+              <div class="text-2xl font-black text-slate-900" id="dash-active-clients">0</div>
+              <div class="text-[10px] text-emerald-600 font-bold mt-0.5">من إجمالي <span id="dash-total-clients">0</span> عميل</div>
+            </div>
+          </div>
+          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-cyan-50 text-cyan-600 flex items-center justify-center font-bold text-2xl">📋</div>
+            <div>
+              <div class="text-xs text-slate-500 font-medium">إجمالي الجلسات (شهر أكتوبر)</div>
+              <div class="text-2xl font-black text-slate-900" id="dash-month-sessions">0</div>
+              <div class="text-[10px] text-slate-400 font-bold mt-0.5"><span id="dash-att-count">0</span> حضور مؤكد</div>
+            </div>
+          </div>
+          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-2xl">💵</div>
+            <div>
+              <div class="text-xs text-slate-500 font-medium">إجمالي التحصيل (أكتوبر)</div>
+              <div class="text-2xl font-black text-emerald-700" id="dash-month-payments">0 ج.م</div>
+              <div class="text-[10px] text-slate-400 font-bold mt-0.5">من سندات القبض</div>
+            </div>
+          </div>
+          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-2xl">⚖️</div>
+            <div>
+              <div class="text-xs text-slate-500 font-medium">صافي المطلوب سداده</div>
+              <div class="text-2xl font-black text-indigo-700" id="dash-month-due">0 ج.م</div>
+              <div class="text-[10px] text-red-500 font-bold mt-0.5">متبقي غير مسدد: <span id="dash-month-remaining">0</span> ج.م</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- Quick Status Breakdown -->
+          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-4 lg:col-span-1">
+            <h3 class="font-extrabold text-slate-900 text-sm flex items-center gap-2 border-b pb-3">
+              <span>📊 توزيع حالات الجلسات (قواعد الخصم)</span>
+            </h3>
+            <div class="space-y-3 text-xs">
+              <div class="flex justify-between items-center bg-emerald-50 p-2.5 rounded-xl border border-emerald-100">
+                <div class="flex items-center gap-2 font-bold text-emerald-800">
+                  <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
+                  <span>ATT (حضور فعلي)</span>
+                </div>
+                <span class="font-mono font-black text-emerald-900 text-sm" id="dash-count-att">0</span>
+              </div>
+              <div class="flex justify-between items-center bg-rose-50 p-2.5 rounded-xl border border-rose-100">
+                <div class="flex items-center gap-2 font-bold text-rose-800">
+                  <span class="w-3 h-3 rounded-full bg-rose-500"></span>
+                  <span>CAN (غياب بدون إخطار)</span>
+                </div>
+                <span class="font-mono font-black text-rose-900 text-sm" id="dash-count-can">0</span>
+              </div>
+              <div class="flex justify-between items-center bg-amber-50 p-2.5 rounded-xl border border-amber-100">
+                <div class="flex items-center gap-2 font-bold text-amber-800">
+                  <span class="w-3 h-3 rounded-full bg-amber-500"></span>
+                  <span>SDE (اعتذار بنفس اليوم - 50%)</span>
+                </div>
+                <span class="font-mono font-black text-amber-900 text-sm" id="dash-count-sde">0</span>
+              </div>
+              <div class="flex justify-between items-center bg-yellow-50 p-2.5 rounded-xl border border-yellow-100">
+                <div class="flex items-center gap-2 font-bold text-yellow-800">
+                  <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
+                  <span>EXC (اعتذار قبل 24س - 0%)</span>
+                </div>
+                <span class="font-mono font-black text-yellow-900 text-sm" id="dash-count-exc">0</span>
+              </div>
+              <div class="flex justify-between items-center bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+                <div class="flex items-center gap-2 font-bold text-slate-700">
+                  <span class="w-3 h-3 rounded-full bg-slate-400"></span>
+                  <span>TCA (إلغاء أخصائي - 0%)</span>
+                </div>
+                <span class="font-mono font-black text-slate-800 text-sm" id="dash-count-tca">0</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Active Clients Summary -->
+          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-4 lg:col-span-2">
+            <div class="flex justify-between items-center border-b pb-3">
+              <h3 class="font-extrabold text-slate-900 text-sm flex items-center gap-2">
+                <span>⚡ وصول سريع للعملاء النشطين</span>
+              </h3>
+              <button onclick="switchTab('clients')" class="text-xs text-indigo-600 font-bold hover:underline">عرض الكل &larr;</button>
+            </div>
+            <div id="dash-quick-clients" class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-72 overflow-y-auto">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. Secretary Attendance Tab (Menna) -->
+      <section id="tab-secretary" class="tab-content space-y-4 hidden">
+        <div class="bg-gradient-to-r from-indigo-900 to-indigo-800 p-5 rounded-2xl text-white shadow-md flex flex-wrap justify-between items-center gap-4">
+          <div>
+            <h2 class="text-lg font-black flex items-center gap-2">
+              <span>⚡ كشف الحضور اليومي السريع (واجهة السكرتيرة أ. منة)</span>
+            </h2>
+            <p class="text-xs text-indigo-200 mt-1">توليد وتسجيل الحضور المباشر للجلسات المجدولة اليوم لجميع الفروع</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <input type="date" id="secretaryDateInput" onchange="loadSecretaryView()" class="bg-indigo-950 text-white font-mono text-xs p-2 rounded-xl border border-indigo-700">
+            <button onclick="generateWeekSessions()" class="bg-cyan-500 text-indigo-950 px-3 py-2 rounded-xl text-xs font-black shadow hover:bg-cyan-400">
+              🔄 توليد جلسات الأسبوع
+            </button>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+          <div class="p-4 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
+            <span class="font-extrabold text-slate-800 text-sm">كشف مواعيد اليوم (<span id="sec-date-label">--</span>)</span>
+            <span class="text-xs text-slate-500 font-bold">اضغط على زر الحالة لتغيير الحضور فوراً</span>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-right text-xs">
+              <thead class="bg-slate-100 text-slate-600 font-bold border-b">
+                <tr>
+                  <th class="p-3">الموعد</th>
+                  <th class="p-3">الطفل العميل</th>
+                  <th class="p-3">الفرع</th>
+                  <th class="p-3">الأخصائي</th>
+                  <th class="p-3">نوع الجلسة</th>
+                  <th class="p-3 text-center">حالة الحضور</th>
+                  <th class="p-3">ملاحظات</th>
+                  <th class="p-3 text-center">إجراء</th>
+                </tr>
+              </thead>
+              <tbody id="secretary-tbody">
+                <!-- Rendered via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. Calendar Tab -->
+      <section id="tab-calendar" class="tab-content space-y-4 hidden">
+        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex justify-between items-center">
+          <div class="flex items-center gap-3">
+            <button onclick="prevCalendarWeek()" class="bg-slate-100 p-2 rounded-xl text-xs font-bold hover:bg-slate-200">&rarr; الأسبوع السابق</button>
+            <span class="font-extrabold text-sm text-slate-800" id="calendar-week-label">الأسبوع الحالي</span>
+            <button onclick="nextCalendarWeek()" class="bg-slate-100 p-2 rounded-xl text-xs font-bold hover:bg-slate-200">الأسبوع التالي &larr;</button>
+          </div>
+          <div class="text-xs text-slate-500 font-medium">جدول مواعيد الأخصائي والجلسات المجدولة</div>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+          <div id="calendar-grid" class="grid grid-cols-7 divide-x divide-x-reverse divide-slate-200 text-xs">
+            <!-- Calendar days rendered via JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. Clients Tab -->
+      <section id="tab-clients" class="tab-content space-y-4 hidden">
+        <div class="flex flex-wrap justify-between items-center gap-3">
+          <div class="flex items-center gap-2 flex-1 max-w-md">
+            <input type="text" id="clientSearchInput" onkeyup="renderClientsTable()" placeholder="ابحث باسم الطفل، الهاتف، التخيص أو الكود..." class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-indigo-500">
+            <select id="clientStatusFilter" onchange="renderClientsTable()" class="bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold">
+              <option value="all">كل الحالات</option>
+              <option value="Active">🟢 نشط فقط</option>
+              <option value="Stopped">🔴 موقوف</option>
+              <option value="Completed">🔵 مكتمل</option>
+            </select>
+          </div>
+          <button onclick="openNewClientModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-4 py-2 rounded-xl text-xs shadow flex items-center gap-1.5">
+            <span>+ إضافة طفل عميل جديد</span>
+          </button>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-right text-xs">
+              <thead class="bg-slate-100 text-slate-600 font-bold border-b">
+                <tr>
+                  <th class="p-3">الكود</th>
+                  <th class="p-3">اسم الطفل العميل</th>
+                  <th class="p-3">رقم الهاتف</th>
+                  <th class="p-3">الفرع</th>
+                  <th class="p-3">التشخيص</th>
+                  <th class="p-3">العنوان</th>
+                  <th class="p-3">الحالة</th>
+                  <th class="p-3">الجدول الأسبوعي</th>
+                  <th class="p-3 text-center">التحكم والإجراءات</th>
+                </tr>
+              </thead>
+              <tbody id="clients-tbody">
+                <!-- Rendered via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. Sessions Log Tab -->
+      <section id="tab-sessions" class="tab-content space-y-4 hidden">
+        <div class="flex flex-wrap justify-between items-center gap-3">
+          <div class="flex items-center gap-2">
+            <select id="sessionStatusFilter" onchange="renderSessionsTable()" class="bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold">
+              <option value="all">كل الحالات</option>
+              <option value="ATT">ATT (حضور)</option>
+              <option value="CAN">CAN (غياب 100%)</option>
+              <option value="SDE">SDE (اعتذار نفس اليوم 50%)</option>
+              <option value="EXC">EXC (اعتذار مسبق 0%)</option>
+              <option value="TCA">TCA (إلغاء أخصائي 0%)</option>
+              <option value="SCHEDULED">SCHEDULED (مجدولة)</option>
+            </select>
+          </div>
+          <button onclick="openNewSessionModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-4 py-2 rounded-xl text-xs shadow flex items-center gap-1.5">
+            <span>+ إضافة جلسة فردية</span>
+          </button>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-right text-xs">
+              <thead class="bg-slate-100 text-slate-600 font-bold border-b">
+                <tr>
+                  <th class="p-3">الكود</th>
+                  <th class="p-3">التاريخ والوقت</th>
+                  <th class="p-3">الطفل العميل</th>
+                  <th class="p-3">الفرع</th>
+                  <th class="p-3">الأخصائي</th>
+                  <th class="p-3">النوع</th>
+                  <th class="p-3">الحالة</th>
+                  <th class="p-3">السعر الأساسي</th>
+                  <th class="p-3">الخصم المعتمد</th>
+                  <th class="p-3">الصافي</th>
+                  <th class="p-3 text-center">التحكم والعمليات</th>
+                </tr>
+              </thead>
+              <tbody id="sessions-tbody">
+                <!-- Rendered via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 6. Monthly Invoices Tab -->
+      <section id="tab-invoices" class="tab-content space-y-4 hidden">
+        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex flex-wrap justify-between items-center gap-3">
+          <div class="flex items-center gap-3">
+            <span class="font-bold text-xs text-slate-700">اختر الشهر المحاسبي:</span>
+            <select id="invoiceMonthSelect" onchange="renderInvoices()" class="bg-slate-50 border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-mono font-bold">
+              <option value="2026-10">2026 / 10 (أكتوبر الحالي)</option>
+              <option value="2026-09">2026 / 09 (سبتمبر)</option>
+            </select>
+          </div>
+          <div class="text-xs text-slate-500">حساب تلقائي وقواعد خصم دقيقة متوافقة مع AppSheet</div>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-right text-xs">
+              <thead class="bg-slate-100 text-slate-600 font-bold border-b">
+                <tr>
+                  <th class="p-3">اسم العميل والبيانات</th>
+                  <th class="p-3">الفرع</th>
+                  <th class="p-3 text-center">عدد الجلسات</th>
+                  <th class="p-3">تفاصيل الحالات</th>
+                  <th class="p-3">الإجمالي (Gross)</th>
+                  <th class="p-3">الخصومات (Discounts)</th>
+                  <th class="p-3">الصافي المستحق</th>
+                  <th class="p-3">المسدد (Paid)</th>
+                  <th class="p-3">المتبقي / الرصيد</th>
+                  <th class="p-3 text-center">طباعة الفاتورة</th>
+                </tr>
+              </thead>
+              <tbody id="invoices-tbody">
+                <!-- Rendered via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 7. Payments Tab -->
+      <section id="tab-payments" class="tab-content space-y-4 hidden">
+        <div class="flex justify-between items-center">
+          <h2 class="font-extrabold text-slate-900 text-base">سندات القبض والمدفوعات المالية</h2>
+          <button onclick="openNewPaymentModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2 rounded-xl text-xs shadow flex items-center gap-1.5">
+            <span>+ تسجيل سند قبض جديد 💵</span>
+          </button>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-right text-xs">
+              <thead class="bg-slate-100 text-slate-600 font-bold border-b">
+                <tr>
+                  <th class="p-3">رقم السند</th>
+                  <th class="p-3">التاريخ</th>
+                  <th class="p-3">اسم العميل</th>
+                  <th class="p-3">الفرع</th>
+                  <th class="p-3">المبلغ المسدد</th>
+                  <th class="p-3">الشهر المحاسبي</th>
+                  <th class="p-3">ملاحظات والبيان</th>
+                  <th class="p-3 text-center">التحكم والإجراءات</th>
+                </tr>
+              </thead>
+              <tbody id="payments-tbody">
+                <!-- Rendered via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 8. Staff & HR Tab -->
+      <section id="tab-staff" class="tab-content space-y-6 hidden">
+        <!-- Branches overview -->
+        <div class="space-y-3">
+          <div class="flex justify-between items-center">
+            <h3 class="font-extrabold text-slate-900 text-sm">فروع المركز وأسعار الجلسات والتقييمات</h3>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" id="branches-cards">
+            <!-- Rendered via JS -->
+          </div>
+        </div>
+
+        <!-- Staff List -->
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden space-y-3 p-4">
+          <div class="flex justify-between items-center border-b pb-3">
+            <h3 class="font-extrabold text-slate-900 text-sm">فريق العمل والأخصائيين السريريين</h3>
+            <button onclick="openNewStaffModal()" class="bg-indigo-600 text-white font-bold px-3 py-1.5 rounded-lg text-xs hover:bg-indigo-700">
+              + إضافة أخصائي جديد
+            </button>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-right text-xs">
+              <thead class="bg-slate-100 text-slate-600 font-bold border-b">
+                <tr>
+                  <th class="p-3">الكود</th>
+                  <th class="p-3">الاسم الكامل</th>
+                  <th class="p-3">التخصص</th>
+                  <th class="p-3">رقم الهاتف</th>
+                  <th class="p-3">البريد الإلكتروني</th>
+                  <th class="p-3">الحالة</th>
+                  <th class="p-3 text-center">التحكم والإجراءات</th>
+                </tr>
+              </thead>
+              <tbody id="staff-tbody">
+                <!-- Rendered via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 9. System Settings Tab (General, Theme, Layout & Permissions) -->
+      <section id="tab-settings" class="tab-content space-y-6 hidden">
+        <div class="bg-gradient-to-r from-indigo-900 via-slate-900 to-indigo-950 p-6 rounded-2xl text-white shadow-md flex flex-wrap justify-between items-center gap-4">
+          <div>
+            <h2 class="text-xl font-black flex items-center gap-2">
+              <span>⚙️ إعدادات النظام، الثيم، والصلاحيات</span>
+            </h2>
+            <p class="text-xs text-indigo-200 mt-1">رفع اللوجو، تخصيص ألوان الثيم، ضبط الواجهة والبار العلوي، وتحديد الصلاحيات</p>
+          </div>
+          <div class="flex items-center gap-2 bg-indigo-950/80 p-1.5 rounded-xl border border-indigo-700/50 flex-wrap">
+            <button onclick="switchSettingsSubTab('general')" id="subtab-btn-general" class="px-3 py-1.5 rounded-lg text-xs font-bold transition bg-white text-indigo-900 shadow">
+              ⚙️ إعدادات اللوجو والمركز
+            </button>
+            <button onclick="switchSettingsSubTab('theme')" id="subtab-btn-theme" class="px-3 py-1.5 rounded-lg text-xs font-medium text-indigo-200 hover:text-white hover:bg-indigo-800">
+              🎨 ألوان الثيم والواجهة
+            </button>
+            <button onclick="switchSettingsSubTab('permissions')" id="subtab-btn-permissions" class="px-3 py-1.5 rounded-lg text-xs font-medium text-indigo-200 hover:text-white hover:bg-indigo-800">
+              🔐 الصلاحيات والمستخدمين
+            </button>
+            <button onclick="switchSettingsSubTab('custom')" id="subtab-btn-custom" class="px-3 py-1.5 rounded-lg text-xs font-medium text-indigo-200 hover:text-white hover:bg-indigo-800">
+              ➕ الخانات والأقسام الجديدة
+            </button>
+          </div>
+        </div>
+
+        <!-- Sub-Tab 1: General Settings & Logo Upload -->
+        <div id="settings-sub-general" class="settings-subtab space-y-6">
+          <form onsubmit="saveGeneralSettings(event)" class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-6 text-xs">
+            <h3 class="font-extrabold text-slate-900 text-sm border-b pb-3 flex items-center gap-2">
+              <span>🏢 البيانات الأساسية للمركز وشعار اللوجو</span>
+            </h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-slate-700 font-bold mb-1.5">اسم المركز الرسمي *</label>
+                <input type="text" id="settingCenterName" required class="w-full border rounded-xl p-2.5 font-bold focus:ring-2 focus:ring-indigo-500">
+              </div>
+              
+              <div>
+                <label class="block text-slate-700 font-bold mb-1.5">شعار اللوجو (رفع صورة أو أدخل رابط)</label>
+                <div class="flex items-center gap-2">
+                  <input type="text" id="settingLogoUrl" placeholder="https://example.com/logo.png" class="flex-1 border rounded-xl p-2.5 font-mono text-xs">
+                  <label class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold px-3.5 py-2.5 rounded-xl border border-indigo-200 cursor-pointer text-xs flex items-center gap-1.5 whitespace-nowrap shadow-xs">
+                    <span>📁 رفع ملف صورة...</span>
+                    <input type="file" id="settingLogoFileInput" accept="image/*" onchange="handleLogoFileUpload(event)" class="hidden">
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label class="block text-slate-700 font-bold mb-1.5">شكل إطار اللوجو 🖼️</label>
+                <select id="settingLogoShape" class="w-full border rounded-xl p-2.5 font-bold">
+                  <option value="circle">⭕ دائري (Circular Frame)</option>
+                  <option value="square">🔲 مربع بحواف منحنية (Rounded Square)</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-slate-700 font-bold mb-1.5">اللغة الأساسية للنظام 🌐</label>
+                <select id="settingLanguage" class="w-full border rounded-xl p-2.5 font-bold">
+                  <option value="ar">العربية (Arabic - RTL)</option>
+                  <option value="en">English (الانجليزية)</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-slate-700 font-bold mb-1.5">العملة المحاسبية 💰</label>
+                <input type="text" id="settingCurrency" value="ج.م" class="w-full border rounded-xl p-2.5 font-bold font-mono">
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-slate-700 font-bold mb-1.5">نص تذييل فواتير وإيصالات الطباعة (Receipt Footer Note)</label>
+              <textarea id="settingReceiptFooter" rows="2" class="w-full border rounded-xl p-2.5 text-slate-700 font-medium"></textarea>
+            </div>
+
+            <div class="flex justify-end pt-3 border-t">
+              <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-black px-6 py-2.5 rounded-xl shadow text-xs flex items-center gap-1.5">
+                <span>حفظ البيانات واللوجو 💾</span>
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Sub-Tab 2: Theme, Colors & Header Bar Customs -->
+        <div id="settings-sub-theme" class="settings-subtab space-y-6 hidden">
+          <form onsubmit="saveThemeSettings(event)" class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-6 text-xs">
+            <h3 class="font-extrabold text-slate-900 text-sm border-b pb-3 flex items-center gap-2">
+              <span>🎨 تخصيص ألوان الثيم وتصميم البار العلوي والواجهة</span>
+            </h3>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <!-- Color schemes -->
+              <div class="space-y-3">
+                <label class="block text-slate-700 font-bold">لون ثيم البار العلوي (Header Color Scheme) 🎨</label>
+                <select id="settingHeaderColor" class="w-full border rounded-xl p-2.5 font-bold">
+                  <option value="indigo">🔵 كحلي ملكي (Royal Indigo)</option>
+                  <option value="emerald">🟢 زمردي فاخر (Emerald Green)</option>
+                  <option value="rose">🔴 عنابي ملكي (Ruby Crimson)</option>
+                  <option value="purple">🟣 بنفسجي فاخر (Royal Purple)</option>
+                  <option value="slate">🖤 كلاسيك داكن (Midnight Dark)</option>
+                  <option value="blue">🌊 أزرق محيطي (Ocean Blue)</option>
+                </select>
+
+                <label class="block text-slate-700 font-bold pt-2">نمط عرض أزرار الأقسام (Navigation Style) ☰</label>
+                <select id="settingNavStyle" class="w-full border rounded-xl p-2.5 font-bold">
+                  <option value="compact">☰ قائمة مدمجة هادئة (Categorized Dropdown Menu)</option>
+                  <option value="full">↔️ جميع أزرار الأقسام معروضة بجانب بعضها</option>
+                </select>
+              </div>
+
+              <!-- Header Bar Elements toggles -->
+              <div class="space-y-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                <label class="block text-slate-900 font-extrabold border-b pb-2">🛠️ اختيار العناصر المعروضة في البار العلوي:</label>
+                <div class="space-y-2 font-bold text-slate-700">
+                  <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" id="headerShowBranch" checked class="w-4 h-4 rounded text-indigo-600">
+                    <span>إظهار فلتر اختيار الفرع (البيطاش / سموحه / أونلاين)</span>
+                  </label>
+                  <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" id="headerShowUser" checked class="w-4 h-4 rounded text-indigo-600">
+                    <span>إظهار معلومات المستخدم الحالية وخيار تسجيل الخروج</span>
+                  </label>
+                  <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" id="headerShowAddStaff" checked class="w-4 h-4 rounded text-indigo-600">
+                    <span>إظهار زر "+ إضافة أخصائي" السريع</span>
+                  </label>
+                  <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" id="headerShowAddSession" checked class="w-4 h-4 rounded text-indigo-600">
+                    <span>إظهار زر "+ جلسة جديدة" السريع</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex justify-end pt-3 border-t">
+              <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-black px-6 py-2.5 rounded-xl shadow text-xs flex items-center gap-1.5">
+                <span>حفظ وتطبيق إعدادات الثيم والواجهة 🎨</span>
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Sub-Tab 3: Permissions & User Roles -->
+        <div id="settings-sub-permissions" class="settings-subtab space-y-6 hidden">
+          <!-- User Accounts Management -->
+          <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+            <div class="flex justify-between items-center border-b pb-3">
+              <div>
+                <h3 class="font-extrabold text-slate-900 text-sm">👤 حسابات المستخدمين المسجلة في النظام</h3>
+                <p class="text-[11px] text-slate-400">إضافة وتعديل بيانات دخول المدراء، السكرتارية، والأخصائيين</p>
+              </div>
+              <button onclick="openNewUserModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-4 py-2 rounded-xl text-xs shadow">
+                + إضافة مستخدم جديد
+              </button>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="w-full text-right text-xs">
+                <thead class="bg-slate-100 text-slate-600 font-bold border-b">
+                  <tr>
+                    <th class="p-3">اسم المستخدم</th>
+                    <th class="p-3">البريد الإلكتروني (Sign In Email)</th>
+                    <th class="p-3">الدور / الوظيفة</th>
+                    <th class="p-3">نوع الصلاحيات</th>
+                    <th class="p-3 text-center">التحكم وتخصيص الصلاحيات</th>
+                  </tr>
+                </thead>
+                <tbody id="users-tbody">
+                  <!-- Rendered via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Granular Permissions Matrix -->
+          <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+            <div class="flex justify-between items-center border-b pb-3">
+              <div>
+                <h3 class="font-extrabold text-slate-900 text-sm">🔐 مصفوفة التحكم في الصلاحيات التفصيلية (Permissions Matrix)</h3>
+                <p class="text-[11px] text-slate-400">تحجيم الصلاحيات لكل دور (المدير / السكرتيرة / الأخصائي)</p>
+              </div>
+              <button onclick="savePermissionsMatrix()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2 rounded-xl text-xs shadow">
+                حفظ الصلاحيات 💾
+              </button>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="w-full text-right text-xs border border-slate-200">
+                <thead class="bg-slate-100 font-bold text-slate-700 border-b">
+                  <tr>
+                    <th class="p-3 border">القسم / الإمكانية المتاحة</th>
+                    <th class="p-3 border text-center">👑 المدير (Admin)</th>
+                    <th class="p-3 border text-center">⚡ السكرتيرة (Secretary)</th>
+                    <th class="p-3 border text-center">👩‍⚕️ الأخصائي (Therapist)</th>
+                  </tr>
+                </thead>
+                <tbody id="permissions-matrix-tbody">
+                  <!-- Matrix Checkboxes rendered via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sub-Tab 4: Custom Fields & Dynamic Modules -->
+        <div id="settings-sub-custom" class="settings-subtab space-y-6 hidden">
+          <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+            <div class="border-b pb-3">
+              <h3 class="font-extrabold text-slate-900 text-sm">➕ إضافة خانات وأقسام جديدة (مثل: المشتريات والمصروفات الإدارية)</h3>
+              <p class="text-[11px] text-slate-400">تخصيص الحقول الإضافية والأعمدة في القوائم والجلسات والعملاء</p>
+            </div>
+
+            <form onsubmit="addCustomModule(event)" class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+              <div>
+                <label class="block text-slate-700 font-bold mb-1">اسم القسم / الخانة الجديدة *</label>
+                <input type="text" id="customModuleName" placeholder="مثلاً: المشتريات والتجهيزات" required class="w-full border rounded-xl p-2.5 font-bold">
+              </div>
+              <div>
+                <label class="block text-slate-700 font-bold mb-1">نوع البيانات</label>
+                <select id="customModuleType" class="w-full border rounded-xl p-2.5 font-bold">
+                  <option value="number">رقم مالي (مبلغ / مصروفات)</option>
+                  <option value="text">نص مخصص</option>
+                  <option value="date">تاريخ</option>
+                </select>
+              </div>
+              <div class="flex items-end">
+                <button type="submit" class="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-2.5 rounded-xl shadow">
+                  + إضافة الخانة الجديدة
+                </button>
+              </div>
+            </form>
+
+            <div class="border-t pt-4 space-y-2">
+              <h4 class="font-extrabold text-slate-800 text-xs">الخانات والأقسام المخصصة المضافة حالياً:</h4>
+              <div id="customModulesList" class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <!-- Rendered via JS -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Modals Area -->
+
+    <!-- Modal: Client Add/Edit -->
+    <div id="clientModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+      <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+        <div class="flex justify-between items-center border-b pb-3">
+          <h3 class="font-extrabold text-slate-900 text-base">بيانات الطفل العميل والجدول الأسبوعي</h3>
+          <button onclick="closeModal('clientModal')" class="text-slate-400 font-bold text-lg">&times;</button>
+        </div>
+        <form id="clientForm" onsubmit="saveClient(event)" class="space-y-4 text-xs">
+          <input type="hidden" id="clientId">
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-slate-700 font-bold mb-1">اسم الطفل العميل *</label>
+              <input type="text" id="clientName" required class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-indigo-500">
+            </div>
+            <div>
+              <label class="block text-slate-700 font-bold mb-1">رقم هاتف ولي الأمر *</label>
+              <input type="text" id="clientPhone" required class="w-full border rounded-lg p-2 font-mono">
+            </div>
+          </div>
+          <div class="grid grid-cols-3 gap-3">
+            <div>
+              <label class="block text-slate-700 font-bold mb-1">الفرع المباشر *</label>
+              <select id="clientBranch" class="w-full border rounded-lg p-2 font-bold">
+                <option value="B001">فرع البيطاش (B001)</option>
+                <option value="B002">فرع سموحه (B002)</option>
+                <option value="B003">أونلاين (B003)</option>
+                <option value="B004">خاص Private (B004)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-slate-700 font-bold mb-1">الحالة</label>
+              <select id="clientStatus" class="w-full border rounded-lg p-2 font-bold">
+                <option value="Active">🟢 نشط (Active)</option>
+                <option value="Stopped">🔴 موقوف (Stopped)</option>
+                <option value="Completed">🔵 مكتمل (Completed)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-slate-700 font-bold mb-1">تاريخ الميلاد</label>
+              <input type="date" id="clientDob" class="w-full border rounded-lg p-2">
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-slate-700 font-bold mb-1">التشخيص الحالي</label>
+              <input type="text" id="clientDiagnosis" placeholder="مثلاً: D.L.D, Stuttering..." class="w-full border rounded-lg p-2">
+            </div>
+            <div>
+              <label class="block text-slate-700 font-bold mb-1">العنوان التفصيلي</label>
+              <input type="text" id="clientAddress" class="w-full border rounded-lg p-2">
+            </div>
+          </div>
+
+          <!-- Weekly Schedule Builder -->
+          <div class="border-t pt-3 space-y-2">
+            <div class="flex justify-between items-center">
+              <label class="font-extrabold text-slate-800">مواعيد الجلسات الأسبوعية الثابتة</label>
+              <button type="button" onclick="addScheduleRow()" class="bg-indigo-50 text-indigo-700 font-bold px-2.5 py-1 rounded text-xs hover:bg-indigo-100">+ إضافة موعد أسبوعي</button>
+            </div>
+            <div id="scheduleRowsContainer" class="space-y-2 max-h-40 overflow-y-auto p-1">
+              <!-- Rows added via JS -->
+            </div>
+          </div>
+
+          <div class="flex justify-end gap-2 pt-3 border-t">
+            <button type="button" onclick="closeModal('clientModal')" class="bg-slate-100 px-4 py-2 rounded-lg font-bold">إلغاء</button>
+            <button type="submit" class="bg-indigo-600 text-white px-5 py-2 rounded-lg font-bold">حفظ بيانات العميل</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal: Session Add/Edit -->
+    <div id="sessionModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+      <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
+        <div class="flex justify-between items-center border-b pb-3">
+          <h3 class="font-extrabold text-slate-900 text-base">تسجيل / تعديل الجلسة Individual Session</h3>
+          <button onclick="closeModal('sessionModal')" class="text-slate-400 font-bold text-lg">&times;</button>
+        </div>
+        <form id="sessionForm" onsubmit="saveSession(event)" class="space-y-3 text-xs">
+          <input type="hidden" id="sessionId">
+          <div>
+            <label class="block text-slate-700 font-bold mb-1">الطفل العميل *</label>
+            <select id="sessionClientId" onchange="autoFillSessionDetails()" required class="w-full border rounded-lg p-2 font-bold"></select>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-slate-700 font-bold mb-1">الفرع *</label>
+              <select id="sessionBranch" onchange="updateSessionPriceByBranch()" class="w-full border rounded-lg p-2 font-bold">
+                <option value="B001">فرع البيطاش</option>
+                <option value="B002">فرع سموحه</option>
+                <option value="B003">أونلاين</option>
+                <option value="B004">خاص Private</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-slate-700 font-bold mb-1">الأخصائي المعالج *</label>
+              <select id="sessionTherapist" class="w-full border rounded-lg p-2 font-bold"></select>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-slate-700 font-bold mb-1">التاريخ *</label>
+              <input type="date" id="sessionDate" required class="w-full border rounded-lg p-2">
+            </div>
+            <div>
+              <label class="block text-slate-700 font-bold mb-1">الموعد *</label>
+              <input type="time" id="sessionTime" required class="w-full border rounded-lg p-2 font-mono">
+            </div>
+          </div>
+          <div class="grid grid-cols-3 gap-3">
+            <div>
+              <label class="block text-slate-700 font-bold mb-1">نوع الجلسة</label>
+              <input type="text" id="sessionType" value="S.T Session" class="w-full border rounded-lg p-2 font-bold">
+            </div>
+            <div>
+              <label class="block text-slate-700 font-bold mb-1">السعر الأساسي</label>
+              <input type="number" id="sessionPrice" value="150" class="w-full border rounded-lg p-2 font-mono font-bold">
+            </div>
+            <div>
+              <label class="block text-slate-700 font-bold mb-1">حالة الحضور</label>
+              <select id="sessionStatus" class="w-full border rounded-lg p-2 font-bold">
+                <option value="ATT">ATT - حضور فعلي</option>
+                <option value="SDE">SDE - اعتذار نفس اليوم (50%)</option>
+                <option value="EXC">EXC - اعتذار مسبق (0%)</option>
+                <option value="CAN">CAN - غياب بدون إخطار (100%)</option>
+                <option value="TCA">TCA - إلغاء أخصائي (0%)</option>
+                <option value="SCHEDULED">SCHEDULED - مجدولة</option>
+              </select>
+            </div>
+          </div>
+          <div class="flex justify-end gap-2 pt-3 border-t">
+            <button type="button" onclick="closeModal('sessionModal')" class="bg-slate-100 px-4 py-2 rounded-lg font-bold">إلغاء</button>
+            <button type="submit" class="bg-indigo-600 text-white px-5 py-2 rounded-lg font-bold">حفظ بيانات الجلسة</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal: Payment Add/Edit -->
+    <div id="paymentModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+      <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
+        <div class="flex justify-between items-center border-b pb-3">
+          <h3 class="font-extrabold text-slate-900 text-base">تسجيل / تعديل سند قبض نقدية</h3>
+          <button onclick="closeModal('paymentModal')" class="text-slate-400 font-bold text-lg">&times;</button>
+        </div>
+        <form id="paymentForm" onsubmit="savePayment(event)" class="space-y-3 text-xs">
+          <input type="hidden" id="paymentId">
+          <div>
+            <label class="block text-slate-700 font-bold mb-1">اسم العميل *</label>
+            <select id="paymentClientId" required class="w-full border rounded-lg p-2 font-bold"></select>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-slate-700 font-bold mb-1">المبلغ المسدد (ج.م) *</label>
+              <input type="number" id="paymentAmount" required min="1" class="w-full border rounded-lg p-2 font-mono font-bold text-emerald-700">
+            </div>
+            <div>
+              <label class="block text-slate-700 font-bold mb-1">الفرع *</label>
+              <select id="paymentBranch" class="w-full border rounded-lg p-2 font-bold">
+                <option value="B001">فرع البيطاش</option>
+                <option value="B002">فرع سموحه</option>
+                <option value="B003">أونلاين</option>
+                <option value="B004">خاص Private</option>
+              </select>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-slate-700 font-bold mb-1">التاريخ *</label>
+              <input type="date" id="paymentDate" required class="w-full border rounded-lg p-2">
+            </div>
+            <div>
+              <label class="block text-slate-700 font-bold mb-1">الشهر المالي</label>
+              <input type="text" id="paymentMonth" placeholder="10/2026" class="w-full border rounded-lg p-2 font-mono">
+            </div>
+          </div>
+          <div>
+            <label class="block text-slate-700 font-bold mb-1">البيان وملاحظات الدفعة</label>
+            <input type="text" id="paymentNotes" placeholder="سداد جلسات شهر أكتوبر..." class="w-full border rounded-lg p-2">
+          </div>
+          <div class="flex justify-end gap-2 pt-3 border-t">
+            <button type="button" onclick="closeModal('paymentModal')" class="bg-slate-100 px-4 py-2 rounded-lg font-bold">إلغاء</button>
+            <button type="submit" class="bg-emerald-600 text-white px-5 py-2 rounded-lg font-bold">حفظ وطباعة</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal: Staff Add/Edit -->
+    <div id="staffModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+      <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
+        <div class="flex justify-between items-center border-b pb-3">
+          <h3 class="font-extrabold text-slate-900 text-base">بيانات الأخصائي / الموظف</h3>
+          <button onclick="closeModal('staffModal')" class="text-slate-400 font-bold text-lg">&times;</button>
+        </div>
+        <form id="staffForm" onsubmit="saveStaff(event)" class="space-y-3 text-xs">
+          <input type="hidden" id="staffId">
+          <div>
+            <label class="block text-slate-700 font-bold mb-1">الاسم الكامل *</label>
+            <input type="text" id="staffName" required class="w-full border rounded-lg p-2 font-bold">
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-slate-700 font-bold mb-1">التخصص</label>
+              <input type="text" id="staffSpecialty" placeholder="Speech Therapist, Receptionist..." class="w-full border rounded-lg p-2">
+            </div>
+            <div>
+              <label class="block text-slate-700 font-bold mb-1">رقم الهاتف</label>
+              <input type="text" id="staffPhone" class="w-full border rounded-lg p-2 font-mono">
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-slate-700 font-bold mb-1">البريد الإلكتروني</label>
+              <input type="email" id="staffEmail" class="w-full border rounded-lg p-2 font-mono">
+            </div>
+            <div>
+              <label class="block text-slate-700 font-bold mb-1">الحالة</label>
+              <select id="staffStatus" class="w-full border rounded-lg p-2 font-bold">
+                <option value="Active">نشط (Active)</option>
+                <option value="Inactive">غير نشط (Inactive)</option>
+              </select>
+            </div>
+          </div>
+          <div class="flex justify-end gap-2 pt-3 border-t">
+            <button type="button" onclick="closeModal('staffModal')" class="bg-slate-100 px-4 py-2 rounded-lg font-bold">إلغاء</button>
+            <button type="submit" class="bg-indigo-600 text-white px-5 py-2 rounded-lg font-bold">حفظ البيانات</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal: User Account Add/Edit -->
+    <div id="userModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+      <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
+        <div class="flex justify-between items-center border-b pb-3">
+          <h3 class="font-extrabold text-slate-900 text-base">بيانات حساب المستخدم والصلاحيات</h3>
+          <button onclick="closeModal('userModal')" class="text-slate-400 font-bold text-lg">&times;</button>
+        </div>
+        <form id="userForm" onsubmit="saveUser(event)" class="space-y-3 text-xs">
+          <input type="hidden" id="userEditIndex">
+          <div>
+            <label class="block text-slate-700 font-bold mb-1">الاسم الكامل *</label>
+            <input type="text" id="userName" required class="w-full border rounded-lg p-2 font-bold">
+          </div>
+          <div>
+            <label class="block text-slate-700 font-bold mb-1">البريد الإلكتروني (Sign In Email) *</label>
+            <input type="email" id="userEmail" required class="w-full border rounded-lg p-2 font-mono font-medium">
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-slate-700 font-bold mb-1">كلمة المرور *</label>
+              <input type="text" id="userPassword" required value="123" class="w-full border rounded-lg p-2 font-mono">
+            </div>
+            <div>
+              <label class="block text-slate-700 font-bold mb-1">الدور الرئيسي *</label>
+              <select id="userRole" class="w-full border rounded-lg p-2 font-bold">
+                <option value="admin">👑 المدير (Full Access)</option>
+                <option value="secretary">⚡ السكرتيرة (Attendance & Fees)</option>
+                <option value="therapist">👩‍⚕️ الأخصائي (Sessions & Calendar)</option>
+              </select>
+            </div>
+          </div>
+          <div class="flex justify-end gap-2 pt-3 border-t">
+            <button type="button" onclick="closeModal('userModal')" class="bg-slate-100 px-4 py-2 rounded-lg font-bold">إلغاء</button>
+            <button type="submit" class="bg-indigo-600 text-white px-5 py-2 rounded-lg font-bold">حفظ بيانات المستخدم</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal: Individual User Permissions Setup -->
+    <div id="userPermissionsModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+      <div class="bg-white rounded-3xl max-w-xl w-full p-6 shadow-2xl space-y-5 border border-slate-100 max-h-[90vh] overflow-y-auto">
+        <div class="flex justify-between items-center border-b pb-3">
+          <div>
+            <h3 class="font-black text-slate-900 text-base flex items-center gap-2">
+              <span>🔑 تخصيص صلاحيات المستخدم بالتفصيل</span>
+            </h3>
+            <p id="userPermsModalSubtitle" class="text-xs text-indigo-600 font-bold mt-0.5"></p>
+          </div>
+          <button onclick="closeModal('userPermissionsModal')" class="text-slate-400 font-bold text-xl hover:text-slate-600">&times;</button>
+        </div>
+
+        <input type="hidden" id="userPermsIndex">
+
+        <!-- Choice mode: Default Role vs Custom -->
+        <div class="bg-indigo-50/70 p-4 rounded-2xl border border-indigo-100 space-y-3 text-xs">
+          <label class="block text-indigo-950 font-extrabold">اختر نظام صلاحيات هذا الحساب:</label>
+          <div class="space-y-2 font-bold text-slate-700">
+            <label class="flex items-center gap-2 cursor-pointer bg-white p-2.5 rounded-xl border border-indigo-100 hover:bg-slate-50 transition">
+              <input type="radio" name="userPermType" value="role" id="permTypeRole" onchange="toggleUserPermsView()" class="w-4 h-4 text-indigo-600">
+              <div>
+                <span class="text-indigo-950">اعتماد الصلاحيات الإفتراضية للدور/الوظيفة</span>
+                <div id="userPermRoleHint" class="text-[11px] text-slate-500 font-normal">يأخذ صلاحيات الوظيفة القياسية المحددة في الجدول</div>
+              </div>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer bg-white p-2.5 rounded-xl border border-indigo-100 hover:bg-slate-50 transition">
+              <input type="radio" name="userPermType" value="custom" id="permTypeCustom" onchange="toggleUserPermsView()" class="w-4 h-4 text-indigo-600">
+              <div>
+                <span class="text-indigo-950">🎛️ تخصيص صلاحيات استثنائية لهذا المستخدم بالاسم</span>
+                <div class="text-[11px] text-slate-500 font-normal">تحديد وتغليب الصلاحيات التي يُسمح لهذا الحساب تحديداً بدخولها دون غيرها</div>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Custom Modules Checklist -->
+        <div id="userCustomPermsContainer" class="space-y-3 text-xs">
+          <div class="flex justify-between items-center">
+            <span class="font-extrabold text-slate-800">الأقسام والإمكانيات المتاحة لهذا الحساب (Check/Uncheck):</span>
+            <div class="flex gap-2 text-[11px]">
+              <button type="button" onclick="selectAllUserPerms(true)" class="text-indigo-600 font-bold hover:underline">إتاحة الكل 🟢</button> |
+              <button type="button" onclick="selectAllUserPerms(false)" class="text-rose-600 font-bold hover:underline">حظر الكل 🔴</button>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 bg-slate-50 p-4 rounded-2xl border border-slate-200" id="user-perms-checklist">
+            <!-- Checklist rendered dynamically via JS -->
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-3 border-t">
+          <button type="button" onclick="closeModal('userPermissionsModal')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-4 py-2 rounded-xl text-xs">إلغاء</button>
+          <button type="button" onclick="saveUserPermissions()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-black px-6 py-2 rounded-xl text-xs shadow">حفظ الصلاحيات 💾</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal: Branch Pricing Edit -->
+    <div id="branchModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+      <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
+        <div class="flex justify-between items-center border-b pb-3">
+          <h3 class="font-extrabold text-slate-900 text-base">تعديل أسعار وبيانات الفرع</h3>
+          <button onclick="closeModal('branchModal')" class="text-slate-400 font-bold text-lg">&times;</button>
+        </div>
+        <form id="branchForm" onsubmit="saveBranch(event)" class="space-y-3 text-xs">
+          <input type="hidden" id="branchId">
+          <div>
+            <label class="block text-slate-700 font-bold mb-1">اسم الفرع</label>
+            <input type="text" id="branchName" disabled class="w-full border rounded-lg p-2 bg-slate-100 font-bold">
+          </div>
+          <div>
+            <label class="block text-slate-700 font-bold mb-1">عنوان الفرع</label>
+            <input type="text" id="branchAddress" class="w-full border rounded-lg p-2">
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-slate-700 font-bold mb-1">سعر الجلسة العادية (ج.م)</label>
+              <input type="number" id="branchSessionPrice" required class="w-full border rounded-lg p-2 font-mono font-bold">
+            </div>
+            <div>
+              <label class="block text-slate-700 font-bold mb-1">سعر كشف التقييم (ج.م)</label>
+              <input type="number" id="branchAssessmentPrice" required class="w-full border rounded-lg p-2 font-mono font-bold">
+            </div>
+          </div>
+          <div class="flex justify-end gap-2 pt-3 border-t">
+            <button type="button" onclick="closeModal('branchModal')" class="bg-slate-100 px-4 py-2 rounded-lg font-bold">إلغاء</button>
+            <button type="submit" class="bg-indigo-600 text-white px-5 py-2 rounded-lg font-bold">تحديث الأسعار</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Print Modal -->
+    <div id="printModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+      <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl space-y-4 max-h-[95vh] overflow-y-auto">
+        <div class="flex justify-between items-center border-b pb-3 no-print">
+          <h3 class="font-bold text-slate-900 text-sm">معاينة المستند للطباعة</h3>
+          <div class="flex items-center gap-2">
+            <button onclick="window.print()" class="bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1">🖨️ طباعة الآن</button>
+            <button onclick="closeModal('printModal')" class="text-slate-400 font-bold text-lg">&times;</button>
+          </div>
+        </div>
+        <div id="print-area" class="p-6 border border-slate-200 rounded-xl bg-white text-slate-800 space-y-4"></div>
+      </div>
+    </div>
+
+    <!-- Sign In Overlay Screen -->
+    <div id="loginOverlay" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-md transition-all">
+      <div class="bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl space-y-6 border border-slate-100">
+        <div class="text-center space-y-2">
+          <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-cyan-400 to-indigo-600 flex items-center justify-center text-white text-3xl mx-auto shadow-lg">
+            🗣️
+          </div>
+          <h2 class="text-2xl font-black text-slate-900">تسجيل الدخول</h2>
+          <p class="text-xs text-slate-500 font-medium">نظام الإدارة المتكامل &bull; Speak Up Speech Therapy</p>
+        </div>
+
+        <!-- Error Alert -->
+        <div id="loginErrorAlert" class="hidden bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-xl text-xs font-bold text-center">
+          البريد الإلكتروني أو كلمة المرور غير صحيحة!
+        </div>
+
+        <form id="loginForm" onsubmit="handleLoginSubmit(event)" class="space-y-4 text-xs">
+          <div>
+            <label class="block text-slate-700 font-bold mb-1.5">البريد الإلكتروني *</label>
+            <input type="email" id="loginEmail" required placeholder="أدخل البريد الإلكتروني (e.g. user@gmail.com)" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs font-mono font-medium focus:ring-2 focus:ring-indigo-500 focus:bg-white transition">
+          </div>
+
+          <div>
+            <label class="block text-slate-700 font-bold mb-1.5">كلمة المرور *</label>
+            <input type="password" id="loginPassword" required placeholder="••••••••" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs font-mono font-medium focus:ring-2 focus:ring-indigo-500 focus:bg-white transition">
+          </div>
+
+          <div class="flex items-center justify-between text-[11px] text-slate-500 pt-1">
+            <label class="flex items-center gap-1.5 cursor-pointer">
+              <input type="checkbox" id="rememberMe" checked class="rounded text-indigo-600">
+              <span>تذكر بيانات الدخول</span>
+            </label>
+            <span class="text-indigo-600 hover:underline cursor-pointer">نسيت كلمة المرور؟</span>
+          </div>
+
+          <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-black py-3 rounded-xl shadow-lg transition text-sm flex items-center justify-center gap-2">
+            <span>تسجيل الدخول للنظام 🔑</span>
+          </button>
+        </form>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    function checkAndCleanCache() {
+      try {
+        const raw = localStorage.getItem('SPEAK_UP_DATABASE_REAL_V2');
+        if (raw && (raw.includes('?') || raw.includes('Ø') || raw.includes('Ù'))) {
+          console.warn('Wiping legacy corrupted cache');
+          localStorage.removeItem('SPEAK_UP_DATABASE_REAL_V2');
+        }
+      } catch(e){}
+    }
+    checkAndCleanCache();
+
+    const STORAGE_KEY = 'SPEAK_UP_DATABASE_REAL_V2';
+
+    const defaultUsers = [
+      { email: 'speakup.speechpathology@gmail.com', password: '123', name: 'أ. حسام سعيد طه (المدير)', role: 'admin' },
+      { email: 'hossamtaha.speak.up@gmail.com', password: '123', name: 'أ. حسام سعيد طه', role: 'admin' },
+      { email: 'menna.speakup@gmail.com', password: '123', name: 'منة محمد (السكرتيرة)', role: 'secretary' },
+      { email: 'donia.speakup@gmail.com', password: '123', name: 'دنيا أحمد (الأخصائي)', role: 'therapist' }
+    ];
+
+    const defaultSettings = {
+      centerName: 'Speak Up Speech Therapy',
+      logoUrl: '',
+      logoShape: 'circle',
+      headerColor: 'indigo',
+      navStyle: 'compact',
+      showBranchFilter: true,
+      showUser: true,
+      showAddStaff: true,
+      showAddSession: true,
+      language: 'ar',
+      currency: 'ج.م',
+      receiptFooter: 'شكراً لثقتكم في مركز Speak Up للتخاطب وتأهيل الأطفال • نسعد دائماً بتقدم أطفالنا الأعزاء',
+      customModules: [
+        { name: 'المشتريات والتجهيزات', type: 'number' },
+        { name: 'المصروفات الإدارية', type: 'number' }
+      ],
+      permissions: {
+        admin: { dashboard: true, secretary: true, calendar: true, clients: true, sessions: true, invoices: true, payments: true, staff: true, settings: true, delete: true },
+        secretary: { dashboard: true, secretary: true, calendar: true, clients: true, sessions: true, invoices: true, payments: true, staff: false, settings: false, delete: false },
+        therapist: { dashboard: false, secretary: true, calendar: true, clients: true, sessions: true, invoices: false, payments: false, staff: false, settings: false, delete: false }
+      }
+    };
+
+    const sheetData = {
+      users: defaultUsers,
+      settings: defaultSettings,
+      branches: [
+        { id: 'B001', name: 'فرع البيطاش', address: 'البيطاش شارع مسجد ابو النصر (شارع بلية) اعلى جمعية نجاة المسلم', sessionPrice: 150, assessmentPrice: 250, phone: '01282108885', status: 'Active' },
+        { id: 'B002', name: 'فرع سموحه', address: 'سموحه، شارع ذكي رجب، امام حلواني خالد، بداخل اكاديمية كزكوضانا', sessionPrice: 200, assessmentPrice: 350, phone: '01282108885', status: 'Active' },
+        { id: 'B003', name: 'Online Egypt', address: 'جميع محافظات مصر', sessionPrice: 250, assessmentPrice: 400, phone: '01282108885', status: 'Active' },
+        { id: 'B004', name: 'Private', address: 'جلسات منزلية خاصة', sessionPrice: 350, assessmentPrice: 500, phone: '01282108885', status: 'Active' }
+      ],
+      staff: [
+        { id: '785e56df', name: 'حسام سعيد طه', phone: '01282108885', email: 'hossamtaha.speak.up@gmail.com', specialty: 'Speech Therapist', status: 'Active' },
+        { id: '1002', name: 'منة محمد (Menna Mohmaed)', phone: '01273761294', email: 'menna.speakup@gmail.com', specialty: 'Receptionist (سكرتيرة)', status: 'Active' },
+        { id: '1', name: 'دنيا أحمد (Donia ahmed)', phone: '01227835153', email: 'donia.speakup@gmail.com', specialty: 'Trainee', status: 'Active' }
+      ],
+      clients: [
+        { id: '1001', name: 'عز محمد محمود', phone: '01001998978', branch: 'B002', dob: '2017-08-14', address: 'بلازا، سموحه، الإسكندرية', diagnosis: 'mental retardation', status: 'Active', weeklySchedule: [
+          { day: 'السبت', time: '14:30', therapistId: '785e56df', type: 'S.T Session', fee: 200, discount: 30, netFee: 170 },
+          { day: 'الإثنين', time: '16:45', therapistId: '785e56df', type: 'S.T Session', fee: 200, discount: 30, netFee: 170 },
+          { day: 'الخميس', time: '16:45', therapistId: '785e56df', type: 'S.T Session', fee: 200, discount: 30, netFee: 170 }
+        ]},
+        { id: '1002', name: 'زين تامر عبد الحميد', phone: '01279726772', branch: 'B001', dob: '2019-05-24', address: 'بيانكي، البيطاش، العجمي، الإسكندرية', diagnosis: 'D.L.D', status: 'Active', weeklySchedule: [
+          { day: 'الأحد', time: '16:45', therapistId: '785e56df', type: 'S.T Session', fee: 150, discount: 0, netFee: 150 },
+          { day: 'الأربعاء', time: '16:45', therapistId: '785e56df', type: 'S.T Session', fee: 150, discount: 0, netFee: 150 }
+        ]},
+        { id: '199', name: 'محمد عمرو حسن', phone: '01112040308', branch: 'B002', dob: '2022-04-18', address: 'سموحه, زكي رجب', diagnosis: 'D.L.D', status: 'Active', weeklySchedule: [
+          { day: 'الإثنين', time: '18:15', therapistId: '785e56df', type: 'S.T Session', fee: 200, discount: 0, netFee: 200 },
+          { day: 'الخميس', time: '12:00', therapistId: '785e56df', type: 'S.T Session', fee: 200, discount: 0, netFee: 200 }
+        ]},
+        { id: '2005', name: 'حمزه محمود محمد فرج', phone: '01040396553', branch: 'B002', dob: '2023-08-15', address: 'عزبة سعد، الإسكندرية', diagnosis: 'D.L.D', status: 'Active', weeklySchedule: [
+          { day: 'الإثنين', time: '17:30', therapistId: '785e56df', type: 'S.T Session', fee: 200, discount: 0, netFee: 200 },
+          { day: 'الخميس', time: '17:30', therapistId: '785e56df', type: 'S.T Session', fee: 200, discount: 0, netFee: 200 }
+        ]},
+        { id: '2007', name: 'لين محمود مصطفى', phone: '01203081084', branch: 'B001', dob: '2025-05-01', address: 'البيطاش، العجمي، الإسكندرية', diagnosis: 'D.L.D', status: 'Active', weeklySchedule: [
+          { day: 'الأحد', time: '14:30', therapistId: '785e56df', type: 'S.T Session', fee: 150, discount: 50, netFee: 100 },
+          { day: 'الأربعاء', time: '14:30', therapistId: '785e56df', type: 'S.T Session', fee: 150, discount: 50, netFee: 100 }
+        ]},
+        { id: '2015', name: 'صالح سعد صالح إبراهيم', phone: '01126077079', branch: 'B001', dob: '2021-09-01', address: 'الورديان، الإسكندرية', diagnosis: 'D.L.D', status: 'Active', weeklySchedule: [
+          { day: 'الأحد', time: '17:30', therapistId: '785e56df', type: 'S.T Session', fee: 150, discount: 50, netFee: 100 },
+          { day: 'الأربعاء', time: '19:00', therapistId: '785e56df', type: 'S.T Session', fee: 150, discount: 50, netFee: 100 }
+        ]},
+        { id: '2016', name: 'حمزه محمد محمود', phone: '01228927562', branch: 'B001', dob: '2023-07-17', address: 'خلف كشري التحرير، البيطاش', diagnosis: 'D.L.D', status: 'Active', weeklySchedule: [
+          { day: 'السبت', time: '18:15', therapistId: '785e56df', type: 'S.T Session', fee: 150, discount: 0, netFee: 150 },
+          { day: 'الثلاثاء', time: '18:15', therapistId: '785e56df', type: 'S.T Session', fee: 150, discount: 0, netFee: 150 }
+        ]},
+        { id: '2019', name: 'علاء على رمضان', phone: '01271017426', branch: 'B001', dob: '2022-03-18', address: 'ابويوسف، العجمي، الإسكندرية', diagnosis: 'D.L.D', status: 'Active', weeklySchedule: [
+          { day: 'السبت', time: '19:00', therapistId: '785e56df', type: 'S.T Session', fee: 150, discount: 50, netFee: 100 },
+          { day: 'الأربعاء', time: '16:00', therapistId: '785e56df', type: 'S.T Session', fee: 150, discount: 50, netFee: 100 }
+        ]},
+        { id: '2026', name: 'جميلة خالد حافظ', phone: '01007026065', branch: 'B004', dob: '2024-03-02', address: 'برج تسنيم، محور المحمودية، محرم بيك', diagnosis: 'POBINDS', status: 'Active', weeklySchedule: [
+          { day: 'السبت', time: '12:00', therapistId: '785e56df', type: 'S.T Session', fee: 350, discount: 100, netFee: 250 },
+          { day: 'الإثنين', time: '14:30', therapistId: '785e56df', type: 'S.T Session', fee: 350, discount: 100, netFee: 250 },
+          { day: 'الخميس', time: '14:30', therapistId: '785e56df', type: 'S.T Session', fee: 350, discount: 100, netFee: 250 }
+        ]},
+        { id: '2029', name: 'مالك محمود رمزي', phone: '01002178578', branch: 'B001', dob: '2014-08-18', address: '', diagnosis: 'Stuttering', status: 'Active', weeklySchedule: [
+          { day: 'الأحد', time: '16:00', therapistId: '785e56df', type: 'S.T Session', fee: 150, discount: 30, netFee: 120 },
+          { day: 'الأربعاء', time: '18:15', therapistId: '785e56df', type: 'S.T Session', fee: 150, discount: 30, netFee: 120 }
+        ]},
+        { id: '2017', name: 'يوسف محمد ابراهيم محمد', phone: '01206687017', branch: 'B001', dob: '2021-07-12', address: '', diagnosis: 'D.L.D', status: 'Active', weeklySchedule: [
+          { day: 'السبت', time: '19:45', therapistId: '785e56df', type: 'S.T Session', fee: 150, discount: 0, netFee: 150 },
+          { day: 'الأربعاء', time: '17:30', therapistId: '785e56df', type: 'S.T Session', fee: 150, discount: 0, netFee: 150 }
+        ]},
+        { id: '31acc6b1', name: 'مكه محمود محمد عبدالعظيم', phone: '01017968005', branch: 'B001', dob: '2026-09-02', address: '', diagnosis: 'D.L.D', status: 'Active', weeklySchedule: [
+          { day: 'السبت', time: '17:30', therapistId: '785e56df', type: 'S.T Session', fee: 150, discount: 0, netFee: 150 },
+          { day: 'الثلاثاء', time: '17:30', therapistId: '785e56df', type: 'S.T Session', fee: 150, discount: 0, netFee: 150 }
+        ]},
+        { id: '2031', name: 'على السيد على', phone: '01030602106', branch: 'B001', dob: '2020-07-03', address: 'البيطاش، العجمي', diagnosis: 'Silver Syndrome', status: 'Active', weeklySchedule: [
+          { day: 'الأحد', time: '19:45', therapistId: '785e56df', type: 'S.T Session', fee: 150, discount: 0, netFee: 150 },
+          { day: 'الأربعاء', time: '19:45', therapistId: '785e56df', type: 'S.T Session', fee: 150, discount: 0, netFee: 150 }
+        ]},
+        { id: '2035', name: 'تميم لؤي محمد', phone: '01227255278', branch: 'B001', dob: '2022-12-01', address: 'ابويوسف، العجمي', diagnosis: 'D.L.D', status: 'Active', weeklySchedule: [
+          { day: 'السبت', time: '16:00', therapistId: '785e56df', type: 'S.T Session', fee: 150, discount: 0, netFee: 150 },
+          { day: 'الثلاثاء', time: '16:00', therapistId: '785e56df', type: 'S.T Session', fee: 150, discount: 0, netFee: 150 }
+        ]},
+        { id: '2044', name: 'راكان احمد منتصر', phone: '01205543009', branch: 'B001', dob: '2023-09-02', address: 'البيطاش', diagnosis: 'D.L.D', status: 'Active', weeklySchedule: [] },
+        { id: '2046', name: 'إيلين خالد عثمان', phone: '012782622610', branch: 'B001', dob: '2020-10-24', address: 'البيطاش', diagnosis: 'تأخر لغوي', status: 'Active', weeklySchedule: [] },
+
+        // Stopped / Completed Clients
+        { id: '1004', name: 'يونس إبراهيم محمد', phone: '01282197321', branch: 'B001', dob: '2023-01-20', address: 'شارع الحي، البيطاش', diagnosis: 'D.L.D', status: 'Stopped', weeklySchedule: [] },
+        { id: '1007', name: 'عمر خالد صلاح', phone: '01099005733', branch: 'B002', dob: '2023-04-10', address: 'كامب شيزار، الإسكندرية', diagnosis: 'D.L.D', status: 'Stopped', weeklySchedule: [] },
+        { id: '1009', name: 'يزن ابراهيم سعد', phone: '01208040199', branch: 'B002', dob: '2022-07-25', address: 'المعموره البلد', diagnosis: 'CB', status: 'Stopped', weeklySchedule: [] },
+        { id: '1010', name: 'مالك محمد السيد', phone: '01277124158', branch: 'B002', dob: '2019-12-26', address: 'بحري، الإسكندرية', diagnosis: 'ASD', status: 'Stopped', weeklySchedule: [] },
+        { id: '1018', name: 'ريان محمد احمد', phone: '01552051478', branch: 'B002', dob: '2021-08-10', address: 'سيدي بشر', diagnosis: 'ASD', status: 'Stopped', weeklySchedule: [] },
+        { id: '1024', name: 'محمد عمرو محمد', phone: '01224477093', branch: 'B001', dob: '2018-11-01', address: 'بيانكي، البيطاش', diagnosis: 'stuttering', status: 'Completed', weeklySchedule: [] },
+        { id: '1030', name: 'داليدا احمد محمد سعد', phone: '01287856355', branch: 'B001', dob: '2020-09-02', address: 'الهانوفيل', diagnosis: 'Phono.. Error', status: 'Stopped', weeklySchedule: [] },
+        { id: '1032', name: 'محمد احمد محمد متولى', phone: '0128884501', branch: 'B001', dob: '2022-01-09', address: 'القباري', diagnosis: 'D.L.D', status: 'Stopped', weeklySchedule: [] },
+        { id: '1034', name: 'محمد احمد عبد الله حجازي', phone: '01212693583', branch: 'B001', dob: '2021-10-26', address: 'البيطاش', diagnosis: 'D.L.D', status: 'Stopped', weeklySchedule: [] },
+        { id: '200', name: 'تاليا مصطفي احمد', phone: '01210055182', branch: 'B001', dob: '2020-06-15', address: 'البيطاش', diagnosis: 'phon.Error', status: 'Completed', weeklySchedule: [] },
+        { id: '2002', name: 'بدر خالد عبدالرازق', phone: '01063863841', branch: 'B001', dob: '2026-05-20', address: 'الهانوفيل', diagnosis: 'D.L.D', status: 'Stopped', weeklySchedule: [] },
+        { id: '2012', name: 'نور مدحت', phone: '01098579696', branch: 'B002', dob: '2024-05-15', address: 'ابو قير', diagnosis: 'Dowen syndrome', status: 'Stopped', weeklySchedule: [] },
+        { id: '2020', name: 'مليكة حسام الدين محمد', phone: '01099482031', branch: 'B001', dob: '2017-08-03', address: 'البيطاش', diagnosis: 'Stuttering', status: 'Stopped', weeklySchedule: [] },
+        { id: '2030', name: 'سليم اسلام رشدي', phone: '01284459911', branch: 'B001', dob: '2022-07-06', address: 'ابو يوسف', diagnosis: 'Stuttering', status: 'Stopped', weeklySchedule: [] },
+        { id: '2038', name: 'اسر وسام محمد', phone: '01154791015', branch: 'B001', dob: '2022-02-03', address: 'الهانوفيل', diagnosis: 'D.L.D', status: 'Stopped', weeklySchedule: [] }
+      ],
+      sessions: [
+        { id: 'S1301', clientId: '1001', therapistId: '785e56df', branch: 'B002', date: '2026-10-01', time: '16:45', type: 'S.T Session', status: 'ATT', price: 200, notes: 'استجابة ممتازة' },
+        { id: 'S1302', clientId: '1002', therapistId: '785e56df', branch: 'B001', date: '2026-10-01', time: '16:45', type: 'S.T Session', status: 'ATT', price: 150, notes: '' },
+        { id: 'S1303', clientId: '199', therapistId: '785e56df', branch: 'B002', date: '2026-10-01', time: '12:00', type: 'S.T Session', status: 'ATT', price: 200, notes: '' },
+        { id: 'S1304', clientId: '2005', therapistId: '785e56df', branch: 'B002', date: '2026-10-01', time: '17:30', type: 'S.T Session', status: 'SDE', price: 200, notes: 'اعتذار نفس اليوم - يخصم 50%' },
+        { id: 'S1305', clientId: '1001', therapistId: '785e56df', branch: 'B002', date: '2026-10-03', time: '14:30', type: 'S.T Session', status: 'ATT', price: 200, notes: '' },
+        { id: 'S1306', clientId: '2016', therapistId: '785e56df', branch: 'B001', date: '2026-10-03', time: '18:15', type: 'S.T Session', status: 'ATT', price: 150, notes: '' },
+        { id: 'S1307', clientId: '2019', therapistId: '785e56df', branch: 'B001', date: '2026-10-03', time: '19:00', type: 'S.T Session', status: 'EXC', price: 150, notes: 'اعتذار قبل 24 ساعة - معفى 100%' },
+        { id: 'S1308', clientId: '2026', therapistId: '785e56df', branch: 'B004', date: '2026-10-03', time: '12:00', type: 'S.T Session', status: 'ATT', price: 350, notes: 'جلسة منزلية خاصة' },
+        { id: 'S1309', clientId: '1002', therapistId: '785e56df', branch: 'B001', date: '2026-10-04', time: '16:45', type: 'S.T Session', status: 'ATT', price: 150, notes: '' },
+        { id: 'S1310', clientId: '2007', therapistId: '785e56df', branch: 'B001', date: '2026-10-04', time: '14:30', type: 'S.T Session', status: 'ATT', price: 150, notes: '' },
+        { id: 'S1311', clientId: '2015', therapistId: '785e56df', branch: 'B001', date: '2026-10-04', time: '17:30', type: 'S.T Session', status: 'ATT', price: 150, notes: '' },
+        { id: 'S1312', clientId: '2029', therapistId: '785e56df', branch: 'B001', date: '2026-10-04', time: '16:00', type: 'S.T Session', status: 'ATT', price: 150, notes: '' },
+        { id: 'S1313', clientId: '2031', therapistId: '785e56df', branch: 'B001', date: '2026-10-04', time: '19:45', type: 'S.T Session', status: 'CAN', price: 150, notes: 'غياب بدون إخطار - يحسب 100%' },
+        { id: 'S1314', clientId: '1001', therapistId: '785e56df', branch: 'B002', date: '2026-10-05', time: '16:45', type: 'S.T Session', status: 'TCA', price: 200, notes: 'إلغاء لظرف طارئ للأخصائي - معفى تماماً' },
+        { id: 'S1315', clientId: '199', therapistId: '785e56df', branch: 'B002', date: '2026-10-05', time: '18:15', type: 'S.T Session', status: 'ATT', price: 200, notes: '' },
+        { id: 'S1316', clientId: '2005', therapistId: '785e56df', branch: 'B002', date: '2026-10-05', time: '17:30', type: 'S.T Session', status: 'ATT', price: 200, notes: '' },
+        { id: 'S1317', clientId: '2016', therapistId: '785e56df', branch: 'B001', date: '2026-10-06', time: '18:15', type: 'S.T Session', status: 'SCHEDULED', price: 150, notes: 'مجدولة لليوم' },
+        { id: 'S1318', clientId: '2035', therapistId: '785e56df', branch: 'B001', date: '2026-10-06', time: '16:00', type: 'S.T Session', status: 'SCHEDULED', price: 150, notes: 'مجدولة لليوم' }
+      ],
+      payments: [
+        { id: 'pay-101', clientId: '1001', date: '2026-10-01', amount: 1530, branch: 'B002', month: '10/2026', notes: 'سداد جلسات شهر أكتوبر' },
+        { id: 'pay-102', clientId: '1002', date: '2026-10-01', amount: 1200, branch: 'B001', month: '10/2026', notes: 'سداد مقدماً' },
+        { id: 'pay-103', clientId: '199', date: '2026-10-02', amount: 1400, branch: 'B002', month: '10/2026', notes: 'سداد شهر أكتوبر' },
+        { id: 'pay-104', clientId: '2005', date: '2026-10-01', amount: 1200, branch: 'B002', month: '10/2026', notes: 'سداد جزئي' },
+        { id: 'pay-105', clientId: '2007', date: '2026-10-02', amount: 800, branch: 'B001', month: '10/2026', notes: 'سداد مقدماً' },
+        { id: 'pay-106', clientId: '2026', date: '2026-10-01', amount: 2000, branch: 'B004', month: '10/2026', notes: 'سداد جلسات خاصة' }
+      ]
+    };
+
+    let state = JSON.parse(localStorage.getItem(STORAGE_KEY)) || sheetData;
+    if (!state.users) state.users = defaultUsers;
+    if (!state.settings) state.settings = defaultSettings;
+
+    let currentUser = JSON.parse(localStorage.getItem('SPEAK_UP_CURRENT_USER')) || null;
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      refreshAll();
+    }
+
+    let currentBranchFilter = 'all';
+    let currentRole = currentUser ? currentUser.role : 'admin';
+    let calendarDateOffset = 0;
+
+    function handleLoginSubmit(e) {
+      if (e && e.preventDefault) e.preventDefault();
+      const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+      const password = document.getElementById('loginPassword').value;
+
+      const allUsers = state.users || defaultUsers;
+      let user = allUsers.find(u => u.email.toLowerCase() === email && u.password === password);
+
+      if (!user && (email === 'speakup.speechpathology@gmail.com' || email === 'hossamtaha.speak.up@gmail.com')) {
+        user = {
+          email,
+          name: 'أ. حسام سعيد طه (المدير)',
+          role: 'admin'
+        };
+      }
+
+      if (user) {
+        currentUser = user;
+        localStorage.setItem('SPEAK_UP_CURRENT_USER', JSON.stringify(currentUser));
+        document.getElementById('loginErrorAlert').classList.add('hidden');
+        closeModal('loginOverlay');
+        setUserRole(user.role);
+        updateUserHeader();
+      } else {
+        document.getElementById('loginErrorAlert').classList.remove('hidden');
+      }
+    }
+
+    function quickLogin(email) {
+      document.getElementById('loginEmail').value = email;
+      document.getElementById('loginPassword').value = '123';
+      handleLoginSubmit({ preventDefault: () => {} });
+    }
+
+    function handleLogout() {
+      currentUser = null;
+      localStorage.removeItem('SPEAK_UP_CURRENT_USER');
+      document.getElementById('loginOverlay').classList.remove('hidden');
+    }
+
+    function handleLogoFileUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        const dataUrl = evt.target.result;
+        document.getElementById('settingLogoUrl').value = dataUrl;
+        if (!state.settings) state.settings = defaultSettings;
+        state.settings.logoUrl = dataUrl;
+        saveState();
+        updateUserHeader();
+        alert('تم رفع صورة اللوجو وتطبيقها بنجاح! 🖼️');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function updateUserHeader() {
+      const userHeaderEl = document.getElementById('userInfoHeader');
+      if (currentUser) {
+        userHeaderEl.classList.remove('hidden');
+        document.getElementById('headerUserName').textContent = currentUser.name;
+        const roleMap = { admin: '👑 المدير', secretary: '⚡ السكرتيرة', therapist: '👩‍⚕️ الأخصائي' };
+        document.getElementById('headerUserRoleBadge').textContent = roleMap[currentUser.role] || currentUser.role;
+        document.getElementById('loginOverlay').classList.add('hidden');
+        document.getElementById('userRoleSelect').value = currentUser.role;
+      } else {
+        document.getElementById('loginOverlay').classList.remove('hidden');
+      }
+
+      // Apply settings dynamically
+      const settings = state.settings || defaultSettings;
+      document.getElementById('headerCenterName').textContent = settings.centerName || 'Speak Up Speech Therapy';
+      
+      const logoContainer = document.getElementById('headerLogoContainer');
+      if (settings.logoShape === 'circle') {
+        logoContainer.className = 'w-14 h-14 rounded-full bg-gradient-to-tr from-cyan-400 to-indigo-500 flex items-center justify-center text-white shadow-md font-bold text-2xl overflow-hidden transition-all shrink-0';
+      } else {
+        logoContainer.className = 'w-14 h-14 rounded-xl bg-gradient-to-tr from-cyan-400 to-indigo-500 flex items-center justify-center text-white shadow-md font-bold text-2xl overflow-hidden transition-all shrink-0';
+      }
+
+      const logoImg = document.getElementById('headerLogoImg');
+      const logoEmoji = document.getElementById('headerLogoEmoji');
+      if (settings.logoUrl) {
+        logoImg.src = settings.logoUrl;
+        logoImg.classList.remove('hidden');
+        logoEmoji.classList.add('hidden');
+      } else {
+        logoImg.classList.add('hidden');
+        logoEmoji.classList.remove('hidden');
+      }
+
+      // Apply Header Color Theme
+      const headerEl = document.getElementById('mainHeader');
+      if (headerEl) {
+        const colorClasses = {
+          indigo: 'bg-indigo-900',
+          emerald: 'bg-emerald-950',
+          rose: 'bg-rose-950',
+          purple: 'bg-purple-950',
+          slate: 'bg-slate-950',
+          blue: 'bg-blue-900'
+        };
+        const activeColor = settings.headerColor || 'indigo';
+        headerEl.className = `${colorClasses[activeColor] || 'bg-indigo-900'} text-white shadow-md sticky top-0 z-40 transition-colors duration-300`;
+      }
+
+      // Header Bar Toggles
+      document.getElementById('headerBranchFilter').classList.toggle('hidden', settings.showBranchFilter === false);
+      document.getElementById('userInfoHeader').classList.toggle('hidden', settings.showUser === false);
+      document.getElementById('headerAddStaffBtn').classList.toggle('hidden', settings.showAddStaff === false);
+      document.getElementById('headerAddSessionBtn').classList.toggle('hidden', settings.showAddSession === false);
+
+      // Nav style toggle (Full Row vs Compact Mega Menu)
+      const fullNav = document.getElementById('fullNavRow');
+      const compactNav = document.getElementById('compactNavRow');
+      if (settings.navStyle === 'compact') {
+        if (fullNav) fullNav.classList.add('hidden');
+        if (compactNav) compactNav.classList.remove('hidden');
+      } else {
+        if (fullNav) fullNav.classList.remove('hidden');
+        if (compactNav) compactNav.classList.add('hidden');
+      }
+    }
+
+    function toggleMegaMenu() {
+      const menu = document.getElementById('megaMenuDropdown');
+      if (menu) menu.classList.toggle('hidden');
+    }
+
+    function closeMegaMenu() {
+      const menu = document.getElementById('megaMenuDropdown');
+      if (menu) menu.classList.add('hidden');
+    }
+
+    function getUserEffectivePermissions(user) {
+      if (!user) return defaultSettings.permissions.admin;
+      if (user.useCustomPermissions && user.customPermissions) {
+        return user.customPermissions;
+      }
+      const role = user.role || 'admin';
+      const settingsPerms = (state.settings && state.settings.permissions) || defaultSettings.permissions;
+      return settingsPerms[role] || defaultSettings.permissions[role] || defaultSettings.permissions.admin;
+    }
+
+    function applyPermissions() {
+      if (!currentUser) return;
+      const perms = getUserEffectivePermissions(currentUser);
+
+      const navMap = {
+        dashboard: 'nav-dashboard',
+        secretary: 'nav-secretary',
+        calendar: 'nav-calendar',
+        clients: 'nav-clients',
+        sessions: 'nav-sessions',
+        invoices: 'nav-invoices',
+        payments: 'nav-payments',
+        staff: 'nav-staff',
+        settings: 'nav-settings'
+      };
+
+      const megaMap = {
+        dashboard: 'mega-nav-dashboard',
+        secretary: 'mega-nav-secretary',
+        calendar: 'mega-nav-calendar',
+        clients: 'mega-nav-clients',
+        sessions: 'mega-nav-sessions',
+        invoices: 'mega-nav-invoices',
+        payments: 'mega-nav-payments',
+        staff: 'mega-nav-staff',
+        settings: 'mega-nav-settings'
+      };
+
+      Object.keys(navMap).forEach(key => {
+        const btn = document.getElementById(navMap[key]);
+        if (btn) {
+          if (perms[key] === false) {
+            btn.classList.add('hidden');
+          } else {
+            btn.classList.remove('hidden');
+          }
+        }
+        const megaBtn = document.getElementById(megaMap[key]);
+        if (megaBtn) {
+          if (perms[key] === false) {
+            megaBtn.classList.add('hidden');
+          } else {
+            megaBtn.classList.remove('hidden');
+          }
+        }
+      });
+
+      // Global delete buttons hiding/showing if user has no delete perm
+      document.querySelectorAll('.btn-delete-action').forEach(btn => {
+        if (perms.delete === false) {
+          btn.classList.add('hidden');
+        } else {
+          btn.classList.remove('hidden');
+        }
+      });
+    }
+
+    function switchSettingsSubTab(subTab) {
+      document.querySelectorAll('.settings-subtab').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('#subtab-btn-general, #subtab-btn-theme, #subtab-btn-permissions, #subtab-btn-custom').forEach(btn => {
+        btn.className = 'px-3 py-1.5 rounded-lg text-xs font-medium text-indigo-200 hover:text-white hover:bg-indigo-800';
+      });
+
+      const target = document.getElementById('settings-sub-' + subTab);
+      if (target) target.classList.remove('hidden');
+
+      const activeBtn = document.getElementById('subtab-btn-' + subTab);
+      if (activeBtn) activeBtn.className = 'px-3 py-1.5 rounded-lg text-xs font-bold transition bg-white text-indigo-900 shadow';
+
+      if (subTab === 'general') renderGeneralSettingsForm();
+      if (subTab === 'theme') renderThemeSettingsForm();
+      if (subTab === 'permissions') { renderUsersTable(); renderPermissionsMatrix(); }
+      if (subTab === 'custom') renderCustomModules();
+    }
+
+    function renderGeneralSettingsForm() {
+      const s = state.settings || defaultSettings;
+      document.getElementById('settingCenterName').value = s.centerName || '';
+      document.getElementById('settingLogoUrl').value = s.logoUrl || '';
+      document.getElementById('settingLogoShape').value = s.logoShape || 'circle';
+      document.getElementById('settingLanguage').value = s.language || 'ar';
+      document.getElementById('settingCurrency').value = s.currency || 'ج.م';
+      document.getElementById('settingReceiptFooter').value = s.receiptFooter || '';
+    }
+
+    function saveGeneralSettings(e) {
+      e.preventDefault();
+      if (!state.settings) state.settings = defaultSettings;
+      state.settings.centerName = document.getElementById('settingCenterName').value.trim();
+      state.settings.logoUrl = document.getElementById('settingLogoUrl').value.trim();
+      state.settings.logoShape = document.getElementById('settingLogoShape').value;
+      state.settings.language = document.getElementById('settingLanguage').value;
+      state.settings.currency = document.getElementById('settingCurrency').value.trim();
+      state.settings.receiptFooter = document.getElementById('settingReceiptFooter').value.trim();
+
+      saveState();
+      alert('تم حفظ البيانات وشعار اللوجو بنجاح! 🎉');
+    }
+
+    function renderThemeSettingsForm() {
+      const s = state.settings || defaultSettings;
+      document.getElementById('settingHeaderColor').value = s.headerColor || 'indigo';
+      document.getElementById('settingNavStyle').value = s.navStyle || 'compact';
+      document.getElementById('headerShowBranch').checked = s.showBranchFilter !== false;
+      document.getElementById('headerShowUser').checked = s.showUser !== false;
+      document.getElementById('headerShowAddStaff').checked = s.showAddStaff !== false;
+      document.getElementById('headerShowAddSession').checked = s.showAddSession !== false;
+    }
+
+    function saveThemeSettings(e) {
+      e.preventDefault();
+      if (!state.settings) state.settings = defaultSettings;
+      state.settings.headerColor = document.getElementById('settingHeaderColor').value;
+      state.settings.navStyle = document.getElementById('settingNavStyle').value;
+      state.settings.showBranchFilter = document.getElementById('headerShowBranch').checked;
+      state.settings.showUser = document.getElementById('headerShowUser').checked;
+      state.settings.showAddStaff = document.getElementById('headerShowAddStaff').checked;
+      state.settings.showAddSession = document.getElementById('headerShowAddSession').checked;
+
+      saveState();
+      alert('تم حفظ وتطبيق إعدادات الثيم والواجهة بنجاح! 🎨');
+    }
+
+    function renderUsersTable() {
+      const tbody = document.getElementById('users-tbody');
+      tbody.innerHTML = '';
+      const users = state.users || defaultUsers;
+
+      users.forEach((u, idx) => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50 border-b border-slate-100';
+
+        const roleText = u.role === 'admin' ? '👑 المدير' : (u.role === 'secretary' ? '⚡ السكرتيرة' : '👩‍⚕️ الأخصائي');
+        const permBadge = u.useCustomPermissions ? 
+          '<span class="bg-amber-100 text-amber-900 border border-amber-300 px-2 py-0.5 rounded font-black text-[11px] inline-flex items-center gap-1">🎛️ مخصصة بالاسم</span>' : 
+          '<span class="bg-slate-100 text-slate-700 border border-slate-200 px-2 py-0.5 rounded font-bold text-[11px]">حسب الوظيفة</span>';
+
+        tr.innerHTML = `
+          <td class="p-3 font-bold text-slate-800">${u.name}</td>
+          <td class="p-3 font-mono font-medium text-slate-600">${u.email}</td>
+          <td class="p-3"><span class="bg-indigo-100 text-indigo-800 px-2.5 py-1 rounded-lg font-extrabold text-xs">${roleText}</span></td>
+          <td class="p-3">${permBadge}</td>
+          <td class="p-3 text-center">
+            <div class="flex items-center justify-center gap-1.5">
+              <button onclick="openUserPermissionsModal(${idx})" class="bg-amber-50 hover:bg-amber-100 text-amber-800 font-extrabold px-2.5 py-1 rounded-lg text-xs border border-amber-200 shadow-2xs flex items-center gap-1">🔑 الصلاحيات</button>
+              <button onclick="editUser(${idx})" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold px-2 py-1 rounded-lg text-xs border border-indigo-200">✏️ تعديل</button>
+              <button onclick="deleteUser(${idx})" class="bg-red-50 hover:bg-red-100 text-red-700 font-bold px-2 py-1 rounded-lg text-xs border border-red-200">🗑️ حذف</button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function openNewUserModal() {
+      document.getElementById('userForm').reset();
+      document.getElementById('userEditIndex').value = '';
+      openModal('userModal');
+    }
+
+    function editUser(idx) {
+      const u = state.users[idx];
+      if (!u) return;
+      document.getElementById('userEditIndex').value = idx;
+      document.getElementById('userName').value = u.name;
+      document.getElementById('userEmail').value = u.email;
+      document.getElementById('userPassword').value = u.password;
+      document.getElementById('userRole').value = u.role;
+      openModal('userModal');
+    }
+
+    function deleteUser(idx) {
+      if (confirm('هل أنت تأكد من حذف حساب هذا المستخدم؟')) {
+        state.users.splice(idx, 1);
+        saveState();
+        renderUsersTable();
+      }
+    }
+
+    function saveUser(e) {
+      e.preventDefault();
+      const idxVal = document.getElementById('userEditIndex').value;
+      const existing = (idxVal !== '' && state.users[Number(idxVal)]) ? state.users[Number(idxVal)] : {};
+      
+      const uData = {
+        ...existing,
+        name: document.getElementById('userName').value.trim(),
+        email: document.getElementById('userEmail').value.trim().toLowerCase(),
+        password: document.getElementById('userPassword').value,
+        role: document.getElementById('userRole').value
+      };
+
+      if (!state.users) state.users = defaultUsers;
+
+      if (idxVal !== '') {
+        state.users[Number(idxVal)] = uData;
+      } else {
+        state.users.push(uData);
+      }
+
+      saveState();
+      closeModal('userModal');
+      renderUsersTable();
+    }
+
+    const permissionModulesList = [
+      { key: 'dashboard', label: '📊 لوحة التحكم والإحصائيات المالية' },
+      { key: 'secretary', label: '⚡ كشف الحضور اليومي السريع (منة)' },
+      { key: 'calendar', label: '📅 الكاليندر ومواعيد الأخصائيين' },
+      { key: 'clients', label: '👶 سجل العملاء والجدول الأسبوعي' },
+      { key: 'sessions', label: '📋 سجل الجلسات الكامل' },
+      { key: 'invoices', label: '🧾 الفواتير والتقارير الشهرية' },
+      { key: 'payments', label: '💵 المدفوعات وسندات القبض النقدية' },
+      { key: 'staff', label: '👩‍⚕️ إدارة الأخصائيين وأسعار الفروع' },
+      { key: 'settings', label: '⚙️ إعدادات النظام والصلاحيات' },
+      { key: 'delete', label: '🗑️ صلاحية الحذف النهائي للعناصر' }
+    ];
+
+    function openUserPermissionsModal(idx) {
+      const u = state.users[idx];
+      if (!u) return;
+
+      document.getElementById('userPermsIndex').value = idx;
+      document.getElementById('userPermsModalSubtitle').textContent = `حساب: ${u.name} (${u.email})`;
+
+      const roleNames = { admin: '👑 المدير (Admin)', secretary: '⚡ السكرتيرة (Secretary)', therapist: '👩‍⚕️ الأخصائي (Therapist)' };
+      document.getElementById('userPermRoleHint').textContent = `الوظيفة المحددة: ${roleNames[u.role] || u.role}`;
+
+      if (u.useCustomPermissions) {
+        document.getElementById('permTypeCustom').checked = true;
+      } else {
+        document.getElementById('permTypeRole').checked = true;
+      }
+
+      // Render Checklist
+      const checklistContainer = document.getElementById('user-perms-checklist');
+      checklistContainer.innerHTML = '';
+
+      const effectivePerms = getUserEffectivePermissions(u);
+
+      permissionModulesList.forEach(m => {
+        const isChecked = u.customPermissions ? u.customPermissions[m.key] !== false : effectivePerms[m.key] !== false;
+        
+        const labelEl = document.createElement('label');
+        labelEl.className = 'flex items-center gap-2 bg-white p-2.5 rounded-xl border border-slate-200 cursor-pointer hover:border-indigo-300 font-bold text-slate-700 transition';
+        labelEl.innerHTML = `
+          <input type="checkbox" id="user-perm-${m.key}" ${isChecked ? 'checked' : ''} class="w-4 h-4 text-indigo-600 rounded">
+          <span class="text-xs">${m.label}</span>
+        `;
+        checklistContainer.appendChild(labelEl);
+      });
+
+      toggleUserPermsView();
+      openModal('userPermissionsModal');
+    }
+
+    function toggleUserPermsView() {
+      const isCustom = document.getElementById('permTypeCustom').checked;
+      const container = document.getElementById('userCustomPermsContainer');
+      if (isCustom) {
+        container.classList.remove('opacity-50', 'pointer-events-none');
+      } else {
+        container.classList.add('opacity-50', 'pointer-events-none');
+      }
+    }
+
+    function selectAllUserPerms(val) {
+      permissionModulesList.forEach(m => {
+        const el = document.getElementById(`user-perm-${m.key}`);
+        if (el) el.checked = val;
+      });
+    }
+
+    function saveUserPermissions() {
+      const idx = document.getElementById('userPermsIndex').value;
+      if (idx === '' || !state.users[idx]) return;
+
+      const u = state.users[idx];
+      const isCustom = document.getElementById('permTypeCustom').checked;
+
+      u.useCustomPermissions = isCustom;
+      if (!u.customPermissions) u.customPermissions = {};
+
+      permissionModulesList.forEach(m => {
+        const el = document.getElementById(`user-perm-${m.key}`);
+        if (el) {
+          u.customPermissions[m.key] = el.checked;
+        }
+      });
+
+      saveState();
+      closeModal('userPermissionsModal');
+      renderUsersTable();
+
+      if (currentUser && currentUser.email === u.email) {
+        currentUser = u;
+        localStorage.setItem('SPEAK_UP_CURRENT_USER', JSON.stringify(currentUser));
+        applyPermissions();
+      }
+
+      alert(`تم حفظ وتطبيق الصلاحيات الخاصة للمستخدم (${u.name}) بنجاح! 🔑`);
+    }
+
+    function renderPermissionsMatrix() {
+      const tbody = document.getElementById('permissions-matrix-tbody');
+      tbody.innerHTML = '';
+
+      const perms = (state.settings && state.settings.permissions) || defaultSettings.permissions;
+
+      permissionModulesList.forEach(m => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50 border-b border-slate-100';
+        tr.innerHTML = `
+          <td class="p-3 font-bold text-slate-800 border-l">${m.label}</td>
+          <td class="p-3 text-center border-l bg-indigo-50/50">
+            <input type="checkbox" id="perm-admin-${m.key}" ${perms.admin[m.key] !== false ? 'checked' : ''} class="w-4 h-4 text-indigo-600 rounded cursor-pointer">
+          </td>
+          <td class="p-3 text-center border-l bg-purple-50/50">
+            <input type="checkbox" id="perm-secretary-${m.key}" ${perms.secretary[m.key] !== false ? 'checked' : ''} class="w-4 h-4 text-purple-600 rounded cursor-pointer">
+          </td>
+          <td class="p-3 text-center bg-cyan-50/50">
+            <input type="checkbox" id="perm-therapist-${m.key}" ${perms.therapist[m.key] !== false ? 'checked' : ''} class="w-4 h-4 text-cyan-600 rounded cursor-pointer">
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function savePermissionsMatrix() {
+      if (!state.settings) state.settings = defaultSettings;
+      const roles = ['admin', 'secretary', 'therapist'];
+      const keys = permissionModulesList.map(m => m.key);
+
+      roles.forEach(r => {
+        if (!state.settings.permissions[r]) state.settings.permissions[r] = {};
+        keys.forEach(k => {
+          const el = document.getElementById(`perm-${r}-${k}`);
+          if (el) {
+            state.settings.permissions[r][k] = el.checked;
+          }
+        });
+      });
+
+      saveState();
+      alert('تم تحديث مصفوفة التحكم في الصلاحيات بنجاح! 🔐');
+    }
+
+    function renderCustomModules() {
+      const container = document.getElementById('customModulesList');
+      container.innerHTML = '';
+      const list = (state.settings && state.settings.customModules) || defaultSettings.customModules;
+
+      list.forEach((mod, idx) => {
+        const div = document.createElement('div');
+        div.className = 'bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs flex justify-between items-center';
+        div.innerHTML = `
+          <div>
+            <div class="font-extrabold text-indigo-950">${mod.name}</div>
+            <div class="text-[10px] text-slate-400 font-mono">نوع الخانة: ${mod.type}</div>
+          </div>
+          <button onclick="removeCustomModule(${idx})" class="text-rose-600 font-bold hover:underline">حذف 🗑️</button>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function addCustomModule(e) {
+      e.preventDefault();
+      const name = document.getElementById('customModuleName').value.trim();
+      const type = document.getElementById('customModuleType').value;
+      if (!state.settings) state.settings = defaultSettings;
+      if (!state.settings.customModules) state.settings.customModules = [];
+
+      state.settings.customModules.push({ name, type });
+      saveState();
+      document.getElementById('customModuleName').value = '';
+      renderCustomModules();
+    }
+
+    function removeCustomModule(idx) {
+      if (confirm('هل أنت تأكد من حذف هذه الخانة المخصصة؟')) {
+        state.settings.customModules.splice(idx, 1);
+        saveState();
+        renderCustomModules();
+      }
+    }
+
+    function getBranchName(branchIdOrName) {
+      const b = state.branches.find(br => br.id === branchIdOrName || br.name === branchIdOrName);
+      return b ? b.name : branchIdOrName;
+    }
+
+    function matchBranch(branchIdOrName) {
+      if (currentBranchFilter === 'all') return true;
+      return branchIdOrName === currentBranchFilter || (branchIdOrName === 'البيطاش' && currentBranchFilter === 'B001') || (branchIdOrName === 'سموحه' && currentBranchFilter === 'B002');
+    }
+
+    function setBranchFilter(branchId) {
+      currentBranchFilter = branchId;
+      document.querySelectorAll('#btn-branch-all, #btn-branch-bitash, #btn-branch-smouha, #btn-branch-online, #btn-branch-private').forEach(b => {
+        b.className = 'px-2.5 py-1 rounded-md transition font-medium text-indigo-200 hover:text-white';
+      });
+      const mapping = {
+        'all': 'btn-branch-all',
+        'B001': 'btn-branch-bitash',
+        'B002': 'btn-branch-smouha',
+        'B003': 'btn-branch-online',
+        'B004': 'btn-branch-private'
+      };
+      const activeBtn = document.getElementById(mapping[branchId]);
+      if (activeBtn) activeBtn.className = 'px-2.5 py-1 rounded-md transition font-semibold bg-white text-indigo-900 shadow-sm';
+      refreshAll();
+    }
+
+    function setUserRole(role) {
+      currentRole = role;
+      if (role === 'secretary') switchTab('secretary');
+      else if (role === 'therapist') switchTab('sessions');
+      refreshAll();
+    }
+
+    function calculateSessionFee(session) {
+      const base = Number(session.price) || 0;
+      switch (session.status) {
+        case 'ATT':
+        case 'CAN':
+          return { gross: base, discount: 0, net: base, discountRate: '0%' };
+        case 'SDE':
+          const half = base * 0.5;
+          return { gross: base, discount: half, net: base - half, discountRate: '50%' };
+        case 'EXC':
+        case 'TCA':
+          return { gross: base, discount: base, net: 0, discountRate: '100%' };
+        default:
+          return { gross: base, discount: 0, net: base, discountRate: 'مجدولة' };
+      }
+    }
+
+    function calculateClientInvoice(clientId, yearMonth = '2026/10') {
+      const client = state.clients.find(c => c.id === clientId);
+      if (!client) return null;
+
+      const normMonth = yearMonth.replace('-', '/');
+      const normMonthDash = yearMonth.replace('/', '-');
+
+      const clientSessions = state.sessions.filter(s => {
+        const sMonth = s.date.slice(0, 7);
+        return s.clientId === clientId && (sMonth === normMonth || sMonth === normMonthDash);
+      });
+
+      let totalGross = 0;
+      let totalDiscounts = 0;
+      let totalNetDue = 0;
+      let counts = { ATT: 0, CAN: 0, SDE: 0, EXC: 0, TCA: 0, SCHEDULED: 0 };
+
+      clientSessions.forEach(s => {
+        counts[s.status] = (counts[s.status] || 0) + 1;
+        const fee = calculateSessionFee(s);
+        totalGross += fee.gross;
+        totalDiscounts += fee.discount;
+        totalNetDue += fee.net;
+      });
+
+      const clientPayments = state.payments.filter(p => {
+        const pDate = p.date || '';
+        return p.clientId === clientId && (pDate.startsWith(normMonthDash) || pDate.startsWith(normMonth) || p.month === '10/2026');
+      });
+
+      const totalPaid = clientPayments.reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+      const remainingBalance = totalNetDue - totalPaid;
+
+      return {
+        client, yearMonth, sessionsCount: clientSessions.length, counts,
+        totalGross, totalDiscounts, totalNetDue, totalPaid, remainingBalance,
+        sessions: clientSessions, payments: clientPayments
+      };
+    }
+
+    function generateWeekSessions() {
+      const daysMap = { 'الأحد': 0, 'الإثنين': 1, 'الثلاثاء': 2, 'الأربعاء': 3, 'الخميس': 4, 'الجمعة': 5, 'السبت': 6 };
+      const now = new Date();
+      const startOfWeek = new Date(now);
+      startOfWeek.setDate(now.getDate() - now.getDay());
+
+      let createdCount = 0;
+      state.clients.forEach(client => {
+        if (client.status !== 'Active') return;
+        if (!client.weeklySchedule || client.weeklySchedule.length === 0) return;
+
+        const branchObj = state.branches.find(b => b.id === client.branch || b.name === client.branch);
+        const branchPrice = branchObj ? branchObj.sessionPrice : 150;
+
+        client.weeklySchedule.forEach(slot => {
+          const targetDayIndex = daysMap[slot.day];
+          if (targetDayIndex === undefined) return;
+
+          const sessionDate = new Date(startOfWeek);
+          sessionDate.setDate(startOfWeek.getDate() + targetDayIndex);
+          const dateStr = sessionDate.toISOString().split('T')[0];
+
+          const exists = state.sessions.some(s => s.clientId === client.id && s.date === dateStr && s.time === slot.time);
+
+          if (!exists) {
+            state.sessions.push({
+              id: 'S' + Date.now().toString().slice(-4) + Math.floor(Math.random() * 10),
+              clientId: client.id,
+              therapistId: slot.therapistId || '785e56df',
+              branch: client.branch,
+              date: dateStr,
+              time: slot.time,
+              type: slot.type || 'S.T Session',
+              status: 'SCHEDULED',
+              price: slot.netFee || branchPrice,
+              notes: 'مولدة تلقائياً من الجدول الأسبوعي'
+            });
+            createdCount++;
+          }
+        });
+      });
+
+      saveState();
+      alert(`تم توليد ${createdCount} جلسات أسبوعية جديدة بنجاح في الكشف!`);
+    }
+
+    function renderDashboard() {
+      const filteredClients = state.clients.filter(c => matchBranch(c.branch));
+      const activeClients = filteredClients.filter(c => c.status === 'Active');
+      document.getElementById('dash-active-clients').textContent = activeClients.length;
+      document.getElementById('dash-total-clients').textContent = filteredClients.length;
+      document.getElementById('clients-nav-badge').textContent = filteredClients.length;
+
+      const filteredSessions = state.sessions.filter(s => matchBranch(s.branch));
+      document.getElementById('dash-month-sessions').textContent = filteredSessions.length;
+
+      const attSessions = filteredSessions.filter(s => s.status === 'ATT');
+      document.getElementById('dash-att-count').textContent = attSessions.length;
+
+      let counts = { ATT: 0, CAN: 0, SDE: 0, EXC: 0, TCA: 0 };
+      let totalDue = 0;
+      filteredSessions.forEach(s => {
+        counts[s.status] = (counts[s.status] || 0) + 1;
+        totalDue += calculateSessionFee(s).net;
+      });
+
+      document.getElementById('dash-count-att').textContent = counts.ATT || 0;
+      document.getElementById('dash-count-can').textContent = counts.CAN || 0;
+      document.getElementById('dash-count-sde').textContent = counts.SDE || 0;
+      document.getElementById('dash-count-exc').textContent = counts.EXC || 0;
+      document.getElementById('dash-count-tca').textContent = counts.TCA || 0;
+
+      const filteredPayments = state.payments.filter(p => matchBranch(p.branch));
+      const totalPaid = filteredPayments.reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+
+      document.getElementById('dash-month-payments').textContent = totalPaid.toLocaleString('ar-EG') + ' ج.م';
+      document.getElementById('dash-month-due').textContent = totalDue.toLocaleString('ar-EG') + ' ج.م';
+      const remaining = totalDue - totalPaid;
+      document.getElementById('dash-month-remaining').textContent = remaining.toLocaleString('ar-EG');
+
+      const quickContainer = document.getElementById('dash-quick-clients');
+      quickContainer.innerHTML = '';
+      activeClients.slice(0, 6).forEach(c => {
+        const div = document.createElement('div');
+        div.className = 'bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs flex justify-between items-center hover:bg-indigo-50 transition';
+        div.innerHTML = `
+          <div>
+            <div class="font-bold text-slate-800">${c.name}</div>
+            <div class="text-[10px] text-slate-400 font-mono">#${c.id} &bull; ${getBranchName(c.branch)}</div>
+          </div>
+          <button onclick="editClient('${c.id}')" class="text-indigo-600 font-bold text-xs hover:underline">تعديل ✏️</button>
+        `;
+        quickContainer.appendChild(div);
+      });
+    }
+
+    function loadSecretaryView() {
+      const dateVal = document.getElementById('secretaryDateInput').value || new Date().toISOString().split('T')[0];
+      document.getElementById('secretaryDateInput').value = dateVal;
+      document.getElementById('sec-date-label').textContent = dateVal;
+
+      const tbody = document.getElementById('secretary-tbody');
+      tbody.innerHTML = '';
+
+      const daysList = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+      const targetDateObj = new Date(dateVal);
+      const dayName = daysList[targetDateObj.getDay()];
+
+      const sessionsForDay = state.sessions.filter(s => s.date === dateVal && matchBranch(s.branch));
+
+      if (sessionsForDay.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="text-center py-8 text-slate-400">لا توجد جلسات مسجلة لهذا اليوم (${dateVal}). يمكنك الضغط على "توليد جلسات الأسبوع" لتوليدها من الجدول.</td></tr>`;
+        return;
+      }
+
+      sessionsForDay.forEach(s => {
+        const client = state.clients.find(c => c.id === s.clientId) || { name: 'غير معروف' };
+        const therapist = state.staff.find(t => t.id === s.therapistId) || { name: 'أ. حسام سعيد طه' };
+
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50 border-b border-slate-100 transition';
+        tr.innerHTML = `
+          <td class="p-3 font-mono font-bold text-slate-900">${s.time}</td>
+          <td class="p-3 font-extrabold text-slate-900">${client.name} <span class="text-[10px] text-slate-400 font-normal">#${client.id}</span></td>
+          <td class="p-3"><span class="bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded font-bold">${getBranchName(s.branch)}</span></td>
+          <td class="p-3 text-slate-700 font-medium">${therapist.name}</td>
+          <td class="p-3 text-slate-600">${s.type}</td>
+          <td class="p-3 text-center">
+            <select onchange="updateSessionStatusDirect('${s.id}', this.value)" class="font-bold text-xs rounded-lg px-2 py-1 border cursor-pointer ${getStatusBadgeClass(s.status)}">
+              <option value="ATT" ${s.status === 'ATT' ? 'selected' : ''}>🟢 ATT - حضور فعلي</option>
+              <option value="SDE" ${s.status === 'SDE' ? 'selected' : ''}>🟠 SDE - اعتذار نفس اليوم (50%)</option>
+              <option value="EXC" ${s.status === 'EXC' ? 'selected' : ''}>🟡 EXC - اعتذار مسبق (0%)</option>
+              <option value="CAN" ${s.status === 'CAN' ? 'selected' : ''}>🔴 CAN - غياب بدون إخطار (100%)</option>
+              <option value="TCA" ${s.status === 'TCA' ? 'selected' : ''}>⚪ TCA - إلغاء أخصائي (0%)</option>
+              <option value="SCHEDULED" ${s.status === 'SCHEDULED' ? 'selected' : ''}>🔵 SCHEDULED - مجدولة</option>
+            </select>
+          </td>
+          <td class="p-3">
+            <input type="text" value="${s.notes || ''}" onchange="updateSessionNotes('${s.id}', this.value)" placeholder="أضف ملاحظة..." class="w-full border rounded px-2 py-1 text-xs">
+          </td>
+          <td class="p-3 text-center">
+            <button onclick="editSession('${s.id}')" class="text-indigo-600 hover:text-indigo-800 font-bold">تعديل ✏️</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function getStatusBadgeClass(status) {
+      switch(status) {
+        case 'ATT': return 'badge-att';
+        case 'CAN': return 'badge-can';
+        case 'EXC': return 'badge-exc';
+        case 'SDE': return 'badge-sde';
+        case 'TCA': return 'badge-tca';
+        default: return 'badge-scheduled';
+      }
+    }
+
+    function updateSessionStatusDirect(sessionId, newStatus) {
+      const sess = state.sessions.find(s => s.id === sessionId);
+      if (!sess) return;
+      sess.status = newStatus;
+      saveState();
+    }
+
+    function updateSessionNotes(sessionId, newNotes) {
+      const sess = state.sessions.find(s => s.id === sessionId);
+      if (!sess) return;
+      sess.notes = newNotes;
+      saveState();
+    }
+
+    function renderCalendar() {
+      const container = document.getElementById('calendar-grid');
+      container.innerHTML = '';
+
+      const daysOfWeek = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+      const now = new Date();
+      const currSunday = new Date(now);
+      currSunday.setDate(now.getDate() - now.getDay() + (calendarDateOffset * 7));
+
+      document.getElementById('calendar-week-label').textContent = `أسبوع (${currSunday.toISOString().split('T')[0]})`;
+
+      for (let i = 0; i < 7; i++) {
+        const dayDate = new Date(currSunday);
+        dayDate.setDate(currSunday.getDate() + i);
+        const dateStr = dayDate.toISOString().split('T')[0];
+        const dayName = daysOfWeek[i];
+
+        const col = document.createElement('div');
+        col.className = 'bg-slate-50 min-h-[350px] p-2 space-y-2 border-b';
+
+        const daySessions = state.sessions.filter(s => s.date === dateStr && matchBranch(s.branch));
+
+        col.innerHTML = `
+          <div class="text-center pb-2 border-b">
+            <div class="font-extrabold text-slate-800 text-xs">${dayName}</div>
+            <div class="text-[10px] text-slate-400 font-mono">${dateStr.slice(5)}</div>
+          </div>
+          <div class="space-y-1.5">
+            ${daySessions.map(s => {
+              const client = state.clients.find(c => c.id === s.clientId) || { name: 'عميل' };
+              return `
+                <div onclick="editSession('${s.id}')" class="p-2 rounded-xl border bg-white shadow-2xs hover:shadow border-slate-200 cursor-pointer space-y-1">
+                  <div class="flex justify-between items-center text-[10px]">
+                    <span class="font-bold text-indigo-700 font-mono">${s.time}</span>
+                    <span class="px-1.5 py-0.5 rounded font-black text-[9px] ${getStatusBadgeClass(s.status)}">${s.status}</span>
+                  </div>
+                  <div class="font-extrabold text-slate-900 text-xs truncate">${client.name}</div>
+                  <div class="text-[10px] text-slate-500">${s.type}</div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        `;
+        container.appendChild(col);
+      }
+    }
+
+    function prevCalendarWeek() { calendarDateOffset--; renderCalendar(); }
+    function nextCalendarWeek() { calendarDateOffset++; renderCalendar(); }
+
+    function renderClientsTable() {
+      const tbody = document.getElementById('clients-tbody');
+      tbody.innerHTML = '';
+      const search = (document.getElementById('clientSearchInput').value || '').trim().toLowerCase();
+      const statusFilter = document.getElementById('clientStatusFilter').value;
+
+      const list = state.clients.filter(c => {
+        if (!matchBranch(c.branch)) return false;
+        if (statusFilter !== 'all' && c.status !== statusFilter) return false;
+        if (search) {
+          return c.name.toLowerCase().includes(search) || c.id.toLowerCase().includes(search) || (c.phone || '').includes(search) || (c.diagnosis || '').toLowerCase().includes(search);
+        }
+        return true;
+      });
+
+      if (list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" class="text-center py-6 text-slate-400">لا يوجد عملاء يطابقون الاختيار.</td></tr>`;
+        return;
+      }
+
+      list.forEach(c => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50 transition border-b border-slate-100';
+
+        const scheduleHtml = (c.weeklySchedule && c.weeklySchedule.length > 0)
+          ? c.weeklySchedule.map(slot => {
+              return `<span class="inline-block bg-indigo-50 text-indigo-700 border border-indigo-100 rounded px-1.5 py-0.5 text-[10px] font-bold mr-1 mb-1">
+                ${slot.day} ${slot.time} (${slot.netFee || 150} ج)
+              </span>`;
+            }).join('')
+          : '<span class="text-slate-400 text-[11px]">بدون ميعاد ثابت</span>';
+
+        let statusClass = 'bg-emerald-100 text-emerald-800';
+        if (c.status === 'Stopped') statusClass = 'bg-rose-100 text-rose-800';
+        if (c.status === 'Completed') statusClass = 'bg-blue-100 text-blue-800';
+
+        tr.innerHTML = `
+          <td class="p-3 font-mono font-bold text-slate-500">#${c.id}</td>
+          <td class="p-3 font-bold text-slate-800">${c.name}</td>
+          <td class="p-3 font-mono">${c.phone || '-'}</td>
+          <td class="p-3"><span class="bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-bold">${getBranchName(c.branch)}</span></td>
+          <td class="p-3 text-slate-600">${c.diagnosis || '-'}</td>
+          <td class="p-3 text-slate-400 text-[11px] truncate max-w-xs">${c.address || '-'}</td>
+          <td class="p-3">
+            <button onclick="toggleClientStatus('${c.id}')" title="اضغط لتغيير الحالة" class="px-2.5 py-1 rounded-full text-xs font-black transition ${statusClass}">
+              ${c.status === 'Active' ? '🟢 نشط' : (c.status === 'Stopped' ? '🔴 موقوف' : c.status)}
+            </button>
+          </td>
+          <td class="p-3">${scheduleHtml}</td>
+          <td class="p-3 text-center">
+            <div class="flex items-center justify-center gap-1.5">
+              <button onclick="editClient('${c.id}')" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold px-2 py-1 rounded text-xs border border-indigo-200" title="تعديل البيانات">✏️ تعديل</button>
+              <button onclick="printClientInvoice('${c.id}', '2026/10')" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold px-2 py-1 rounded text-xs border border-emerald-200" title="الفاتورة">🧾 الفاتورة</button>
+              <button onclick="deleteClient('${c.id}')" class="bg-red-50 hover:bg-red-100 text-red-700 font-bold px-2 py-1 rounded text-xs border border-red-200" title="حذف العميل">🗑️ حذف</button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function toggleClientStatus(clientId) {
+      const client = state.clients.find(c => c.id === clientId);
+      if (!client) return;
+      client.status = client.status === 'Active' ? 'Stopped' : 'Active';
+      saveState();
+    }
+
+    function deleteClient(id) {
+      const client = state.clients.find(c => c.id === id);
+      if (!client) return;
+      if (confirm(`هل أنت تأكد من حذف العميل "${client.name}" النهائي؟`)) {
+        state.clients = state.clients.filter(c => c.id !== id);
+        saveState();
+      }
+    }
+
+    function renderSessionsTable() {
+      const tbody = document.getElementById('sessions-tbody');
+      tbody.innerHTML = '';
+      const filter = document.getElementById('sessionStatusFilter').value;
+
+      const list = state.sessions.filter(s => {
+        if (!matchBranch(s.branch)) return false;
+        if (filter !== 'all' && s.status !== filter) return false;
+        return true;
+      });
+      list.sort((a,b) => (b.date + b.time).localeCompare(a.date + a.time));
+
+      if (list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="11" class="text-center py-6 text-slate-400">لا توجد جلسات.</td></tr>`;
+        return;
+      }
+
+      list.forEach(s => {
+        const client = state.clients.find(c => c.id === s.clientId) || { name: 'غير معروف' };
+        const therapist = state.staff.find(t => t.id === s.therapistId) || { name: 'أ. حسام سعيد طه' };
+        const fee = calculateSessionFee(s);
+
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50 transition border-b border-slate-100';
+        tr.innerHTML = `
+          <td class="p-3 font-mono font-bold text-slate-500">${s.id}</td>
+          <td class="p-3 font-mono font-bold text-slate-800">${s.date} ${s.time}</td>
+          <td class="p-3 font-bold">${client.name}</td>
+          <td class="p-3">${getBranchName(s.branch)}</td>
+          <td class="p-3">${therapist.name}</td>
+          <td class="p-3 text-slate-600">${s.type}</td>
+          <td class="p-3"><span class="px-2 py-0.5 rounded font-bold ${getStatusBadgeClass(s.status)}">${s.status}</span></td>
+          <td class="p-3 font-mono">${fee.gross} ج.م</td>
+          <td class="p-3 font-mono text-amber-600 font-bold">${fee.discount > 0 ? '-' + fee.discount + ' ج.م' : '0'}</td>
+          <td class="p-3 font-mono font-bold text-emerald-700">${fee.net} ج.م</td>
+          <td class="p-3 text-center">
+            <div class="flex items-center justify-center gap-1">
+              <button onclick="editSession('${s.id}')" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold px-2 py-1 rounded text-xs border border-indigo-200">✏️ تعديل</button>
+              <button onclick="deleteSession('${s.id}')" class="bg-red-50 hover:bg-red-100 text-red-700 font-bold px-2 py-1 rounded text-xs border border-red-200">🗑️ حذف</button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function deleteSession(id) {
+      if (confirm('هل أنت تأكد من حذف هذه الجلسة النهائي؟')) {
+        state.sessions = state.sessions.filter(s => s.id !== id);
+        saveState();
+      }
+    }
+
+    function renderInvoices() {
+      const tbody = document.getElementById('invoices-tbody');
+      tbody.innerHTML = '';
+      const yearMonth = document.getElementById('invoiceMonthSelect').value;
+      const clientsList = state.clients.filter(c => matchBranch(c.branch));
+
+      clientsList.forEach(client => {
+        const inv = calculateClientInvoice(client.id, yearMonth);
+        if (!inv || inv.sessionsCount === 0) return;
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50 transition border-b border-slate-100';
+        tr.innerHTML = `
+          <td class="p-3">
+            <div class="font-bold text-slate-900">${client.name}</div>
+            <div class="text-[11px] text-slate-400 font-mono">#${client.id} &bull; ${client.phone || ''}</div>
+          </td>
+          <td class="p-3"><span class="bg-slate-100 px-2 py-0.5 rounded font-bold">${getBranchName(client.branch)}</span></td>
+          <td class="p-3 font-black text-center text-slate-800">${inv.sessionsCount} جلسات</td>
+          <td class="p-3">
+            <div class="flex gap-1 text-[10px] font-bold">
+              <span class="badge-att px-1.5 py-0.5 rounded">ATT: ${inv.counts.ATT}</span>
+              <span class="badge-sde px-1.5 py-0.5 rounded">SDE: ${inv.counts.SDE}</span>
+              <span class="badge-exc px-1.5 py-0.5 rounded">EXC: ${inv.counts.EXC}</span>
+              <span class="badge-can px-1.5 py-0.5 rounded">CAN: ${inv.counts.CAN}</span>
+            </div>
+          </td>
+          <td class="p-3 font-mono font-bold">${inv.totalGross} ج.م</td>
+          <td class="p-3 font-mono font-bold text-amber-600">-${inv.totalDiscounts} ج.م</td>
+          <td class="p-3 font-mono font-black text-indigo-700">${inv.totalNetDue} ج.م</td>
+          <td class="p-3 font-mono font-bold text-emerald-600">${inv.totalPaid} ج.م</td>
+          <td class="p-3 font-mono font-black ${inv.remainingBalance > 0 ? 'text-red-600' : 'text-emerald-700'}">
+            ${inv.remainingBalance > 0 ? inv.remainingBalance + ' ج.م مطلوب' : (inv.remainingBalance < 0 ? 'رصيد دائن ' + Math.abs(inv.remainingBalance) : 'خالص المسدد')}
+          </td>
+          <td class="p-3 text-center">
+            <button onclick="printClientInvoice('${client.id}', '${yearMonth}')" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold px-2.5 py-1 rounded text-xs border border-indigo-200">
+              طباعة الفاتورة 🖨️
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderPaymentsTable() {
+      const tbody = document.getElementById('payments-tbody');
+      tbody.innerHTML = '';
+      const list = state.payments.filter(p => matchBranch(p.branch));
+      list.sort((a,b) => b.date.localeCompare(a.date));
+
+      list.forEach(p => {
+        const client = state.clients.find(c => c.id === p.clientId) || { name: 'غير معروف' };
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50 transition border-b border-slate-100';
+        tr.innerHTML = `
+          <td class="p-3 font-mono font-bold text-indigo-700">#${p.id}</td>
+          <td class="p-3 font-mono">${p.date}</td>
+          <td class="p-3 font-bold">${client.name} <span class="text-[10px] text-slate-400 font-mono">#${client.id}</span></td>
+          <td class="p-3">${getBranchName(p.branch)}</td>
+          <td class="p-3 font-mono font-black text-emerald-700 text-sm">${p.amount} ج.م</td>
+          <td class="p-3 font-mono font-bold text-slate-600">${p.month || '-'}</td>
+          <td class="p-3 text-slate-500">${p.notes || '-'}</td>
+          <td class="p-3 text-center">
+            <div class="flex items-center justify-center gap-1">
+              <button onclick="printPaymentReceipt('${p.id}')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-2 py-1 rounded text-xs border border-slate-300" title="طباعة الإيصال">🧾 إيصال</button>
+              <button onclick="editPayment('${p.id}')" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold px-2 py-1 rounded text-xs border border-indigo-200" title="تعديل السند">✏️ تعديل</button>
+              <button onclick="deletePayment('${p.id}')" class="bg-red-50 hover:bg-red-100 text-red-700 font-bold px-2 py-1 rounded text-xs border border-red-200" title="حذف السند">🗑️ حذف</button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function editPayment(id) {
+      const p = state.payments.find(pay => pay.id === id);
+      if (!p) return;
+      document.getElementById('paymentId').value = p.id;
+      document.getElementById('paymentClientId').value = p.clientId;
+      document.getElementById('paymentAmount').value = p.amount;
+      document.getElementById('paymentBranch').value = p.branch;
+      document.getElementById('paymentDate').value = p.date;
+      document.getElementById('paymentMonth').value = p.month || '10/2026';
+      document.getElementById('paymentNotes').value = p.notes || '';
+      openModal('paymentModal');
+    }
+
+    function deletePayment(id) {
+      if (confirm('هل أنت تأكد من حذف هذا السند المالي النهائي؟')) {
+        state.payments = state.payments.filter(p => p.id !== id);
+        saveState();
+      }
+    }
+
+    function renderStaffAndBranches() {
+      const branchesContainer = document.getElementById('branches-cards');
+      branchesContainer.innerHTML = '';
+      state.branches.forEach(b => {
+        const card = document.createElement('div');
+        card.className = 'bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs space-y-2';
+        card.innerHTML = `
+          <div class="flex justify-between items-center border-b pb-2">
+            <span class="font-black text-indigo-950 text-sm">📍 ${b.name}</span>
+            <div class="flex items-center gap-1">
+              <span class="bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded font-bold font-mono text-xs">${b.id}</span>
+              <button onclick="editBranch('${b.id}')" class="text-indigo-600 hover:text-indigo-800 font-bold text-xs px-1" title="تعديل الفرع">✏️ تعديل</button>
+            </div>
+          </div>
+          <p class="text-slate-600 text-[11px]">${b.address}</p>
+          <div class="grid grid-cols-2 gap-2 pt-2 border-t font-bold">
+            <div class="bg-white p-2 rounded border"><span class="text-slate-400 block text-[10px]">سعر الجلسة</span><span class="text-indigo-700 text-sm font-black">${b.sessionPrice} ج.م</span></div>
+            <div class="bg-white p-2 rounded border"><span class="text-slate-400 block text-[10px]">سعر التقييم</span><span class="text-purple-700 text-sm font-black">${b.assessmentPrice} ج.م</span></div>
+          </div>
+        `;
+        branchesContainer.appendChild(card);
+      });
+
+      const staffTbody = document.getElementById('staff-tbody');
+      staffTbody.innerHTML = '';
+      state.staff.forEach(s => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50 border-b border-slate-100';
+        tr.innerHTML = `
+          <td class="p-3 font-mono font-bold text-slate-500">${s.id}</td>
+          <td class="p-3 font-bold text-slate-800">${s.name}</td>
+          <td class="p-3 text-slate-600">${s.specialty}</td>
+          <td class="p-3 font-mono font-bold">${s.phone}</td>
+          <td class="p-3 font-mono text-slate-500">${s.email || '-'}</td>
+          <td class="p-3"><span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold">${s.status}</span></td>
+          <td class="p-3 text-center">
+            <div class="flex items-center justify-center gap-1">
+              <button onclick="editStaff('${s.id}')" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold px-2 py-1 rounded text-xs border border-indigo-200">✏️ تعديل</button>
+              <button onclick="deleteStaff('${s.id}')" class="bg-red-50 hover:bg-red-100 text-red-700 font-bold px-2 py-1 rounded text-xs border border-red-200">🗑️ حذف</button>
+            </div>
+          </td>
+        `;
+        staffTbody.appendChild(tr);
+      });
+    }
+
+    function openNewStaffModal() {
+      document.getElementById('staffForm').reset();
+      document.getElementById('staffId').value = '';
+      openModal('staffModal');
+    }
+
+    function editStaff(id) {
+      const s = state.staff.find(st => st.id === id);
+      if (!s) return;
+      document.getElementById('staffId').value = s.id;
+      document.getElementById('staffName').value = s.name;
+      document.getElementById('staffSpecialty').value = s.specialty || '';
+      document.getElementById('staffPhone').value = s.phone || '';
+      document.getElementById('staffEmail').value = s.email || '';
+      document.getElementById('staffStatus').value = s.status || 'Active';
+      openModal('staffModal');
+    }
+
+    function deleteStaff(id) {
+      const s = state.staff.find(st => st.id === id);
+      if (!s) return;
+      if (confirm(`هل أنت تأكد من حذف الأخصائي "${s.name}" النهائي؟`)) {
+        state.staff = state.staff.filter(st => st.id !== id);
+        saveState();
+      }
+    }
+
+    function saveStaff(e) {
+      e.preventDefault();
+      const id = document.getElementById('staffId').value || ('st-' + Date.now().toString().slice(-4));
+      const staffData = {
+        id,
+        name: document.getElementById('staffName').value.trim(),
+        specialty: document.getElementById('staffSpecialty').value.trim(),
+        phone: document.getElementById('staffPhone').value.trim(),
+        email: document.getElementById('staffEmail').value.trim(),
+        status: document.getElementById('staffStatus').value
+      };
+      const idx = state.staff.findIndex(s => s.id === id);
+      if (idx >= 0) state.staff[idx] = staffData;
+      else state.staff.push(staffData);
+      saveState();
+      closeModal('staffModal');
+    }
+
+    function editBranch(id) {
+      const b = state.branches.find(br => br.id === id);
+      if (!b) return;
+      document.getElementById('branchId').value = b.id;
+      document.getElementById('branchName').value = b.name;
+      document.getElementById('branchAddress').value = b.address || '';
+      document.getElementById('branchSessionPrice').value = b.sessionPrice || 150;
+      document.getElementById('branchAssessmentPrice').value = b.assessmentPrice || 250;
+      openModal('branchModal');
+    }
+
+    function saveBranch(e) {
+      e.preventDefault();
+      const id = document.getElementById('branchId').value;
+      const b = state.branches.find(br => br.id === id);
+      if (b) {
+        b.address = document.getElementById('branchAddress').value.trim();
+        b.sessionPrice = Number(document.getElementById('branchSessionPrice').value) || 150;
+        b.assessmentPrice = Number(document.getElementById('branchAssessmentPrice').value) || 250;
+        saveState();
+      }
+      closeModal('branchModal');
+    }
+
+    function populateDropdowns() {
+      ['sessionClientId', 'paymentClientId'].forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.innerHTML = '';
+        state.clients.forEach(c => {
+          const opt = document.createElement('option');
+          opt.value = c.id;
+          opt.textContent = `${c.name} (${getBranchName(c.branch)} - ${c.status})`;
+          el.appendChild(opt);
+        });
+      });
+
+      const stEl = document.getElementById('sessionTherapist');
+      if (stEl) {
+        stEl.innerHTML = '';
+        state.staff.forEach(s => {
+          const opt = document.createElement('option');
+          opt.value = s.id;
+          opt.textContent = `${s.name} (${s.specialty})`;
+          stEl.appendChild(opt);
+        });
+      }
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.nav-tab').forEach(el => {
+        el.classList.remove('bg-indigo-600', 'text-white');
+        el.classList.add('text-indigo-200');
+      });
+
+      const target = document.getElementById('tab-' + tabId);
+      if (target) target.classList.remove('hidden');
+
+      const navBtn = document.getElementById('nav-' + tabId);
+      if (navBtn) {
+        navBtn.classList.remove('text-indigo-200');
+        navBtn.classList.add('bg-indigo-600', 'text-white');
+      }
+
+      // Update compact tab name indicator
+      const tabNames = {
+        dashboard: '📊 لوحة التحكم والإحصائيات',
+        secretary: '⚡ كشف الحضور اليومي السريع (منة)',
+        calendar: '📅 الكاليندر والمواعيد الأسبوعية',
+        clients: '👶 العملاء والجدول الأسبوعي الثابت',
+        sessions: '📋 سجل الجلسات اليومي الكامل',
+        invoices: '🧾 الفواتير الشهرية والتقارير (Billing)',
+        payments: '💵 المدفوعات وسندات القبض النقدية',
+        staff: '👩‍⚕️ الأخصائيين وأسعار الفروع (HR)',
+        settings: '⚙️ إعدادات النظام، الثيم، والصلاحيات'
+      };
+      const compactTabEl = document.getElementById('compactActiveTabName');
+      if (compactTabEl) compactTabEl.textContent = tabNames[tabId] || tabId;
+
+      if (tabId === 'calendar') renderCalendar();
+      if (tabId === 'secretary') loadSecretaryView();
+      if (tabId === 'settings') switchSettingsSubTab('general');
+    }
+
+    function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+    function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+    function openNewClientModal() {
+      document.getElementById('clientForm').reset();
+      document.getElementById('clientId').value = '';
+      document.getElementById('scheduleRowsContainer').innerHTML = '';
+      addScheduleRow();
+      openModal('clientModal');
+    }
+
+    function editClient(id) {
+      const client = state.clients.find(c => c.id === id);
+      if (!client) return;
+      document.getElementById('clientId').value = client.id;
+      document.getElementById('clientName').value = client.name;
+      document.getElementById('clientPhone').value = client.phone || '';
+      document.getElementById('clientDob').value = client.dob || '';
+      document.getElementById('clientBranch').value = client.branch;
+      document.getElementById('clientStatus').value = client.status;
+      document.getElementById('clientDiagnosis').value = client.diagnosis || '';
+      document.getElementById('clientAddress').value = client.address || '';
+
+      const container = document.getElementById('scheduleRowsContainer');
+      container.innerHTML = '';
+      if (client.weeklySchedule && client.weeklySchedule.length > 0) {
+        client.weeklySchedule.forEach(slot => addScheduleRow(slot));
+      } else {
+        addScheduleRow();
+      }
+      openModal('clientModal');
+    }
+
+    function addScheduleRow(slot = { day: 'الأحد', time: '16:00', therapistId: '785e56df', type: 'S.T Session', netFee: 150 }) {
+      const container = document.getElementById('scheduleRowsContainer');
+      const div = document.createElement('div');
+      div.className = 'schedule-row grid grid-cols-4 gap-2 items-center bg-slate-50 p-2 rounded border text-xs';
+      const days = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+      const dayOptions = days.map(d => `<option value="${d}" ${d === slot.day ? 'selected' : ''}>${d}</option>`).join('');
+
+      div.innerHTML = `
+        <select class="schedule-day border rounded p-1 font-bold">${dayOptions}</select>
+        <input type="time" class="schedule-time border rounded p-1 font-mono" value="${slot.time}">
+        <input type="number" class="schedule-fee border rounded p-1 font-bold" value="${slot.netFee || 150}" placeholder="السعر">
+        <div class="flex items-center gap-1">
+          <input type="text" class="schedule-type border rounded p-1 w-full" value="${slot.type || 'S.T Session'}">
+          <button type="button" onclick="this.parentElement.parentElement.remove()" class="text-red-500 font-bold px-1.5 hover:text-red-700">&times;</button>
+        </div>
+      `;
+      container.appendChild(div);
+    }
+
+    function saveClient(e) {
+      e.preventDefault();
+      const id = document.getElementById('clientId').value || ('c' + (Date.now()));
+      const rows = document.querySelectorAll('.schedule-row');
+      const weeklySchedule = [];
+      rows.forEach(r => {
+        weeklySchedule.push({
+          day: r.querySelector('.schedule-day').value,
+          time: r.querySelector('.schedule-time').value,
+          therapistId: '785e56df',
+          type: r.querySelector('.schedule-type').value,
+          netFee: Number(r.querySelector('.schedule-fee').value) || 150
+        });
+      });
+
+      const clientData = {
+        id,
+        name: document.getElementById('clientName').value.trim(),
+        phone: document.getElementById('clientPhone').value.trim(),
+        dob: document.getElementById('clientDob').value,
+        branch: document.getElementById('clientBranch').value,
+        status: document.getElementById('clientStatus').value,
+        diagnosis: document.getElementById('clientDiagnosis').value.trim(),
+        address: document.getElementById('clientAddress').value.trim(),
+        weeklySchedule
+      };
+
+      const existingIndex = state.clients.findIndex(c => c.id === id);
+      if (existingIndex >= 0) state.clients[existingIndex] = clientData;
+      else state.clients.push(clientData);
+
+      saveState();
+      closeModal('clientModal');
+    }
+
+    function openNewSessionModal() {
+      document.getElementById('sessionForm').reset();
+      document.getElementById('sessionId').value = '';
+      document.getElementById('sessionDate').value = new Date().toISOString().split('T')[0];
+      document.getElementById('sessionTime').value = '16:00';
+      autoFillSessionDetails();
+      openModal('sessionModal');
+    }
+
+    function editSession(id) {
+      const sess = state.sessions.find(s => s.id === id);
+      if (!sess) return;
+      document.getElementById('sessionId').value = sess.id;
+      document.getElementById('sessionClientId').value = sess.clientId;
+      document.getElementById('sessionBranch').value = sess.branch;
+      document.getElementById('sessionTherapist').value = sess.therapistId;
+      document.getElementById('sessionDate').value = sess.date;
+      document.getElementById('sessionTime').value = sess.time;
+      document.getElementById('sessionType').value = sess.type;
+      document.getElementById('sessionPrice').value = sess.price;
+      document.getElementById('sessionStatus').value = sess.status;
+      openModal('sessionModal');
+    }
+
+    function autoFillSessionDetails() {
+      const clientId = document.getElementById('sessionClientId').value;
+      const client = state.clients.find(c => c.id === clientId);
+      if (client) {
+        document.getElementById('sessionBranch').value = client.branch;
+        updateSessionPriceByBranch();
+      }
+    }
+
+    function updateSessionPriceByBranch() {
+      const branchId = document.getElementById('sessionBranch').value;
+      const branchObj = state.branches.find(b => b.id === branchId || b.name === branchId);
+      if (branchObj) document.getElementById('sessionPrice').value = branchObj.sessionPrice;
+    }
+
+    function saveSession(e) {
+      e.preventDefault();
+      const id = document.getElementById('sessionId').value || ('S' + Date.now().toString().slice(-4));
+      const sessionData = {
+        id,
+        clientId: document.getElementById('sessionClientId').value,
+        branch: document.getElementById('sessionBranch').value,
+        therapistId: document.getElementById('sessionTherapist').value,
+        date: document.getElementById('sessionDate').value,
+        time: document.getElementById('sessionTime').value,
+        type: document.getElementById('sessionType').value,
+        price: Number(document.getElementById('sessionPrice').value) || 150,
+        status: document.getElementById('sessionStatus').value,
+        notes: ''
+      };
+
+      const existingIndex = state.sessions.findIndex(s => s.id === id);
+      if (existingIndex >= 0) state.sessions[existingIndex] = sessionData;
+      else state.sessions.push(sessionData);
+
+      saveState();
+      closeModal('sessionModal');
+    }
+
+    function openNewPaymentModal() {
+      document.getElementById('paymentForm').reset();
+      document.getElementById('paymentId').value = '';
+      document.getElementById('paymentDate').value = new Date().toISOString().split('T')[0];
+      document.getElementById('paymentMonth').value = '10/2026';
+      openModal('paymentModal');
+    }
+
+    function savePayment(e) {
+      e.preventDefault();
+      const existingId = document.getElementById('paymentId').value;
+      const pData = {
+        id: existingId || ('pay-' + Date.now().toString().slice(-4)),
+        clientId: document.getElementById('paymentClientId').value,
+        amount: Number(document.getElementById('paymentAmount').value),
+        branch: document.getElementById('paymentBranch').value,
+        date: document.getElementById('paymentDate').value,
+        month: document.getElementById('paymentMonth').value || '10/2026',
+        notes: document.getElementById('paymentNotes').value
+      };
+      if (existingId) {
+        const idx = state.payments.findIndex(p => p.id === existingId);
+        if (idx >= 0) state.payments[idx] = pData;
+      } else {
+        state.payments.push(pData);
+      }
+      saveState();
+      closeModal('paymentModal');
+      printPaymentReceipt(pData.id);
+    }
+
+    function printClientInvoice(clientId, yearMonth = '2026/10') {
+      const inv = calculateClientInvoice(clientId, yearMonth);
+      if (!inv) return;
+
+      const printArea = document.getElementById('print-area');
+      printArea.innerHTML = `
+        <div class="text-center border-b pb-4">
+          <div class="text-xl font-black text-indigo-900">${state.settings ? state.settings.centerName : 'مركز Speak Up للتخاطب وتأهيل الأطفال'}</div>
+          <div class="text-xs text-slate-500 mt-1">${getBranchName(inv.client.branch)} &bull; فاتورة الحساب الشهري: ${yearMonth}</div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 py-2 border-b text-xs">
+          <div><span class="text-slate-400">اسم الطفل / العميل:</span> <span class="font-bold text-slate-900 text-sm">${inv.client.name} (#${inv.client.id})</span></div>
+          <div><span class="text-slate-400">رقم الهاتف:</span> <span class="font-bold text-slate-900 font-mono">${inv.client.phone || '-'}</span></div>
+        </div>
+
+        <div>
+          <div class="font-bold text-xs mb-2">كشف الجلسات المحسوبة في الفاتورة:</div>
+          <table class="w-full text-right text-xs border border-slate-200">
+            <thead class="bg-slate-100 font-bold border-b">
+              <tr>
+                <th class="p-2 border">التاريخ</th>
+                <th class="p-2 border">الأخصائي</th>
+                <th class="p-2 border">النوع</th>
+                <th class="p-2 border">الحالة</th>
+                <th class="p-2 border">السعر</th>
+                <th class="p-2 border">الخصم المعتمد</th>
+                <th class="p-2 border">الصافي</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${inv.sessions.map(s => {
+                const th = state.staff.find(st => st.id === s.therapistId) || { name: 'أ. حسام سعيد طه' };
+                const fee = calculateSessionFee(s);
+                return `
+                  <tr class="border-b">
+                    <td class="p-2 border font-mono">${s.date}</td>
+                    <td class="p-2 border">${th.name}</td>
+                    <td class="p-2 border">${s.type}</td>
+                    <td class="p-2 border font-bold">${s.status}</td>
+                    <td class="p-2 border font-mono">${fee.gross} ج.م</td>
+                    <td class="p-2 border font-mono text-amber-600">${fee.discount > 0 ? '-' + fee.discount + ' ج.م' : '0'}</td>
+                    <td class="p-2 border font-mono font-bold">${fee.net} ج.م</td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-1.5 text-xs">
+          <div class="flex justify-between"><span class="text-slate-600">إجمالي قيمة الجلسات (${inv.sessionsCount} جلسة):</span><span class="font-mono font-bold">${inv.totalGross} ج.م</span></div>
+          <div class="flex justify-between text-amber-700"><span>إجمالي الخصومات (أعذار مسبقة EXC + نصف جلسات SDE + إلغاء أخصائي TCA):</span><span class="font-mono font-bold">-${inv.totalDiscounts} ج.م</span></div>
+          <div class="flex justify-between font-bold text-slate-900 border-t pt-1"><span>صافي المستحق لشهر ${yearMonth}:</span><span class="font-mono font-black text-indigo-700">${inv.totalNetDue} ج.م</span></div>
+          <div class="flex justify-between text-emerald-700"><span>إجمالي المبالغ المسددة:</span><span class="font-mono font-bold">${inv.totalPaid} ج.م</span></div>
+          <div class="flex justify-between font-black text-sm border-t pt-2 ${inv.remainingBalance > 0 ? 'text-red-600' : 'text-emerald-700'}">
+            <span>المتبقي المطلوب سداده:</span><span class="font-mono">${inv.remainingBalance} ج.م</span>
+          </div>
+        </div>
+
+        <div class="text-[11px] text-slate-400 text-center pt-2">
+          ${(state.settings && state.settings.receiptFooter) ? state.settings.receiptFooter : 'شكراً لثقتكم في مركز Speak Up للتخاطب وتأهيل الأطفال • نسعد دائماً بتقدم أطفالنا الأعزاء'}
+        </div>
+      `;
+      openModal('printModal');
+    }
+
+    function printPaymentReceipt(paymentId) {
+      const p = state.payments.find(pay => pay.id === paymentId);
+      if (!p) return;
+      const client = state.clients.find(c => c.id === p.clientId) || { name: 'غير معروف' };
+      const printArea = document.getElementById('print-area');
+      printArea.innerHTML = `
+        <div class="text-center border-b pb-4">
+          <div class="text-xl font-black text-indigo-900">${state.settings ? state.settings.centerName : 'مركز Speak Up للتخاطب'}</div>
+          <div class="text-xs text-slate-500 mt-1">سند قبض نقدية &bull; ${getBranchName(p.branch)}</div>
+        </div>
+        <div class="space-y-3 py-4 text-xs">
+          <div class="flex justify-between border-b pb-2"><span class="text-slate-500">رقم الإيصال:</span><span class="font-mono font-bold">#${p.id}</span></div>
+          <div class="flex justify-between border-b pb-2"><span class="text-slate-500">التاريخ:</span><span class="font-mono font-bold">${p.date}</span></div>
+          <div class="flex justify-between border-b pb-2"><span class="text-slate-500">استلمنا من ولي أمر الطفل:</span><span class="font-bold text-slate-900">${client.name} (#${client.id})</span></div>
+          <div class="flex justify-between border-b pb-2"><span class="text-slate-500">مبلغ وقدره:</span><span class="font-black text-emerald-700 text-base font-mono">${p.amount} جنيهاً مصرياً</span></div>
+          <div class="flex justify-between border-b pb-2"><span class="text-slate-500">الشهر المحاسبي:</span><span class="font-bold font-mono">${p.month || '-'}</span></div>
+          <div class="flex justify-between pb-2"><span class="text-slate-500">البيان:</span><span class="text-slate-700 font-medium">${p.notes || 'سداد رسوم جلسات تأهيل'}</span></div>
+        </div>
+        <div class="flex justify-between items-center pt-6 border-t text-xs">
+          <div class="text-center"><div class="text-slate-400">توقيع المستلم</div><div class="mt-6 font-bold text-slate-800">إدارة مركز Speak Up</div></div>
+          <div class="text-center"><div class="text-slate-400">ختم المركز</div><div class="mt-6 w-16 h-16 border-2 border-dashed border-slate-300 rounded-full mx-auto flex items-center justify-center text-[10px] text-slate-400 font-bold">ختم معتمد</div></div>
+        </div>
+      `;
+      openModal('printModal');
+    }
+
+    function refreshAll() {
+      updateUserHeader();
+      applyPermissions();
+      renderDashboard();
+      renderClientsTable();
+      renderSessionsTable();
+      renderInvoices();
+      renderPaymentsTable();
+      renderStaffAndBranches();
+      loadSecretaryView();
+      renderCalendar();
+      populateDropdowns();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => { 
+      refreshAll(); 
+      if (!currentUser) {
+        document.getElementById('loginOverlay').classList.remove('hidden');
+      }
+    });
+  </script>
+</body>
+</html>
