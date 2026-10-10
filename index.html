@@ -36,25 +36,25 @@
     #invoice-print-root { display: none; }
 
     /* ===== Professional fixed sidebar ===== */
-    #sideNav { display: none; position: fixed; right: 0; top: 64px; bottom: 0; width: 232px; z-index: 30;
-      flex-direction: column; background: #1e1b4b; color: #c7d2fe; border-left: 1px solid rgba(255,255,255,.06);
+    #sideNav { display: none; position: fixed; right: 0; top: 88px; bottom: 0; width: 232px; z-index: 30;
+      flex-direction: column; background: var(--b950,#1e1b4b); color: var(--b200,#c7d2fe); border-left: 1px solid rgba(255,255,255,.06);
       transition: width .2s ease; overflow: hidden; }
     body.has-sidebar #sideNav { display: flex; }
     body.has-sidebar main { margin-right: 232px !important; margin-left: 0 !important; max-width: none !important; width: auto !important; transition: margin .2s ease; }
     body.has-sidebar.sidebar-collapsed #sideNav { width: 68px; }
     body.has-sidebar.sidebar-collapsed main { margin-right: 68px !important; }
     #sideNav .side-scroll { flex: 1; overflow-y: auto; padding: 12px 10px; }
-    #sideNav .side-group-title { font-size: 10px; font-weight: 800; letter-spacing: .04em; color: #818cf8; padding: 14px 10px 6px; white-space: nowrap; }
+    #sideNav .side-group-title { font-size: 10px; font-weight: 800; letter-spacing: .04em; color: var(--b400,#818cf8); padding: 14px 10px 6px; white-space: nowrap; }
     #sideNav .side-tab { width: 100%; display: flex; align-items: center; gap: 12px; padding: 10px 12px; margin-bottom: 2px;
-      border-radius: 12px; font-size: 13px; font-weight: 700; color: #c7d2fe; text-align: right; white-space: nowrap;
+      border-radius: 12px; font-size: 13px; font-weight: 700; color: var(--b200,#c7d2fe); text-align: right; white-space: nowrap;
       position: relative; transition: background .15s, color .15s; cursor: pointer; }
     #sideNav .side-tab:hover { background: rgba(255,255,255,.08); color: #fff; }
-    #sideNav .side-tab.active { background: #4f46e5; color: #fff; box-shadow: 0 4px 12px rgba(79,70,229,.35); }
+    #sideNav .side-tab.active { background: var(--b600,#4f46e5); color: #fff; box-shadow: 0 4px 12px rgba(79,70,229,.35); }
     #sideNav .side-tab.active::before { content: ''; position: absolute; right: -10px; top: 20%; bottom: 20%; width: 4px; border-radius: 4px 0 0 4px; background: #22d3ee; }
     #sideNav .side-ico { font-size: 18px; width: 24px; text-align: center; flex-shrink: 0; }
     #sideNav .side-badge { margin-right: auto; background: rgba(255,255,255,.15); color: #fff; font-size: 10px; font-weight: 800; padding: 1px 7px; border-radius: 999px; }
     #sideNav .side-collapse { border-top: 1px solid rgba(255,255,255,.08); padding: 10px; }
-    #sideNav .side-collapse button { width: 100%; padding: 8px; border-radius: 10px; font-size: 12px; font-weight: 700; color: #a5b4fc; background: rgba(255,255,255,.05); }
+    #sideNav .side-collapse button { width: 100%; padding: 8px; border-radius: 10px; font-size: 12px; font-weight: 700; color: var(--b300,#a5b4fc); background: rgba(255,255,255,.05); }
     #sideNav .side-collapse button:hover { background: rgba(255,255,255,.12); color: #fff; }
     body.sidebar-collapsed #sideNav .side-label, body.sidebar-collapsed #sideNav .side-group-title, body.sidebar-collapsed #sideNav .side-badge { display: none; }
     body.sidebar-collapsed #sideNav .side-tab { justify-content: center; padding: 11px 0; }
@@ -63,17 +63,17 @@
 
     /* ===== Sidebar extras: branch chips / quick add / excel / user ===== */
     .qtpop .side-panel { display:flex; margin: 4px 2px 10px; padding: 10px; border-radius: 14px; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.07); gap: 6px; }
-    .qtpop .side-panel-title { font-size: 10px; font-weight: 800; color: #a5b4fc; margin-bottom: 2px; white-space: nowrap; }
+    .qtpop .side-panel-title { font-size: 10px; font-weight: 800; color: var(--b300,#a5b4fc); margin-bottom: 2px; white-space: nowrap; }
     .qtpop .bchip-grid { display:grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-    .qtpop .bchip { display:flex; align-items:center; gap:6px; padding: 6px 8px; border-radius: 10px; font-size: 11px; font-weight: 700; color:#c7d2fe; background: rgba(255,255,255,.06); border:1px solid transparent; transition: all .15s; white-space:nowrap; }
+    .qtpop .bchip { display:flex; align-items:center; gap:6px; padding: 6px 8px; border-radius: 10px; font-size: 11px; font-weight: 700; color:var(--b200,#c7d2fe); background: rgba(255,255,255,.06); border:1px solid transparent; transition: all .15s; white-space:nowrap; }
     .qtpop .bchip i { width:8px; height:8px; border-radius:50%; display:inline-block; flex-shrink:0; }
     .qtpop .bchip:hover { background: rgba(255,255,255,.14); color:#fff; }
-    .qtpop .bchip.active { background:#fff; color:#312e81; border-color:#22d3ee; box-shadow:0 2px 8px rgba(34,211,238,.35); }
+    .qtpop .bchip.active { background:#fff; color:var(--b900,#312e81); border-color:#22d3ee; box-shadow:0 2px 8px rgba(34,211,238,.35); }
     .qtpop .bchip-wide { grid-column: span 2; justify-content:center; }
-    .qtpop .qa-btn { display:flex; align-items:center; gap:10px; padding: 8px 10px; border-radius: 10px; font-size: 12px; font-weight: 800; color:#e0e7ff; background: rgba(255,255,255,.07); text-align:right; white-space:nowrap; transition: all .15s; }
+    .qtpop .qa-btn { display:flex; align-items:center; gap:10px; padding: 8px 10px; border-radius: 10px; font-size: 12px; font-weight: 800; color:var(--b100,#e0e7ff); background: rgba(255,255,255,.07); text-align:right; white-space:nowrap; transition: all .15s; }
     .qtpop .qa-btn:hover { background: rgba(255,255,255,.16); color:#fff; transform: translateX(-2px); }
-    .qtpop .qa-primary { background: linear-gradient(135deg,#06b6d4,#22d3ee); color:#1e1b4b; box-shadow:0 4px 12px rgba(34,211,238,.3); }
-    .qtpop .qa-primary:hover { background: linear-gradient(135deg,#22d3ee,#67e8f9); color:#1e1b4b; }
+    .qtpop .qa-primary { background: linear-gradient(135deg,#06b6d4,#22d3ee); color:var(--b950,#1e1b4b); box-shadow:0 4px 12px rgba(34,211,238,.3); }
+    .qtpop .qa-primary:hover { background: linear-gradient(135deg,#22d3ee,#67e8f9); color:var(--b950,#1e1b4b); }
     .qtpop .excel-card { margin: 4px 2px 6px; padding: 10px; border-radius: 14px; background: linear-gradient(160deg, rgba(6,78,59,.55), rgba(6,78,59,.25)); border: 1px solid rgba(52,211,153,.35); display:flex; flex-direction:column; gap:6px; }
     .qtpop .excel-row { display:flex; align-items:center; gap:8px; font-size:12px; }
     .qtpop .excel-last { font-size:10px; color:#a7f3d0; opacity:.85; }
@@ -82,7 +82,7 @@
     .qtpop .excel-btn.syncing .sync-ico { display:inline-block; animation: spin-sync .8s linear infinite; }
     @keyframes spin-sync { to { transform: rotate(360deg); } }
     #sideNav .side-user { display:flex; padding: 10px; border-top: 1px solid rgba(255,255,255,.08); background: rgba(0,0,0,.18); }
-    #sideNav .side-avatar { width:34px; height:34px; border-radius:50%; background: linear-gradient(135deg,#22d3ee,#6366f1); color:#fff; font-weight:900; display:flex; align-items:center; justify-content:center; flex-shrink:0; border:2px solid rgba(255,255,255,.25); }
+    #sideNav .side-avatar { width:34px; height:34px; border-radius:50%; background: linear-gradient(135deg,var(--b300,#22d3ee),var(--b500,#6366f1)); color:#fff; font-weight:900; display:flex; align-items:center; justify-content:center; flex-shrink:0; border:2px solid rgba(255,255,255,.25); }
     #sideNav .side-mini { display:none; width:100%; padding:10px 0; margin-bottom:6px; border-radius:12px; font-size:18px; background:rgba(255,255,255,.07); }
     .side-collapsed-only { display:none; }
     body.sidebar-collapsed #sideNav .side-collapsed-only { display:block; }
@@ -97,13 +97,13 @@
     @media print { #sideNav { display:none !important; } }
     #clientProfileModal .cp-card { background:#fff; border:1px solid #e2e8f0; border-radius:16px; }
     #clientProfileModal .cp-tab { padding:8px 14px; border-radius:12px; font-size:12px; font-weight:800; color:#475569; background:#f1f5f9; cursor:pointer; }
-    #clientProfileModal .cp-tab.active { background:#4f46e5; color:#fff; box-shadow:0 4px 12px rgba(79,70,229,.3); }
+    #clientProfileModal .cp-tab.active { background:var(--b600,#4f46e5); color:#fff; box-shadow:0 4px 12px rgba(79,70,229,.3); }
     #clientProfileModal table th, #clientProfileModal table td { text-align:center; padding:8px 10px; white-space:nowrap; }
 
-    .qtpop { position: fixed; z-index: 55; width: 272px; padding: 12px; border-radius: 18px; background: #1e1b4b; color: #c7d2fe;
+    .qtpop { position: fixed; z-index: 55; width: 272px; padding: 12px; border-radius: 18px; background: var(--b950,#1e1b4b); color: var(--b200,#c7d2fe);
       border: 1px solid rgba(255,255,255,.12); box-shadow: 0 20px 50px rgba(15,23,42,.45); }
     .qtpop .qt-head { display:flex; align-items:center; justify-content:space-between; font-weight:900; font-size:13px; color:#fff; margin-bottom:8px; }
-    .qtpop .qt-x { color:#a5b4fc; font-size:12px; padding:2px 6px; border-radius:6px; }
+    .qtpop .qt-x { color:var(--b300,#a5b4fc); font-size:12px; padding:2px 6px; border-radius:6px; }
     .qtpop .qt-x:hover { background: rgba(255,255,255,.12); color:#fff; }
     .qtpop .excel-card { margin: 4px 0 0; }
     .qtpop .side-panel { margin: 4px 0 8px; }
@@ -265,19 +265,24 @@
   
 
     
-    </style>
+        html[dir=ltr] #sideNav { right: auto; left: 0; border-left: 0; border-right: 1px solid rgba(255,255,255,.06); }
+    html[dir=ltr] body.has-sidebar main { margin-right: 0 !important; margin-left: 232px !important; }
+    html[dir=ltr] body.has-sidebar.sidebar-collapsed main { margin-left: 68px !important; }
+    html[dir=ltr] #sideNav .side-tab { text-align: left; }
+    html[dir=ltr] #sideNav .side-tab.active::before { right: auto; left: -10px; border-radius: 0 4px 4px 0; }
+</style>
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen">
   <div id="app" class="flex flex-col min-h-screen">
     
     <!-- Header -->
     <header id="mainHeader" class="bg-indigo-900 text-white shadow-md sticky top-0 z-40 transition-colors duration-300">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-between h-16">
-          <div class="flex items-center space-x-3 space-x-reverse">
-            <div id="headerLogoContainer" class="w-14 h-14 rounded-full bg-gradient-to-tr from-cyan-400 to-indigo-500 flex items-center justify-center text-white shadow-md font-bold text-2xl overflow-hidden transition-all shrink-0">
+      <div class="w-full px-4 sm:px-6">
+        <div class="flex items-center justify-between" style="height:88px">
+          <div class="flex items-center gap-4">
+            <div id="headerLogoContainer" class="flex items-center justify-start text-white font-bold text-4xl overflow-hidden shrink-0" style="width:10cm;max-width:45vw;height:80px">
               <span id="headerLogoEmoji">🗣️</span>
-              <img id="headerLogoImg" class="w-full h-full object-cover hidden" src="" alt="Logo">
+              <img id="headerLogoImg" class="hidden" style="max-height:100%;max-width:100%;object-fit:contain" src="" alt="Logo">
             </div>
             <div>
               <div class="font-extrabold text-lg tracking-tight flex items-center gap-2">
@@ -478,8 +483,9 @@
         <div class="side-label flex items-center gap-1.5 mt-2">
           <select id="userRoleSelect" onchange="setUserRole(this.value)" class="flex-1 bg-indigo-900 text-white font-semibold rounded-lg px-2 py-1 border border-indigo-700 text-[11px] cursor-pointer">
             <option value="admin">صلاحية المدير</option>
-            <option value="secretary">صلاحية السكرتيرة</option>
+            <option value="secretary">صلاحية السكرتارية</option>
             <option value="therapist">صلاحية الأخصائي</option>
+            <option value="parent">صلاحية أب / أم</option>
           </select>
           <button onclick="handleLogout()" class="bg-rose-600/90 hover:bg-rose-600 text-white font-bold px-2 py-1 rounded-lg text-[11px]" title="تسجيل الخروج">🚪 خروج</button>
         </div>
@@ -1237,15 +1243,9 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <!-- Color schemes -->
               <div class="space-y-3">
-                <label class="block text-slate-700 font-bold">لون ثيم البار العلوي (Header Color Scheme) 🎨</label>
-                <select id="settingHeaderColor" class="w-full border rounded-xl p-2.5 font-bold">
-                  <option value="indigo">🔵 كحلي ملكي (Royal Indigo)</option>
-                  <option value="emerald">🟢 زمردي فاخر (Emerald Green)</option>
-                  <option value="rose">🔴 عنابي ملكي (Ruby Crimson)</option>
-                  <option value="purple">🟣 بنفسجي فاخر (Royal Purple)</option>
-                  <option value="slate">🖤 كلاسيك داكن (Midnight Dark)</option>
-                  <option value="blue">🌊 أزرق محيطي (Ocean Blue)</option>
-                </select>
+                <label class="block text-slate-700 font-bold">🎨 لون النظام (يشمل البار العلوي والشريط الجانبي وكل الصفحات)</label>
+                <div id="brandPalette" class="flex flex-wrap gap-2"></div>
+                <div class="flex items-center gap-2 text-xs font-bold text-slate-600"><input type="color" id="settingBrandColor" class="w-12 h-9 rounded cursor-pointer border" oninput="pickBrandColor(this.value)"> لون مخصص من الـ Color Picker</div>
 
                 <label class="block text-slate-700 font-bold pt-2">نمط عرض أزرار الأقسام (Navigation Style) ☰</label>
                 <select id="settingNavStyle" class="w-full border rounded-xl p-2.5 font-bold">
@@ -1324,7 +1324,7 @@
             <div class="flex justify-between items-center border-b pb-3">
               <div>
                 <h3 class="font-extrabold text-slate-900 text-sm">🔐 مصفوفة التحكم في الصلاحيات التفصيلية (Permissions Matrix)</h3>
-                <p class="text-[11px] text-slate-400">تحجيم الصلاحيات لكل دور (المدير / السكرتيرة / الأخصائي)</p>
+                <p class="text-[11px] text-slate-400">تحجيم الصلاحيات لكل دور (المدير / السكرتارية / الأخصائي / أب-أم)</p>
               </div>
               <button onclick="savePermissionsMatrix()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2 rounded-xl text-xs shadow">
                 حفظ الصلاحيات 💾
@@ -1337,8 +1337,9 @@
                   <tr>
                     <th class="p-3 border">القسم / الإمكانية المتاحة</th>
                     <th class="p-3 border text-center">👑 المدير (Admin)</th>
-                    <th class="p-3 border text-center">⚡ السكرتيرة (Secretary)</th>
+                    <th class="p-3 border text-center">⚡ السكرتارية (Secretary)</th>
                     <th class="p-3 border text-center">👩‍⚕️ الأخصائي (Therapist)</th>
+                    <th class="p-3 border text-center">👪 أب / أم (Parent)</th>
                   </tr>
                 </thead>
                 <tbody id="permissions-matrix-tbody">
@@ -1870,8 +1871,9 @@
               <label class="block text-slate-700 font-bold mb-1">الدور الرئيسي *</label>
               <select id="userRole" class="w-full border rounded-lg p-2 font-bold">
                 <option value="admin">👑 المدير (Full Access)</option>
-                <option value="secretary">⚡ السكرتيرة (Attendance & Fees)</option>
+                <option value="secretary">⚡ السكرتارية (Attendance & Fees)</option>
                 <option value="therapist">👩‍⚕️ الأخصائي (Sessions & Calendar)</option>
+                <option value="parent">👪 أب / أم (Parent)</option>
               </select>
             </div>
           </div>
@@ -21635,6 +21637,22 @@
   let _lastLocalSaveTime = 0;
 
   // 3. Helper & Formatting Functions
+  // ---- WhatsApp links for phone numbers (Egypt country code 20) ----
+  function waNumber(phone) {
+    let d = String(phone || '').replace(/\D/g, '');
+    if (!d) return '';
+    if (d.startsWith('00')) d = d.slice(2);
+    else if (d.startsWith('0')) d = '20' + d.slice(1);
+    else if (!d.startsWith('20') && d.length <= 10) d = '20' + d;
+    return d;
+  }
+  function phoneLink(phone, cls) {
+    const n = waNumber(phone);
+    const txt = String(phone == null ? '' : phone).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
+    if (!n) return txt || '-';
+    return `<a href="https://wa.me/${n}" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="فتح محادثة واتساب" class="${cls || 'text-emerald-600 hover:underline'}">${txt}</a>`;
+  }
+
   function formatTime12(timeStr) {
     if (!timeStr) return '--:--';
     if (timeStr.includes('م') || timeStr.includes('ص') || timeStr.includes('AM') || timeStr.includes('PM')) return timeStr;
@@ -21880,7 +21898,7 @@
       if (userHeaderEl) userHeaderEl.classList.remove('hidden');
       const nameEl = document.getElementById('headerUserName');
       if (nameEl) nameEl.textContent = currentUser.name;
-      const roleMap = { admin: '👑 المدير', secretary: '⚡ السكرتيرة', therapist: '👩‍⚕️ الأخصائي' };
+      const roleMap = { admin: '👑 المدير', secretary: '⚡ السكرتارية', therapist: '👩‍⚕️ الأخصائي', parent: '👪 أب / أم' };
       const roleBadge = document.getElementById('headerUserRoleBadge');
       if (roleBadge) roleBadge.textContent = roleMap[currentUser.role] || currentUser.role;
       const roleSelect = document.getElementById('userRoleSelect');
@@ -21904,6 +21922,10 @@
     }
     const role = user.role || 'admin';
     const settingsPerms = (state.settings && state.settings.permissions) || defaultSettings.permissions;
+    if (role === 'parent') {
+      const none = {}; ['dashboard','secretary','calendar','clients','sessions','invoices','payments','purchases','staff','branches','settings','delete'].forEach(k => none[k] = false);
+      return Object.assign(none, settingsPerms.parent || {});
+    }
     return settingsPerms[role] || defaultSettings.permissions[role] || defaultSettings.permissions.admin;
   }
 
@@ -22022,7 +22044,7 @@
             </div>
             <div>
               <div class="font-bold text-slate-800">${c.name}</div>
-              <div class="text-[10px] text-slate-400 font-mono">${c.phone || 'بدون هاتف'} &bull; ${getBranchName(c.branch)}</div>
+              <div class="text-[10px] text-slate-400 font-mono">${c.phone ? phoneLink(c.phone) : 'بدون هاتف'} &bull; ${getBranchName(c.branch)}</div>
             </div>
           </div>
           <span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full text-[10px] font-bold">نشط</span>
@@ -22199,7 +22221,7 @@
             </div>
           </div>
         </td>
-        <td class="font-mono font-bold nw">${c.phone ? `<a href="tel:${dashEsc(c.phone)}" class="text-indigo-600 hover:underline">${dashEsc(c.phone)}</a>` : '-'}</td>
+        <td class="font-mono font-bold nw">${c.phone ? phoneLink(c.phone) : '-'}</td>
         <td><span class="chip bg-slate-100 text-slate-800 border border-slate-200">${dashEsc(getBranchName(c.branch))}</span></td>
         <td><span class="chip bg-indigo-50 text-indigo-800 border border-indigo-100">${dashEsc(c.diagnosis || 'غير محدد')}</span></td>
         <td class="text-slate-600"><span class="clamp2" title="${dashEsc(c.address || '')}">${dashEsc(c.address || '-')}</span></td>
@@ -22457,7 +22479,7 @@
         <div class="flex-1 min-w-[220px]">
           <div class="flex items-center gap-2 flex-wrap"><h2 class="text-2xl font-black text-slate-900">${c.name}</h2><span class="text-xs font-black px-2 py-0.5 rounded-full bg-white border">${statusBadge}</span><span class="text-xs font-mono text-slate-400">#${c.id}</span></div>
           <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-1 text-xs mt-2">
-            ${info('الهاتف', c.phone ? `<a href="tel:${c.phone}" class="text-indigo-600">${c.phone}</a>` : '')}
+            ${info('الهاتف', c.phone ? phoneLink(c.phone) : '')}
             ${info('الفرع', getBranchName(c.branch))}
             ${info('التشخيص', c.diagnosis)}
             ${info('تاريخ الميلاد', c.dob ? c.dob + (cpAge(c.dob) ? ' (' + cpAge(c.dob) + ')' : '') : '')}
@@ -23201,7 +23223,7 @@
       tr.innerHTML = `
         <td class="p-3">
           <div class="font-extrabold text-slate-900">${client.name}</div>
-          <div class="text-[11px] text-slate-400 font-mono">#${client.id} &bull; ${client.phone || ''}</div>
+          <div class="text-[11px] text-slate-400 font-mono">#${client.id} &bull; ${client.phone ? phoneLink(client.phone) : ''}</div>
         </td>
         <td class="p-3"><span class="bg-slate-100 px-2 py-0.5 rounded font-bold text-xs">${getBranchName(client.branch)}</span></td>
         <td class="p-3 font-black text-center text-slate-800">${inv.currentSessionsCount || Object.values(inv.sessionsByType).reduce((a, g) => a + (g.count || 0), 0)} جلسات${inv.currentSessionsCount ? '' : '<div class="text-[10px] font-medium text-slate-400">(حسب الجدول)</div>'}</td>
@@ -23993,7 +24015,7 @@
           <td class="p-3 font-mono font-bold text-slate-500">#${s.id}</td>
           <td class="p-3 font-bold text-slate-800">${s.name}</td>
           <td class="p-3 text-slate-600">${s.specialty || 'Speech Therapist'}</td>
-          <td class="p-3 font-mono font-bold">${s.phone || '-'}</td>
+          <td class="p-3 font-mono font-bold">${s.phone ? phoneLink(s.phone) : '-'}</td>
           <td class="p-3 font-mono text-slate-500">${s.email || '-'}</td>
           <td class="p-3"><span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold">${s.status || 'Active'}</span></td>
           <td class="p-3 text-center">
@@ -24496,11 +24518,13 @@
     if (centerName) state.settings.centerName = centerName;
     if (logoUrl !== undefined) state.settings.logoUrl = logoUrl;
     if (logoShape) state.settings.logoShape = logoShape;
+    const prevLang = state.settings.language || 'ar';
     if (language) state.settings.language = language;
     if (currency) state.settings.currency = currency;
     if (receiptFooter !== undefined) state.settings.receiptFooter = receiptFooter;
     
     saveState();
+    if (language && language !== prevLang) { showToast('🌐 جاري تغيير اللغة...', 'green'); setTimeout(() => location.reload(), 700); return; }
     
     // Update header immediately
     const headerName = document.getElementById('headerCenterName');
@@ -24518,6 +24542,7 @@
   function renderThemeSettingsForm() {
     const s = state.settings || defaultSettings;
     if (document.getElementById('settingHeaderColor')) document.getElementById('settingHeaderColor').value = s.headerColor || 'indigo';
+    window._brandPick = s.brandColor || ''; renderBrandPalette(s.brandColor);
     if (document.getElementById('settingNavStyle')) document.getElementById('settingNavStyle').value = s.navStyle || 'sidebar';
     if (document.getElementById('headerShowBranch')) document.getElementById('headerShowBranch').checked = s.showBranchFilter !== false;
     if (document.getElementById('headerShowUser')) document.getElementById('headerShowUser').checked = s.showUser !== false;
@@ -24530,6 +24555,7 @@
     if (!state.settings) state.settings = JSON.parse(JSON.stringify(defaultSettings));
     
     state.settings.headerColor = document.getElementById('settingHeaderColor')?.value || 'indigo';
+    state.settings.brandColor = window._brandPick || state.settings.brandColor || '';
     state.settings.navStyle = document.getElementById('settingNavStyle')?.value || 'sidebar';
     state.settings.showBranchFilter = document.getElementById('headerShowBranch')?.checked ?? true;
     state.settings.showUser = document.getElementById('headerShowUser')?.checked ?? true;
@@ -24550,7 +24576,7 @@
     users.forEach((u, idx) => {
       const tr = document.createElement('tr');
       tr.className = 'hover:bg-slate-50 border-b border-slate-100 text-xs';
-      const roleText = u.role === 'admin' ? '👑 المدير' : (u.role === 'secretary' ? '⚡ السكرتيرة' : '👩‍⚕️ الأخصائي');
+      const roleText = ({ admin: '👑 المدير', secretary: '⚡ السكرتارية', therapist: '👩‍⚕️ الأخصائي', parent: '👪 أب / أم' }[u.role] || u.role);
 
       tr.innerHTML = `
         <td class="p-3 font-bold text-slate-800">${u.name}</td>
@@ -24599,8 +24625,11 @@
         <td class="p-3 text-center border-l bg-purple-50/50">
           <input type="checkbox" id="perm-secretary-${m.key}" ${perms.secretary && perms.secretary[m.key] !== false ? 'checked' : ''} class="w-4 h-4 text-purple-600 rounded">
         </td>
-        <td class="p-3 text-center bg-cyan-50/50">
+        <td class="p-3 text-center border-l bg-cyan-50/50">
           <input type="checkbox" id="perm-therapist-${m.key}" ${perms.therapist && perms.therapist[m.key] !== false ? 'checked' : ''} class="w-4 h-4 text-cyan-600 rounded">
+        </td>
+        <td class="p-3 text-center bg-amber-50/60">
+          <input type="checkbox" id="perm-parent-${m.key}" ${perms.parent && perms.parent[m.key] === true ? 'checked' : ''} class="w-4 h-4 text-amber-600 rounded">
         </td>
       `;
       tbody.appendChild(tr);
@@ -24611,7 +24640,7 @@
     if (!state.settings) state.settings = JSON.parse(JSON.stringify(defaultSettings));
     if (!state.settings.permissions) state.settings.permissions = JSON.parse(JSON.stringify(defaultSettings.permissions));
     
-    const roles = ['admin', 'secretary', 'therapist'];
+    const roles = ['admin', 'secretary', 'therapist', 'parent'];
     const modules = ['dashboard', 'secretary', 'calendar', 'clients', 'sessions', 'invoices', 'payments', 'purchases', 'staff', 'settings', 'delete'];
 
     roles.forEach(r => {
@@ -24684,9 +24713,95 @@
   // =========================================================================
   // THEME & HEADER CUSTOMIZATION ENGINE
   // =========================================================================
+  // ================= Brand color (applies to the whole system) =================
+  const BRAND_PRESETS = [
+    ['#4f46e5', 'نيلي'], ['#2563eb', 'أزرق'], ['#0284c7', 'سماوي'], ['#0891b2', 'تركواز'], ['#0d9488', 'أخضر مزرق'], ['#059669', 'زمردي'], ['#16a34a', 'أخضر'], ['#65a30d', 'ليموني'],
+    ['#d97706', 'عنبري'], ['#ea580c', 'برتقالي'], ['#dc2626', 'أحمر'], ['#e11d48', 'عنابي'], ['#db2777', 'وردي'], ['#c026d3', 'فوشيا'], ['#7c3aed', 'بنفسجي'], ['#475569', 'رمادي داكن']
+  ];
+  function hexToHsl(hex) {
+    const n = parseInt(hex.slice(1), 16), r = (n >> 16 & 255) / 255, g = (n >> 8 & 255) / 255, b = (n & 255) / 255;
+    const mx = Math.max(r, g, b), mn = Math.min(r, g, b); let h = 0, s = 0; const l = (mx + mn) / 2;
+    if (mx !== mn) { const d = mx - mn; s = l > .5 ? d / (2 - mx - mn) : d / (mx + mn);
+      h = mx === r ? (g - b) / d + (g < b ? 6 : 0) : mx === g ? (b - r) / d + 2 : (r - g) / d + 4; h *= 60; }
+    return [h, s * 100, l * 100];
+  }
+  function hslToRgb(h, s, l) {
+    s /= 100; l /= 100; const k = n => (n + h / 30) % 12, a = s * Math.min(l, 1 - l);
+    const f = n => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
+    return [Math.round(f(0) * 255), Math.round(f(8) * 255), Math.round(f(4) * 255)];
+  }
+  function applyBrandTheme(hex) {
+    let st = document.getElementById('brandThemeStyle');
+    if (!hex || !/^#[0-9a-f]{6}$/i.test(hex) || hex.toLowerCase() === '#4f46e5') {
+      if (st) st.remove();
+      ['50','100','200','300','400','500','600','700','800','900','950'].forEach(k => document.documentElement.style.removeProperty('--b' + k));
+      return;
+    }
+    const [h, s] = hexToHsl(hex);
+    const L = { 50: 96, 100: 92, 200: 85, 300: 75, 400: 64, 500: 54, 600: 45, 700: 37, 800: 29, 900: 22, 950: 13 };
+    let css = ':root{'; const rgb = {};
+    Object.entries(L).forEach(([k, l]) => { const c = hslToRgb(h, Math.min(100, s * (l > 80 ? .9 : 1)), l); rgb[k] = c; css += `--b${k}:rgb(${c});`; });
+    css += '}';
+    Object.keys(L).forEach(k => {
+      const c = `var(--b${k})`;
+      css += `.bg-indigo-${k}{background-color:${c}!important}.text-indigo-${k}{color:${c}!important}.border-indigo-${k}{border-color:${c}!important}.ring-indigo-${k}{--tw-ring-color:${c}!important}`
+        + `.from-indigo-${k}{--tw-gradient-from:${c}!important;--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to,transparent)!important}.to-indigo-${k}{--tw-gradient-to:${c}!important}.via-indigo-${k}{--tw-gradient-stops:var(--tw-gradient-from),${c},var(--tw-gradient-to,transparent)!important}`
+        + `.hover\\:bg-indigo-${k}:hover{background-color:${c}!important}.hover\\:text-indigo-${k}:hover{color:${c}!important}.focus\\:ring-indigo-${k}:focus{--tw-ring-color:${c}!important}.focus\\:border-indigo-${k}:focus{border-color:${c}!important}.accent-indigo-${k}{accent-color:${c}!important}`;
+      [20, 30, 40, 50, 60, 80].forEach(a => { css += `.bg-indigo-${k}\\/${a}{background-color:rgba(${rgb[k]},${a / 100})!important}`; });
+    });
+    if (!st) { st = document.createElement('style'); st.id = 'brandThemeStyle'; document.head.appendChild(st); }
+    st.textContent = css;
+  }
+  function pickBrandColor(hex) {
+    window._brandPick = hex;
+    applyBrandTheme(hex);
+    const hd = document.getElementById('mainHeader'); if (hd) hd.style.background = 'var(--b900)';
+    renderBrandPalette(hex);
+  }
+  function renderBrandPalette(cur) {
+    const box = document.getElementById('brandPalette'); if (!box) return;
+    const c = (cur || '#4f46e5').toLowerCase();
+    box.innerHTML = BRAND_PRESETS.map(([hx, nm]) => `<button type="button" title="${nm}" onclick="pickBrandColor('${hx}')" class="w-9 h-9 rounded-full border-2 transition hover:scale-110" style="background:${hx};border-color:${hx.toLowerCase() === c ? '#0f172a' : 'transparent'};box-shadow:${hx.toLowerCase() === c ? '0 0 0 2px #fff inset' : 'none'}"></button>`).join('');
+    const ci = document.getElementById('settingBrandColor'); if (ci && /^#[0-9a-f]{6}$/i.test(c)) ci.value = c;
+  }
+
+  // ================= Language (Arabic / English) =================
+  const I18N_EN = {"لوحة التحكم والإحصائيات": "Dashboard & Statistics", "لوحة التحكم": "Dashboard", "كشف الحضور اليومي": "Daily Attendance", "الكاليندر والمواعيد": "Calendar & Appointments", "العملاء والجلسات": "Clients & Sessions", "العملاء": "Clients", "سجل الجلسات": "Sessions Log", "الفواتير الشهرية": "Monthly Invoices", "المدفوعات": "Payments", "المشتريات والمصروفات": "Purchases & Expenses", "الأخصائيين والفروع": "Staff & Branches", "الإعدادات والصلاحيات": "Settings & Permissions", "الرئيسية": "Main", "الحسابات": "Accounting", "الإدارة": "Administration", "جلسة جديدة": "New Session", "عميل جديد": "New Client", "أخصائي جديد": "New Specialist", "تصفية حسب الفرع": "Filter by Branch", "الكل": "All", "البيطاش": "Bitash", "سموحه": "Smouha", "أونلاين": "Online", "تصغير القائمة": "Collapse", "خروج": "Logout", "الإكسيل متصل": "Excel connected", "مزامنة تلقائية": "Auto sync", "المدير": "Admin", "السكرتارية": "Secretary", "السكرتيرة": "Secretary", "الأخصائي": "Therapist", "أب / أم": "Parent", "صلاحية المدير": "Admin role", "صلاحية السكرتارية": "Secretary role", "صلاحية الأخصائي": "Therapist role", "صلاحية أب / أم": "Parent role", "الكود": "Code", "اسم الطفل": "Child Name", "الهاتف": "Phone", "الفرع": "Branch", "التشخيص": "Diagnosis", "العنوان": "Address", "الحالة": "Status", "الجدول الأسبوعي": "Weekly Schedule", "الإجراءات": "Actions", "التاريخ": "Date", "الوقت": "Time", "السعر": "Price", "الصافي": "Net", "اسم العميل": "Client Name", "عدد الجلسات": "Sessions", "تفاصيل الحالات": "Status Details", "الإجمالي": "Total", "الخصومات": "Discounts", "الصافي المستحق": "Net Due", "المسدد": "Paid", "المتبقي": "Remaining", "طباعة": "Print", "المبلغ": "Amount", "الشهر": "Month", "ملاحظات": "Notes", "رقم السند": "Receipt No.", "الاسم": "Name", "تعديل": "Edit", "حذف": "Delete", "حفظ": "Save", "إلغاء": "Cancel", "إغلاق": "Close", "التفاصيل": "Details", "نشط": "Active", "موقوف": "Stopped", "مكتمل": "Completed", "بحث": "Search", "رجوع": "Back", "توقيع": "Signature", "إجمالي الجلسات": "Total Sessions", "العملاء النشطين": "Active Clients", "نسبة الحضور": "Attendance Rate", "إجمالي التحصيل": "Total Collected", "الفترة": "Period", "كل الفترات": "All periods", "حالات الجلسات حسب الفرع": "Session Status by Branch", "توزيع العملاء حسب التشخيص": "Clients by Diagnosis", "رجوع للفروع": "Back to branches", "حضور": "Attended", "غياب": "Absent", "اعتذار بعذر": "Excused", "اعتذار نفس اليوم": "Same-day excuse", "إلغاء من المركز": "Center cancelled", "مجدولة": "Scheduled", "السبت": "Saturday", "الأحد": "Sunday", "الإثنين": "Monday", "الثلاثاء": "Tuesday", "الأربعاء": "Wednesday", "الخميس": "Thursday", "الجمعة": "Friday", "اليوم": "Today", "الإعدادات": "Settings", "المشتريات": "Purchases", "الفواتير": "Invoices", "الجلسات": "Sessions", "المدفوعات وسندات القبض": "Payments & Receipts", "الأخصائيين": "Specialists", "الفروع": "Branches", "جلسات": "sessions", "جلسة": "session", "عميل": "client"};
+  let _i18nRegex = null, _i18nObs = null;
+  function i18nBuild() {
+    if (_i18nRegex) return;
+    const keys = Object.keys(I18N_EN).sort((a, b) => b.length - a.length).map(k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+    _i18nRegex = new RegExp('(?<![\\u0600-\\u06FF])(' + keys.join('|') + ')(?![\\u0600-\\u06FF])', 'g');
+  }
+  function i18nTranslate(root) {
+    i18nBuild();
+    const tr = s => s.replace(_i18nRegex, m => I18N_EN[m] || m);
+    const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    let n; while ((n = w.nextNode())) {
+      const p = n.parentNode && n.parentNode.nodeName;
+      if (p === 'SCRIPT' || p === 'STYLE' || !/[\u0600-\u06FF]/.test(n.nodeValue)) continue;
+      const v = tr(n.nodeValue); if (v !== n.nodeValue) n.nodeValue = v;
+    }
+    root.querySelectorAll && root.querySelectorAll('[title],[placeholder]').forEach(el => {
+      ['title', 'placeholder'].forEach(a => { const v = el.getAttribute(a); if (v && /[\u0600-\u06FF]/.test(v)) el.setAttribute(a, tr(v)); });
+    });
+  }
+  function applyLanguage(lang) {
+    const en = lang === 'en';
+    document.documentElement.lang = en ? 'en' : 'ar';
+    document.documentElement.dir = en ? 'ltr' : 'rtl';
+    if (_i18nObs) { _i18nObs.disconnect(); _i18nObs = null; }
+    if (!en) return;
+    let timer = null;
+    const run = () => { if (_i18nObs) _i18nObs.disconnect(); i18nTranslate(document.body); if (_i18nObs) _i18nObs.observe(document.body, { childList: true, subtree: true, characterData: true }); };
+    _i18nObs = new MutationObserver(() => { clearTimeout(timer); timer = setTimeout(run, 80); });
+    run();
+  }
+
   function applyThemeSystem() {
     const s = (state && state.settings) || defaultSettings;
     const headerColor = s.headerColor || 'indigo';
+    applyBrandTheme(s.brandColor);
     const navStyle = s.navStyle || 'sidebar';
 
     // 1. Apply Header Color Classes
@@ -24707,6 +24822,7 @@
         blue: 'bg-blue-900'
       };
       headerEl.classList.add(colorMap[headerColor] || 'bg-indigo-900');
+      headerEl.style.background = s.brandColor ? 'var(--b900)' : '';
     }
 
     // 2. Navigation Row Style (Full vs Compact)
@@ -25050,6 +25166,7 @@
     // Apply saved settings (logo, center name) on load
     try { loadSettingsValues(); } catch(e) { console.warn('loadSettingsValues error:', e); }
     try { applyThemeSystem(); positionSidebar(); } catch(e) { console.warn('applyThemeSystem error:', e); }
+    try { applyLanguage((state.settings || {}).language || 'ar'); } catch(e) { console.warn('applyLanguage error:', e); }
     // Init resizable columns
     setTimeout(initAllResizableTables, 200);
     // Init resizable columns
