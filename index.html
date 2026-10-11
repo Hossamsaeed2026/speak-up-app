@@ -42,8 +42,26 @@
         -webkit-print-color-adjust: exact; print-color-adjust: exact; padding: 12mm; box-sizing: border-box; }
       #invoice-print-root, #invoice-print-root * { visibility: visible; }
       #invoice-print-root > div { border: none !important; border-radius: 0 !important; max-width: 100% !important; }
+      /* طباعة صفحة واحدة فقط: بنشيل باقي التطبيق من الصفحة بدل ما نخفيه (الإخفاء بـ visibility كان بيسيب مساحته = 15 صفحة) */
+      html.inv-printing, html.inv-printing body, html.doc-printing, html.doc-printing body { height: auto !important; min-height: 0 !important; overflow: visible !important; background: #fff !important; }
+      html.inv-printing body > *:not(#invoice-print-root) { display: none !important; }
+      html.inv-printing #invoice-print-root { position: static !important; display: block !important; page-break-inside: avoid; break-inside: avoid; }
+      html.doc-printing body > *:not(#printModal) { display: none !important; }
+      html.doc-printing #printModal { position: static !important; display: block !important; background: none !important; padding: 0 !important; }
+      html.doc-printing #printModal > div { box-shadow: none !important; max-height: none !important; overflow: visible !important; max-width: 100% !important; padding: 12mm !important; }
+      html.doc-printing #print-area { position: static !important; }
     }
     #invoice-print-root { display: none; }
+    /* ===== نافذة الفاتورة: الإعدادات مخفية لحد ما تدوس زرار الإعدادات ===== */
+    #inv-settings-panel { display: none; }
+    #inv-settings-panel.open { display: block; }
+    #inv-settings-close { display: none; }
+    @media (max-width: 820px) {
+      #inv-settings-panel.open { position: absolute; inset: 0; width: 100% !important; z-index: 6; }
+      #inv-settings-close { display: block; }
+      #invoice-preview-modal { padding: 6px !important; }
+      #invoice-preview-modal .inv-body { padding: 8px !important; }
+    }
 
     /* ===== v5: role-based UI ===== */
     .only-therapist { display: none !important; }
@@ -900,6 +918,13 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
 #sul-staff{margin-top:6px}
 }
 </style>
+<style id="su-bio-css">
+#plBio,#plBioSet{display:none}
+#pinLock #plBio{margin:16px auto 0;padding:13px 20px;border-radius:16px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.5);color:#fff;font:800 15px inherit;font-family:inherit;cursor:pointer;min-width:230px}
+#pinLock #plBio:active{background:rgba(255,255,255,.3)}
+#pinLock #plBioSet{margin:10px auto 0;padding:8px 14px;border-radius:12px;background:transparent;border:1px dashed rgba(255,255,255,.5);color:#fff;font:700 13px inherit;font-family:inherit;cursor:pointer}
+#pinLock.pl-bioask .pl-pad,#pinLock.pl-bioask .pl-dots,#pinLock.pl-bioask #plInput,#pinLock.pl-bioask #plX,#pinLock.pl-bioask .pl-lenrow{display:none!important}
+</style>
 <style id="su-fix-r7">
 #plInput,#plX{display:none}
 #suMenuPage{display:none}
@@ -960,6 +985,8 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
       <div class="pl-pad" id="plPad"></div>
       <input id="plInput" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="الكود" placeholder="• • • •">
       <button type="button" id="plX" class="pl-link" onclick="document.getElementById('plCancel').click()">إلغاء</button>
+      <button type="button" id="plBio"></button>
+      <button type="button" id="plBioSet"></button>
       <button type="button" class="pl-link" id="plLink"></button>
     </div>
   </div>
@@ -1186,6 +1213,9 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
         <div class="side-label flex items-center gap-1.5 mt-2">
           <button onclick="pinLockNow()" class="flex-1 bg-indigo-500/80 hover:bg-indigo-500 text-white font-bold px-2 py-1 rounded-lg text-[11px]" title="قفل التطبيق">🔒 قفل</button>
           <button onclick="pinMenu()" class="flex-1 bg-indigo-900 hover:bg-indigo-800 text-white font-bold px-2 py-1 rounded-lg text-[11px] border border-indigo-700" title="الدخول السريع بكود">🔢 كود الدخول</button>
+        </div>
+        <div class="side-label flex items-center gap-1.5 mt-2">
+          <button onclick="window.suUpdate && suUpdate.check()" class="flex-1 bg-emerald-600/90 hover:bg-emerald-600 text-white font-bold px-2 py-1 rounded-lg text-[11px]" title="فحص وجود نسخة جديدة من البرنامج">🔄 فحص التحديثات</button>
         </div>
       </div>
       <div class="side-collapse"><button onclick="toggleSidebarCollapse()" title="تصغير / تكبير القائمة">↔ <span class="collapse-text">تصغير القائمة</span></button></div>
@@ -2901,7 +2931,7 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
         <div class="flex justify-between items-center border-b pb-3 no-print">
           <h3 class="font-bold text-slate-900 text-sm">معاينة المستند للطباعة</h3>
           <div class="flex items-center gap-2">
-            <button onclick="window.print()" class="bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1">🖨️ طباعة الآن</button>
+            <button onclick="printPlainDoc()" class="bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1">🖨️ طباعة الآن</button>
             <button onclick="closeModal('printModal')" class="text-slate-400 font-bold text-lg">&times;</button>
           </div>
         </div>
@@ -5185,7 +5215,7 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
 
     // Build the invoice HTML for preview
     function buildInvoiceHTML(cfg, inv, notes) {
-      const effectiveLogo = (cfg.logoUrl && cfg.logoUrl !== "speakup_logo.png") ? cfg.logoUrl : "speakup_logo_white.png";
+      const effectiveLogo = (cfg.logoUrl && cfg.logoUrl !== "speakup_logo.png") ? cfg.logoUrl : (window.SU_DEFAULT_LOGO || "icons/icon-192.png");
       const logoHtml = cfg.showLogo
         ? `<img src="${effectiveLogo}" alt="Logo" style="height:115px;max-width:230px;object-fit:contain;margin:0 auto 8px;display:block;background:#ffffff;padding:4px;border-radius:10px;">`
         : `<div style="width:70px;height:70px;border-radius:50%;background:linear-gradient(135deg,${cfg.primaryColor},${cfg.accentColor});display:flex;align-items:center;justify-content:center;margin:0 auto 8px;font-size:28px;">🗣️</div>`;
@@ -5338,22 +5368,24 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
     modal.innerHTML = `
       <div class="bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[95vh] overflow-hidden flex flex-col">
         <!-- Modal Header -->
-        <div class="flex items-center justify-between px-6 py-4 border-b bg-indigo-900 text-white">
-          <div class="font-black text-lg">🧾 كشف حساب الشهر — ${inv.client.name} — ${yearMonth}</div>
-          <div class="flex items-center gap-3">
-            <button onclick="openSignaturePad()" class="bg-purple-600 hover:bg-purple-700 text-white px-3.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 shadow transition">✍️ توقيع</button>
-            <button onclick="openInvoiceSettingsModal()" class="bg-white/20 hover:bg-white/30 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1">⚙️ إعدادات الفاتورة</button>
+        <div class="flex flex-wrap items-center justify-between gap-2 px-3 sm:px-6 py-3 border-b bg-indigo-900 text-white">
+          <div class="font-black text-sm sm:text-lg">🧾 كشف حساب الشهر — ${inv.client.name} — ${yearMonth}</div>
+          <div class="flex flex-wrap items-center gap-2">
             <button onclick="printInvoiceNow()" 
-                    class="bg-emerald-500 hover:bg-emerald-600 px-4 py-1.5 rounded-lg text-sm font-bold flex items-center gap-1">
+                    class="bg-emerald-500 hover:bg-emerald-600 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold flex items-center gap-1">
               🖨️ طباعة
             </button>
+            <button onclick="saveInvoicePDF()" id="inv-pdf-btn" class="bg-rose-500 hover:bg-rose-600 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold flex items-center gap-1">📄 حفظ PDF</button>
+            <button onclick="openSignaturePad()" class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 shadow transition">✍️ توقيع</button>
+            <button onclick="toggleInvoiceSettings()" id="inv-settings-btn" class="bg-white/20 hover:bg-white/30 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1">⚙️ الإعدادات</button>
             <button onclick="document.getElementById('invoice-preview-modal').remove()" class="bg-white/20 hover:bg-white/30 px-3 py-1.5 rounded-lg text-xs font-bold">✕ إغلاق</button>
           </div>
         </div>
 
-        <div class="flex flex-1 overflow-hidden">
-          <!-- Left Panel: Edit Controls -->
-          <div class="w-72 bg-slate-50 border-l p-4 overflow-y-auto flex-shrink-0 space-y-3" style="direction:rtl;">
+        <div class="flex flex-1 overflow-hidden relative">
+          <!-- Left Panel: Edit Controls (مخفية لحد ما تدوس زرار الإعدادات) -->
+          <div id="inv-settings-panel" class="w-72 bg-slate-50 border-l p-4 overflow-y-auto flex-shrink-0 space-y-3" style="direction:rtl;">
+            <button id="inv-settings-close" onclick="toggleInvoiceSettings(false)" class="w-full bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-2 rounded-lg text-xs">⬅️ رجوع للفاتورة</button>
             <div class="font-black text-slate-800 text-sm mb-3">تعديل بيانات الفاتورة</div>
             
             <div>
@@ -5428,7 +5460,7 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
           </div>
 
           <!-- Right Panel: Invoice Preview -->
-          <div class="flex-1 overflow-y-auto p-6 bg-slate-100">
+          <div class="inv-body flex-1 overflow-y-auto p-6 bg-slate-100">
             <div id="invoice-live-preview">
               ${buildInvoiceHTML(cfg, inv, '')}
             </div>
@@ -5439,6 +5471,7 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
 
     // Store current inv for refresh
     window._currentInvData = { inv, yearMonth, buildInvoiceHTML };
+    requestAnimationFrame(() => { try { invFitPreview(); } catch (e) {} });
   }
 
   function handleInvoiceLogoUpload(input) {
@@ -5462,9 +5495,110 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
       document.body.appendChild(root);
     }
     root.innerHTML = src.innerHTML.replace(/id="invoice-printable"/g, '');
-    const cleanup = () => { root.innerHTML = ''; window.removeEventListener('afterprint', cleanup); };
+    document.documentElement.classList.add('inv-printing');
+    const cleanup = () => {
+      root.innerHTML = '';
+      document.documentElement.classList.remove('inv-printing');
+      window.removeEventListener('afterprint', cleanup);
+    };
     window.addEventListener('afterprint', cleanup);
     setTimeout(() => window.print(), 150);
+  }
+
+  // طباعة المستندات العادية (سندات القبض...) بصفحة واحدة
+  function printPlainDoc() {
+    document.documentElement.classList.add('doc-printing');
+    const cleanup = () => { document.documentElement.classList.remove('doc-printing'); window.removeEventListener('afterprint', cleanup); };
+    window.addEventListener('afterprint', cleanup);
+    setTimeout(() => window.print(), 100);
+  }
+
+  // ---- إظهار / إخفاء إعدادات الفاتورة ----
+  function toggleInvoiceSettings(force) {
+    const p = document.getElementById('inv-settings-panel');
+    if (!p) return;
+    const open = typeof force === 'boolean' ? force : !p.classList.contains('open');
+    p.classList.toggle('open', open);
+    const b = document.getElementById('inv-settings-btn');
+    if (b) b.classList.toggle('bg-white/40', open);
+    setTimeout(invFitPreview, 30);
+  }
+
+  // ---- تصغير الفاتورة لتناسب عرض الشاشة (موبايل) ----
+  function invFitPreview() {
+    const box = document.getElementById('invoice-live-preview');
+    if (!box) return;
+    const holder = box.parentElement;
+    const avail = (holder ? holder.clientWidth : window.innerWidth) - 4;
+    const W = 720;
+    box.style.width = W + 'px';
+    box.style.zoom = avail < W ? String(Math.max(0.3, avail / W)) : '1';
+    if (avail >= W) { box.style.width = ''; }
+  }
+  window.addEventListener('resize', () => { try { invFitPreview(); } catch (e) {} });
+
+  // ---- حفظ الفاتورة كـ PDF ----
+  function _loadScriptOnce(src) {
+    return new Promise((resolve, reject) => {
+      if (document.querySelector('script[data-lib="' + src + '"]')) { resolve(); return; }
+      const sc = document.createElement('script');
+      sc.src = src; sc.dataset.lib = src; sc.onload = resolve; sc.onerror = () => reject(new Error('load ' + src));
+      document.head.appendChild(sc);
+    });
+  }
+  async function saveInvoicePDF() {
+    const src = document.getElementById('invoice-live-preview');
+    if (!src) return;
+    const btn = document.getElementById('inv-pdf-btn');
+    const oldTxt = btn ? btn.innerHTML : '';
+    if (btn) { btn.disabled = true; btn.innerHTML = '⏳ جاري التجهيز...'; }
+    let holder = null;
+    try {
+      if (!window.html2pdf) {
+        try { await _loadScriptOnce('https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js'); }
+        catch (e1) { await _loadScriptOnce('https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js'); }
+      }
+      // نسخة بحجم ثابت (من غير تصغير الموبايل) عشان الـ PDF يطلع بنفس تصميم الفاتورة
+      holder = document.createElement('div');
+      holder.style.cssText = 'position:fixed;left:0;top:0;width:760px;background:#fff;z-index:-1;padding:0;';
+      holder.innerHTML = src.innerHTML.replace(/id="invoice-printable"/g, '');
+      const card = holder.firstElementChild;
+      if (card) { card.style.border = 'none'; card.style.borderRadius = '0'; card.style.maxWidth = '100%'; card.style.margin = '0'; }
+      document.body.appendChild(holder);
+      await Promise.all([].slice.call(holder.querySelectorAll('img')).map(im => im.complete ? 0 : new Promise(r => { im.onload = im.onerror = r; })));
+      const d = window._currentInvData;
+      const nm = (d && d.inv && d.inv.client && d.inv.client.name || 'عميل').replace(/[\\/:*?"<>|]+/g, ' ').trim();
+      const fileName = 'فاتورة - ' + nm + ' - ' + (d ? d.yearMonth : '') + '.pdf';
+      const worker = html2pdf().set({
+        margin: [8, 8, 8, 8],
+        filename: fileName,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', scrollX: 0, scrollY: 0, windowWidth: 760 },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        pagebreak: { mode: ['avoid-all'] }
+      }).from(holder);
+      const blob = await worker.outputPdf('blob');
+      const ios = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      const file = new File([blob], fileName, { type: 'application/pdf' });
+      if (ios && navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title: fileName });
+      } else {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = fileName; document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 60000);
+      }
+      if (typeof showToast === 'function') showToast('📄 تم حفظ الفاتورة PDF', 'green');
+    } catch (e) {
+      if (e && e.name === 'AbortError') { /* المستخدم قفل نافذة المشاركة */ }
+      else {
+        console.warn('PDF', e);
+        alert('تعذّر إنشاء ملف PDF (تأكد من اتصال الإنترنت). تقدر تستخدم زر الطباعة واختار "حفظ كـ PDF".');
+      }
+    } finally {
+      if (holder) holder.remove();
+      if (btn) { btn.disabled = false; btn.innerHTML = oldTxt; }
+    }
   }
 
   // ---- Signature pad (stylus / touch / mouse) ----
@@ -7780,8 +7914,8 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
     openInvoiceModal(inv, ym);
     const m = document.getElementById('invoice-preview-modal'); if (!m) return;
     m.style.zIndex = '80';
-    const panel = m.querySelector('.w-72'); if (panel) panel.remove();                       // no editing for parents
-    m.querySelectorAll('button[onclick*="openSignaturePad"],button[onclick*="openInvoiceSettingsModal"]').forEach(b => b.remove());
+    const panel = m.querySelector('#inv-settings-panel'); if (panel) panel.remove();                       // no editing for parents
+    m.querySelectorAll('button[onclick*="openSignaturePad"],button[onclick*="toggleInvoiceSettings"],button[onclick*="openInvoiceSettingsModal"]').forEach(b => b.remove());
     window._currentInvData = null;                                                           // block any preview refresh / config save
   }
   function ppInvCard(r, cid, big) {
@@ -7941,7 +8075,7 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
     const MAX_TRIES = 5;              // بعد 5 محاولات غلط: خروج كامل
     const root = document.documentElement;
     const hasSubtle = !!(window.crypto && crypto.subtle);
-    let mode = '', buf = '', first = '', len = 4, changing = false, busy = false, hiddenAt = 0;
+    let mode = '', buf = '', first = '', len = 4, changing = false, busy = false, hiddenAt = 0, subT = null;
     const $ = id => document.getElementById(id);
 
     function rec() { try { return JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) { return null; } }
@@ -7952,6 +8086,65 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
     function uname() { try { return (currentUser && currentUser.name) || ''; } catch (e) { return ''; } }
     function loggedIn() { try { return !!currentUser; } catch (e) { return false; } }
     function toast(m, c) { try { showToast(m, c); } catch (e) {} }
+
+    // ---- البصمة / الوجه (WebAuthn - مصادقة الجهاز نفسه) ----
+    // بتتحفظ جنب الكود على الجهاز ده بس. الدخول بيتم لما الموبايل يتأكد من بصمتك/وجهك.
+    const bioOK = !!(window.PublicKeyCredential && navigator.credentials && hasSubtle);
+    let bioAvail = false, bioBusy = false;
+    if (bioOK && PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable) {
+      PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable().then(function (v) { bioAvail = !!v; refreshBio(); }).catch(function () {});
+    }
+    function bioEnrolled() { const r = rec(); return !!(r && r.bio); }
+    function refreshBio() {
+      const b = $('plBio'), st = $('plBioSet'); if (!b || !st) return;
+      const en = bioEnrolled();
+      b.style.display = ((mode === 'unlock' && en) || (mode === 'bioask' && bioAvail)) ? 'block' : 'none';
+      b.textContent = mode === 'bioask' ? '👆 تفعيل البصمة / الوجه' : '👆 افتح بالبصمة / الوجه';
+      st.style.display = (mode === 'setup1' && changing && (bioAvail || en)) ? 'block' : 'none';
+      st.textContent = en ? '🚫 إيقاف البصمة / الوجه' : '👆 تفعيل البصمة / الوجه';
+    }
+    async function enrollBio() {
+      const r = rec(); if (!r) throw new Error('no pin');
+      const idBytes = new TextEncoder().encode((uid() || 'speakup-user').slice(0, 60));
+      const cred = await navigator.credentials.create({ publicKey: {
+        challenge: crypto.getRandomValues(new Uint8Array(32)),
+        rp: { name: 'Speak Up' },
+        user: { id: idBytes, name: uname() || 'speakup', displayName: uname() || 'Speak Up' },
+        pubKeyCredParams: [{ type: 'public-key', alg: -7 }, { type: 'public-key', alg: -257 }],
+        authenticatorSelection: { authenticatorAttachment: 'platform', userVerification: 'required', residentKey: 'discouraged' },
+        timeout: 60000, attestation: 'none'
+      } });
+      r.bio = b64(cred.rawId); put(r);
+    }
+    async function bioUnlock() {
+      const r = rec(); if (!r || !r.bio || bioBusy || mode !== 'unlock') return;
+      bioBusy = true;
+      try {
+        await navigator.credentials.get({ publicKey: {
+          challenge: crypto.getRandomValues(new Uint8Array(32)),
+          allowCredentials: [{ type: 'public-key', id: unb64(r.bio), transports: ['internal'] }],
+          userVerification: 'required', timeout: 60000
+        } });
+        r.tries = 0; put(r); hide();
+      } catch (e) {
+        if (e && e.name !== 'NotAllowedError' && e.name !== 'AbortError') setText($('plTitle').textContent, 'تعذّر التحقق بالبصمة — استخدم الكود', true);
+      }
+      bioBusy = false;
+    }
+    async function bioEnrollFlow(fromAsk) {
+      try {
+        await enrollBio();
+        toast('تم تفعيل البصمة / الوجه ✅');
+        if (fromAsk) hide(); else refreshBio();
+      } catch (e) {
+        if (!(e && (e.name === 'NotAllowedError' || e.name === 'AbortError'))) toast('تعذّر تفعيل البصمة على الجهاز ده', 'amber');
+      }
+    }
+    function bioDisable() {
+      const r = rec(); if (!r) return;
+      if (!confirm('إيقاف فتح التطبيق بالبصمة / الوجه؟')) return;
+      delete r.bio; put(r); toast('تم إيقاف البصمة', 'amber'); refreshBio();
+    }
 
     const b64 = a => btoa(String.fromCharCode.apply(null, new Uint8Array(a)));
     const unb64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
@@ -7980,6 +8173,7 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
       $('plLenRow').style.display = m === 'setup1' ? 'flex' : 'none';
       $('plCancel').style.visibility = m === 'unlock' ? 'hidden' : 'visible';
       $('pinLock').classList.toggle('pl-setup', m !== 'unlock');
+      $('pinLock').classList.toggle('pl-bioask', m === 'bioask');
       const link = $('plLink');
       if (m === 'unlock') {
         setText('ادخل الكود', '');
@@ -7988,13 +8182,19 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
         setText('اختار كود الدخول السريع', 'الكود ده بيفتح التطبيق على الجهاز ده بس');
         link.textContent = changing ? 'إيقاف الكود نهائياً' : 'مش دلوقتي';
         link.onclick = changing ? disable : skip; markLen();
+      } else if (m === 'bioask') {
+        setText('فعّل البصمة / الوجه؟', 'تفتح بيه التطبيق بسرعة بدل ما تكتب الكود');
+        link.textContent = 'مش دلوقتي'; link.onclick = function () { hide(); toast('تم تفعيل الدخول السريع ✅'); };
       } else {
         setText('اكتب الكود تاني للتأكيد', '');
         link.textContent = 'رجوع'; link.onclick = function () { show('setup1'); };
       }
       dots();
       $('pinLock').classList.add('show'); root.classList.add('pin-locked');
-      try { if (window.matchMedia('(max-width:820px)').matches) { const pi = $('plInput'); if (pi) setTimeout(function () { pi.focus(); }, 250); } } catch (e) {}
+      refreshBio();
+      const autoBio = m === 'unlock' && bioEnrolled();
+      try { if (!autoBio && m !== 'bioask' && window.matchMedia('(max-width:820px)').matches) { const pi = $('plInput'); if (pi) setTimeout(function () { pi.focus(); }, 250); } } catch (e) {}
+      if (autoBio) setTimeout(bioUnlock, 400);
     }
     function hide() { mode = ''; buf = ''; busy = false; changing = false; $('pinLock').classList.remove('show'); root.classList.remove('pin-locked'); }
     function fail(msg) {
@@ -8029,8 +8229,10 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
         try {
           const salt = b64(crypto.getRandomValues(new Uint8Array(16)));
           const h = await hash(pin, salt);
-          put({ v: 1, uid: uid(), name: uname(), len: len, salt: salt, h: h, tries: 0 });
+          const old = rec();
+          put({ v: 1, uid: uid(), name: uname(), len: len, salt: salt, h: h, tries: 0, bio: (old && old.bio && old.uid === uid()) ? old.bio : undefined });
           try { localStorage.removeItem(SKIP); } catch (e) {}
+          if (bioOK && bioAvail && !bioEnrolled()) { show('bioask'); return; }
           hide(); toast('تم تفعيل الدخول السريع ✅');
         } catch (e) { busy = false; fail('تعذر حفظ الكود على الجهاز ده'); }
         return;
@@ -8051,7 +8253,7 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
       if (busy || !mode) return;
       if (buf.length >= target()) return;
       buf += d; dots();
-      if (buf.length === target()) setTimeout(submit, 120);
+      if (buf.length === target()) { clearTimeout(subT); subT = setTimeout(submit, 120); }
     }
     function back() { if (busy || !mode) return; buf = buf.slice(0, -1); dots(); }
 
@@ -8078,9 +8280,30 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
     window.suPinSet = function (v) {
       if (busy || !mode) return;
       buf = String(v).replace(/\D/g, '').slice(0, target()); dots();
-      if (buf.length === target()) setTimeout(submit, 120);
+      if (buf.length === target()) { clearTimeout(subT); subT = setTimeout(submit, 120); }
     };
+    // خانة الكتابة على الموبايل: الدخول تلقائي أول ما الكود يكتمل (من غير زرار Enter)
+    (function () {
+      const pi = $('plInput'); if (!pi) return;
+      const norm = function (v) {
+        return String(v || '')
+          .replace(/[\u0660-\u0669]/g, function (d) { return String(d.charCodeAt(0) - 0x660); })
+          .replace(/[\u06F0-\u06F9]/g, function (d) { return String(d.charCodeAt(0) - 0x6F0); });
+      };
+      const onType = function () {
+        if (busy || !mode) { pi.value = buf; return; }
+        window.suPinSet(norm(pi.value));
+      };
+      pi.addEventListener('input', onType);
+      pi.addEventListener('keyup', function (e) { if (e.key === 'Enter') onType(); });
+      pi.addEventListener('change', onType);
+    })();
     window.pinSetLen = function (n) { len = n; buf = ''; first = ''; markLen(); dots(); };
+    (function () {
+      const b = $('plBio'), st = $('plBioSet');
+      if (b) b.onclick = function () { if (mode === 'bioask') bioEnrollFlow(true); else bioUnlock(); };
+      if (st) st.onclick = function () { if (bioEnrolled()) bioDisable(); else bioEnrollFlow(false); };
+    })();
     window.pinLockNow = function () { if (rec()) show('unlock'); else window.pinMenu(); };
     window.pinMenu = function () {
       if (!hasSubtle) { toast('الدخول بالكود محتاج رابط https', 'amber'); return; }
@@ -8202,9 +8425,65 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
   // تثبيت التطبيق (PWA) - شغال بس على رابط https أو localhost
   if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
     window.addEventListener('load', function () {
-      navigator.serviceWorker.register('service-worker.js').catch(function (e) { console.warn('SW', e); });
+      navigator.serviceWorker.register('service-worker.js').then(function (reg) {
+        // لو الـ Service Worker نفسه اتحدّث (غيّرت VERSION) برضه نطلب من المستخدم يحدّث
+        reg.addEventListener('updatefound', function () {
+          var nw = reg.installing; if (!nw) return;
+          nw.addEventListener('statechange', function () {
+            if (nw.state === 'installed' && navigator.serviceWorker.controller && window.suUpdate) window.suUpdate.show();
+          });
+        });
+      }).catch(function (e) { console.warn('SW', e); });
     });
   }
+
+  /* ===== نظام التحديث: يكتشف إن نسخة جديدة اتّرفعت على GitHub ويطلب من المستخدم يحدّث ===== */
+  (function () {
+    var baseSig = null, shownAt = 0, bar = null;
+    function sigOf(r) { var v = (r.headers.get('etag') || '') + '|' + (r.headers.get('last-modified') || '') + '|' + (r.headers.get('content-length') || ''); return v === '||' ? null : v; }
+    function headSig() {
+      return fetch(new URL('index.html', location.href).href, { method: 'HEAD', cache: 'no-store' })
+        .then(function (r) { return r.ok ? sigOf(r) : null; }).catch(function () { return null; });
+    }
+    function toast(m, c) { try { if (typeof showToast === 'function') showToast(m, c || 'green'); } catch (e) {} }
+    function hide() { if (bar) { bar.remove(); bar = null; } }
+    function show() {
+      if (bar) return;
+      shownAt = Date.now();
+      bar = document.createElement('div');
+      bar.id = 'suUpdateBar'; bar.className = 'no-print'; bar.setAttribute('dir', 'rtl');
+      bar.style.cssText = 'position:fixed;left:10px;right:10px;bottom:calc(env(safe-area-inset-bottom,0px) + 12px);z-index:100000;max-width:520px;margin:0 auto;background:#1e1b4b;color:#fff;border-radius:16px;padding:12px 14px;box-shadow:0 12px 40px rgba(0,0,0,.45);display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-family:inherit;border:1px solid #6366f1';
+      bar.innerHTML = '<div style="flex:1;min-width:180px"><div style="font-weight:900;font-size:14px">🔔 يتوفر تحديث جديد للبرنامج</div><div style="font-size:11px;opacity:.8;margin-top:2px">اضغط «تحديث الآن» لتحميل آخر نسخة (بياناتك محفوظة).</div></div>' +
+        '<button id="suUpdNow" style="background:#10b981;color:#fff;font-weight:900;border-radius:10px;padding:8px 14px;font-size:13px">🔄 تحديث الآن</button>' +
+        '<button id="suUpdLater" style="background:rgba(255,255,255,.15);color:#fff;font-weight:700;border-radius:10px;padding:8px 10px;font-size:12px">لاحقاً</button>';
+      document.body.appendChild(bar);
+      document.getElementById('suUpdNow').onclick = apply;
+      document.getElementById('suUpdLater').onclick = hide;
+    }
+    function apply() {
+      if (!navigator.onLine) { toast('محتاج اتصال بالإنترنت للتحديث', 'amber'); return; }
+      var b = document.getElementById('suUpdNow'); if (b) { b.disabled = true; b.textContent = '⏳ جاري التحديث...'; }
+      var tasks = [];
+      try { tasks.push(navigator.serviceWorker.getRegistrations().then(function (rs) { return Promise.all(rs.map(function (r) { return r.update().catch(function () {}); })); })); } catch (e) {}
+      try { tasks.push(caches.keys().then(function (ks) { return Promise.all(ks.filter(function (k) { return /^speakup-/.test(k); }).map(function (k) { return caches.open(k).then(function (c) { return c.delete('./index.html').then(function () { return c.delete(new URL('index.html', location.href).href); }); }); })); })); } catch (e) {}
+      Promise.all(tasks).catch(function () {}).then(function () { location.reload(); });
+    }
+    function check(manual) {
+      if (!navigator.onLine) { if (manual) toast('مفيش اتصال بالإنترنت', 'amber'); return Promise.resolve(); }
+      return headSig().then(function (sig) {
+        if (!sig) { if (manual) toast('تعذّر فحص التحديثات الآن', 'amber'); return; }
+        if (baseSig === null) { baseSig = sig; if (manual) toast('✅ أنت على أحدث نسخة'); return; }
+        if (sig !== baseSig) { if (!bar && (manual || Date.now() - shownAt > 30 * 60 * 1000)) show(); }
+        else if (manual) toast('✅ أنت على أحدث نسخة');
+      });
+    }
+    window.suUpdate = { show: show, check: function () { return check(true); }, apply: apply };
+    window.addEventListener('load', function () { setTimeout(function () { headSig().then(function (s) { if (s && baseSig === null) baseSig = s; }); }, 1500); });
+    setTimeout(function () { check(false); }, 30000);
+    setInterval(function () { check(false); }, 10 * 60 * 1000);
+    document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') check(false); });
+    window.addEventListener('online', function () { check(false); });
+  })();
 </script>
 <script>
 /* Speak Up redesign: splash + hamburger (does not touch app logic) */
@@ -8416,7 +8695,9 @@ if(window.matchMedia('(max-width:820px)').matches){
     d.querySelector('.sul-fb').onclick=function(){openFilter(cf)};
     d.querySelector('.sul-add').onclick=function(){if(cf.addBtn)cf.addBtn.click()};
     d.querySelector('.sul-more').onclick=function(){openMore(cf)};
-    d.querySelector('.sul-list').onclick=function(e){var r=e.target.closest('[data-i]');if(r)openDetail(cf,+r.dataset.i)};
+    d.querySelector('.sul-list').onclick=function(e){var r=e.target.closest('[data-i]');if(!r)return;
+      if(cf.tab==='invoices'){var trI=rowsOf(cf)[+r.dataset.i],bI=trI&&trI.children[cf.act]&&trI.children[cf.act].querySelector('button');if(bI){bI.click();return}}
+      openDetail(cf,+r.dataset.i)};
     cf.ctrls=[].slice.call(tab.querySelectorAll('select,input[type=date],input[type=month]')).filter(function(c){return !c.closest('table')&&c!==qi});
   }
   function btnsOf(cf){var out=[];cf.hide.forEach(function(h){[].slice.call(h.querySelectorAll('button,a[onclick]')).forEach(function(b){
