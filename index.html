@@ -2,7 +2,15 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#7e3ab8">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Speak Up">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <title>Speak Up Speech Therapy - نظام الإدارة المتكامل</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.78.0/dist/umd/supabase.js"></script>
@@ -7272,5 +7280,13 @@
     <div class="p-3 border-t flex justify-end gap-2"><button onclick="hideM('actFormModal')" class="bg-slate-100 px-4 py-2 rounded-lg font-bold text-sm">إلغاء</button><button onclick="afSave()" class="bg-indigo-600 text-white px-6 py-2 rounded-lg font-bold text-sm">💾 حفظ النشاط</button></div>
   </div>
 </div>
+<script>
+  // تثبيت التطبيق (PWA) - شغال بس على رابط https أو localhost
+  if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('service-worker.js').catch(function (e) { console.warn('SW', e); });
+    });
+  }
+</script>
 </body>
 </html>
