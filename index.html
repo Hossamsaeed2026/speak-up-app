@@ -592,6 +592,7 @@
             <option value="therapist">صلاحية الأخصائي</option>
             <option value="parent">صلاحية أب / أم</option>
           </select>
+          <button onclick="changeMyPassword()" class="bg-indigo-500/80 hover:bg-indigo-500 text-white font-bold px-2 py-1 rounded-lg text-[11px]" title="تغيير كلمة المرور">🔑</button>
           <button onclick="handleLogout()" class="bg-rose-600/90 hover:bg-rose-600 text-white font-bold px-2 py-1 rounded-lg text-[11px]" title="تسجيل الخروج">🚪 خروج</button>
         </div>
       </div>
@@ -3098,6 +3099,48 @@
     cloudUser = null; cloudReady = false; currentUser = null; window._realRole = null;
     try { localStorage.removeItem(STORAGE_KEY); localStorage.removeItem('SPEAK_UP_CURRENT_USER'); } catch (e) {}
     location.reload();
+  }
+
+
+  // ---------- تغيير كلمة المرور من جوه التطبيق ----------
+  function changeMyPassword() {
+    if (!sb || !cloudUser) { showToast('لازم تسجّل دخول الأول', 'amber'); return; }
+    let m = document.getElementById('pwModal');
+    if (m) m.remove();
+    m = document.createElement('div');
+    m.id = 'pwModal';
+    m.className = 'fixed inset-0 z-[70] flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-sm';
+    m.innerHTML = '<div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl space-y-4 text-xs" dir="rtl">' +
+      '<h3 class="text-lg font-black text-slate-900">🔑 تغيير كلمة المرور</h3>' +
+      '<div id="pwMsg" class="hidden px-3 py-2 rounded-xl font-bold"></div>' +
+      '<div><label class="block font-bold text-slate-700 mb-1">كلمة المرور الحالية</label><input id="pwOld" type="password" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 font-mono"></div>' +
+      '<div><label class="block font-bold text-slate-700 mb-1">كلمة المرور الجديدة (8 أحرف على الأقل)</label><input id="pwNew" type="password" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 font-mono"></div>' +
+      '<div><label class="block font-bold text-slate-700 mb-1">أعد كتابة الجديدة</label><input id="pwNew2" type="password" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 font-mono"></div>' +
+      '<div class="flex gap-2 pt-1"><button id="pwSave" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-black py-2.5 rounded-xl">حفظ</button>' +
+      '<button id="pwCancel" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 rounded-xl">إلغاء</button></div></div>';
+    document.body.appendChild(m);
+    const msg = (t, ok) => { const el = document.getElementById('pwMsg'); el.textContent = t; el.className = 'px-3 py-2 rounded-xl font-bold ' + (ok ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'); };
+    document.getElementById('pwCancel').onclick = () => m.remove();
+    document.getElementById('pwSave').onclick = async () => {
+      const oldP = document.getElementById('pwOld').value;
+      const n1 = document.getElementById('pwNew').value;
+      const n2 = document.getElementById('pwNew2').value;
+      if (!oldP) return msg('اكتب كلمة المرور الحالية', false);
+      if (n1.length < 8) return msg('الباسورد الجديد لازم يكون 8 أحرف على الأقل', false);
+      if (n1 !== n2) return msg('الباسورد الجديد والتأكيد مش متطابقين', false);
+      if (n1 === oldP) return msg('الباسورد الجديد لازم يختلف عن الحالي', false);
+      const btn = document.getElementById('pwSave'); btn.disabled = true;
+      try {
+        const chk = await sb.auth.signInWithPassword({ email: cloudUser.email, password: oldP });
+        if (chk.error) { msg('كلمة المرور الحالية غلط', false); return; }
+        const up = await sb.auth.updateUser({ password: n1 });
+        if (up.error) { msg('تعذر التغيير: ' + up.error.message, false); return; }
+        msg('✅ تم تغيير كلمة المرور', true);
+        setTimeout(() => m.remove(), 1500);
+      } catch (e) { msg('تعذر الاتصال. تأكد من النت.', false); }
+      finally { btn.disabled = false; }
+    };
+    setTimeout(() => { const f = document.getElementById('pwOld'); if (f) f.focus(); }, 50);
   }
 
   function updateUserHeader() {
