@@ -1966,7 +1966,7 @@
           <h3 class="font-extrabold text-slate-900 text-base">بيانات حساب المستخدم والصلاحيات</h3>
           <button onclick="closeModal('userModal')" class="text-slate-400 font-bold text-lg">&times;</button>
         </div>
-        <form id="userForm" onsubmit="saveUser(event)" class="space-y-3 text-xs">
+        <form id="userForm" onsubmit="saveUserCloud(event)" class="space-y-3 text-xs">
           <input type="hidden" id="userEditIndex">
           <div>
             <label class="block text-slate-700 font-bold mb-1">الاسم الكامل *</label>
@@ -1978,8 +1978,8 @@
           </div>
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block text-slate-700 font-bold mb-1">كلمة المرور *</label>
-              <input type="text" id="userPassword" required value="123" class="w-full border rounded-lg p-2 font-mono">
+              <label class="block text-slate-700 font-bold mb-1">كلمة المرور (8 أحرف على الأقل)</label>
+              <input type="text" id="userPassword" placeholder="سيبها فاضية لو مش عايز تغيّرها" autocomplete="new-password" class="w-full border rounded-lg p-2 font-mono">
             </div>
             <div>
               <label class="block text-slate-700 font-bold mb-1">الدور الرئيسي *</label>
@@ -3141,6 +3141,46 @@
       finally { btn.disabled = false; }
     };
     setTimeout(() => { const f = document.getElementById('pwOld'); if (f) f.focus(); }, 50);
+  }
+
+
+  // ---------- إدارة الحسابات الحقيقية (للمدير) عن طريق Edge Function ----------
+  async function cloudAdmin(body) {
+    if (!sb || !cloudUser) return { ok: false, error: 'لازم تسجّل دخول الأول' };
+    try {
+      const { data, error } = await sb.functions.invoke('admin-users', { body });
+      if (error) {
+        let msg = error.message || 'خطأ غير معروف';
+        try { const j = await error.context.json(); if (j && j.error) msg = j.error; } catch (e) {}
+        if (/not found|404|Failed to send/i.test(msg)) msg = 'دالة إدارة المستخدمين لسه مش مفعّلة على Supabase';
+        return { ok: false, error: msg };
+      }
+      if (data && data.error) return { ok: false, error: data.error };
+      return { ok: true, data };
+    } catch (e) { return { ok: false, error: 'تعذر الاتصال بالسحابة' }; }
+  }
+
+  async function saveUserCloud(e) {
+    if (e && e.preventDefault) e.preventDefault();
+    const role = document.getElementById('userRole').value;
+    const email = document.getElementById('userEmail').value.trim().toLowerCase();
+    const name = document.getElementById('userName').value.trim();
+    const pass = document.getElementById('userPassword').value;
+    const pwEl = document.getElementById('userPassword');
+    if (role === 'parent' || !sb || !cloudUser) {
+      pwEl.value = '';
+      if (role === 'parent') showToast('ملحوظة: دخول أولياء الأمور لسه مش مفعّل على السحابة', 'amber');
+      return saveUser(e);
+    }
+    const staffId = role === 'therapist' ? (document.getElementById('userStaffId').value || '') : '';
+    const btn = document.querySelector('#userForm button[type=submit]');
+    if (btn) btn.disabled = true;
+    const r = await cloudAdmin({ action: 'upsert', email, password: pass, name, role, staff_id: staffId });
+    if (btn) btn.disabled = false;
+    if (!r.ok) { showToast('❌ ' + r.error, 'red'); return; }
+    pwEl.value = '';
+    saveUser(e);
+    showToast(pass ? '✅ تم حفظ المستخدم وتغيير كلمة مروره' : '✅ تم حفظ المستخدم', 'green');
   }
 
   function updateUserHeader() {
@@ -5930,17 +5970,23 @@
     document.getElementById('userEditIndex').value = idx;
     document.getElementById('userName').value = u.name;
     document.getElementById('userEmail').value = u.email;
-    document.getElementById('userPassword').value = u.password;
+    document.getElementById('userPassword').value = '';
     document.getElementById('userRole').value = u.role;
     openModal('userModal');
   }
 
-  function deleteUser(idx) {
-    if (confirm('هل أنت متأكد من حذف هذا المستخدم؟')) {
-      state.users.splice(idx, 1);
-      saveState();
-      renderUsersTable();
+  async function deleteUser(idx) {
+    const u = (state.users || [])[idx];
+    if (!u) return;
+    if (!confirm('هل أنت متأكد من حذف هذا المستخدم؟\nهيتمسح حسابه وميقدرش يدخل تاني.')) return;
+    if (sb && cloudUser && u.role !== 'parent') {
+      if ((u.email || '').toLowerCase() === (cloudUser.email || '').toLowerCase()) { showToast('مينفعش تمسح حسابك إنت', 'amber'); return; }
+      const r = await cloudAdmin({ action: 'delete', email: (u.email || '').toLowerCase() });
+      if (!r.ok) { showToast('❌ ' + r.error, 'red'); return; }
     }
+    state.users.splice(idx, 1);
+    saveState();
+    renderUsersTable();
   }
 
   function saveUser(e) {
