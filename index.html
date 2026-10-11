@@ -2,7 +2,9 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, viewport-fit=cover">
+  <script>/* موبايل: لو الصفحة اتفتحت بعرض أكبر من الشاشة (وضع الكمبيوتر / تكبير تلقائي) نرجّعها لعرض الموبايل عشان القوائم والقائمة الجانبية تشتغل */
+  (function(){try{var sw=Math.min(screen.width,screen.height);if(navigator.maxTouchPoints>0&&sw<=500&&window.innerWidth>820){var m=document.querySelector('meta[name=viewport]');if(m)m.setAttribute('content','width='+sw+', initial-scale=1, minimum-scale=1, viewport-fit=cover');}}catch(e){}})();</script>
   <meta name="theme-color" content="#7e3ab8">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -25,6 +27,7 @@
     .badge-tca { background-color: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
     .badge-scheduled { background-color: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
 
+    @media (max-width: 820px) { html, body { overflow-x: clip; max-width: 100%; } }
     @media print {
       body * { visibility: hidden; }
       #invoice-printable, #invoice-printable * { visibility: visible; }
