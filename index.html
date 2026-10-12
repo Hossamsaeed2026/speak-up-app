@@ -2962,12 +2962,12 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
         <form id="loginForm" onsubmit="handleLoginSubmit(event)" class="space-y-4 text-xs">
           <div>
             <label class="block text-slate-700 font-bold mb-1.5">البريد الإلكتروني *</label>
-            <input type="email" id="loginEmail" required placeholder="أدخل البريد الإلكتروني (e.g. user@gmail.com)" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs font-mono font-medium focus:ring-2 focus:ring-indigo-500 focus:bg-white transition">
+            <input type="text" inputmode="email" autocapitalize="none" autocorrect="off" spellcheck="false" autocomplete="username" name="email" id="loginEmail" required placeholder="أدخل البريد الإلكتروني (e.g. user@gmail.com)" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs font-mono font-medium focus:ring-2 focus:ring-indigo-500 focus:bg-white transition">
           </div>
 
           <div>
             <label class="block text-slate-700 font-bold mb-1.5">كلمة المرور *</label>
-            <input type="password" id="loginPassword" required placeholder="••••••••" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs font-mono font-medium focus:ring-2 focus:ring-indigo-500 focus:bg-white transition">
+            <input type="password" autocomplete="current-password" name="password" id="loginPassword" required placeholder="••••••••" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs font-mono font-medium focus:ring-2 focus:ring-indigo-500 focus:bg-white transition">
           </div>
 
           <div class="flex items-center justify-between text-[11px] text-slate-500 pt-1">
@@ -2981,6 +2981,7 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
           <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-black py-3 rounded-xl shadow-lg transition text-sm flex items-center justify-center gap-2">
             <span>تسجيل الدخول للنظام 🔑</span>
           </button>
+          <div id="loginStatus" class="text-center text-[12px] font-bold text-indigo-600 min-h-[18px]"></div>
         </form>
       </div>
     </div>
@@ -3496,8 +3497,32 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
   // =========================================================================
   const SB_URL = 'https://dbqszalzzmxodqqhhdhi.supabase.co';
   const SB_KEY = 'sb_publishable_FDsbaeTWlzcLatOwK8yhtw_rIeiKbrG';
-  const sb = (window.supabase && window.supabase.createClient)
+  let sb = (window.supabase && window.supabase.createClient)
     ? window.supabase.createClient(SB_URL, SB_KEY) : null;
+  function suLoadLib(src) {
+    return new Promise(function (res, rej) {
+      var el = document.createElement('script'); el.src = src; el.onload = res;
+      el.onerror = function () { rej(new Error('load failed')); }; document.head.appendChild(el);
+    });
+  }
+  function suStage(t) { var el = document.getElementById('loginStatus'); if (el) el.textContent = t || ''; }
+  function suTimeout(p, ms, label) {
+    return new Promise(function (res, rej) {
+      var t = setTimeout(function () { rej(new Error(label + ' — مفيش رد (النت بطيء أو السيرفر مش بيرد)')); }, ms);
+      Promise.resolve(p).then(function (v) { clearTimeout(t); res(v); }, function (e) { clearTimeout(t); rej(e); });
+    });
+  }
+  // لو مكتبة الاتصال ماتحمّلتش من السيرفر الأول، نجرّب سيرفر تاني
+  async function ensureSb() {
+    if (sb) return sb;
+    var srcs = ['https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.78.0/dist/umd/supabase.js',
+                'https://unpkg.com/@supabase/supabase-js@2.78.0/dist/umd/supabase.js'];
+    for (var i = 0; i < srcs.length && !(window.supabase && window.supabase.createClient); i++) {
+      try { await suLoadLib(srcs[i]); } catch (e) {}
+    }
+    if (window.supabase && window.supabase.createClient) sb = window.supabase.createClient(SB_URL, SB_KEY);
+    return sb;
+  }
   let cloudUser = null, cloudReady = false, cloudBusy = false, cloudNeedRefresh = false, cloudPushTimer = null;
   const cloudSynced = {};   // key -> canonical JSON as last known in the cloud
 
@@ -3640,12 +3665,15 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
 
   function showLoginError(msg) {
     const el = document.getElementById('loginErrorAlert');
-    if (el) { el.textContent = msg; el.classList.remove('hidden'); }
+    if (el) { el.textContent = msg; el.classList.remove('hidden'); try { el.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (e) {} }
+    try { showToast('❌ ' + msg, 'red'); } catch (e) {}
   }
 
   async function cloudStart(session) {
     cloudUser = session.user;
-    const { data: prof, error } = await sb.from('profiles').select('*').eq('id', cloudUser.id).maybeSingle();
+    suStage('2/3 جاري تحميل صلاحياتك...');
+    const { data: prof, error } = await suTimeout(sb.from('profiles').select('*').eq('id', cloudUser.id).maybeSingle(), 25000, 'تحميل الصلاحيات');
+    if (error) { await sb.auth.signOut(); cloudUser = null; showLoginError('تعذر تحميل الصلاحيات: ' + (error.message || '')); return false; }
     if (error || !prof || !['admin', 'secretary', 'therapist'].includes(prof.role)) {
       await sb.auth.signOut(); cloudUser = null;
       showLoginError(prof && prof.role === 'pending'
@@ -3661,10 +3689,11 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
     window._realRole = prof.role;
     cloudStatus('busy');
     let pulled;
-    try { pulled = await cloudPull(); }
+    suStage('3/3 جاري تحميل البيانات...');
+    try { pulled = await suTimeout(cloudPull(), 60000, 'تحميل البيانات'); }
     catch (err) {
       console.warn(err); cloudStatus('err');
-      showLoginError('تعذر تحميل البيانات من السحابة. تأكد من النت وجرّب تاني.');
+      showLoginError('تعذر تحميل البيانات: ' + ((err && err.message) || err || ''));
       await sb.auth.signOut(); cloudUser = null; currentUser = null; return false;
     }
     cloudReady = true;
@@ -3697,6 +3726,7 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
   }
 
   async function cloudInit() {
+    if (!sb) await ensureSb();
     if (!sb) { showLoginError('مكتبة الاتصال مش متحملة. تأكد من النت وحدّث الصفحة.'); return; }
     try {
       const { data } = await sb.auth.getSession();
@@ -3713,17 +3743,28 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
     const password = passInput ? passInput.value : '';
     const errAlert = document.getElementById('loginErrorAlert');
     if (errAlert) errAlert.classList.add('hidden');
-    if (!sb) { showLoginError('مكتبة الاتصال مش متحملة. تأكد من النت وحدّث الصفحة.'); return; }
+    if (!email || email.indexOf('@') < 1) { showLoginError('اكتب البريد الإلكتروني كامل (لازم فيه @) وليس اسم مستخدم فقط'); return; }
+    if (!password) { showLoginError('اكتب كلمة المرور'); return; }
     const btn = document.querySelector('#loginForm button[type=submit]');
-    if (btn) btn.disabled = true;
+    if (btn) { btn.disabled = true; btn.textContent = '⏳ جاري الدخول...'; }
     try {
-      const { data, error } = await sb.auth.signInWithPassword({ email, password });
-      if (error || !data || !data.session) { showLoginError('البريد الإلكتروني أو كلمة المرور غير صحيحة'); return; }
+      if (!sb) await ensureSb();
+      if (!sb) { showLoginError('مكتبة الاتصال مش متحملة. تأكد من النت وحدّث الصفحة.'); return; }
+      suStage('1/3 جاري التحقق من الحساب...');
+      const { data, error } = await suTimeout(sb.auth.signInWithPassword({ email, password }), 30000, 'التحقق من الحساب');
+      if (error || !data || !data.session) {
+        const m = (error && error.message) || '';
+        showLoginError(/invalid login|invalid credentials/i.test(m) || !m ? 'البريد الإلكتروني أو كلمة المرور غير صحيحة'
+          : /confirm/i.test(m) ? 'الحساب لسه مش مفعّل (محتاج تأكيد من Supabase)'
+          : /rate|too many/i.test(m) ? 'محاولات كتير — استنى دقيقة وجرّب تاني'
+          : 'تعذر الدخول: ' + m);
+        return;
+      }
       const ok = await cloudStart(data.session);
       if (ok && passInput) passInput.value = '';
     } catch (err) {
-      showLoginError('تعذر الاتصال بالسحابة. تأكد من النت.');
-    } finally { if (btn) btn.disabled = false; }
+      showLoginError('تعذر الدخول: ' + ((err && err.message) || err || 'خطأ غير معروف'));
+    } finally { suStage(''); if (btn) { btn.disabled = false; btn.innerHTML = '<span>تسجيل الدخول للنظام 🔑</span>'; } }
   }
 
   async function handleLogout() {
