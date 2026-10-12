@@ -66,6 +66,8 @@
       #invoice-preview-modal .inv-body { padding: 8px !important; }
     }
 
+    @media (max-width: 820px) { [data-desktop-only] { display: none !important; } }
+
     /* ===== v5: role-based UI ===== */
     .only-therapist { display: none !important; }
     body.role-therapist .only-therapist { display: flex !important; }
@@ -1896,14 +1898,20 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
             <h2 class="text-xl font-black flex items-center gap-2">
               <span>⚙️ إعدادات النظام، الثيم، والصلاحيات</span>
             </h2>
-            <p class="text-xs text-indigo-200 mt-1">رفع اللوجو، تخصيص ألوان الثيم، ضبط الواجهة والبار العلوي، وتحديد الصلاحيات</p>
+            <p class="text-xs text-indigo-200 mt-1">🤝 مشترك للاتنين • 📱 إعدادات التطبيق (الموبايل) • 🖥️ إعدادات سيستم المركز (اللابتوب) • الصلاحيات والأقسام</p>
           </div>
           <div class="flex items-center gap-2 bg-indigo-950/80 p-1.5 rounded-xl border border-indigo-700/50 flex-wrap">
             <button onclick="switchSettingsSubTab('general')" id="subtab-btn-general" class="px-3 py-1.5 rounded-lg text-xs font-bold transition bg-white text-indigo-900 shadow">
-              ⚙️ إعدادات اللوجو والمركز
+              🤝 مشترك: المركز واللوجو
             </button>
             <button onclick="switchSettingsSubTab('theme')" id="subtab-btn-theme" class="px-3 py-1.5 rounded-lg text-xs font-medium text-indigo-200 hover:text-white hover:bg-indigo-800">
-              🎨 ألوان الثيم والواجهة
+              🎨 اللون العام (مشترك)
+            </button>
+            <button onclick="switchSettingsSubTab('app')" id="subtab-btn-app" class="px-3 py-1.5 rounded-lg text-xs font-medium text-indigo-200 hover:text-white hover:bg-indigo-800">
+              📱 إعدادات التطبيق
+            </button>
+            <button onclick="switchSettingsSubTab('system')" id="subtab-btn-system" data-desktop-only="1" class="px-3 py-1.5 rounded-lg text-xs font-medium text-indigo-200 hover:text-white hover:bg-indigo-800">
+              🖥️ إعدادات سيستم المركز
             </button>
             <button onclick="switchSettingsSubTab('permissions')" id="subtab-btn-permissions" class="px-3 py-1.5 rounded-lg text-xs font-medium text-indigo-200 hover:text-white hover:bg-indigo-800">
               🔐 الصلاحيات والمستخدمين
@@ -1917,8 +1925,9 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
         <!-- Sub-Tab 1: General Settings & Logo Upload -->
         <div id="settings-sub-general" class="settings-subtab space-y-6">
           <form onsubmit="saveGeneralSettings(event)" class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-6 text-xs">
+            <div class="rounded-xl p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 font-bold">🤝 مشترك — بيتطبق على التطبيق والسيستم على كل الأجهزة</div>
             <h3 class="font-extrabold text-slate-900 text-sm border-b pb-3 flex items-center gap-2">
-              <span>🏢 البيانات الأساسية للمركز وشعار اللوجو</span>
+              <span>🏢 البيانات الأساسية للمركز واللوجو الرسمي</span>
             </h3>
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1928,7 +1937,7 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
               </div>
               
               <div>
-                <label class="block text-slate-700 font-bold mb-1.5">شعار اللوجو (رفع صورة أو أدخل رابط)</label>
+                <label class="block text-slate-700 font-bold mb-1.5">اللوجو الرسمي (صفحة الدخول، شاشة القفل، الطباعة — وهو اللوجو الافتراضي للبار العلوي)</label>
                 <div>
               <label class="block text-xs font-bold text-slate-600 mb-1">لوجو المركز</label>
               <div class="flex gap-2 items-center">
@@ -1949,13 +1958,6 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label class="block text-slate-700 font-bold mb-1.5">شكل إطار اللوجو 🖼️</label>
-                <select id="settingLogoShape" class="w-full border rounded-xl p-2.5 font-bold">
-                  <option value="circle">⭕ دائري (Circular Frame)</option>
-                  <option value="square">🔲 مربع بحواف منحنية (Rounded Square)</option>
-                </select>
-              </div>
-              <div>
                 <label class="block text-slate-700 font-bold mb-1.5">اللغة الأساسية للنظام 🌐</label>
                 <select id="settingLanguage" class="w-full border rounded-xl p-2.5 font-bold">
                   <option value="ar">العربية (Arabic - RTL)</option>
@@ -1963,13 +1965,17 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
                 </select>
               </div>
               <div>
-                <label class="block text-slate-700 font-bold mb-1.5">العملة المحاسبية 💰</label>
-                <input type="text" id="settingCurrency" value="ج.م" class="w-full border rounded-xl p-2.5 font-bold font-mono">
+                <label class="block text-slate-700 font-bold mb-1.5">تليفون المركز 📞 <span class="font-medium text-slate-400">(للفواتير)</span></label>
+                <input type="text" id="settingCenterPhone" inputmode="tel" class="w-full border rounded-xl p-2.5 font-bold font-mono">
+              </div>
+              <div>
+                <label class="block text-slate-700 font-bold mb-1.5">عنوان المركز 📍 <span class="font-medium text-slate-400">(للفواتير)</span></label>
+                <input type="text" id="settingCenterAddress" class="w-full border rounded-xl p-2.5 font-bold">
               </div>
             </div>
 
             <div>
-              <label class="block text-slate-700 font-bold mb-1.5">نص تذييل فواتير وإيصالات الطباعة (Receipt Footer Note)</label>
+              <label class="block text-slate-700 font-bold mb-1.5">نص تذييل الفواتير والإيصالات (Receipt Footer Note)</label>
               <textarea id="settingReceiptFooter" rows="2" class="w-full border rounded-xl p-2.5 text-slate-700 font-medium"></textarea>
             </div>
 
@@ -1984,8 +1990,9 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
         <!-- Sub-Tab 2: Theme, Colors & Header Bar Customs -->
         <div id="settings-sub-theme" class="settings-subtab space-y-6 hidden">
           <form onsubmit="saveThemeSettings(event)" class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-6 text-xs">
+            <div class="rounded-xl p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 font-bold">🤝 مشترك — اللون الأساسي بيتطبق على التطبيق والسيستم. وكل واحد فيهم يقدر يخصص لون البار العلوي بتاعه من تبويبه.</div>
             <h3 class="font-extrabold text-slate-900 text-sm border-b pb-3 flex items-center gap-2">
-              <span>🎨 تخصيص ألوان الثيم وتصميم البار العلوي والواجهة</span>
+              <span>🎨 اللون العام للنظام (مشترك)</span>
             </h3>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -1995,15 +2002,100 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
                 <div id="brandPalette" class="flex flex-wrap gap-2"></div>
                 <div class="flex items-center gap-2 text-xs font-bold text-slate-600"><input type="color" id="settingBrandColor" class="w-12 h-9 rounded cursor-pointer border" oninput="pickBrandColor(this.value)"> لون مخصص من الـ Color Picker</div>
 
-                <label class="block text-slate-700 font-bold pt-2">نمط عرض أزرار الأقسام (Navigation Style) ☰</label>
+                
+              </div>
+
+              
+            </div>
+
+            <div class="flex justify-end pt-3 border-t">
+              <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-black px-6 py-2.5 rounded-xl shadow text-xs flex items-center gap-1.5">
+                <span>حفظ وتطبيق اللون 🎨</span>
+              </button>
+            </div>
+          </form>
+        </div>
+
+
+        <!-- Sub-Tab: App (mobile) settings -->
+        <div id="settings-sub-app" class="settings-subtab space-y-6 hidden">
+          <form onsubmit="saveAppSettings(event)" class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-6 text-xs">
+            <div class="rounded-xl p-3 bg-sky-50 border border-sky-200 text-sky-800 font-bold">📱 إعدادات التطبيق — بتتطبق على شكل التطبيق (الموبايل والتابلت) على كل الأجهزة. تقدر تعدلها من أي جهاز.</div>
+
+            <h3 class="font-extrabold text-slate-900 text-sm border-b pb-3">🖼️ الشريط العلوي في التطبيق</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div id="appLogoBlock"></div>
+              <div class="space-y-4">
+                <label class="flex items-center gap-2 cursor-pointer font-bold text-slate-700">
+                  <input type="checkbox" id="appShowName" class="w-4 h-4 rounded text-indigo-600"><span>إظهار اسم المركز بجانب اللوجو</span>
+                </label>
+                <div id="appHdrBlock"></div>
+              </div>
+            </div>
+
+            <h3 class="font-extrabold text-slate-900 text-sm border-b pb-3 pt-2">🔠 الشكل العام</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label class="block text-slate-700 font-bold mb-1.5">حجم الخط</label>
+                <select id="appFontScale" class="w-full border rounded-xl p-2.5 font-bold">
+                  <option value="s">صغير</option><option value="m">عادي</option><option value="l">كبير</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-slate-700 font-bold mb-1.5">كثافة القوائم</label>
+                <select id="appDensity" class="w-full border rounded-xl p-2.5 font-bold">
+                  <option value="comfy">مريح</option><option value="compact">مضغوط (يعرض أسماء أكتر)</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-slate-700 font-bold mb-1.5">الصفحة الافتتاحية بعد الدخول</label>
+                <select id="appHomeTab" class="w-full border rounded-xl p-2.5 font-bold"></select>
+              </div>
+            </div>
+
+            <h3 class="font-extrabold text-slate-900 text-sm border-b pb-3 pt-2">🧭 الشريط السفلي والأمان</h3>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div><label class="block text-slate-700 font-bold mb-1.5">زر 1 في الشريط السفلي</label><select id="appNav1" class="w-full border rounded-xl p-2.5 font-bold"></select></div>
+              <div><label class="block text-slate-700 font-bold mb-1.5">زر 2</label><select id="appNav2" class="w-full border rounded-xl p-2.5 font-bold"></select></div>
+              <div><label class="block text-slate-700 font-bold mb-1.5">زر 3</label><select id="appNav3" class="w-full border rounded-xl p-2.5 font-bold"></select></div>
+              <div>
+                <label class="block text-slate-700 font-bold mb-1.5">قفل التطبيق تلقائياً بعد</label>
+                <select id="appAutoLock" class="w-full border rounded-xl p-2.5 font-bold">
+                  <option value="30">30 ثانية</option><option value="60">دقيقة</option><option value="180">3 دقايق</option><option value="300">5 دقايق</option><option value="0">أبداً</option>
+                </select>
+              </div>
+            </div>
+            <p class="text-[11px] text-slate-400">القفل التلقائي بيشتغل بس على الأجهزة اللي مفعّل عليها كود الدخول السريع.</p>
+
+            <div class="flex flex-wrap justify-between gap-2 pt-3 border-t">
+              <button type="button" onclick="suResetSurface('app')" class="text-slate-500 hover:text-rose-600 font-bold px-3 py-2 rounded-xl text-xs">↺ رجوع كل إعدادات التطبيق للافتراضي</button>
+              <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-black px-6 py-2.5 rounded-xl shadow text-xs">حفظ إعدادات التطبيق 📱</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Sub-Tab: System (laptop) settings -->
+        <div id="settings-sub-system" class="settings-subtab space-y-6 hidden">
+          <form onsubmit="saveSystemSettings(event)" class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-6 text-xs">
+            <div class="rounded-xl p-3 bg-violet-50 border border-violet-200 text-violet-800 font-bold">🖥️ إعدادات سيستم المركز — بتتطبق على السيستم (اللابتوب والشاشات الكبيرة) على كل الأجهزة الكبيرة. بتتعدل من اللابتوب بس.</div>
+
+            <h3 class="font-extrabold text-slate-900 text-sm border-b pb-3">🖼️ البار العلوي في السيستم</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div id="sysLogoBlock"></div>
+              <div class="space-y-4">
+                <div id="sysHdrBlock"></div>
+                <div class="space-y-3 pt-2">
+<label class="block text-slate-700 font-bold pt-2">نمط عرض أزرار الأقسام (Navigation Style) ☰</label>
                 <select id="settingNavStyle" class="w-full border rounded-xl p-2.5 font-bold">
                   <option value="sidebar">🧭 شريط جانبي ثابت (احترافي)</option>
                   <option value="compact">☰ قائمة مدمجة هادئة (Categorized Dropdown Menu)</option>
                   <option value="full">↔️ جميع أزرار الأقسام معروضة بجانب بعضها</option>
                 </select>
+                </div>
               </div>
+            </div>
 
-              <!-- Header Bar Elements toggles -->
+            <!-- Header Bar Elements toggles -->
               <div class="space-y-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
                 <label class="block text-slate-900 font-extrabold border-b pb-2">🛠️ اختيار العناصر المعروضة في البار العلوي:</label>
                 <div class="space-y-2 font-bold text-slate-700">
@@ -2025,12 +2117,30 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
                   </label>
                 </div>
               </div>
+
+            <h3 class="font-extrabold text-slate-900 text-sm border-b pb-3 pt-2">📐 شكل الصفحات والجداول</h3>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div>
+                <label class="block text-slate-700 font-bold mb-1.5">كثافة الجداول</label>
+                <select id="sysDensity" class="w-full border rounded-xl p-2.5 font-bold"><option value="comfy">مريح</option><option value="compact">مضغوط (صفوف أكتر)</option></select>
+              </div>
+              <div>
+                <label class="block text-slate-700 font-bold mb-1.5">عرض المحتوى</label>
+                <select id="sysWidth" class="w-full border rounded-xl p-2.5 font-bold"><option value="normal">عادي</option><option value="wide">عريض</option><option value="full">ملء الشاشة</option></select>
+              </div>
+              <div>
+                <label class="block text-slate-700 font-bold mb-1.5">حجم الخط</label>
+                <select id="sysFontScale" class="w-full border rounded-xl p-2.5 font-bold"><option value="s">صغير</option><option value="m">عادي</option><option value="l">كبير</option></select>
+              </div>
+              <div class="space-y-2 pt-6">
+                <label class="flex items-center gap-2 cursor-pointer font-bold text-slate-700"><input type="checkbox" id="sysZebra" class="w-4 h-4 rounded text-indigo-600"><span>صفوف متبادلة الألوان</span></label>
+                <label class="flex items-center gap-2 cursor-pointer font-bold text-slate-700"><input type="checkbox" id="sysSideCollapsed" class="w-4 h-4 rounded text-indigo-600"><span>الشريط الجانبي يبدأ مصغّر</span></label>
+              </div>
             </div>
 
-            <div class="flex justify-end pt-3 border-t">
-              <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-black px-6 py-2.5 rounded-xl shadow text-xs flex items-center gap-1.5">
-                <span>حفظ وتطبيق إعدادات الثيم والواجهة 🎨</span>
-              </button>
+            <div class="flex flex-wrap justify-between gap-2 pt-3 border-t">
+              <button type="button" onclick="suResetSurface('sys')" class="text-slate-500 hover:text-rose-600 font-bold px-3 py-2 rounded-xl text-xs">↺ رجوع كل إعدادات السيستم للافتراضي</button>
+              <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-black px-6 py-2.5 rounded-xl shadow text-xs">حفظ إعدادات السيستم 🖥️</button>
             </div>
           </form>
         </div>
@@ -5154,7 +5264,11 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
         accentColor: '#6366f1',
       };
     }
-    return state.settings.invoiceConfig;
+    const _c = state.settings.invoiceConfig, _s = state.settings;
+    if (_s.centerPhone && (!_c.centerPhone || _c.centerPhone === '01000000000')) _c.centerPhone = _s.centerPhone;
+    if (_s.centerAddress && (!_c.centerAddress || _c.centerAddress === 'الإسكندرية، مصر')) _c.centerAddress = _s.centerAddress;
+    if (_s.receiptFooter && (!_c.footerText || String(_c.footerText).indexOf('شكراً لثقتكم') === 0)) _c.footerText = _s.receiptFooter;
+    return _c;
   }
 
   function openInvoiceModal(inv, yearMonth) {
@@ -5770,6 +5884,7 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
         <div class="text-center"><div class="text-slate-400 font-bold">توقيع المستلم</div><div class="mt-6 font-bold text-slate-800">إدارة مركز Speak Up</div></div>
         <div class="text-center"><div class="text-slate-400 font-bold">ختم المركز</div><div class="mt-6 w-16 h-16 border-2 border-dashed border-slate-300 rounded-full mx-auto flex items-center justify-center text-[10px] text-slate-400 font-bold">ختم معتمد</div></div>
       </div>
+      ${(state.settings && state.settings.receiptFooter) ? '<div class="text-center text-[11px] text-slate-500 pt-3 border-t">' + dashEsc(state.settings.receiptFooter) + '</div>' : ''}
     `;
     openModal('printModal');
   }
@@ -6395,11 +6510,19 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
   }
 
   function applyLogoToHeader(logoUrl) {
-    const effectiveLogo = (window.SU_HEADER_LOGO && window.matchMedia('(max-width:820px)').matches) ? window.SU_HEADER_LOGO : (logoUrl || window.SU_DEFAULT_LOGO || 'speakup_logo.png');
+    const st = (state && state.settings) || {};
+    const app = st.app || {}, sys = st.sys || {};
+    const isApp = window.matchMedia('(max-width:820px)').matches;
+    const shared = logoUrl || st.logoUrl || '';
+    // التطبيق: لوجو التطبيق الخاص بيه (أو المربع الافتراضي) — السيستم: لوجو السيستم (أو اللوجو الرسمي)
+    const effectiveLogo = isApp
+      ? (app.logoUrl || window.SU_HEADER_LOGO || shared || window.SU_DEFAULT_LOGO || 'speakup_logo.png')
+      : (sys.logoUrl || shared || window.SU_DEFAULT_LOGO || 'speakup_logo.png');
+    window.SU_APP_LOGO = app.logoUrl || '';
     const logoImg = document.getElementById('headerLogoImg');
     const logoEmoji = document.getElementById('headerLogoEmoji');
     if (effectiveLogo && logoImg) {
-      logoImg.src = effectiveLogo;
+      if (logoImg.getAttribute('src') !== effectiveLogo) logoImg.src = effectiveLogo;
       logoImg.classList.remove('hidden');
       if (logoEmoji) logoEmoji.classList.add('hidden');
     }
@@ -6428,9 +6551,9 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
     const fields = {
       'settingCenterName':    s.centerName || '',
       'settingLogoUrl':       s.logoUrl || '',
-      'settingLogoShape':     s.logoShape || 'circle',
       'settingLanguage':      s.language || 'ar',
-      'settingCurrency':      s.currency || 'ج.م',
+      'settingCenterPhone':   s.centerPhone || '',
+      'settingCenterAddress': s.centerAddress || '',
       'settingReceiptFooter': s.receiptFooter || ''
     };
     Object.entries(fields).forEach(([id, val]) => {
@@ -6465,7 +6588,7 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
 
   function switchSettingsSubTab(subTab) {
     document.querySelectorAll('.settings-subtab').forEach(el => el.classList.add('hidden'));
-    document.querySelectorAll('#subtab-btn-general, #subtab-btn-theme, #subtab-btn-permissions, #subtab-btn-custom').forEach(btn => {
+    document.querySelectorAll('#subtab-btn-general, #subtab-btn-theme, #subtab-btn-app, #subtab-btn-system, #subtab-btn-permissions, #subtab-btn-custom').forEach(btn => {
       btn.className = 'px-3 py-1.5 rounded-lg text-xs font-medium text-indigo-200 hover:text-white hover:bg-indigo-800';
     });
 
@@ -6477,6 +6600,8 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
 
     if (subTab === 'general') renderGeneralSettingsForm();
     if (subTab === 'theme') { renderThemeSettingsForm(); }
+    if (subTab === 'app') renderAppSettingsForm();
+    if (subTab === 'system') renderSystemSettingsForm();
     if (subTab === 'permissions') { renderUsersTable(); renderPermissionsMatrix(); }
   }
 
@@ -6484,9 +6609,9 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
     const s = state.settings || defaultSettings;
     if (document.getElementById('settingCenterName')) document.getElementById('settingCenterName').value = s.centerName || '';
     if (document.getElementById('settingLogoUrl')) document.getElementById('settingLogoUrl').value = s.logoUrl || '';
-    if (document.getElementById('settingLogoShape')) document.getElementById('settingLogoShape').value = s.logoShape || 'circle';
     if (document.getElementById('settingLanguage')) document.getElementById('settingLanguage').value = s.language || 'ar';
-    if (document.getElementById('settingCurrency')) document.getElementById('settingCurrency').value = s.currency || 'ج.م';
+    if (document.getElementById('settingCenterPhone')) document.getElementById('settingCenterPhone').value = s.centerPhone || '';
+    if (document.getElementById('settingCenterAddress')) document.getElementById('settingCenterAddress').value = s.centerAddress || '';
     if (document.getElementById('settingReceiptFooter')) document.getElementById('settingReceiptFooter').value = s.receiptFooter || '';
   }
 
@@ -6498,17 +6623,17 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
     // Only save non-empty values to avoid overwriting with blanks
     const centerName = document.getElementById('settingCenterName')?.value.trim();
     const logoUrl = document.getElementById('settingLogoUrl')?.value.trim();
-    const logoShape = document.getElementById('settingLogoShape')?.value;
     const language = document.getElementById('settingLanguage')?.value;
-    const currency = document.getElementById('settingCurrency')?.value.trim();
+    const centerPhone = document.getElementById('settingCenterPhone')?.value.trim();
+    const centerAddress = document.getElementById('settingCenterAddress')?.value.trim();
     const receiptFooter = document.getElementById('settingReceiptFooter')?.value.trim();
     
     if (centerName) state.settings.centerName = centerName;
     if (logoUrl !== undefined) state.settings.logoUrl = logoUrl;
-    if (logoShape) state.settings.logoShape = logoShape;
+    if (centerPhone !== undefined) state.settings.centerPhone = centerPhone;
+    if (centerAddress !== undefined) state.settings.centerAddress = centerAddress;
     const prevLang = state.settings.language || 'ar';
     if (language) state.settings.language = language;
-    if (currency) state.settings.currency = currency;
     if (receiptFooter !== undefined) state.settings.receiptFooter = receiptFooter;
     
     saveState();
@@ -6529,31 +6654,213 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
 
   function renderThemeSettingsForm() {
     const s = state.settings || defaultSettings;
-    if (document.getElementById('settingHeaderColor')) document.getElementById('settingHeaderColor').value = s.headerColor || 'indigo';
     window._brandPick = s.brandColor || ''; renderBrandPalette(s.brandColor);
-    if (document.getElementById('settingNavStyle')) document.getElementById('settingNavStyle').value = s.navStyle || 'sidebar';
-    if (document.getElementById('headerShowBranch')) document.getElementById('headerShowBranch').checked = s.showBranchFilter !== false;
-    if (document.getElementById('headerShowUser')) document.getElementById('headerShowUser').checked = s.showUser !== false;
-    if (document.getElementById('headerShowAddStaff')) document.getElementById('headerShowAddStaff').checked = s.showAddStaff !== false;
-    if (document.getElementById('headerShowAddSession')) document.getElementById('headerShowAddSession').checked = s.showAddSession !== false;
   }
 
   function saveThemeSettings(e) {
     if (e && e.preventDefault) e.preventDefault();
     if (!state.settings) state.settings = JSON.parse(JSON.stringify(defaultSettings));
-    
-    state.settings.headerColor = document.getElementById('settingHeaderColor')?.value || 'indigo';
     state.settings.brandColor = window._brandPick || state.settings.brandColor || '';
-    state.settings.navStyle = document.getElementById('settingNavStyle')?.value || 'sidebar';
-    state.settings.showBranchFilter = document.getElementById('headerShowBranch')?.checked ?? true;
-    state.settings.showUser = document.getElementById('headerShowUser')?.checked ?? true;
-    state.settings.showAddStaff = document.getElementById('headerShowAddStaff')?.checked ?? true;
-    state.settings.showAddSession = document.getElementById('headerShowAddSession')?.checked ?? true;
-    
     saveState();
     applyThemeSystem();
-    showToast('✅ تم حفظ وتطبيق الثيم والواجهة فوراً!', 'green');
+    showToast('✅ تم حفظ وتطبيق اللون فوراً!', 'green');
   }
+
+
+  // =========================================================================
+  // إعدادات منفصلة: 🤝 مشترك  |  📱 التطبيق (موبايل)  |  🖥️ سيستم المركز (لابتوب)
+  // كلها بتتحفظ في state.settings وبتتزامن مع السحابة؛ app و sys بيتطبقوا بحسب نوع الشاشة.
+  // =========================================================================
+  const SU_TAB_OPTS = [['dashboard', '📊 لوحة التحكم'], ['secretary', '⚡ كشف الحضور'], ['calendar', '📅 الكاليندر'], ['clients', '👥 العملاء'], ['sessions', '📋 الجلسات'], ['invoices', '🧾 الفواتير'], ['payments', '💵 المدفوعات'], ['purchases', '🛒 المشتريات']];
+  function suSettings() { if (!state.settings) state.settings = JSON.parse(JSON.stringify(defaultSettings)); return state.settings; }
+  function suSurf(k) { const s = suSettings(); if (!s[k] || typeof s[k] !== 'object') s[k] = {}; return s[k]; }
+  const suEl = id => document.getElementById(id);
+  const suHex = v => /^#[0-9a-f]{6}$/i.test(v || '');
+
+  function suLogoBlock(k, defH, minH, maxH) {
+    return `<div class="space-y-3">
+      <label class="block text-slate-700 font-bold">شعار البار العلوي</label>
+      <div class="flex gap-2 items-center">
+        <div id="${k}LogoPreview" class="h-14 min-w-[56px] max-w-[170px] rounded-xl bg-slate-100 border border-slate-300 flex items-center justify-center overflow-hidden text-xl px-1">🗣️</div>
+        <div class="flex-1 space-y-1.5">
+          <label class="flex items-center gap-2 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-xl px-3 py-2 cursor-pointer text-xs font-bold text-indigo-700 transition">📁 اختر صورة من جهازك
+            <input type="file" accept="image/*" class="hidden" onchange="suPickSurfaceLogo(this,'${k}')"></label>
+          <input type="text" id="${k}LogoUrl" placeholder="أو الصق رابط صورة هنا..." oninput="suSurfLogoPreview('${k}',this.value)" class="w-full border border-slate-300 rounded-lg px-3 py-1.5 text-xs">
+          <button type="button" onclick="suResetSurfaceLogo('${k}')" class="text-[11px] font-bold text-slate-500 hover:text-rose-600">↺ رجوع للوجو الافتراضي</button>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div><label class="block text-slate-600 font-bold mb-1">شكل اللوجو</label>
+          <select id="${k}LogoStyle" class="w-full border rounded-xl p-2 font-bold"><option value="wide">عريض (من غير إطار)</option><option value="square">مربع بحواف منحنية</option><option value="circle">دائري</option></select></div>
+        <div><label class="block text-slate-600 font-bold mb-1">الارتفاع: <span id="${k}LogoHVal" class="font-mono"></span>px</label>
+          <input type="range" id="${k}LogoHeight" min="${minH}" max="${maxH}" step="2" value="${defH}" class="w-full" oninput="document.getElementById('${k}LogoHVal').textContent=this.value"></div>
+      </div></div>`;
+  }
+  function suHdrBlock(k) {
+    return `<div class="flex items-center gap-3 flex-wrap">
+      <label class="flex items-center gap-2 cursor-pointer font-bold text-slate-700"><input type="checkbox" id="${k}HdrOn" class="w-4 h-4 rounded text-indigo-600" onchange="document.getElementById('${k}HdrColor').disabled=!this.checked"><span>لون مخصص للبار العلوي</span></label>
+      <input type="color" id="${k}HdrColor" value="#4338ca" class="w-12 h-9 rounded cursor-pointer border" disabled>
+    </div>`;
+  }
+  function suFillTabs(id, cur, withNone) {
+    const el = suEl(id); if (!el) return;
+    el.innerHTML = (withNone ? '<option value="">— بدون —</option>' : '') + SU_TAB_OPTS.map(o => `<option value="${o[0]}">${o[1]}</option>`).join('');
+    el.value = cur || '';
+  }
+  function suSurfLogoPreview(k, url) {
+    const pv = suEl(k + 'LogoPreview'); if (!pv) return;
+    if (url) pv.innerHTML = `<img src="${dashEsc(url)}" style="max-height:100%;max-width:100%;object-fit:contain" onerror="this.parentElement.textContent='❌'">`;
+    else pv.textContent = '🗣️';
+  }
+  function suResizeImage(file, maxW) {
+    return new Promise((resolve, reject) => {
+      const fr = new FileReader();
+      fr.onerror = () => reject(new Error('read'));
+      fr.onload = () => {
+        if (/svg/.test(file.type)) { resolve(fr.result); return; }
+        const im = new Image();
+        im.onerror = () => reject(new Error('img'));
+        im.onload = () => {
+          const k = Math.min(1, maxW / im.width), w = Math.max(1, Math.round(im.width * k)), h = Math.max(1, Math.round(im.height * k));
+          const c = document.createElement('canvas'); c.width = w; c.height = h;
+          c.getContext('2d').drawImage(im, 0, 0, w, h);
+          resolve(c.toDataURL(/png|webp|gif/.test(file.type) ? 'image/png' : 'image/jpeg', 0.92));
+        };
+        im.src = fr.result;
+      };
+      fr.readAsDataURL(file);
+    });
+  }
+  async function suPickSurfaceLogo(input, k) {
+    const f = input.files && input.files[0]; if (!f) return;
+    if (f.size > 4 * 1024 * 1024) { alert('الصورة كبيرة — اختر صورة أقل من 4MB'); return; }
+    try {
+      const url = await suResizeImage(f, 700);
+      suEl(k + 'LogoUrl').value = url; suSurfLogoPreview(k, url);
+      showToast('تم اختيار الصورة — اضغط «حفظ» لتطبيقها', 'blue');
+    } catch (e) { alert('تعذر قراءة الصورة'); }
+    input.value = '';
+  }
+  function suResetSurfaceLogo(k) { const u = suEl(k + 'LogoUrl'); if (u) u.value = ''; suSurfLogoPreview(k, ''); }
+
+  function suFillSurfaceLogo(k, o, defH) {
+    suEl(k + 'LogoUrl').value = o.logoUrl || ''; suSurfLogoPreview(k, o.logoUrl || '');
+    suEl(k + 'LogoStyle').value = o.logoStyle || 'wide';
+    suEl(k + 'LogoHeight').value = o.logoHeight || defH; suEl(k + 'LogoHVal').textContent = suEl(k + 'LogoHeight').value;
+    suEl(k + 'HdrOn').checked = suHex(o.headerColor); suEl(k + 'HdrColor').value = suHex(o.headerColor) ? o.headerColor : '#4338ca'; suEl(k + 'HdrColor').disabled = !suHex(o.headerColor);
+  }
+  function suReadSurfaceLogo(k, o, defH) {
+    const u = suEl(k + 'LogoUrl').value.trim(); if (u) o.logoUrl = u; else delete o.logoUrl;
+    o.logoStyle = suEl(k + 'LogoStyle').value;
+    const h = parseInt(suEl(k + 'LogoHeight').value, 10); if (h && h !== defH) o.logoHeight = h; else delete o.logoHeight;
+    if (suEl(k + 'HdrOn').checked) o.headerColor = suEl(k + 'HdrColor').value; else delete o.headerColor;
+  }
+
+  function renderAppSettingsForm() {
+    if (!suEl('appLogoBlock').firstChild) { suEl('appLogoBlock').innerHTML = suLogoBlock('app', 40, 28, 60); suEl('appHdrBlock').innerHTML = suHdrBlock('app'); }
+    const o = suSurf('app');
+    suFillSurfaceLogo('app', o, 40);
+    suEl('appShowName').checked = !!o.showName;
+    suEl('appFontScale').value = o.fontScale || 'm';
+    suEl('appDensity').value = o.density || 'comfy';
+    suFillTabs('appHomeTab', o.homeTab || 'dashboard', false);
+    const nav = Array.isArray(o.bottomNav) && o.bottomNav.length ? o.bottomNav : ['clients', 'calendar', 'sessions'];
+    [1, 2, 3].forEach(i => suFillTabs('appNav' + i, nav[i - 1] || '', true));
+    suEl('appAutoLock').value = String(o.autoLockSec != null ? o.autoLockSec : 60);
+  }
+  function saveAppSettings(e) {
+    if (e && e.preventDefault) e.preventDefault();
+    const o = suSurf('app');
+    suReadSurfaceLogo('app', o, 40);
+    o.showName = suEl('appShowName').checked;
+    o.fontScale = suEl('appFontScale').value; o.density = suEl('appDensity').value;
+    o.homeTab = suEl('appHomeTab').value;
+    const nav = [1, 2, 3].map(i => suEl('appNav' + i).value).filter((v, i, a) => v && a.indexOf(v) === i);
+    o.bottomNav = nav.length ? nav : ['clients', 'calendar', 'sessions'];
+    o.autoLockSec = parseInt(suEl('appAutoLock').value, 10);
+    saveState(); applyThemeSystem();
+    try { window.mRebuildNav && window.mRebuildNav(); } catch (er) {}
+    showToast('✅ تم حفظ إعدادات التطبيق' + (suIsApp() ? '' : ' — هتظهر على الموبايل'), 'green');
+  }
+  function renderSystemSettingsForm() {
+    if (!suEl('sysLogoBlock').firstChild) { suEl('sysLogoBlock').innerHTML = suLogoBlock('sys', 56, 36, 90); suEl('sysHdrBlock').innerHTML = suHdrBlock('sys'); }
+    const o = suSurf('sys'), s = suSettings();
+    suFillSurfaceLogo('sys', o, 56);
+    suEl('settingNavStyle').value = s.navStyle || 'sidebar';
+    suEl('headerShowBranch').checked = s.showBranchFilter !== false;
+    suEl('headerShowUser').checked = s.showUser !== false;
+    suEl('headerShowAddStaff').checked = s.showAddStaff !== false;
+    suEl('headerShowAddSession').checked = s.showAddSession !== false;
+    suEl('sysDensity').value = o.density || 'comfy'; suEl('sysWidth').value = o.width || 'normal'; suEl('sysFontScale').value = o.fontScale || 'm';
+    suEl('sysZebra').checked = !!o.zebra; suEl('sysSideCollapsed').checked = !!o.sideCollapsed;
+  }
+  function saveSystemSettings(e) {
+    if (e && e.preventDefault) e.preventDefault();
+    const o = suSurf('sys'), s = suSettings();
+    suReadSurfaceLogo('sys', o, 56);
+    s.navStyle = suEl('settingNavStyle').value || 'sidebar';
+    s.showBranchFilter = suEl('headerShowBranch').checked; s.showUser = suEl('headerShowUser').checked;
+    s.showAddStaff = suEl('headerShowAddStaff').checked; s.showAddSession = suEl('headerShowAddSession').checked;
+    o.density = suEl('sysDensity').value; o.width = suEl('sysWidth').value; o.fontScale = suEl('sysFontScale').value;
+    o.zebra = suEl('sysZebra').checked; o.sideCollapsed = suEl('sysSideCollapsed').checked;
+    try { localStorage.removeItem('SPEAK_UP_SIDEBAR_COLLAPSED'); } catch (er) {}
+    document.body.classList.toggle('sidebar-collapsed', !!o.sideCollapsed);
+    saveState(); applyThemeSystem();
+    showToast('✅ تم حفظ إعدادات السيستم', 'green');
+  }
+  function suResetSurface(k) {
+    if (!confirm(k === 'app' ? 'رجوع كل إعدادات التطبيق للافتراضي؟' : 'رجوع كل إعدادات السيستم للافتراضي؟')) return;
+    const s = suSettings(); s[k] = {};
+    if (k === 'sys') { ['navStyle', 'showBranchFilter', 'showUser', 'showAddStaff', 'showAddSession'].forEach(x => delete s[x]); s.navStyle = 'sidebar'; }
+    saveState(); applyThemeSystem();
+    try { window.mRebuildNav && window.mRebuildNav(); } catch (er) {}
+    (k === 'app' ? renderAppSettingsForm : renderSystemSettingsForm)();
+    showToast('تم الرجوع للافتراضي', 'amber');
+  }
+  function suIsApp() { return window.matchMedia('(max-width:820px)').matches; }
+
+  // يبني CSS الخاص بكل شاشة (تطبيق / سيستم) ويطبّقه بـ media queries، فالتطبيق ما بيتأثرش بإعدادات السيستم والعكس
+  function applySurfaceSettings() {
+    const st = (state && state.settings) || {}, app = st.app || {}, sys = st.sys || {};
+    const SC = { s: 14, l: 18 }, SCD = { s: 14.4, l: 17.6 };
+    let css = '';
+    // ---- التطبيق ----
+    let a = '';
+    const aStyle = app.logoStyle || 'wide', aH = app.logoHeight;
+    if (aH || aStyle !== 'wide') {
+      const H = aH || 40;
+      a += `html body #headerLogoContainer{height:${H}px!important;width:${aStyle === 'wide' ? 'auto' : H + 'px'}!important;max-width:60vw!important}`;
+      a += `html body #headerLogoImg{object-fit:${aStyle === 'wide' ? 'contain' : 'cover'};border-radius:${aStyle === 'circle' ? '50%' : aStyle === 'square' ? '12px' : '0'};${aStyle === 'wide' ? '' : 'width:' + H + 'px;height:' + H + 'px;'}}`;
+      a += `html body #mainHeader>div>div{height:${Math.max(52, H + 14)}px!important}`;
+    }
+    if (suHex(app.headerColor)) a += `html body #mainHeader{background:${app.headerColor}!important}`;
+    if (app.showName) a += `html body #mainHeader #headerCenterName{display:block!important;color:#fff;margin-inline:8px}`;
+    if (app.fontScale && SC[app.fontScale]) a += `html{font-size:${SC[app.fontScale]}px}`;
+    if (app.density === 'compact') a += `.sul-row{padding-top:5px!important;padding-bottom:5px!important;min-height:44px!important}.sul-dl>div{padding:4px 0!important}`;
+    if (a) css += `@media (max-width:820px){${a}}`;
+    // ---- السيستم ----
+    let d = '';
+    const sStyle = sys.logoStyle || 'wide', sH = sys.logoHeight;
+    if (sH || sStyle !== 'wide') {
+      const H = sH || 56;
+      d += `html body #headerLogoContainer{height:${H}px!important;width:${sStyle === 'wide' ? 'auto' : H + 'px'}!important;max-width:50vw!important}`;
+      d += `html body #headerLogoImg{object-fit:${sStyle === 'wide' ? 'contain' : 'cover'};border-radius:${sStyle === 'circle' ? '50%' : sStyle === 'square' ? '12px' : '0'};${sStyle === 'wide' ? '' : 'width:' + H + 'px;height:' + H + 'px;'}}`;
+      d += `html body #mainHeader>div>div{height:${Math.max(62, H + 14)}px!important}`;
+    }
+    if (suHex(sys.headerColor)) d += `html body #mainHeader{background:${sys.headerColor}!important}`;
+    if (sys.fontScale && SCD[sys.fontScale]) d += `html{font-size:${SCD[sys.fontScale]}px}`;
+    if (sys.density === 'compact') d += `.data-tbl tbody td{padding:5px 8px!important}.data-tbl thead th{padding:7px 8px!important}`;
+    if (sys.zebra) d += `.data-tbl tbody tr:nth-child(even) td{background-color:#f8fafc}`;
+    if (sys.width === 'wide') d += `html body main{max-width:1600px!important}`;
+    if (sys.width === 'full') d += `html body main{max-width:none!important}`;
+    if (d) css += `@media (min-width:821px){${d}}`;
+    let el = document.getElementById('suSurfaceCss');
+    if (!el) { el = document.createElement('style'); el.id = 'suSurfaceCss'; document.head.appendChild(el); }
+    if (el.textContent !== css) el.textContent = css;
+    // لون شريط الحالة في الموبايل
+    try { const m = document.querySelector('meta[name=theme-color]'); if (m) { if (!m.dataset.orig) m.dataset.orig = m.content; m.content = (suIsApp() && suHex(app.headerColor)) ? app.headerColor : m.dataset.orig; } } catch (e) {}
+  }
+  try { window.matchMedia('(max-width:820px)').addEventListener('change', () => { try { applyThemeSystem(); } catch (e) {} }); } catch (e) {}
 
   function renderUsersTable() {
     const tbody = document.getElementById('users-tbody');
@@ -6895,6 +7202,8 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
     const headerColor = s.headerColor || 'indigo';
     applyBrandTheme(s.brandColor);
     const navStyle = s.navStyle || 'sidebar';
+    // الشريط الجانبي يبدأ مصغّر (إعداد السيستم) — بس لو المستخدم ماغيّرش بإيده على الجهاز ده
+    try { if (localStorage.getItem('SPEAK_UP_SIDEBAR_COLLAPSED') === null && s.sys && s.sys.sideCollapsed) document.body.classList.add('sidebar-collapsed'); } catch (e) {}
 
     // 1. Apply Header Color Classes
     const headerEl = document.getElementById('mainHeader');
@@ -6963,6 +7272,7 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
       headerCenterName.textContent = s.centerName;
     }
     applyLogoToHeader(s.logoUrl || '');
+    try { applySurfaceSettings(); } catch (e) { console.warn('applySurfaceSettings', e); }
   }
 
 
@@ -8072,7 +8382,8 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
   // ===== Mobile bottom navigation (مبني من أزرار السايدبار نفسها، فالصلاحيات بتتطبق تلقائي) =====
   (function () {
     const MQ = window.matchMedia('(max-width: 820px)');
-    const PRIORITY = ['clients', 'calendar', 'sessions'];
+    const DEFAULT_PRIORITY = ['clients', 'calendar', 'sessions'];
+    function PRIORITY_LIST() { try { const b = state.settings.app.bottomNav; if (Array.isArray(b) && b.length) return b; } catch (e) {} return DEFAULT_PRIORITY; }
     const MAX_ITEMS = 3;                       // + زر "المزيد"
     let building = false;
 
@@ -8083,7 +8394,7 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
       if (building) return; building = true;
       try {
         const nav = document.getElementById('mNav'); if (!nav) return;
-        const visible = PRIORITY.filter(id => isVisible(sideBtn(id)) || (sideBtn(id) && !sideBtn(id).classList.contains('hidden')));
+        const visible = PRIORITY_LIST().filter(id => isVisible(sideBtn(id)) || (sideBtn(id) && !sideBtn(id).classList.contains('hidden')));
         const items = visible.slice(0, MAX_ITEMS);
         const activeId = (document.querySelector('#sideNav .side-tab.active') || {}).id || '';
         let html = '';
@@ -8117,6 +8428,7 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
       if (side) new MutationObserver(buildMobileNav).observe(side, { attributes: true, attributeFilter: ['class'], subtree: true });
       MQ.addEventListener && MQ.addEventListener('change', function () { mCloseMore(); buildMobileNav(); });
       setTimeout(buildMobileNav, 600); setTimeout(buildMobileNav, 2000);
+      window.mRebuildNav = function () { const n = document.getElementById('mNav'); if (n) n.dataset.sig = ''; buildMobileNav(); };
     }
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
   })();
@@ -8127,7 +8439,7 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
   // لو الجلسة انتهت أو عملت "خروج" لازم إيميل وباسورد مرة واحدة.
   (function () {
     const KEY = 'SPEAK_UP_PIN', SKIP = 'SPEAK_UP_PIN_SKIP';
-    const AUTO_LOCK_MS = 60 * 1000;   // يقفل لوحده لو سبت التطبيق أكتر من دقيقة
+    function autoLockMs() { try { const v = state.settings.app.autoLockSec; if (v === 0) return Infinity; if (v > 0) return v * 1000; } catch (e) {} return 60 * 1000; }   // إعداد التطبيق: القفل التلقائي (الافتراضي دقيقة)
     const MAX_TRIES = 5;              // بعد 5 محاولات غلط: خروج كامل
     const root = document.documentElement;
     const hasSubtle = !!(window.crypto && crypto.subtle);
@@ -8379,6 +8691,10 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
       cloudStart = async function (s) {
         const ok = await _cs(s);
         try { if (ok) window.pinAfterLogin(s && s.user); } catch (e) {}
+        try { // الصفحة الافتتاحية للتطبيق (إعداد التطبيق)
+          const h = ok && window.matchMedia('(max-width:820px)').matches && state.settings && state.settings.app && state.settings.app.homeTab;
+          if (h && h !== 'dashboard') { const b = document.getElementById('side-nav-' + h); if (b && !b.classList.contains('hidden')) switchTab(h); }
+        } catch (e) {}
         return ok;
       };
     }
@@ -8386,7 +8702,7 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
     // قفل تلقائي لما ترجع للتطبيق بعد فترة
     document.addEventListener('visibilitychange', function () {
       if (document.hidden) { hiddenAt = Date.now(); return; }
-      if (hiddenAt && rec() && !mode && loggedIn() && Date.now() - hiddenAt > AUTO_LOCK_MS) show('unlock');
+      if (hiddenAt && rec() && !mode && loggedIn() && Date.now() - hiddenAt > autoLockMs()) show('unlock');
       hiddenAt = 0;
     });
 
@@ -8831,8 +9147,8 @@ if(window.matchMedia('(max-width:820px)').matches){
   (function(){var o=window.renderStaffAndBranches;if(typeof o!=='function')return;
     window.renderStaffAndBranches=function(){var r=o.apply(this,arguments);try{drawBranches()}catch(e){console.warn('suBranches',e)}return r}})();
   /* settings: vertical menu */
-  var SD={general:'اسم المركز والشعار واللغة',theme:'الألوان والمظهر',permissions:'المستخدمون والصلاحيات وكلمات المرور',custom:'أقسام مخصصة للنظام'};
-  function setupSettings(){var tab=$('tab-settings');if(!tab||$('suSet'))return;var bs=[].slice.call(tab.querySelectorAll('[id^="subtab-btn-"]'));if(!bs.length)return;
+  var SD={general:'اسم المركز واللوجو الرسمي واللغة والتليفون والعنوان',theme:'اللون الأساسي للنظام',app:'لوجو الشريط العلوي، حجم الخط، الشريط السفلي، القفل التلقائي',system:'للابتوب فقط',permissions:'المستخدمون والصلاحيات وكلمات المرور',custom:'أقسام مخصصة للنظام'};
+  function setupSettings(){var tab=$('tab-settings');if(!tab||$('suSet'))return;var bs=[].slice.call(tab.querySelectorAll('[id^="subtab-btn-"]')).filter(function(b){return !b.hasAttribute('data-desktop-only')});if(!bs.length)return;
     bs[0].parentElement.classList.add('su-orig');
     var m=document.createElement('div');m.id='suSet';m.innerHTML='<div class="sul-list" id="suSetMenu">'+bs.map(function(b,i){var k=b.id.replace('subtab-btn-','');return '<button type="button" class="sul-row" data-s="'+i+'"><span class="sul-tx"><b>'+esc(norm(b.textContent))+'</b><small>'+esc(SD[k]||'')+'</small></span><span class="sul-ch">'+IC.c+'</span></button>'}).join('')+'</div><button type="button" id="suSetBack" class="sul-back">'+IC.c.replace('M15 6l-6 6 6 6','M9 6l6 6-6 6')+' الإعدادات</button>';
     tab.insertBefore(m,tab.firstChild);
@@ -8942,7 +9258,7 @@ if(window.matchMedia('(max-width:820px)').matches){
   /* ---------- menu page ---------- */
   function build(){
     var nm=($('headerUserName')||{}).textContent||'',rl=($('headerUserRoleBadge')||{}).textContent||'',av=($('headerUserAvatar')||{}).textContent||'';
-    var h='<div class="sum-bar"><button type="button" class="sum-back" data-back aria-label="رجوع">'+BK+'</button><b>القائمة</b>'+(window.SU_HEADER_LOGO?'<img class="sum-logo" alt="" src="'+window.SU_HEADER_LOGO+'">':'')+'</div><div class="sum-body">';
+    var h='<div class="sum-bar"><button type="button" class="sum-back" data-back aria-label="رجوع">'+BK+'</button><b>القائمة</b>'+((window.SU_APP_LOGO||window.SU_HEADER_LOGO)?'<img class="sum-logo" alt="" src="'+(window.SU_APP_LOGO||window.SU_HEADER_LOGO)+'">':'')+'</div><div class="sum-body">';
     h+='<div class="sum-user"><span class="sum-av">'+esc(av.trim())+'</span><span class="sum-un"><b>'+esc(nm.trim())+'</b><small>'+esc(rl.trim())+'</small></span></div>';
     [].forEach.call(document.querySelectorAll('#sideNav .side-group'),function(g){
       var bs=[].filter.call(g.querySelectorAll('.side-tab'),vis);if(!bs.length)return;
