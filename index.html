@@ -7308,12 +7308,13 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
   // =========================================================================
   // نسخة احتياطية على اللابتوب (للمدير فقط)
   // بتسحب كل البيانات من Supabase (كل الأجهزة) وتحدّث نفس الملف كل مرة.
-  //   SpeakUp-Data.json          : الملف الأساسي (بيتحدّث في مكانه)
-  //   SpeakUp-Data.prev.json     : النسخة اللي قبل آخر تحديث (لو آخر تحديث طلع فيه مشكلة)
-  //   SpeakUp-Data.archive-YYYY-MM.json : نسخة شهرية واحدة (أول حفظ في الشهر)
+  //   SpeakUp-Data.sql           : الملف الأساسي (بيتحدّث في مكانه) — ملف SQL بصيغة SQL Server (SSMS)
+  //   SpeakUp-Data.prev.sql      : النسخة اللي قبل آخر تحديث (لو آخر تحديث طلع فيه مشكلة)
+  //   SpeakUp-Data.archive-YYYY-MM.sql : نسخة شهرية واحدة (أول حفظ في الشهر)
+  // الجداول بتتسمّى bk_clients / bk_sessions / bk_payments ... (البادئة bk_ عشان ما تتعارضش مع جداول Supabase الحقيقية)
   // حماية: لو بيانات السحابة قلّت فجأة عن الملف المحفوظ → مش بيكتب فوق الملف الأساسي.
   // =========================================================================
-  const BK = { MAIN: 'SpeakUp-Data.json', PREV: 'SpeakUp-Data.prev.json', supported: !!window.showDirectoryPicker,
+  const BK = { MAIN: 'SpeakUp-Data.sql', PREV: 'SpeakUp-Data.prev.sql', supported: !!window.showDirectoryPicker,
     LABEL: { clients: 'عملاء', sessions: 'جلسات', payments: 'مدفوعات', purchases: 'مشتريات', staff: 'أخصائيين', branches: 'فروع' } };
   function bkDb() { return new Promise((res, rej) => { const r = indexedDB.open('SpeakUpBackup', 1); r.onupgradeneeded = () => r.result.createObjectStore('h'); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }); }
   async function bkGet(k) { const db = await bkDb(); return new Promise((res, rej) => { const q = db.transaction('h').objectStore('h').get(k); q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error); }); }
@@ -7341,6 +7342,76 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
   function bkCounts(data) {
     const o = {}; Object.keys(BK.LABEL).forEach(k => { if (Array.isArray(data[k])) o[k] = data[k].length; }); return o;
   }
+
+  // ---- تحويل البيانات إلى SQL (SQLite / PostgreSQL) ----
+  function bkQI(n) { return '[' + String(n).replace(/\]/g, ']]') + ']'; }
+  function bkQS(v) { return "N'" + String(v).replace(/'/g, "''") + "'"; }
+  function bkTbl(k) { return 'bk_' + String(k).replace(/[^A-Za-z0-9_]/g, '_').toLowerCase(); }
+  function bkIsObj(x) { return x && typeof x === 'object' && !Array.isArray(x); }
+  function bkCell(v, type) {
+    if (v === null || v === undefined) return 'NULL';
+    if (type === 'NUMERIC') return (typeof v === 'number' && isFinite(v)) ? String(v) : 'NULL';
+    if (type === 'INTEGER') return v ? '1' : '0';
+    if (typeof v === 'object') return bkQS(JSON.stringify(v));
+    return bkQS(v);
+  }
+  function bkInsert(out, table, cols, rows) {
+    for (let i = 0; i < rows.length; i += 200) {
+      out.push('INSERT INTO ' + bkQI(table) + ' (' + cols.map(bkQI).join(', ') + ') VALUES\n' +
+        rows.slice(i, i + 200).map(r => '  (' + r.join(', ') + ')').join(',\n') + ';');
+    }
+  }
+  function bkSql(data) {
+    const out = [];
+    const q = [];       // CREATE + INSERT statements
+    const names = [];
+    out.push('-- SpeakUp backup (SQL) — صيغة SQL Server (SSMS)');
+    out.push('-- كل الجداول بتبدأ بـ bk_  (مثال:  SELECT * FROM bk_clients;)');
+    out.push('SET XACT_ABORT ON;');
+    out.push('BEGIN TRANSACTION;');
+    const addTable = (name, cols, types, rows) => {
+      names.push(name);
+      const TY = { NUMERIC: 'FLOAT', INTEGER: 'BIT', TEXT: 'NVARCHAR(MAX)' };
+      q.push('IF OBJECT_ID(N\'' + name + '\', N\'U\') IS NOT NULL DROP TABLE ' + bkQI(name) + ';');
+      q.push('CREATE TABLE ' + bkQI(name) + ' (' + cols.map((c, i) => bkQI(c) + ' ' + TY[types[i]]).join(', ') + ');');
+      if (rows.length) bkInsert(q, name, cols, rows);
+    };
+    const misc = [];
+    Object.keys(data).sort().forEach(key => {
+      const val = data[key], tn = bkTbl(key);
+      if (Array.isArray(val) && val.some(bkIsObj) && val.every(x => x === null || bkIsObj(x))) {
+        const items = val.filter(bkIsObj);
+        const cols = [];
+        items.forEach(o => Object.keys(o).forEach(c => { if (!/^password$/i.test(c) && !cols.some(x => x.toLowerCase() === c.toLowerCase())) cols.push(c); }));
+        const types = cols.map(c => {
+          const t = new Set();
+          items.forEach(o => { const v = o[c]; if (v !== null && v !== undefined) t.add(typeof v === 'object' ? 'obj' : typeof v); });
+          if (t.size === 1 && t.has('number')) return 'NUMERIC';
+          if (t.size === 1 && t.has('boolean')) return 'INTEGER';
+          return 'TEXT';
+        });
+        addTable(tn, cols, types, items.map(o => cols.map((c, i) => bkCell(o[c], types[i]))));
+      } else if (Array.isArray(val)) {
+        addTable(tn, ['idx', 'value'], ['NUMERIC', 'TEXT'], val.map((v, i) => [String(i), bkCell(v === null ? null : (typeof v === 'object' ? v : String(v)), 'TEXT')]));
+      } else if (bkIsObj(val)) {
+        addTable(tn, ['k', 'value'], ['TEXT', 'TEXT'], Object.keys(val).map(k2 => [bkQS(k2), bkCell(val[k2] === undefined ? null : (typeof val[k2] === 'object' ? val[k2] : String(val[k2])), 'TEXT')]));
+      } else {
+        misc.push([bkQS(key), val === null || val === undefined ? 'NULL' : bkQS(typeof val === 'object' ? JSON.stringify(val) : String(val))]);
+      }
+    });
+    if (misc.length) addTable('bk_misc', ['k', 'value'], ['TEXT', 'TEXT'], misc);
+    // النسخة الخام الكاملة (JSON) كمان — عشان ما يضيعش أي حاجة
+    addTable('bk_app_state', ['key', 'data'], ['TEXT', 'TEXT'],
+      Object.keys(data).sort().map(k => [bkQS(k), bkQS(JSON.stringify(k === 'users' ? (data[k] || []).map(u => Object.assign({}, u, { password: '' })) : data[k]))]));
+    return out.concat(q, ['COMMIT TRANSACTION;', '']).join('\n');
+  }
+  const BK_META = '-- SPEAKUP-META ';
+  function bkParse(text) {                       // يرجّع { meta, body } أو null لو الملف مش ملف نسخة سليم
+    if (text && text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
+    if (!text || text.indexOf(BK_META) !== 0) return null;
+    const nl = text.indexOf('\n'); if (nl < 0) return null;
+    try { return { meta: JSON.parse(text.slice(BK_META.length, nl)), body: text.slice(nl + 1) }; } catch (e) { return null; }
+  }
   async function bkFetchCloud() {
     if (!sb || !cloudUser) throw new Error('مش متصل بالسحابة — سجّل دخول الأول');
     try { await cloudPush(); } catch (e) {}                       // نرفع أي تعديل لسه ماترفعش
@@ -7363,7 +7434,15 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
   function bkSummary(c) { return Object.keys(BK.LABEL).filter(k => c[k] != null).map(k => c[k] + ' ' + BK.LABEL[k]).join(' • '); }
   function bkSaveInfo(info) { try { localStorage.setItem('SU_LAST_BACKUP', JSON.stringify(info)); } catch (e) {} updateBackupUI(); }
 
+  // النسخة الاحتياطية بتظهر على اللابتوب/الكمبيوتر بس (مش موبايل ولا تابلت)
+  function bkIsDesktop() {
+    const ua = navigator.userAgent || '';
+    if (/Android|iPhone|iPad|iPod|Mobile|Tablet|Silk|Kindle/i.test(ua)) return false;
+    if (/Macintosh/i.test(ua) && navigator.maxTouchPoints > 1) return false;     // iPad بيعرّف نفسه كـ Mac
+    try { return window.matchMedia('(hover: hover) and (pointer: fine)').matches; } catch (e) { return true; }
+  }
   async function backupToLaptop(forcePick) {
+    if (!bkIsDesktop()) { showToast('النسخة الاحتياطية من اللابتوب فقط', 'amber'); return; }
     if (!currentUser || currentUser.role !== 'admin') { showToast('النسخة الاحتياطية للمدير فقط', 'amber'); return; }
     const btn = document.getElementById('backupBtn'); if (btn) btn.disabled = true;
     try {
@@ -7374,21 +7453,21 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
       }
       showToast('⏳ جاري سحب كل البيانات من السحابة...', 'blue');
       const data = await bkFetchCloud();
-      const dataStr = JSON.stringify(data);
-      const snap = { app: 'SpeakUp', format: 1, savedAt: new Date().toISOString(), savedBy: (currentUser.name || ''), counts: bkCounts(data), sha256: await bkSha(dataStr), data: data };
-      const text = JSON.stringify(snap);
+      const body = bkSql(data);
+      const snap = { app: 'SpeakUp', format: 2, savedAt: new Date().toISOString(), savedBy: (currentUser.name || ''), counts: bkCounts(data), sha256: await bkSha(body) };
+      const text = '\uFEFF' + BK_META + JSON.stringify(snap) + '\n' + body;   // BOM عشان SSMS يقرا العربي صح
 
       if (!dir) {                                                   // متصفح مش بيدعم الكتابة في ملف ثابت → تنزيل عادي
-        const url = URL.createObjectURL(new Blob([text], { type: 'application/json' }));
-        const a = document.createElement('a'); a.href = url; a.download = 'SpeakUp-Backup-' + bkStamp() + '.json';
+        const url = URL.createObjectURL(new Blob([text], { type: 'application/sql;charset=utf-8' }));
+        const a = document.createElement('a'); a.href = url; a.download = 'SpeakUp-Backup-' + bkStamp() + '.sql';
         document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 60000);
         bkSaveInfo({ at: snap.savedAt, counts: snap.counts, mode: 'download' });
         showToast('⬇️ تم تنزيل النسخة (' + bkSummary(snap.counts) + ')', 'green'); return;
       }
 
       const oldText = await bkRead(dir, BK.MAIN);
-      let oldSnap = null;
-      if (oldText) { try { oldSnap = JSON.parse(oldText); } catch (e) { oldSnap = null; } }
+      const oldP = bkParse(oldText);
+      const oldSnap = oldP ? oldP.meta : null;
 
       // حماية: بيانات السحابة قلّت فجأة؟
       const bad = [];
@@ -7399,19 +7478,19 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
       if (bad.length) {
         const ok = confirm('⚠️ بيانات السحابة أقل بكتير من النسخة المحفوظة على اللابتوب:\n\n' + bad.join('\n') +
           '\n\nده ممكن يكون مشكلة في السحابة.\nالملف الأساسي مش هيتلمس.\nتحفظ البيانات الحالية في ملف منفصل (SUSPICIOUS) للمراجعة؟');
-        if (ok) { const nm = 'SpeakUp-Data.SUSPICIOUS-' + bkStamp() + '.json'; await bkWrite(dir, nm, text); showToast('تم الحفظ في ' + nm + ' — الملف الأساسي لم يتغيّر', 'amber'); }
+        if (ok) { const nm = 'SpeakUp-Data.SUSPICIOUS-' + bkStamp() + '.sql'; await bkWrite(dir, nm, text); showToast('تم الحفظ في ' + nm + ' — الملف الأساسي لم يتغيّر', 'amber'); }
         return;
       }
-      if (oldText && !oldSnap) { await bkWrite(dir, 'SpeakUp-Data.corrupt-' + bkStamp() + '.json', oldText); }   // الملف القديم تالف: نحتفظ بنسخته
+      if (oldText && !oldSnap) { await bkWrite(dir, 'SpeakUp-Data.corrupt-' + bkStamp() + '.sql', oldText); }   // الملف القديم تالف: نحتفظ بنسخته
       if (oldSnap && oldSnap.sha256 !== snap.sha256) await bkWrite(dir, BK.PREV, oldText);                      // نخلّي اللي قبله في .prev
       await bkWrite(dir, BK.MAIN, text);
 
       // تحقق إن الملف اتكتب سليم
-      const back = JSON.parse(await bkRead(dir, BK.MAIN));
-      if (back.sha256 !== snap.sha256 || (await bkSha(JSON.stringify(back.data))) !== snap.sha256) throw new Error('فشل التحقق من الملف بعد الحفظ — النسخة السابقة موجودة في SpeakUp-Data.prev.json');
+      const back = bkParse(await bkRead(dir, BK.MAIN));
+      if (!back || back.meta.sha256 !== snap.sha256 || (await bkSha(back.body)) !== snap.sha256) throw new Error('فشل التحقق من الملف بعد الحفظ — النسخة السابقة موجودة في SpeakUp-Data.prev.sql');
 
       // نسخة شهرية (مرة واحدة في الشهر)
-      const arch = 'SpeakUp-Data.archive-' + new Date().toISOString().slice(0, 7) + '.json';
+      const arch = 'SpeakUp-Data.archive-' + new Date().toISOString().slice(0, 7) + '.sql';
       if ((await bkRead(dir, arch)) === null) await bkWrite(dir, arch, text);
 
       bkSaveInfo({ at: snap.savedAt, counts: snap.counts, mode: 'file' });
@@ -7423,7 +7502,7 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
   }
 
   function updateBackupUI() {
-    const admin = !!(currentUser && currentUser.role === 'admin');
+    const admin = !!(currentUser && currentUser.role === 'admin') && bkIsDesktop();
     const b = document.getElementById('backupBtn'), pk = document.getElementById('backupPickBtn'), last = document.getElementById('excelLastSync'), tx = document.getElementById('backupBtnTxt');
     if (b) b.style.display = admin ? '' : 'none';
     if (pk) pk.style.display = (admin && BK.supported) ? '' : 'none';
