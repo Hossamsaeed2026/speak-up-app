@@ -1151,11 +1151,14 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
       <div id="excelSyncContainer" class="excel-card">
         <div class="excel-row">
           <span id="excelLiveDot" class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span id="excelStatusText" class="font-bold text-emerald-200">الإكسيل متصل 📊</span>
+          <span id="excelStatusText" class="font-bold text-emerald-200">متصل بالسحابة ☁️</span>
         </div>
-        <div class="excel-last" id="excelLastSync">آخر تحديث: --</div>
-        <button id="excelSyncBtn" onclick="syncWithExcelBackend(true)" title="سحب أحدث التعديلات من ملفات الإكسيل" class="excel-btn">
-          <span class="sync-ico">🔄</span><span>تحديث من الإكسيل</span>
+        <div class="excel-last" id="excelLastSync"></div>
+        <button id="backupBtn" onclick="backupToLaptop()" style="display:none" title="للمدير فقط: يسحب كل البيانات من السحابة ويحدّث ملف النسخة الاحتياطية" class="excel-btn">
+          <span>💾</span><span id="backupBtnTxt">حفظ نسخة على اللابتوب</span>
+        </button>
+        <button id="backupPickBtn" onclick="backupToLaptop(true)" style="display:none" class="excel-btn" title="اختيار مجلد تاني للنسخة الاحتياطية">
+          <span>📁</span><span>تغيير مكان الملف</span>
         </button>
       </div>
     </div>
@@ -3174,106 +3177,7 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
   let currentUser = null;   // بيتحدد من تسجيل الدخول الحقيقي (Supabase)
 
   
-  // =========================================================================
-  // EXCEL BACKEND REAL-TIME SYNC ENGINE
-  // =========================================================================
-  const EXCEL_API_URL = 'http://localhost:3000/api';
-  let isExcelConnected = false;
-
-  async function checkExcelBackendStatus() {
-    try {
-      const res = await fetch(`${EXCEL_API_URL}/status`, { cache: 'no-store' });
-      if (res.ok) {
-        setExcelStatus(true);
-        return true;
-      }
-    } catch (e) {
-      setExcelStatus(false);
-    }
-    return false;
-  }
-
-  (function () {
-    window.__excelWrapReady = true;
-  })();
-  function setExcelStatus(connected) {
-    isExcelConnected = connected;
-    const dot = document.getElementById('excelLiveDot');
-    const text = document.getElementById('excelStatusText');
-    if (dot && text) {
-      if (connected) {
-        dot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse';
-        text.className = 'font-bold text-emerald-200';
-        text.textContent = 'الإكسيل متصل 📊';
-      } else {
-        dot.className = 'w-2.5 h-2.5 rounded-full bg-amber-400';
-        text.className = 'font-bold text-amber-200';
-        text.textContent = 'وضع أوفلاين (محلي)';
-      }
-    }
-  }
-
-  // Load from Excel files on machine
-  async function syncWithExcelBackend(userInitiated = false) {
-    try {
-      // If user just saved data within the last 20 seconds, skip auto-sync
-      // to prevent Excel from overwriting fresh local changes
-      const secondsSinceLastSave = (Date.now() - _lastLocalSaveTime) / 1000;
-      if (!userInitiated && secondsSinceLastSave < 20) {
-        console.log('⏸ Auto-sync skipped — local save was', Math.round(secondsSinceLastSave), 's ago');
-        return;
-      }
-
-      const res = await fetch(`${EXCEL_API_URL}/data`, { cache: 'no-store' });
-      if (!res.ok) throw new Error('Network error');
-      const json = await res.json();
-      if (json.success && json.data) {
-        setExcelStatus(true);
-        // Update state with Excel data (only if user explicitly requested sync)
-        if (userInitiated) {
-          if (json.data.clients && json.data.clients.length > 0) state.clients = json.data.clients;
-          if (json.data.sessions && json.data.sessions.length > 0) state.sessions = json.data.sessions;
-          if (json.data.payments && json.data.payments.length > 0) state.payments = json.data.payments;
-          if (json.data.purchases) state.purchases = json.data.purchases;
-          if (json.data.staff && json.data.staff.length > 0) state.staff = json.data.staff;
-          if (json.data.branches && json.data.branches.length > 0) state.branches = json.data.branches;
-          refreshAll();
-          applyThemeSystem();
-          showToast('✅ تم جلب وقراءة أحدث التعديلات من ملفات الإكسيل بنجاح!', 'green');
-        } else {
-          // Auto-sync: just mark as connected, don't overwrite local state
-          setExcelStatus(true);
-        }
-      }
-    } catch (err) {
-      setExcelStatus(false);
-      if (userInitiated) {
-        showToast('⚠️ تعذر الاتصال بسيرفر الإكسيل! تأكد من تشغيل start_excel_backend.bat', 'amber');
-      }
-    }
-  }
-
-  // Save changes back to Excel
-  async function saveToExcelBackend() {
-    if (!isExcelConnected) return;
-    try {
-      await fetch(`${EXCEL_API_URL}/save`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          clients: state.clients,
-          sessions: state.sessions,
-          payments: state.payments,
-          purchases: state.purchases,
-          staff: state.staff,
-          branches: state.branches
-        })
-      });
-    } catch (err) {
-      console.warn('Failed to save to Excel backend:', err);
-    }
-  }
-
+  // (تم حذف ربط سيرفر الإكسيل المحلي — البيانات الأساسية على Supabase، والنسخة الاحتياطية للابتوب من زر المدير)
 
   function saveState() {
     _lastLocalSaveTime = Date.now(); // track when we last saved locally
@@ -7091,29 +6995,136 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
   });
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeQuickTools(); });
   window.addEventListener('resize', function () { const p = document.getElementById('quickToolsPopover'); if (p && !p.classList.contains('hidden')) positionQuickTools(); });
-  (function () {
-    const _origExcelStatus = setExcelStatus;
-    setExcelStatus = function (connected) {
-      _origExcelStatus(connected);
-      const d = document.getElementById('qtExcelDot');
-      if (d) d.style.background = connected ? '#34d399' : '#fbbf24';
-    };
-  })();
+  // =========================================================================
+  // نسخة احتياطية على اللابتوب (للمدير فقط)
+  // بتسحب كل البيانات من Supabase (كل الأجهزة) وتحدّث نفس الملف كل مرة.
+  //   SpeakUp-Data.json          : الملف الأساسي (بيتحدّث في مكانه)
+  //   SpeakUp-Data.prev.json     : النسخة اللي قبل آخر تحديث (لو آخر تحديث طلع فيه مشكلة)
+  //   SpeakUp-Data.archive-YYYY-MM.json : نسخة شهرية واحدة (أول حفظ في الشهر)
+  // حماية: لو بيانات السحابة قلّت فجأة عن الملف المحفوظ → مش بيكتب فوق الملف الأساسي.
+  // =========================================================================
+  const BK = { MAIN: 'SpeakUp-Data.json', PREV: 'SpeakUp-Data.prev.json', supported: !!window.showDirectoryPicker,
+    LABEL: { clients: 'عملاء', sessions: 'جلسات', payments: 'مدفوعات', purchases: 'مشتريات', staff: 'أخصائيين', branches: 'فروع' } };
+  function bkDb() { return new Promise((res, rej) => { const r = indexedDB.open('SpeakUpBackup', 1); r.onupgradeneeded = () => r.result.createObjectStore('h'); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }); }
+  async function bkGet(k) { const db = await bkDb(); return new Promise((res, rej) => { const q = db.transaction('h').objectStore('h').get(k); q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error); }); }
+  async function bkSet(k, v) { const db = await bkDb(); return new Promise((res, rej) => { const t = db.transaction('h', 'readwrite'); t.objectStore('h').put(v, k); t.oncomplete = res; t.onerror = () => rej(t.error); }); }
+  async function bkFolder(forcePick) {
+    let h = null;
+    if (!forcePick) { try { h = await bkGet('dir'); } catch (e) {} }
+    if (h) {
+      try {
+        let p = await h.queryPermission({ mode: 'readwrite' });
+        if (p !== 'granted') p = await h.requestPermission({ mode: 'readwrite' });
+        if (p !== 'granted') h = null;
+      } catch (e) { h = null; }
+    }
+    if (!h) {
+      h = await window.showDirectoryPicker({ id: 'speakup-backup', mode: 'readwrite' });
+      await bkSet('dir', h);
+    }
+    return h;
+  }
+  async function bkSha(str) {
+    const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+    return Array.from(new Uint8Array(b)).map(x => x.toString(16).padStart(2, '0')).join('');
+  }
+  function bkCounts(data) {
+    const o = {}; Object.keys(BK.LABEL).forEach(k => { if (Array.isArray(data[k])) o[k] = data[k].length; }); return o;
+  }
+  async function bkFetchCloud() {
+    if (!sb || !cloudUser) throw new Error('مش متصل بالسحابة — سجّل دخول الأول');
+    try { await cloudPush(); } catch (e) {}                       // نرفع أي تعديل لسه ماترفعش
+    const { data, error } = await sb.from('app_state').select('key,data');
+    if (error) throw error;
+    if (!data || !data.length) throw new Error('السحابة رجّعت بيانات فاضية — لن يتم الحفظ');
+    const out = {}; data.forEach(r => { out[r.key] = r.data; });
+    return out;
+  }
+  async function bkWrite(dir, name, text) {
+    const fh = await dir.getFileHandle(name, { create: true });
+    const w = await fh.createWritable();           // بيكتب في ملف مؤقت ويستبدل الأصلي عند الإغلاق (مفيش ملف نص-مكتوب)
+    await w.write(text); await w.close();
+  }
+  async function bkRead(dir, name) {
+    try { const fh = await dir.getFileHandle(name); return await (await fh.getFile()).text(); }
+    catch (e) { if (e && e.name === 'NotFoundError') return null; throw e; }
+  }
+  function bkStamp() { const d = new Date(), p = n => String(n).padStart(2, '0'); return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + '_' + p(d.getHours()) + p(d.getMinutes()); }
+  function bkSummary(c) { return Object.keys(BK.LABEL).filter(k => c[k] != null).map(k => c[k] + ' ' + BK.LABEL[k]).join(' • '); }
+  function bkSaveInfo(info) { try { localStorage.setItem('SU_LAST_BACKUP', JSON.stringify(info)); } catch (e) {} updateBackupUI(); }
 
-  // ---- Excel sync button: spinner + last update time ----
-  (function () {
-    const _origSync = syncWithExcelBackend;
-    syncWithExcelBackend = async function (userInitiated) {
-      const btn = document.getElementById('excelSyncBtn');
-      if (btn) btn.classList.add('syncing');
-      try { return await _origSync(userInitiated); }
-      finally {
-        if (btn) setTimeout(() => btn.classList.remove('syncing'), 500);
-        const el = document.getElementById('excelLastSync');
-        if (el) el.textContent = 'آخر تحديث: ' + cairoTimeLabel();
+  async function backupToLaptop(forcePick) {
+    if (!currentUser || currentUser.role !== 'admin') { showToast('النسخة الاحتياطية للمدير فقط', 'amber'); return; }
+    const btn = document.getElementById('backupBtn'); if (btn) btn.disabled = true;
+    try {
+      let dir = null;
+      if (BK.supported) {                                           // الإذن لازم يتطلب أول حاجة (وإنت لسه ضاغط الزرار)
+        try { dir = await bkFolder(!!forcePick); }
+        catch (e) { if (e && e.name === 'AbortError') return; throw e; }
       }
-    };
-  })();
+      showToast('⏳ جاري سحب كل البيانات من السحابة...', 'blue');
+      const data = await bkFetchCloud();
+      const dataStr = JSON.stringify(data);
+      const snap = { app: 'SpeakUp', format: 1, savedAt: new Date().toISOString(), savedBy: (currentUser.name || ''), counts: bkCounts(data), sha256: await bkSha(dataStr), data: data };
+      const text = JSON.stringify(snap);
+
+      if (!dir) {                                                   // متصفح مش بيدعم الكتابة في ملف ثابت → تنزيل عادي
+        const url = URL.createObjectURL(new Blob([text], { type: 'application/json' }));
+        const a = document.createElement('a'); a.href = url; a.download = 'SpeakUp-Backup-' + bkStamp() + '.json';
+        document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 60000);
+        bkSaveInfo({ at: snap.savedAt, counts: snap.counts, mode: 'download' });
+        showToast('⬇️ تم تنزيل النسخة (' + bkSummary(snap.counts) + ')', 'green'); return;
+      }
+
+      const oldText = await bkRead(dir, BK.MAIN);
+      let oldSnap = null;
+      if (oldText) { try { oldSnap = JSON.parse(oldText); } catch (e) { oldSnap = null; } }
+
+      // حماية: بيانات السحابة قلّت فجأة؟
+      const bad = [];
+      if (oldSnap && oldSnap.counts) Object.keys(oldSnap.counts).forEach(k => {
+        const o = oldSnap.counts[k], n = snap.counts[k] || 0;
+        if (o >= 5 && n < o * 0.7) bad.push((BK.LABEL[k] || k) + ': ' + o + ' ← ' + n);
+      });
+      if (bad.length) {
+        const ok = confirm('⚠️ بيانات السحابة أقل بكتير من النسخة المحفوظة على اللابتوب:\n\n' + bad.join('\n') +
+          '\n\nده ممكن يكون مشكلة في السحابة.\nالملف الأساسي مش هيتلمس.\nتحفظ البيانات الحالية في ملف منفصل (SUSPICIOUS) للمراجعة؟');
+        if (ok) { const nm = 'SpeakUp-Data.SUSPICIOUS-' + bkStamp() + '.json'; await bkWrite(dir, nm, text); showToast('تم الحفظ في ' + nm + ' — الملف الأساسي لم يتغيّر', 'amber'); }
+        return;
+      }
+      if (oldText && !oldSnap) { await bkWrite(dir, 'SpeakUp-Data.corrupt-' + bkStamp() + '.json', oldText); }   // الملف القديم تالف: نحتفظ بنسخته
+      if (oldSnap && oldSnap.sha256 !== snap.sha256) await bkWrite(dir, BK.PREV, oldText);                      // نخلّي اللي قبله في .prev
+      await bkWrite(dir, BK.MAIN, text);
+
+      // تحقق إن الملف اتكتب سليم
+      const back = JSON.parse(await bkRead(dir, BK.MAIN));
+      if (back.sha256 !== snap.sha256 || (await bkSha(JSON.stringify(back.data))) !== snap.sha256) throw new Error('فشل التحقق من الملف بعد الحفظ — النسخة السابقة موجودة في SpeakUp-Data.prev.json');
+
+      // نسخة شهرية (مرة واحدة في الشهر)
+      const arch = 'SpeakUp-Data.archive-' + new Date().toISOString().slice(0, 7) + '.json';
+      if ((await bkRead(dir, arch)) === null) await bkWrite(dir, arch, text);
+
+      bkSaveInfo({ at: snap.savedAt, counts: snap.counts, mode: 'file' });
+      showToast('✅ تم تحديث الملف: ' + bkSummary(snap.counts), 'green');
+    } catch (err) {
+      console.warn('backup failed', err);
+      showToast('❌ فشل حفظ النسخة: ' + ((err && err.message) || err), 'red');
+    } finally { if (btn) btn.disabled = false; }
+  }
+
+  function updateBackupUI() {
+    const admin = !!(currentUser && currentUser.role === 'admin');
+    const b = document.getElementById('backupBtn'), pk = document.getElementById('backupPickBtn'), last = document.getElementById('excelLastSync'), tx = document.getElementById('backupBtnTxt');
+    if (b) b.style.display = admin ? '' : 'none';
+    if (pk) pk.style.display = (admin && BK.supported) ? '' : 'none';
+    if (tx) tx.textContent = BK.supported ? 'حفظ نسخة على اللابتوب' : 'تنزيل نسخة احتياطية';
+    if (!last) return;
+    if (!admin) { last.textContent = ''; return; }
+    let info = null; try { info = JSON.parse(localStorage.getItem('SU_LAST_BACKUP') || 'null'); } catch (e) {}
+    if (!info) { last.textContent = 'لسه ما اتعملتش نسخة احتياطية'; return; }
+    const days = Math.floor((Date.now() - new Date(info.at).getTime()) / 86400000);
+    last.textContent = (days >= 7 ? '⚠️ ' : '') + 'آخر نسخة: ' + new Date(info.at).toLocaleString('ar-EG') + (days >= 7 ? ' (من ' + days + ' يوم)' : '');
+  }
 
   // ---- user avatar initial ----
   (function () {
@@ -7122,6 +7133,7 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
       _origUH();
       const av = document.getElementById('headerUserAvatar');
       if (av && currentUser && currentUser.name) av.textContent = currentUser.name.replace(/^أ\.\s*/, '').trim().charAt(0) || 'م';
+      try { updateBackupUI(); } catch (e) {}
     };
   })();
 
