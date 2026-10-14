@@ -91,6 +91,20 @@
     body.role-therapist button[onclick*="cpAddPayment("] { display: none !important; }
     body.role-therapist button[onclick*="toggleClientStatus("] { pointer-events: none; }
 
+    .pp-grid3 { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.75rem; }
+    /* ===== parent portal v2: gateways ===== */
+    .pp-gate { transition: transform .18s, box-shadow .18s; position: relative; overflow: hidden; }
+    .pp-gate:hover { transform: translateY(-4px); box-shadow: 0 18px 38px rgba(30,27,75,.28); }
+    .pp-gate:active { transform: scale(.98); }
+    .pp-gate::before { content:""; position:absolute; width:180px; height:180px; border-radius:50%; background:rgba(255,255,255,.10); left:-50px; top:-60px; }
+    .pp-gate::after { content:""; position:absolute; width:120px; height:120px; border-radius:50%; background:rgba(255,255,255,.08); right:-30px; bottom:-50px; }
+    .pp-gate > * { position: relative; z-index: 1; }
+    .pp-ring { animation: ppring 1.1s ease-out; }
+    @keyframes ppring { from { stroke-dasharray: 0 999; } }
+    .pp-notebook { background-color:#fffdf5; background-image: repeating-linear-gradient(transparent, transparent 29px, #c7d2fe 30px); background-position: 0 14px; border-right: 4px double #fca5a5; }
+    .pp-bubble { position: relative; background:#ecfeff; border:1px solid #a5f3fc; border-radius: 18px 18px 18px 4px; }
+    .pp-pop { animation: pppop .35s ease-out both; }
+    @keyframes pppop { from { opacity:0; transform: translateY(10px); } }
     /* ===== v5: parent portal ===== */
     .pp-fab-wrap { position: fixed; left: 16px; bottom: 16px; z-index: 60; display: flex; flex-direction: column; gap: 10px; align-items: flex-start; }
     .pp-fab { display: flex; align-items: center; gap: 8px; border-radius: 999px; padding: 12px 16px; font-weight: 900; font-size: 13px; color: #fff; box-shadow: 0 8px 24px rgba(0,0,0,.25); text-decoration: none; border: 0; cursor: pointer; transition: transform .15s; }
@@ -2591,6 +2605,10 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
           </div>
 
           <!-- Dynamic Custom Fields Container -->
+          <div>
+            <label class="block text-slate-700 font-bold mb-1">💬 تعليق للأهل <span class="text-slate-400 font-normal">(يظهر لولي الأمر في "متابعة الأداء")</span></label>
+            <textarea id="sessionParentComment" rows="2" maxlength="500" placeholder="مثال: تحسّن واضح في نطق حرف الراء. نكرر التمرين في البيت 5 دقايق يومياً." class="w-full border rounded-lg p-2"></textarea>
+          </div>
           <div id="sessionCustomFieldsContainer" class="border-t pt-3 space-y-2 hidden"></div>
 
           <div class="flex justify-end gap-2 pt-3 border-t">
@@ -3773,7 +3791,7 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
     return res.data;
   }
   function parentApply(d) {
-    const keep = { clients: 1, sessions: 1, payments: 1, staff: 1, branches: 1, clientActivities: 1, settings: 1, users: 1 };
+    const keep = { clients: 1, sessions: 1, payments: 1, staff: 1, branches: 1, clientActivities: 1, settings: 1, users: 1, evaluations: 1 };
     Object.keys(state).forEach(function (k) { if (!keep[k] && Array.isArray(state[k])) state[k] = []; });   // أي بيانات قديمة على الجهاز تتمسح
     state.clients = d.clients || [];
     state.sessions = d.sessions || [];
@@ -3781,6 +3799,7 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
     state.staff = d.staff || [];
     if (d.branches && d.branches.length) state.branches = d.branches;
     state.clientActivities = d.clientActivities || {};
+    state.evaluations = d.evaluations || [];
     if (d.settings && d.settings.permissions) state.settings = d.settings;
     const ids = (d.client_ids || []).map(String);
     state.users = [{ name: d.name || '', email: d.email || '', role: 'parent', clientIds: ids, password: '' }];
@@ -6399,6 +6418,7 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
     document.getElementById('sessionType').value = sess.type;
     document.getElementById('sessionPrice').value = sess.price;
     document.getElementById('sessionStatus').value = sess.status;
+    document.getElementById('sessionParentComment').value = sess.parentComment || '';
     openModal('sessionModal');
   }
 
@@ -6430,7 +6450,8 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
       type: document.getElementById('sessionType').value,
       price: Number(document.getElementById('sessionPrice').value) || 150,
       status: document.getElementById('sessionStatus').value,
-      notes: ''
+      notes: '',
+      parentComment: ((document.getElementById('sessionParentComment') || {}).value || '').trim().slice(0, 500)
     };
 
     // ─── منع تكرار الجلسات ───────────────────────────────────
@@ -7748,7 +7769,10 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
     const head = `<div class="bg-gradient-to-l from-indigo-700 to-cyan-600 text-white p-4 flex items-center gap-3 flex-wrap sticky top-0 z-10"><div class="font-black text-base">👪 ${actEsc(centre)}</div><div class="text-xs opacity-90 mr-auto">أهلًا ${actEsc(currentUser.name || '')}</div><button onclick="handleLogout()" class="bg-white/15 hover:bg-white/25 px-3 py-1.5 rounded-lg text-xs font-bold">🚪 خروج</button></div>`;
     if (!kids.length) { el.innerHTML = head + '<div class="p-10 text-center text-slate-500 font-bold">لم يتم ربط حسابك بأي طفل بعد. برجاء التواصل مع إدارة المركز.</div>'; return; }
     if (!kids.some(k => String(k.id) === String(_ppChild))) _ppChild = kids[0].id;
+    if (['home', 'perf', 'book', 'acct', 'acts', 'notes'].indexOf(_ppTab) < 0) _ppTab = (_ppTab === 'inv' || _ppTab === 'pay') ? 'acct' : (_ppTab === 'sessions' ? 'book' : 'home');
     const c = kids.find(k => String(k.id) === String(_ppChild));
+
+    // ---- data ----
     const sess = (state.sessions || []).filter(s => String(s.clientId) === String(c.id)).sort((a, b) => ((b.date || '') + (b.time || '')).localeCompare((a.date || '') + (a.time || '')));
     const cnt = { ATT: 0, CAN: 0, EXC: 0, SDE: 0, TCA: 0, SCH: 0 }; sess.forEach(s => cnt[cpStatusKey(s.status)]++);
     const done = cnt.ATT + cnt.CAN + cnt.EXC + cnt.SDE, rate = done ? Math.round(cnt.ATT / done * 100) : 0;
@@ -7757,23 +7781,79 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
     const th = s => { const x = (state.staff || []).find(z => String(z.id || z.staff_id) === String(s.therapistId)); return x ? x.name : ''; };
     const badge = s => { const k = cpStatusKey(s.status), v = CP_STATUS[k]; return `<span class="text-[11px] font-black px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">${actEsc(v ? v[0] : k)}</span>`; };
     const row = s => `<div class="flex items-center gap-2 border-b py-2 text-xs"><b class="font-mono">${actEsc(s.date || '')}</b><span class="text-slate-500">${formatTime12(s.time)}</span><span class="text-slate-500">${actEsc(s.type || '')}</span><span class="text-slate-400">${actEsc(th(s))}</span><span class="mr-auto">${badge(s)}</span></div>`;
-    const kpi = (i, l, v) => `<div class="bg-white rounded-2xl border p-3 text-center"><div class="text-2xl">${i}</div><div class="text-xl font-black text-slate-800">${v}</div><div class="text-[11px] text-slate-500 font-bold">${l}</div></div>`;
-    const tab = (id, l) => `<button onclick="ppSet('tab','${id}')" class="px-4 py-2 rounded-xl text-sm font-black ${_ppTab === id ? 'bg-indigo-600 text-white' : 'bg-white border text-slate-600'}">${l}</button>`;
+    const comments = sess.filter(s => (s.parentComment || '').trim());
+    const evals = (state.evaluations || []).filter(e => String(e.clientId) === String(c.id) && e.parentVisible !== false).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+    const d = cpBuildData(c), cur = today.slice(0, 7);
+    const curRow = d.rows.find(r => r.month === cur && r.inv);
+    const curRem = curRow ? Math.max(0, curRow.inv.remainingBalance) : 0;
+    const curPct = curRow && curRow.inv.totalNetDue > 0 ? Math.min(100, Math.round(curRow.inv.totalPaid / curRow.inv.totalNetDue * 100)) : 100;
+    const notesN = ppNotes(c.id).length;
+
+    const ring = (pct, size, stroke, color, track, inner) => {
+      const r = (size - stroke) / 2, C = 2 * Math.PI * r, h = size / 2;
+      return `<div style="position:relative;width:${size}px;height:${size}px"><svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="transform:rotate(-90deg)"><circle cx="${h}" cy="${h}" r="${r}" fill="none" stroke="${track}" stroke-width="${stroke}"/><circle class="pp-ring" cx="${h}" cy="${h}" r="${r}" fill="none" stroke="${color}" stroke-width="${stroke}" stroke-linecap="round" stroke-dasharray="${(C * pct / 100).toFixed(1)} ${C.toFixed(1)}"/></svg><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column">${inner}</div></div>`;
+    };
+    const back = (title, grad) => `<div class="flex items-center gap-3"><button onclick="ppSet('tab','home')" class="bg-white border shadow-sm hover:bg-slate-50 text-slate-700 font-black text-sm px-4 py-2 rounded-xl">→ الرئيسية</button><div class="font-black text-white text-sm px-4 py-2 rounded-xl shadow" style="background:${grad}">${title}</div></div>`;
+    const kpi = (i, l, v, col) => `<div class="bg-white rounded-2xl border p-3 text-center"><div class="text-2xl">${i}</div><div class="text-lg font-black ${col || 'text-slate-800'}">${v}</div><div class="text-[11px] text-slate-500 font-bold">${l}</div></div>`;
+
+    // ---- hero ----
+    const nextS = up[0];
+    const nextHtml = nextS ? `<div class="mt-2 inline-flex items-center gap-2 bg-white/20 rounded-full px-3 py-1 text-[11px] font-black">📅 الجلسة القادمة: ${AR_WEEKDAYS[ymdWeekday((nextS.date || '').replace(/\//g, '-'))] || ''} ${actEsc(ymdArabic((nextS.date || '').replace(/\//g, '-'), false))} · ${formatTime12(nextS.time)}</div>` : '<div class="mt-2 inline-flex items-center gap-2 bg-white/15 rounded-full px-3 py-1 text-[11px] font-bold">لا توجد جلسة قادمة مجدولة</div>';
     const kidsBar = kids.length > 1 ? `<div class="flex gap-2 flex-wrap">${kids.map(k => `<button onclick="ppSet('child','${k.id}')" class="px-3 py-1.5 rounded-full text-xs font-black ${String(k.id) === String(c.id) ? 'bg-amber-400 text-slate-900' : 'bg-white border text-slate-600'}">👶 ${actEsc(k.name)}</button>`).join('')}</div>` : '';
+    const hero = `<div class="rounded-3xl text-white p-5 flex items-center gap-4 shadow-lg" style="background:linear-gradient(135deg,#4338ca 0%,#0891b2 100%)"><div class="w-16 h-16 shrink-0 rounded-full bg-white/20 border-2 border-white/50 font-black text-3xl grid place-items-center">${actEsc((c.name || '?').trim().charAt(0))}</div><div class="min-w-0"><div class="font-black text-xl truncate">${actEsc(c.name || '')}</div><div class="text-xs font-bold opacity-90">${[ppAge(c.dob), c.diagnosis, getBranchName(c.branch)].filter(Boolean).map(actEsc).join(' · ')}</div>${nextHtml}</div></div>`;
+
     let body = '';
-    if (_ppTab === 'sessions') body = `<div class="bg-white rounded-2xl border p-4">${sess.map(row).join('') || '<div class="text-center text-slate-400 py-6">لا توجد جلسات</div>'}</div>`;
-    else if (_ppTab === 'acts') body = acts.length ? `<div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">${acts.map(a => caCard(c.id, a, false)).join('')}</div>` : '<div class="bg-white rounded-2xl border p-8 text-center text-slate-400">لم يتم تنزيل أنشطة منزلية بعد. سيظهر هنا ما يحدده الأخصائي.</div>';
-    else if (_ppTab === 'inv') body = ppInvoicesHtml(c);
-    else if (_ppTab === 'pay') body = ppPaymentsHtml(c);
-    else if (_ppTab === 'notes') body = ppNotesHtml(c);
-    else body = `<div class="grid md:grid-cols-2 gap-4"><div class="bg-white rounded-2xl border p-4"><div class="font-black text-sm mb-2">📅 الجلسات القادمة</div>${up.slice(0, 4).map(row).join('') || '<div class="text-slate-400 text-xs py-3">لا توجد جلسات قادمة مجدولة</div>'}</div>
-      <div class="bg-white rounded-2xl border p-4"><div class="font-black text-sm mb-2">🕘 آخر الجلسات</div>${sess.filter(s => cpStatusKey(s.status) !== 'SCH').slice(0, 5).map(row).join('') || '<div class="text-slate-400 text-xs py-3">لا توجد جلسات سابقة</div>'}</div></div>
-      <div class="bg-white rounded-2xl border p-4 mt-4"><div class="flex items-center mb-2"><div class="font-black text-sm">🧩 أنشطة المنزل (${acts.length})</div><button onclick="ppSet('tab','acts')" class="mr-auto text-xs font-bold text-indigo-600">عرض الكل ←</button></div><div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">${acts.slice(-3).reverse().map(a => caCard(c.id, a, false)).join('') || '<div class="text-slate-400 text-xs">لا توجد أنشطة بعد</div>'}</div></div>`;
-    el.innerHTML = head + `<div class="max-w-4xl mx-auto p-4 space-y-4">${kidsBar}
-      <div class="bg-white rounded-3xl border p-4 flex items-center gap-4 flex-wrap"><div class="w-16 h-16 rounded-full bg-gradient-to-tr from-indigo-600 to-cyan-500 text-white font-black text-2xl grid place-items-center">${actEsc((c.name || '?').trim().charAt(0))}</div>
-        <div><div class="font-black text-lg text-slate-900">${actEsc(c.name || '')}</div><div class="text-xs text-slate-500 font-bold">${[ppAge(c.dob), c.diagnosis, getBranchName(c.branch)].filter(Boolean).map(actEsc).join(' · ')}</div></div></div>
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-3">${kpi('📋', 'إجمالي الجلسات', sess.length)}${kpi('✅', 'نسبة الحضور', rate + '%')}${kpi('📅', 'جلسات قادمة', up.length)}${kpi('🧩', 'أنشطة منفّذة', doneActs + '/' + acts.length)}</div>
-      <div class="flex gap-2 flex-wrap">${tab('home', '🏠 نظرة عامة')}${tab('sessions', '📋 الجلسات')}${tab('inv', '🧾 الفواتير')}${tab('pay', '💵 المدفوعات')}${tab('acts', '🧩 الأنشطة')}${tab('notes', '📝 مفكرتي')}</div>${body}</div>`;
+    if (_ppTab === 'home') {
+      const lastC = comments[0];
+      const gPerf = `<button onclick="ppSet('tab','perf')" class="pp-gate pp-pop text-right rounded-3xl p-5 text-white shadow-lg flex flex-col gap-3 min-h-[210px]" style="background:linear-gradient(145deg,#059669,#0d9488)">
+        <div class="flex items-center gap-4">${ring(rate, 92, 10, '#fff', 'rgba(255,255,255,.28)', `<b class="text-xl">${rate}%</b><span class="text-[9px] font-bold opacity-90">حضور</span>`)}
+        <div><div class="font-black text-lg">📈 متابعة الأداء</div><div class="text-[11px] font-bold opacity-90 mt-1">${cnt.ATT} حضور من ${done} جلسة</div></div></div>
+        <div class="text-[12px] font-bold bg-white/15 rounded-2xl p-3 leading-relaxed">${lastC ? '💬 ' + actEsc(lastC.parentComment.slice(0, 80)) + (lastC.parentComment.length > 80 ? '…' : '') : (evals.length ? '📊 آخر تقييم: ' + actEsc(evals[0].title || '') : 'تعليقات الأخصائي وتقييمات الأداء بتظهر هنا ✨')}</div>
+        <div class="flex gap-2 text-[11px] font-black mt-auto"><span class="bg-white/20 rounded-full px-2.5 py-1">💬 ${comments.length} تعليق</span><span class="bg-white/20 rounded-full px-2.5 py-1">📊 ${evals.length} تقييم</span></div></button>`;
+      const gBook = `<button onclick="ppSet('tab','book')" class="pp-gate pp-pop text-right rounded-3xl p-5 text-white shadow-lg flex flex-col gap-3 min-h-[210px]" style="background:linear-gradient(145deg,#7c3aed,#4f46e5);animation-delay:.08s">
+        <div class="flex items-center gap-4"><div class="w-[92px] h-[92px] rounded-2xl bg-white/15 border border-white/30 grid place-items-center text-5xl shrink-0">📔</div>
+        <div><div class="font-black text-lg">كراسة المتابعة</div><div class="text-[11px] font-bold opacity-90 mt-1">تفاصيل كل جلسة</div></div></div>
+        <div class="text-[12px] font-bold bg-white/15 rounded-2xl p-3 leading-relaxed">ما تم التدريب عليه، وتقييم الجلسة، وواجب البيت.</div>
+        <div class="flex gap-2 text-[11px] font-black mt-auto"><span class="bg-amber-300 text-slate-900 rounded-full px-2.5 py-1">قريباً ✨</span><span class="bg-white/20 rounded-full px-2.5 py-1">📋 ${sess.length} جلسة</span></div></button>`;
+      const gAcct = `<button onclick="ppSet('tab','acct')" class="pp-gate pp-pop text-right rounded-3xl p-5 text-white shadow-lg flex flex-col gap-3 min-h-[210px]" style="background:linear-gradient(145deg,#e11d48,#f97316);animation-delay:.16s">
+        <div class="flex items-center gap-4"><div class="w-[92px] h-[92px] rounded-2xl bg-white/15 border border-white/30 grid place-items-center text-5xl shrink-0">💳</div>
+        <div><div class="font-black text-lg">حساباتي</div><div class="text-[11px] font-bold opacity-90 mt-1">المدفوعات والفواتير</div></div></div>
+        <div class="bg-white/15 rounded-2xl p-3"><div class="text-[11px] font-bold opacity-90">فاتورة ${cpMonthLabel(cur)}</div><div class="font-black text-lg font-mono">${curRow ? (curRem > 0 ? 'المتبقي ' + cpMoney(curRem) : '🟢 مسددة') : 'لا توجد جلسات بعد'}</div><div class="h-2 rounded-full bg-white/25 mt-2 overflow-hidden"><div style="width:${curPct}%" class="h-full bg-white"></div></div></div>
+        <div class="flex gap-2 text-[11px] font-black mt-auto"><span class="bg-white/20 rounded-full px-2.5 py-1">🧾 ${d.rows.filter(r => r.inv && (r.inv.totalNetDue > 0 || r.inv.totalPaid > 0)).length} فاتورة</span><span class="bg-white/20 rounded-full px-2.5 py-1">💵 ${d.payments.length} دفعة</span></div></button>`;
+      const small = (id, ico, title, sub, cls) => `<button onclick="ppSet('tab','${id}')" class="pp-pop text-right rounded-2xl p-4 border bg-white shadow-sm hover:shadow-md hover:-translate-y-0.5 transition flex items-center gap-3 ${cls || ''}"><div class="text-3xl">${ico}</div><div><div class="font-black text-sm text-slate-800">${title}</div><div class="text-[11px] text-slate-500 font-bold">${sub}</div></div></button>`;
+      body = `<div class="text-sm font-black text-slate-500 px-1">اختار البوابة اللي تحب تدخلها 👇</div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">${gPerf}${gBook}${gAcct}</div>
+        <div class="grid grid-cols-2 gap-3">${small('acts', '🧩', 'أنشطة المنزل', acts.length ? doneActs + ' من ' + acts.length + ' منفّذ' : 'ما حدده الأخصائي')}${small('notes', '📝', 'مفكرتي', notesN ? notesN + ' ملاحظة محفوظة' : 'سجّل ملاحظاتك')}</div>`;
+    } else if (_ppTab === 'perf') {
+      // monthly attendance %
+      const byM = {};
+      sess.forEach(s => { const k = cpStatusKey(s.status); if (k === 'SCH' || k === 'TCA') return; const m = cpNormMonth(s.date); if (!m) return; (byM[m] = byM[m] || { a: 0, n: 0 }); byM[m].n++; if (k === 'ATT') byM[m].a++; });
+      const months = Object.keys(byM).sort().slice(-6);
+      const bars = months.length ? months.map(m => { const p = Math.round(byM[m].a / byM[m].n * 100); return `<div class="flex flex-col items-center gap-1 flex-1"><div class="text-[10px] font-black text-slate-600">${p}%</div><div class="w-full max-w-[34px] h-24 bg-slate-100 rounded-lg overflow-hidden flex flex-col-reverse"><div style="height:${p}%;background:linear-gradient(180deg,#34d399,#059669)" class="w-full"></div></div><div class="text-[10px] text-slate-500 font-mono">${m.slice(5)}/${m.slice(2, 4)}</div></div>`; }).join('') : '<div class="text-slate-400 text-xs py-6 text-center w-full">لسه مفيش جلسات منتهية</div>';
+      let streak = 0; for (const s of sess) { const k = cpStatusKey(s.status); if (k === 'SCH' || k === 'TCA') continue; if (k === 'ATT') streak++; else break; }
+      const commentsHtml = comments.length ? comments.slice(0, 12).map(s => `<div class="flex gap-3 items-start"><div class="w-9 h-9 shrink-0 rounded-full bg-cyan-100 text-cyan-800 font-black grid place-items-center text-sm">${actEsc((th(s) || 'أ').replace(/^أ\.\s*/, '').trim().charAt(0))}</div><div class="pp-bubble p-3 flex-1"><div class="text-[11px] font-black text-cyan-800 mb-1">${actEsc(th(s) || 'الأخصائي')} <span class="font-mono font-bold text-slate-400">· ${actEsc(s.date || '')}</span></div><div class="text-sm text-slate-800 leading-relaxed">${actEsc(s.parentComment)}</div></div></div>`).join('') : '<div class="text-center text-slate-400 text-sm py-6">لسه مفيش تعليقات من الأخصائي. أول ما يكتب تعليق بعد جلسة هيظهر هنا 💬</div>';
+      const evHtml = evals.length ? evals.map(e => { const sc = Number(e.score), mx = Number(e.max) || 100, has = !isNaN(sc) && e.score !== '' && e.score != null, p = has ? Math.max(0, Math.min(100, Math.round(sc / mx * 100))) : 0, col = p >= 75 ? '#059669' : p >= 50 ? '#f59e0b' : '#e11d48';
+        return `<div class="rounded-2xl border p-4 bg-white pp-pop"><div class="flex items-center gap-2"><div class="text-2xl">${e.kind === 'test' ? '📝' : '📊'}</div><div class="min-w-0"><div class="font-black text-sm text-slate-800 truncate">${actEsc(e.title || 'تقييم أداء')}</div><div class="text-[11px] text-slate-400 font-bold">${actEsc(e.date || '')}${e.therapistId ? ' · ' + actEsc(th({ therapistId: e.therapistId })) : ''}</div></div>${has ? `<div class="mr-auto font-mono font-black" style="color:${col}">${sc}<span class="text-slate-400 text-xs">/${mx}</span></div>` : ''}</div>${has ? `<div class="h-2 rounded-full bg-slate-100 mt-3 overflow-hidden"><div style="width:${p}%;background:${col}" class="h-full"></div></div>` : ''}${e.notes ? `<div class="text-xs text-slate-600 mt-3 leading-relaxed">${actEsc(e.notes)}</div>` : ''}</div>`; }).join('') : '<div class="rounded-2xl border border-dashed p-6 text-center text-slate-400 text-sm bg-white">لما الأخصائي يرسل تقييم أداء أو نتيجة اختبار هيظهر هنا ✨</div>';
+      body = `${back('📈 متابعة الأداء', 'linear-gradient(135deg,#059669,#0d9488)')}
+        <div class="grid md:grid-cols-3 gap-3"><div class="bg-white rounded-2xl border p-4 flex items-center gap-4 md:col-span-1">${ring(rate, 84, 9, '#059669', '#e2e8f0', `<b class="text-lg text-slate-800">${rate}%</b>`)}<div><div class="font-black text-sm text-slate-800">نسبة الحضور</div><div class="text-[11px] text-slate-500 font-bold">${cnt.ATT} من ${done} جلسة</div>${streak >= 2 ? `<div class="mt-1 text-[11px] font-black text-amber-600">🔥 ${streak} جلسات حضور متتالية</div>` : ''}</div></div>
+          <div class="pp-grid3 md:col-span-2">${kpi('✅', 'حضر', cnt.ATT, 'text-emerald-600')}${kpi('📨', 'اعتذار', cnt.EXC + cnt.SDE, 'text-amber-600')}${kpi('❌', 'غياب', cnt.CAN, 'text-rose-600')}</div></div>
+        <div class="bg-white rounded-2xl border p-4"><div class="font-black text-sm text-slate-800 mb-3">📅 الحضور شهرياً</div><div class="flex items-end gap-2">${bars}</div></div>
+        <div class="bg-white rounded-2xl border p-4 space-y-4"><div class="font-black text-sm text-slate-800">💬 تعليقات الأخصائي</div>${commentsHtml}</div>
+        <div class="space-y-3"><div class="font-black text-sm text-slate-800 px-1">📊 تقييمات الأداء والاختبارات</div>${evHtml}</div>`;
+    } else if (_ppTab === 'book') {
+      body = `${back('📔 كراسة المتابعة', 'linear-gradient(135deg,#7c3aed,#4f46e5)')}
+        <div class="pp-notebook rounded-2xl border shadow-sm p-5" style="min-height:190px;padding-right:22px"><div class="font-black text-lg text-indigo-900">كراسة ${actEsc((c.name || '').split(' ')[0])} ✏️</div><div class="text-sm text-slate-700 font-bold mt-3 leading-[30px]">هنا هتلاقي تفصيل كل جلسة: اللي اتدرّب عليه الطفل، وتقييم الأخصائي للجلسة، وواجب البيت.<br><span class="inline-block bg-amber-300 text-slate-900 rounded-full px-3 leading-7 text-xs font-black">الكراسة قريباً ✨</span></div></div>
+        <div class="bg-white rounded-2xl border p-4"><div class="font-black text-sm text-slate-800 mb-2">📋 سجل الجلسات (${sess.length})</div>${sess.map(row).join('') || '<div class="text-center text-slate-400 py-6">لا توجد جلسات</div>'}</div>`;
+    } else if (_ppTab === 'acct') {
+      body = `${back('💳 حساباتي', 'linear-gradient(135deg,#e11d48,#f97316)')}
+        <div class="pp-grid3">${kpi('🧾', 'إجمالي المستحق', cpMoney(d.totalDue), 'text-indigo-700')}${kpi('💵', 'إجمالي المدفوع', cpMoney(d.totalPaid), 'text-emerald-700')}${kpi(d.balance > 0 ? '⏳' : '✅', d.balance > 0 ? 'المتبقي' : (d.balance < 0 ? 'رصيد لصالحك' : 'مسدد'), cpMoney(Math.abs(d.balance)), d.balance > 0 ? 'text-rose-600' : 'text-slate-500')}</div>
+        ${ppInvoicesHtml(c)}${ppPaymentsHtml(c)}`;
+    } else if (_ppTab === 'acts') {
+      body = `${back('🧩 أنشطة المنزل', 'linear-gradient(135deg,#4f46e5,#06b6d4)')}` + (acts.length ? `<div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">${acts.map(a => caCard(c.id, a, false)).join('')}</div>` : '<div class="bg-white rounded-2xl border p-8 text-center text-slate-400">لم يتم تنزيل أنشطة منزلية بعد. سيظهر هنا ما يحدده الأخصائي.</div>');
+    } else {
+      body = `${back('📝 مفكرتي', 'linear-gradient(135deg,#f59e0b,#eab308)')}${ppNotesHtml(c)}`;
+    }
+    el.innerHTML = head + `<div class="max-w-4xl mx-auto p-4 space-y-4 pb-28">${kidsBar}${hero}${body}</div>`;
   }
 
 
@@ -8484,7 +8564,6 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
       const el = document.getElementById('parentPortal');
       if (!el || el.classList.contains('hidden') || !currentUser || currentUser.role !== 'parent') return;
       const c = ppChild(); if (!c) return;
-      if (_ppTab === 'home') { const card = el.querySelector('.rounded-3xl'); if (card) card.insertAdjacentHTML('afterend', ppQuickHtml(c)); }
       const msg = `السلام عليكم، أنا ولي أمر الطفل/ة ${c.name}، وعندي استفسار:`;
       el.insertAdjacentHTML('beforeend', `<div class="pp-fab-wrap"><button onclick="ppSet('tab','notes')" class="pp-fab pp-fab-note" title="اكتب ملاحظة للأخصائي">✍️<span>ملاحظة</span></button><a href="${waLink(msg)}" target="_blank" rel="noopener" class="pp-fab pp-fab-wa" title="تواصل مع المركز على واتساب">${WA_SVG}<span>تواصل مع المركز</span></a></div>`);
     };
