@@ -3707,7 +3707,7 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
     suStage('2/3 جاري تحميل صلاحياتك...');
     const { data: prof, error } = await suTimeout(sb.from('profiles').select('*').eq('id', cloudUser.id).maybeSingle(), 25000, 'تحميل الصلاحيات');
     if (error) { await sb.auth.signOut(); cloudUser = null; showLoginError('تعذر تحميل الصلاحيات: ' + (error.message || '')); return false; }
-    if (error || !prof || !['admin', 'secretary', 'therapist'].includes(prof.role)) {
+    if (error || !prof || !['admin', 'secretary', 'therapist', 'parent'].includes(prof.role)) {
       await sb.auth.signOut(); cloudUser = null;
       showLoginError(prof && prof.role === 'pending'
         ? 'حسابك لسه مستني موافقة المدير.'
@@ -3720,6 +3720,7 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
       staffId: prof.staff_id || undefined, branch: 'all', active: true
     };
     window._realRole = prof.role;
+    if (prof.role === 'parent') return await parentStart(prof);
     cloudStatus('busy');
     let pulled;
     suStage('3/3 جاري تحميل البيانات...');
@@ -3755,6 +3756,57 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
       setInterval(function () { if (document.visibilityState === 'visible') cloudTick(); }, 30000);
       document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') cloudTick(); });
       window.addEventListener('online', () => { cloudPush(); cloudTick(); });
+    }
+    return true;
+  }
+
+  // ---------- ولي الأمر: قراءة فقط، والبيانات بتتفلتر على السيرفر (دالة parent-data) ----------
+  async function parentFetch() {
+    const res = await suTimeout(sb.functions.invoke('parent-data'), 45000, 'تحميل بيانات أبنائك');
+    if (res.error) {
+      let msg = res.error.message || '';
+      try { const j = await res.error.context.json(); if (j && j.error) msg = j.error; } catch (e) {}
+      if (/not found|404|Failed to send/i.test(msg)) msg = 'دالة بيانات أولياء الأمور لسه مش منشورة على Supabase';
+      throw new Error(msg);
+    }
+    if (!res.data || res.data.error) throw new Error((res.data && res.data.error) || 'رد غير صحيح من السيرفر');
+    return res.data;
+  }
+  function parentApply(d) {
+    const keep = { clients: 1, sessions: 1, payments: 1, staff: 1, branches: 1, clientActivities: 1, settings: 1, users: 1 };
+    Object.keys(state).forEach(function (k) { if (!keep[k] && Array.isArray(state[k])) state[k] = []; });   // أي بيانات قديمة على الجهاز تتمسح
+    state.clients = d.clients || [];
+    state.sessions = d.sessions || [];
+    state.payments = d.payments || [];
+    state.staff = d.staff || [];
+    if (d.branches && d.branches.length) state.branches = d.branches;
+    state.clientActivities = d.clientActivities || {};
+    if (d.settings && d.settings.permissions) state.settings = d.settings;
+    const ids = (d.client_ids || []).map(String);
+    state.users = [{ name: d.name || '', email: d.email || '', role: 'parent', clientIds: ids, password: '' }];
+    if (currentUser) currentUser.clientIds = ids;
+  }
+  async function parentStart(prof) {
+    suStage('3/3 جاري تحميل بيانات أبنائك...');
+    try { parentApply(await parentFetch()); }
+    catch (err) {
+      console.warn(err);
+      showLoginError('تعذر تحميل البيانات: ' + ((err && err.message) || err || ''));
+      try { await sb.auth.signOut(); } catch (e) {}
+      cloudUser = null; currentUser = null; return false;
+    }
+    cloudReady = false;   // ولي الأمر مفيش عنده رفع للسحابة خالص
+    const overlay = document.getElementById('loginOverlay');
+    if (overlay) overlay.classList.add('hidden');
+    setUserRole('parent');
+    updateUserHeader();
+    try { applyThemeSystem(); } catch (e) {}
+    refreshAll();
+    if (!window._parentTimer) {
+      window._parentTimer = setInterval(async function () {
+        if (document.visibilityState !== 'visible' || !currentUser || currentUser.role !== 'parent') return;
+        try { parentApply(await parentFetch()); refreshAll(); } catch (e) {}
+      }, 60000);
     }
     return true;
   }
@@ -3877,15 +3929,12 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
     const name = document.getElementById('userName').value.trim();
     const pass = document.getElementById('userPassword').value;
     const pwEl = document.getElementById('userPassword');
-    if (role === 'parent' || !sb || !cloudUser) {
-      pwEl.value = '';
-      if (role === 'parent') showToast('ملحوظة: دخول أولياء الأمور لسه مش مفعّل على السحابة', 'amber');
-      return saveUser(e);
-    }
+    if (!sb || !cloudUser) { pwEl.value = ''; return saveUser(e); }
+    if (role === 'parent' && !(_ucSel && _ucSel.size)) { showToast('اختار طفل واحد على الأقل لولي الأمر', 'amber'); return; }
     const staffId = role === 'therapist' ? (document.getElementById('userStaffId').value || '') : '';
     const btn = document.querySelector('#userForm button[type=submit]');
     if (btn) btn.disabled = true;
-    const r = await cloudAdmin({ action: 'upsert', email, password: pass, name, role, staff_id: staffId });
+    const r = await cloudAdmin({ action: 'upsert', email, password: pass, name, role, staff_id: staffId, client_ids: role === 'parent' ? Array.from(_ucSel).map(String) : undefined });
     if (btn) btn.disabled = false;
     if (!r.ok) { showToast('❌ ' + r.error, 'red'); alert('❌ لم يتم إنشاء المستخدم.\nالسبب: ' + r.error + '\n\nلم يُحفظ أي شيء. لو الرسالة عن الاتصال أو الحصة (Quota) أو الدالة admin-users فالمشكلة في Supabase مش في الفورم.'); return; }
     pwEl.value = '';
@@ -7001,7 +7050,7 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
     const u = (state.users || [])[idx];
     if (!u) return;
     if (!confirm('هل أنت متأكد من حذف هذا المستخدم؟\nهيتمسح حسابه وميقدرش يدخل تاني.')) return;
-    if (sb && cloudUser && u.role !== 'parent') {
+    if (sb && cloudUser) {
       if ((u.email || '').toLowerCase() === (cloudUser.email || '').toLowerCase()) { showToast('مينفعش تمسح حسابك إنت', 'amber'); return; }
       const r = await cloudAdmin({ action: 'delete', email: (u.email || '').toLowerCase() });
       if (!r.ok) { showToast('❌ ' + r.error, 'red'); return; }
