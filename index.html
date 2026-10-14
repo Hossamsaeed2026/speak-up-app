@@ -3600,9 +3600,25 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
   }
   function cloudCache() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {} }
 
+  const cloudStamp = {};   // key -> last known updated_at (ms); lets us skip downloading unchanged data
   async function cloudPull() {
-    const { data, error } = await sb.from('app_state').select('key,data');
-    if (error) throw error;
+    let data, count;
+    if (!Object.keys(cloudStamp).length) {
+      const res = await sb.from('app_state').select('key,data,updated_at');          // first load: full download once
+      if (res.error) throw res.error;
+      data = res.data || []; count = data.length;
+      data.forEach(r => { cloudStamp[r.key] = Date.parse(r.updated_at) || 0; });
+    } else {
+      const meta = await sb.from('app_state').select('key,updated_at');               // tiny request (keys + timestamps only)
+      if (meta.error) throw meta.error;
+      count = (meta.data || []).length;
+      const changedKeys = (meta.data || []).filter(m => (Date.parse(m.updated_at) || 0) !== cloudStamp[m.key]).map(m => m.key);
+      if (!changedKeys.length) return { changed: false, count };
+      const res = await sb.from('app_state').select('key,data,updated_at').in('key', changedKeys);
+      if (res.error) throw res.error;
+      data = res.data || [];
+      data.forEach(r => { cloudStamp[r.key] = Date.parse(r.updated_at) || 0; });
+    }
     let changed = false;
     for (const r of (data || [])) {
       const c = canon(r.data);
@@ -3615,7 +3631,7 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
       changed = true;
     }
     if (changed) cloudCache();
-    return { changed, count: (data || []).length };
+    return { changed, count };
   }
 
   async function cloudPush() {
@@ -3648,12 +3664,15 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
         const { error } = await sb.from('app_state').upsert(rows, { onConflict: 'key' });
         if (error) throw error;
         rows.forEach(r => { cloudSynced[r.key] = canon(r.data); });
+        try { const st = await sb.from('app_state').select('key,updated_at').in('key', rows.map(r => r.key)); (st.data || []).forEach(x => { cloudStamp[x.key] = Date.parse(x.updated_at) || 0; }); } catch (e) {}
         cloudCache();
       }
       cloudStatus('ok');
     } catch (err) {
       console.warn('cloudPush failed:', err);
+      window._cloudLastErr = (err && (err.message || err.details || err.code)) || String(err);
       cloudStatus(navigator.onLine ? 'err' : 'off');
+      if (navigator.onLine && Date.now() - (window._cloudErrToast || 0) > 60000) { window._cloudErrToast = Date.now(); try { showToast('⚠️ فشل رفع التعديلات للسحابة: ' + window._cloudLastErr, 'red'); } catch (x) {} }
     } finally {
       cloudBusy = false;
       if (cloudNeedRefresh) cloudRefreshUI();
@@ -3733,7 +3752,8 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
     if (!window._cloudTimers) {
       window._cloudTimers = true;
       setInterval(cloudPush, 5000);
-      setInterval(cloudTick, 15000);
+      setInterval(function () { if (document.visibilityState === 'visible') cloudTick(); }, 30000);
+      document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') cloudTick(); });
       window.addEventListener('online', () => { cloudPush(); cloudTick(); });
     }
     return true;
@@ -3867,9 +3887,17 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
     if (btn) btn.disabled = true;
     const r = await cloudAdmin({ action: 'upsert', email, password: pass, name, role, staff_id: staffId });
     if (btn) btn.disabled = false;
-    if (!r.ok) { showToast('❌ ' + r.error, 'red'); return; }
+    if (!r.ok) { showToast('❌ ' + r.error, 'red'); alert('❌ لم يتم إنشاء المستخدم.\nالسبب: ' + r.error + '\n\nلم يُحفظ أي شيء. لو الرسالة عن الاتصال أو الحصة (Quota) أو الدالة admin-users فالمشكلة في Supabase مش في الفورم.'); return; }
     pwEl.value = '';
     saveUser(e);
+    // make sure the users list reached the cloud; otherwise it disappears after a reload
+    clearTimeout(cloudPushTimer); window._cloudLastErr = '';
+    for (let i = 0; i < 15 && cloudBusy; i++) await new Promise(r2 => setTimeout(r2, 200));
+    try { await cloudPush(); } catch (x) {}
+    if (cloudSynced['users'] !== canon(cloudLocal('users'))) {
+      alert('⚠️ تم إنشاء حساب الدخول على Supabase، لكن قائمة المستخدمين لم تُرفع للسحابة وقد تختفي بعد إعادة تحميل الصفحة.\n' + (window._cloudLastErr ? 'السبب: ' + window._cloudLastErr : 'تأكد من الاتصال بالإنترنت ثم أعد المحاولة.'));
+      return;
+    }
     showToast(pass ? '✅ تم حفظ المستخدم وتغيير كلمة مروره' : '✅ تم حفظ المستخدم', 'green');
   }
 
