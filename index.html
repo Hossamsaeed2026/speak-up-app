@@ -978,6 +978,63 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
 .su-ph-del{background:#fee2e2;color:#b91c1c;font-weight:800;font-size:11px;padding:5px 10px;border-radius:9px;border:0;cursor:pointer}
 .su-ph-field{grid-column:1/-1}
 </style>
+<style id="tpCss">
+body.tp-on{overflow:hidden}
+body.tp-on #mNav,body.tp-on #suFab,body.tp-on #suFabMenu,body.tp-on #suMenuBtn{display:none!important}
+#therapistPortal{position:fixed;inset:0;z-index:45;background:#f1f5f9;display:none;flex-direction:column;font-family:inherit}
+#therapistPortal.on{display:flex}
+.tp-head{display:flex;align-items:center;gap:10px;padding:10px 14px;padding-top:calc(10px + env(safe-area-inset-top,0px));background:linear-gradient(135deg,var(--b700,#4338ca),var(--b500,#0891b2));color:#fff;flex:0 0 auto}
+.tp-av{width:44px;height:44px;border-radius:50%;border:2px solid rgba(255,255,255,.7);background:#fff;overflow:hidden;padding:0;cursor:pointer;flex:0 0 auto;display:grid;place-items:center}
+.tp-av img{width:100%;height:100%;object-fit:cover}
+.tp-gear{width:34px;height:34px;border-radius:10px;border:0;background:rgba(255,255,255,.2);color:#fff;font-size:17px;cursor:pointer;flex:0 0 auto}
+.tp-title{flex:1;min-width:0;text-align:center;font-weight:900;font-size:14px;line-height:1.3}
+.tp-title small{display:block;font-weight:700;font-size:11px;opacity:.9}
+.tp-spacer{width:82px;flex:0 0 auto}
+#tpBody{flex:1;overflow-y:auto;padding:12px 12px calc(96px + env(safe-area-inset-bottom,0px))}
+#tpNav{position:fixed;right:0;left:0;bottom:0;height:calc(64px + env(safe-area-inset-bottom,0px));padding-bottom:env(safe-area-inset-bottom,0px);background:#fff;border-top:1px solid #e2e8f0;display:grid;grid-template-columns:1fr 1fr 74px 1fr 1fr;align-items:center;box-shadow:0 -6px 20px rgba(15,23,42,.08);z-index:46}
+#tpNav .tn{background:none;border:0;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;font-weight:800;color:#64748b;cursor:pointer;height:64px;justify-content:center}
+#tpNav .tn .ic{font-size:21px;line-height:1}
+#tpNav .tn.on{color:var(--b600,#4f46e5)}
+#tpNav .tn.on .ic{transform:translateY(-2px)}
+#tpNav .tn-logo{justify-self:center;width:64px;height:64px;border-radius:50%;border:3px solid #fff;background:#fff;box-shadow:0 6px 18px rgba(15,23,42,.28);margin-top:-30px;padding:0;overflow:hidden;cursor:pointer;display:grid;place-items:center}
+#tpNav .tn-logo img{width:100%;height:100%;object-fit:contain;padding:4px}
+.tp-card{background:#fff;border:1px solid #e2e8f0;border-radius:18px;padding:12px}
+.tp-fl{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.tp-fl select,.tp-fl input{border:1px solid #cbd5e1;border-radius:10px;padding:6px 8px;font-size:12px;font-weight:700;background:#fff;max-width:100%}
+.tp-fl button{border:0;border-radius:10px;padding:6px 10px;font-size:12px;font-weight:800;background:#e0e7ff;color:#3730a3;cursor:pointer}
+.tp-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:8px}
+.tp-dn{text-align:center;font-size:10px;font-weight:800;color:#94a3b8}
+.tp-d{aspect-ratio:1/1;border-radius:12px;border:1px solid #e2e8f0;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#334155;cursor:pointer;position:relative;padding:0}
+.tp-d.out{visibility:hidden}
+.tp-d.today{border-color:var(--b500,#6366f1)}
+.tp-d.sel{background:var(--b600,#4f46e5);color:#fff;border-color:transparent}
+.tp-d i{font-style:normal;font-size:9px;background:#fbbf24;color:#1e293b;border-radius:99px;padding:0 5px;margin-top:1px;font-weight:900}
+.tp-d.sel i{background:#fff;color:var(--b700,#4338ca)}
+.tp-row{display:flex;align-items:center;gap:10px;padding:10px 4px;border-bottom:1px solid #f1f5f9;cursor:pointer}
+.tp-row:last-child{border-bottom:0}
+.tp-time{min-width:62px;font-weight:900;font-size:12px;color:var(--b700,#4338ca);font-family:monospace}
+.tp-cav{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#22d3ee);color:#fff;display:grid;place-items:center;font-weight:900;font-size:14px;overflow:hidden;flex:0 0 auto}
+.tp-cav img{width:100%;height:100%;object-fit:cover}
+.tp-sheet-bg{position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:47;display:none}
+.tp-sheet-bg.on{display:block}
+.tp-sheet{position:absolute;right:0;left:0;bottom:0;background:#fff;border-radius:24px 24px 0 0;padding:16px 14px calc(18px + env(safe-area-inset-bottom,0px));max-height:75vh;overflow-y:auto}
+.tp-sheet h4{text-align:center;font-weight:900;margin-bottom:12px;color:#1e293b}
+.tp-sg{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.tp-sg button,.tp-sg a{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 4px;border-radius:16px;border:1px solid #e2e8f0;background:#f8fafc;font-weight:800;font-size:12px;color:#334155;cursor:pointer;text-decoration:none}
+.tp-sg .ic{font-size:26px}
+body.tp-on #clientProfileModal{z-index:48}
+.tp-fold{display:flex;align-items:center;gap:12px;width:100%;background:#fff;border:1px solid #e2e8f0;border-radius:18px;padding:14px;margin-bottom:10px;cursor:pointer;text-align:right}
+.tp-fold .fi{font-size:34px}
+.tp-fold b{display:block;font-size:14px;color:#0f172a}
+.tp-fold span{font-size:11px;color:#64748b;font-weight:700}
+.tp-fold .ar{margin-right:auto;color:#94a3b8;font-size:20px}
+#tpBack{position:fixed;left:12px;bottom:14px;z-index:60;background:var(--b600,#4f46e5);color:#fff;font-weight:900;font-size:12px;border:0;border-radius:99px;padding:10px 14px;box-shadow:0 6px 16px rgba(0,0,0,.25);display:none;cursor:pointer}
+#tpBack.on{display:block}
+#tpProfileModal{position:fixed;inset:0;background:rgba(15,23,42,.6);z-index:60;display:none;align-items:center;justify-content:center;padding:14px}
+#tpProfileModal.on{display:flex}
+#tpProfileModal .box{background:#fff;border-radius:22px;max-width:440px;width:100%;max-height:92vh;overflow-y:auto;padding:16px}
+.tp-perm{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;padding:5px 0;border-bottom:1px dashed #e2e8f0}
+</style>
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen">
 <div id="suSplash" aria-hidden="true"><span class="orb o1"></span><span class="orb o2"></span><span class="orb o3"></span><div class="mark"><img src="icons/icon-192.png" alt="" onerror="this.style.display='none'"><b>Speak Up</b></div></div>
@@ -8124,6 +8181,236 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
     };
   })();
 
+  // ===================== Therapist portal (phase 2) =====================
+  (function () {
+    const TP = window._tp = { tab: 'appts', month: null, day: null, client: '', status: '', all: false, legacy: false };
+    const $ = id => document.getElementById(id);
+    const esc = s => actEsc(s == null ? '' : s);
+    const AR_M = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+    const AR_D = ['سبت', 'أحد', 'اثنين', 'ثلاثاء', 'أربعاء', 'خميس', 'جمعة'];
+    function logo() { const l = state && state.settings && state.settings.logoUrl; return (l && l !== 'speakup_logo.png') ? l : (window.SU_DEFAULT_LOGO || 'icons/icon-192.png'); }
+    function email() { return ((currentUser && currentUser.email) || '').toLowerCase(); }
+    function myPhoto() {
+      const u = freshUser() || {}, st = myStaff();
+      return u.photoUrl || (st && st.photoUrl) || ((state.userPhotos || {})[email()]) || '';
+    }
+    function clientOf(id) { return (state.clients || []).find(c => String(c.id) === String(id)); }
+    function active() { return !!currentUser && currentUser.role === 'therapist' && !TP.legacy; }
+    function pad(n) { return String(n).padStart(2, '0'); }
+    function filtered() {
+      let l = mySessions();
+      if (TP.client) l = l.filter(s => String(s.clientId) === TP.client);
+      if (TP.status) l = l.filter(s => cpStatusKey(s.status) === TP.status);
+      return l;
+    }
+    function cav(c, name) {
+      const ch = esc(String(name || '?').trim().charAt(0));
+      return `<div class="tp-cav">${c && c.photoUrl ? `<img src="${esc(c.photoUrl)}" onerror="this.replaceWith(document.createTextNode('${ch}'))">` : ch}</div>`;
+    }
+
+    // ---------- header / nav ----------
+    function renderHead() {
+      const ph = myPhoto();
+      const centre = (state.settings && state.settings.centerName) || 'Speak Up';
+      $('tpHead').innerHTML =
+        `<button class="tp-av" onclick="tpProfile(true)" title="بروفايلي"><img src="${esc(ph || logo())}" onerror="this.src='${esc(logo())}'"></button>
+         <button class="tp-gear" onclick="tpProfile(true)" title="إعدادات البروفايل">⚙️</button>
+         <div class="tp-title">${esc(centre)}<small>أهلًا ${esc((currentUser && currentUser.name) || '')}</small></div>
+         <div class="tp-spacer"></div>`;
+    }
+    function renderNav() {
+      const it = (id, ic, l) => `<button class="tn ${TP.tab === id ? 'on' : ''}" onclick="tpGo('${id}')"><span class="ic">${ic}</span>${l}</button>`;
+      $('tpNav').innerHTML = it('appts', '📅', 'مواعيدي') + it('clients', '👶', 'عملاء') +
+        `<button class="tn-logo" onclick="tpSheet(true)" title="المزيد"><img src="${esc(logo())}" alt=""></button>` +
+        it('accounts', '💰', 'حسابات') + it('dash', '📊', 'داش بورد');
+    }
+    window.tpGo = function (t) { TP.tab = t; renderTherapistPortal(); const b = $('tpBody'); if (b) b.scrollTop = 0; };
+
+    // ---------- appointments ----------
+    function renderAppts() {
+      const today = todayCairo();
+      if (!TP.month) TP.month = today.slice(0, 7);
+      if (!TP.day) TP.day = today;
+      const all = mySessions();
+      const myClients = []; const seen = {};
+      all.forEach(s => { const k = String(s.clientId); if (!seen[k]) { seen[k] = 1; const c = clientOf(k); if (c) myClients.push(c); } });
+      myClients.sort((a, b) => String(a.name).localeCompare(String(b.name), 'ar'));
+      const fl = filtered();
+      const [Y, M] = TP.month.split('-').map(Number);
+      const counts = {}; fl.forEach(s => { const d = normYmd(s.date); counts[d] = (counts[d] || 0) + 1; });
+      const first = (new Date(Y, M - 1, 1).getDay() + 1) % 7;      // السبت = 0
+      const dim = new Date(Y, M, 0).getDate();
+      let cells = AR_D.map(d => `<div class="tp-dn">${d}</div>`).join('');
+      for (let i = 0; i < first; i++) cells += '<div class="tp-d out"></div>';
+      for (let d = 1; d <= dim; d++) {
+        const ds = `${Y}-${pad(M)}-${pad(d)}`, n = counts[ds];
+        cells += `<button class="tp-d ${ds === today ? 'today' : ''} ${ds === TP.day && !TP.all ? 'sel' : ''}" onclick="tpDay('${ds}')">${d}${n ? `<i>${n}</i>` : ''}</button>`;
+      }
+      const stOpts = Object.keys(CP_STATUS).map(k => `<option value="${k}" ${TP.status === k ? 'selected' : ''}>${esc(CP_STATUS[k][0])}</option>`).join('');
+      const clOpts = myClients.map(c => `<option value="${esc(c.id)}" ${TP.client === String(c.id) ? 'selected' : ''}>${esc(c.name)}</option>`).join('');
+      let list = TP.all ? fl.filter(s => normYmd(s.date) >= today).sort((a, b) => (normYmd(a.date) + (a.time || '')).localeCompare(normYmd(b.date) + (b.time || '')))
+                        : fl.filter(s => normYmd(s.date) === TP.day).sort((a, b) => (a.time || '').localeCompare(b.time || ''));
+      if (TP.all) list = list.slice(0, 60);
+      const row = s => {
+        const c = clientOf(s.clientId), nm = c ? c.name : (s.clientName || 'عميل');
+        return `<div class="tp-row" onclick="tpOpenSession('${esc(s.id)}')">
+          <div class="tp-time">${TP.all ? esc(normYmd(s.date).slice(5)) + '<br>' : ''}${formatTime12(s.time)}</div>
+          ${cav(c, nm)}
+          <div style="flex:1;min-width:0"><div style="font-weight:900;font-size:13px;color:#0f172a">${esc(nm)}</div><div style="font-size:11px;color:#64748b;font-weight:700">${esc(s.type || '')}</div></div>
+          ${statusBadgeHtml(s.status)}</div>`;
+      };
+      const dTitle = TP.all ? 'كل المواعيد القادمة' : `مواعيد ${esc(TP.day)}`;
+      $('tpBody').innerHTML = `${unlinkedBanner()}
+        <div class="tp-card" style="margin-bottom:10px">
+          <div class="tp-fl">
+            <select onchange="tpSet('client',this.value)"><option value="">كل الحالات</option>${clOpts}</select>
+            <select onchange="tpSet('status',this.value)"><option value="">كل الأحوال</option>${stOpts}</select>
+            <input type="date" value="${esc(TP.day)}" onchange="tpDay(this.value)">
+            <button onclick="tpDay('${today}')">اليوم</button>
+            <button onclick="tpSet('all',${!TP.all})">${TP.all ? '📆 عرض يوم' : '📋 كل القادم'}</button>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <button class="tp-gear" style="background:#e0e7ff;color:#3730a3" onclick="tpMonth(1)">›</button>
+            <b style="font-size:14px">${AR_M[M - 1]} ${Y}</b>
+            <button class="tp-gear" style="background:#e0e7ff;color:#3730a3" onclick="tpMonth(-1)">‹</button>
+          </div>
+          <div class="tp-grid">${cells}</div>
+        </div>
+        <div class="tp-card"><div style="font-weight:900;font-size:13px;margin-bottom:4px">📋 ${dTitle} <span style="color:#94a3b8">(${list.length})</span></div>
+          ${list.map(row).join('') || '<div style="text-align:center;color:#94a3b8;font-weight:700;padding:22px 0;font-size:12px">لا توجد مواعيد</div>'}</div>`;
+    }
+    window.tpSet = function (k, v) { TP[k] = v; renderTherapistPortal(); };
+    window.tpDay = function (d) { if (!d) return; TP.day = d; TP.month = d.slice(0, 7); TP.all = false; renderTherapistPortal(); };
+    window.tpMonth = function (n) { const [y, m] = TP.month.split('-').map(Number), d = new Date(y, m - 1 + n, 1); TP.month = d.getFullYear() + '-' + pad(d.getMonth() + 1); renderTherapistPortal(); };
+    window.tpOpenSession = function (id) { if (typeof editSession === 'function') editSession(id); };
+
+    // ---------- placeholders (phases 3/4 replace these) ----------
+    function renderSoon(ic, title, legacyId) {
+      $('tpBody').innerHTML = `<div class="tp-card" style="text-align:center;padding:34px 16px"><div style="font-size:42px">${ic}</div>
+        <div style="font-weight:900;font-size:16px;margin:8px 0">${title}</div>
+        <div style="font-size:12px;color:#64748b;font-weight:700;margin-bottom:14px">الشكل الجديد لهذا القسم قيد التجهيز. تقدر تستخدم القسم الحالي لحد ما يجهز.</div>
+        <button onclick="tpLegacy('${legacyId}')" style="background:var(--b600,#4f46e5);color:#fff;font-weight:900;border:0;border-radius:12px;padding:10px 18px;cursor:pointer">فتح القسم الحالي</button></div>`;
+    }
+
+
+    // ---------- clients (folders per branch; no overall total) ----------
+    function myClientList() {
+      const scope = myScope();
+      const ids = new Set(); mySessions().forEach(s => ids.add(String(s.clientId)));
+      if (scope) scope.forEach(x => ids.add(String(x)));
+      const hasLink = !!myStaff();
+      return (state.clients || []).filter(c => inScope(c.id) && (!hasLink || ids.has(String(c.id))));
+    }
+    function renderClients() {
+      const list = myClientList(), groups = {};
+      list.forEach(c => { const b = getBranchName(c.branch); (groups[b] = groups[b] || []).push(c); });
+      const names = Object.keys(groups).sort((a, b) => a.localeCompare(b, 'ar'));
+      if (TP.folder && !groups[TP.folder]) TP.folder = null;
+      if (!TP.folder) {
+        $('tpBody').innerHTML = unlinkedBanner() + (names.map(n => `<button class="tp-fold" onclick="tpFolder(this.dataset.n)" data-n="${esc(n)}"><span class="fi">📁</span><div><b>${esc(n)}</b><span>${groups[n].length} عميل</span></div><span class="ar">‹</span></button>`).join('')
+        || '<div class="tp-card" style="text-align:center;color:#94a3b8;font-weight:700;padding:30px 10px">لا يوجد عملاء مرتبطين بك</div>');
+        return;
+      }
+      const q = (TP.q || '').trim().toLowerCase();
+      const rows = groups[TP.folder].filter(c => !q || String(c.name || '').toLowerCase().includes(q) || String(c.id).toLowerCase().includes(q))
+        .sort((a, b) => String(a.name).localeCompare(String(b.name), 'ar'));
+      const stLbl = { Active: '🟢 نشط', Stopped: '🔴 موقوف', Completed: '🔵 مكتمل' };
+      $('tpBody').innerHTML = `<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+          <button class="tp-gear" style="background:#e0e7ff;color:#3730a3" onclick="tpFolder(null)">›</button><b style="font-size:15px">📂 ${esc(TP.folder)}</b></div>
+        <input id="tpQ" placeholder="🔍 ابحث باسم العميل..." value="${esc(TP.q || '')}" oninput="tpSearch(this.value)" style="width:100%;border:1px solid #cbd5e1;border-radius:12px;padding:9px 12px;font-size:13px;font-weight:700;margin-bottom:10px;background:#fff">
+        <div class="tp-card">${rows.map(c => `<div class="tp-row" onclick="openClientProfile('${esc(c.id)}')">${cav(c, c.name)}
+          <div style="flex:1;min-width:0"><div style="font-weight:900;font-size:13px;color:#0f172a">${esc(c.name)}</div><div style="font-size:11px;color:#64748b;font-weight:700">${esc(c.diagnosis || '')}</div></div>
+          <span style="font-size:11px;font-weight:800">${stLbl[c.status] || ''}</span></div>`).join('') || '<div style="text-align:center;color:#94a3b8;font-weight:700;padding:22px 0;font-size:12px">لا نتائج</div>'}</div>`;
+    }
+    window.tpFolder = function (n) { TP.folder = n; TP.q = ''; renderTherapistPortal(); const b = $('tpBody'); if (b) b.scrollTop = 0; };
+    window.tpSearch = function (v) {
+      TP.q = v; renderClients();
+      const i = $('tpQ'); if (i) { i.focus(); i.setSelectionRange(v.length, v.length); }
+    };
+
+    // ---------- accounts (reuse the existing "حساباتي" view) ----------
+    function releaseEarn() {
+      const e = $('myEarnBody'), sec = $('tab-myearn');
+      if (e && sec && e.parentNode !== sec) sec.appendChild(e);
+    }
+    function renderAccounts() {
+      const e = $('myEarnBody'); if (!e) return renderSoon('💰', 'حساباتي', 'myearn');
+      const b = $('tpBody'); b.innerHTML = ''; b.appendChild(e);
+      renderMyEarnings();
+    }
+
+    // ---------- legacy escape ----------
+    window.tpLegacy = function (id) { TP.legacy = true; tpSheet(false); renderTherapistPortal(); switchTab(id); window.scrollTo(0, 0); };
+    window.tpBack = function () { TP.legacy = false; renderTherapistPortal(); };
+
+    // ---------- more sheet (logo button) ----------
+    const MORE = [['secretary', '⚡', 'كشف الحضور'], ['sessions', '📋', 'الجلسات'], ['calendar', '🗓️', 'كاليندر المركز'], ['activities', '🧩', 'الأنشطة'], ['invoices', '🧾', 'الفواتير'], ['payments', '💵', 'المدفوعات']];
+    window.tpSheet = function (on) {
+      const bg = $('tpSheetBg'); if (!bg) return;
+      if (on) {
+        const vis = MORE.filter(m => { const b = document.getElementById('side-nav-' + m[0]); return b && !b.classList.contains('hidden'); });
+        $('tpSheet').innerHTML = `<h4>القائمة الكاملة</h4><div class="tp-sg">
+          ${vis.map(m => `<button onclick="tpLegacy('${m[0]}')"><span class="ic">${m[1]}</span>${m[2]}</button>`).join('')}
+          <button onclick="tpSheet(false);tpProfile(true)"><span class="ic">👤</span>بروفايلي</button>
+          <a href="${waLink('السلام عليكم، أنا ' + ((currentUser && currentUser.name) || '') + ' من فريق الأخصائيين:')}" target="_blank" rel="noopener"><span class="ic">💬</span>تواصل مع المركز</a>
+          <button onclick="tpSheet(false);handleLogout()"><span class="ic">🚪</span>تسجيل الخروج</button></div>`;
+      }
+      bg.classList.toggle('on', !!on);
+    };
+
+    // ---------- profile (photo + phone + what I can control) ----------
+    const PERM_LBL = { dashboard: 'لوحة الأداء', secretary: 'كشف الحضور', calendar: 'كاليندر المركز', clients: 'العملاء', sessions: 'الجلسات', activities: 'الأنشطة', invoices: 'الفواتير', payments: 'المدفوعات', myearn: 'حساباتي' };
+    window.tpProfile = function (on) {
+      const m = $('tpProfileModal'); if (!m) return;
+      if (on) {
+        const st = myStaff(), ph = myPhoto();
+        const perms = getUserEffectivePermissions(currentUser) || {};
+        const pl = Object.keys(PERM_LBL).map(k => `<div class="tp-perm">${perms[k] === false ? '🚫' : '✅'} ${PERM_LBL[k]}</div>`).join('');
+        $('tpProfileBox').innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><b style="font-size:15px">⚙️ إعدادات البروفايل</b><button onclick="tpProfile(false)" style="border:0;background:none;font-size:22px;cursor:pointer;color:#94a3b8">&times;</button></div>
+          <div class="su-ph-row"><div id="tpPhotoPreview" class="su-ph-prev">👤</div><div class="su-ph-actions">
+            <label class="su-ph-btn">📷 رفع صورة من الجهاز<input type="file" accept="image/*" style="display:none" onchange="suPhotoPick(this,'tpPhotoUrl','tpPhotoPreview')"></label>
+            <button type="button" class="su-ph-del" onclick="suPhotoClear('tpPhotoUrl','tpPhotoPreview')">🗑️ إزالة (يرجع اللوجو)</button></div></div>
+          <input type="hidden" id="tpPhotoUrl" value="${esc(ph)}">
+          <div style="margin-top:12px;font-size:12px;font-weight:700;color:#475569">الاسم: <b>${esc((currentUser && currentUser.name) || '')}</b><br>الإيميل: <span style="font-family:monospace">${esc(email())}</span></div>
+          ${st ? `<label style="display:block;margin-top:10px;font-size:12px;font-weight:800;color:#334155">رقم الهاتف<input id="tpPhone" value="${esc(st.phone || '')}" style="width:100%;border:1px solid #cbd5e1;border-radius:10px;padding:8px;font-family:monospace;margin-top:4px"></label>` : ''}
+          <div style="margin-top:14px;font-weight:900;font-size:13px">🔑 اللي تقدر تتحكم فيه</div>${pl}
+          <button onclick="tpProfileSave()" style="width:100%;margin-top:14px;background:var(--b600,#4f46e5);color:#fff;font-weight:900;border:0;border-radius:12px;padding:11px;cursor:pointer">💾 حفظ</button>`;
+        suPhotoSync('tpPhotoUrl', 'tpPhotoPreview');
+      }
+      m.classList.toggle('on', !!on);
+    };
+    window.tpProfileSave = function () {
+      const url = $('tpPhotoUrl').value || '', em = email(), st = myStaff();
+      if (!state.userPhotos) state.userPhotos = {};
+      if (url) state.userPhotos[em] = url; else delete state.userPhotos[em];
+      const u = (state.users || []).find(x => (x.email || '').toLowerCase() === em); if (u) u.photoUrl = url;
+      if (st) { st.photoUrl = url; if ($('tpPhone')) st.phone = $('tpPhone').value.trim(); }
+      saveState(); tpProfile(false); renderTherapistPortal();
+      try { showToast('✅ تم حفظ البروفايل', 'green'); } catch (e) {}
+    };
+
+    // ---------- main render ----------
+    window.renderTherapistPortal = function () {
+      const el = $('therapistPortal'); if (!el) return;
+      const on = active();
+      el.classList.toggle('on', on);
+      document.body.classList.toggle('tp-on', on);
+      const back = $('tpBack'); if (back) back.classList.toggle('on', !!currentUser && currentUser.role === 'therapist' && TP.legacy);
+      if (!on) { releaseEarn(); return; }
+      renderHead(); renderNav();
+      if (TP.tab !== 'accounts') releaseEarn();
+      if (TP.tab === 'appts') renderAppts();
+      else if (TP.tab === 'clients') renderClients();
+      else if (TP.tab === 'accounts') renderAccounts();
+      else renderSoon('📊', 'داش بورد وتقييم الأداء', 'dashboard');
+    };
+    const _uh2 = updateUserHeader;
+    updateUserHeader = function () { _uh2(); try { if (!currentUser || currentUser.role !== 'therapist') TP.legacy = false; renderTherapistPortal(); } catch (e) { console.warn(e); } };
+    const _rp = renderParentPortal;
+    renderParentPortal = function () { _rp(); try { renderTherapistPortal(); } catch (e) { console.warn(e); } };
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { renderTherapistPortal(); }); else setTimeout(renderTherapistPortal, 0);
+  })();
+
 </script>
 
 <div id="actPickModal" class="fixed inset-0 bg-slate-900/60 z-[60] hidden flex items-center justify-center p-4">
@@ -8141,6 +8428,14 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
   </div>
 </div>
 <div id="parentPortal" class="fixed inset-0 z-[45] hidden overflow-y-auto bg-slate-50"></div>
+<div id="therapistPortal" dir="rtl">
+  <div class="tp-head" id="tpHead"></div>
+  <div id="tpBody"></div>
+  <nav id="tpNav"></nav>
+  <div class="tp-sheet-bg" id="tpSheetBg" onclick="if(event.target===this)tpSheet(false)"><div class="tp-sheet" id="tpSheet"></div></div>
+</div>
+<button id="tpBack" onclick="tpBack()">↩ واجهة الأخصائي</button>
+<div id="tpProfileModal" dir="rtl" onclick="if(event.target===this)tpProfile(false)"><div class="box" id="tpProfileBox"></div></div>
 <div id="sessDetailModal" class="fixed inset-0 bg-slate-900/60 z-[65] hidden flex items-center justify-center p-4">
   <div class="bg-white rounded-3xl max-w-lg w-full max-h-[92vh] overflow-y-auto shadow-2xl">
     <div class="sticky top-0 bg-white/95 backdrop-blur flex items-center justify-between px-4 py-2 border-b z-10"><b class="text-sm text-slate-700">📂 تفاصيل الجلسة</b><button onclick="hideM('sessDetailModal')" class="bg-slate-100 hover:bg-slate-200 px-3 py-1 rounded-lg font-bold text-sm">إغلاق ✕</button></div>
