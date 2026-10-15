@@ -3931,18 +3931,51 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
   function cloudCache() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {} }
 
   const cloudStamp = {};   // key -> last known updated_at (ms); lets us skip downloading unchanged data
+  // [EGRESS-FIX] نخزّن آخر بصمة (وقت التحديث + hash) لكل مفتاح على الجهاز عشان أول تحميل ما ينزّلش كل حاجة من جديد
+  const CLOUD_META_KEY = 'SU_CLOUD_META_V1';
+  function cloudHash(str) { let h = 5381; for (let i = 0; i < str.length; i++) h = ((h << 5) + h + str.charCodeAt(i)) | 0; return (h >>> 0).toString(36) + ':' + str.length; }
+  function cloudMetaLoad() { try { return JSON.parse(localStorage.getItem(CLOUD_META_KEY) || '{}') || {}; } catch (e) { return {}; } }
+  function cloudMetaSave(keys) {
+    try {
+      const m = cloudMetaLoad();
+      (keys || Object.keys(cloudStamp)).forEach(k => {
+        if (cloudStamp[k] === undefined || cloudSynced[k] === undefined) return;
+        m[k] = { t: cloudStamp[k], h: cloudHash(cloudSynced[k]) };
+      });
+      localStorage.setItem(CLOUD_META_KEY, JSON.stringify(m));
+    } catch (e) {}
+  }
   async function cloudPull() {
     let data, count;
     if (!Object.keys(cloudStamp).length) {
-      const res = await sb.from('app_state').select('key,data,updated_at');          // first load: full download once
-      if (res.error) throw res.error;
-      data = res.data || []; count = data.length;
-      data.forEach(r => { cloudStamp[r.key] = Date.parse(r.updated_at) || 0; });
+      // أول تحميل: نجيب البصمات بس، وننزّل كاملاً المفاتيح اللي اتغيرت فعلاً أو اللي مش موجودة على الجهاز
+      const meta0 = await sb.from('app_state').select('key,updated_at');
+      if (meta0.error) throw meta0.error;
+      const saved = cloudMetaLoad();
+      const need = [];
+      (meta0.data || []).forEach(m => {
+        const t = Date.parse(m.updated_at) || 0, sv = saved[m.key];
+        let cached = false;
+        if (sv && sv.t === t && state[m.key] !== undefined) {
+          const c = canon(cloudLocal(m.key));
+          if (cloudHash(c) === sv.h) { cloudSynced[m.key] = c; cloudStamp[m.key] = t; cached = true; }
+        }
+        if (!cached) need.push(m.key);
+      });
+      count = (meta0.data || []).length;
+      data = [];
+      if (need.length) {
+        const res = await sb.from('app_state').select('key,data,updated_at').in('key', need);
+        if (res.error) throw res.error;
+        data = res.data || [];
+        data.forEach(r => { cloudStamp[r.key] = Date.parse(r.updated_at) || 0; });
+      }
+      if (!Object.keys(cloudStamp).length) cloudStamp.__init = 1;   // جدول فاضي: ما نكررش أول تحميل
     } else {
       const meta = await sb.from('app_state').select('key,updated_at');               // tiny request (keys + timestamps only)
       if (meta.error) throw meta.error;
       count = (meta.data || []).length;
-      const changedKeys = (meta.data || []).filter(m => (Date.parse(m.updated_at) || 0) !== cloudStamp[m.key]).map(m => m.key);
+      const changedKeys = (meta.data || []).filter(m => m.key !== '__init' && (Date.parse(m.updated_at) || 0) !== cloudStamp[m.key]).map(m => m.key);
       if (!changedKeys.length) return { changed: false, count };
       const res = await sb.from('app_state').select('key,data,updated_at').in('key', changedKeys);
       if (res.error) throw res.error;
@@ -3961,6 +3994,7 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
       changed = true;
     }
     if (changed) cloudCache();
+    cloudMetaSave();
     return { changed, count };
   }
 
@@ -3970,9 +4004,18 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
     if (!dirty.length) return;
     cloudBusy = true; cloudStatus('busy');
     try {
-      const { data: rem, error: e1 } = await sb.from('app_state').select('key,data').in('key', dirty);
-      if (e1) throw e1;
-      const remMap = {}; (rem || []).forEach(r => { remMap[r.key] = r.data; });
+      // [EGRESS-FIX] نفحص البصمات الأول (حجمها صغير جداً) وننزّل الصف كامل بس لو حد تاني عدّل عليه
+      const metaR = await sb.from('app_state').select('key,updated_at').in('key', dirty);
+      if (metaR.error) throw metaR.error;
+      const metaMap = {}; (metaR.data || []).forEach(m => { metaMap[m.key] = Date.parse(m.updated_at) || 0; });
+      const needFull = dirty.filter(k => metaMap[k] !== undefined && (cloudStamp[k] === undefined || metaMap[k] !== cloudStamp[k] || cloudSynced[k] === undefined));
+      const remMap = {};
+      if (needFull.length) {
+        const { data: rem, error: e1 } = await sb.from('app_state').select('key,data').in('key', needFull);
+        if (e1) throw e1;
+        (rem || []).forEach(r => { remMap[r.key] = r.data; });
+      }
+      dirty.forEach(k => { if (remMap[k] === undefined && metaMap[k] !== undefined && cloudSynced[k] !== undefined) { try { remMap[k] = JSON.parse(cloudSynced[k]); } catch (e) {} } });
       const rows = [];
       for (const k of dirty) {
         let val = JSON.parse(canon(cloudLocal(k)));
@@ -3996,6 +4039,7 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
         rows.forEach(r => { cloudSynced[r.key] = canon(r.data); });
         try { const st = await sb.from('app_state').select('key,updated_at').in('key', rows.map(r => r.key)); (st.data || []).forEach(x => { cloudStamp[x.key] = Date.parse(x.updated_at) || 0; }); } catch (e) {}
         cloudCache();
+        cloudMetaSave(rows.map(r => r.key));
       }
       cloudStatus('ok');
     } catch (err) {
@@ -4011,7 +4055,7 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
   function cloudSchedulePush() {
     if (!cloudReady) return;
     clearTimeout(cloudPushTimer);
-    cloudPushTimer = setTimeout(cloudPush, 1200);
+    cloudPushTimer = setTimeout(cloudPush, 8000);   // [EGRESS-FIX] تجميع التعديلات
   }
 
   async function cloudTick() {
@@ -4082,9 +4126,10 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
     cloudStatus('ok');
     if (!window._cloudTimers) {
       window._cloudTimers = true;
-      setInterval(cloudPush, 5000);
-      setInterval(function () { if (document.visibilityState === 'visible') cloudTick(); }, 30000);
-      document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') cloudTick(); });
+      setInterval(cloudPush, 15000);
+      setInterval(function () { if (document.visibilityState === 'visible') cloudTick(); }, 60000);
+      document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') cloudTick(); else cloudPush(); });
+      window.addEventListener('pagehide', function () { try { cloudPush(); } catch (e) {} });
       window.addEventListener('online', () => { cloudPush(); cloudTick(); });
     }
     return true;
@@ -4092,7 +4137,7 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
 
   // ---------- ولي الأمر: قراءة فقط، والبيانات بتتفلتر على السيرفر (دالة parent-data) ----------
   async function parentFetch() {
-    const res = await suTimeout(sb.functions.invoke('parent-data'), 45000, 'تحميل بيانات أبنائك');
+    const res = await suTimeout(sb.functions.invoke('parent-data', { body: window._parentVersion ? { version: window._parentVersion } : {} }), 45000, 'تحميل بيانات أبنائك');
     if (res.error) {
       let msg = res.error.message || '';
       try { const j = await res.error.context.json(); if (j && j.error) msg = j.error; } catch (e) {}
@@ -4103,6 +4148,8 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
     return res.data;
   }
   function parentApply(d) {
+    if (d && d.unchanged) return false;   // [EGRESS-FIX] مفيش جديد
+    if (d && d.version) window._parentVersion = d.version;
     const keep = { clients: 1, sessions: 1, payments: 1, staff: 1, branches: 1, clientActivities: 1, settings: 1, users: 1, evaluations: 1 };
     Object.keys(state).forEach(function (k) { if (!keep[k] && Array.isArray(state[k])) state[k] = []; });   // أي بيانات قديمة على الجهاز تتمسح
     state.clients = d.clients || [];
@@ -4117,6 +4164,7 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
     const ids = (d.client_ids || []).map(String);
     state.users = [{ name: d.name || '', email: d.email || '', role: 'parent', clientIds: ids, password: '' }];
     if (currentUser) currentUser.clientIds = ids;
+    return true;
   }
   async function parentStart(prof) {
     suStage('3/3 جاري تحميل بيانات أبنائك...');
@@ -4137,8 +4185,8 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
     if (!window._parentTimer) {
       window._parentTimer = setInterval(async function () {
         if (document.visibilityState !== 'visible' || !currentUser || currentUser.role !== 'parent') return;
-        try { parentApply(await parentFetch()); refreshAll(); } catch (e) {}
-      }, 60000);
+        try { if (parentApply(await parentFetch())) refreshAll(); } catch (e) {}
+      }, 5 * 60 * 1000);   // [EGRESS-FIX] كل 20 دقيقة بدل كل دقيقة
     }
     return true;
   }
@@ -4191,7 +4239,7 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
     if (cloudReady && unsynced.length && !confirm('فيه تعديلات لسه ماترفعتش للسحابة. تخرج برضو وتخسرها؟')) return;
     try { if (sb) await sb.auth.signOut(); } catch (e) {}
     cloudUser = null; cloudReady = false; currentUser = null; window._realRole = null;
-    try { localStorage.removeItem(STORAGE_KEY); localStorage.removeItem('SPEAK_UP_CURRENT_USER'); localStorage.removeItem('SPEAK_UP_PIN'); } catch (e) {}
+    try { localStorage.removeItem(STORAGE_KEY); localStorage.removeItem(CLOUD_META_KEY); localStorage.removeItem('SPEAK_UP_CURRENT_USER'); localStorage.removeItem('SPEAK_UP_PIN'); } catch (e) {}
     location.reload();
   }
 
