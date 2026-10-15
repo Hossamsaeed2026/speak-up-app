@@ -4118,6 +4118,7 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
     const overlay = document.getElementById('loginOverlay');
     if (overlay) overlay.classList.add('hidden');
     try { deduplicateSessions(); } catch (e) {}
+    setTimeout(suSlimSettings, 4000);
     setUserRole(currentUser.role);
     updateUserHeader();
     try { loadSettingsValues(); } catch (e) {}
@@ -6049,8 +6050,8 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
     const file = input.files[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = function(e) {
-      document.getElementById('inv-edit-logo-url').value = e.target.result;
+    reader.onload = async function(e) {
+      document.getElementById('inv-edit-logo-url').value = await suShrinkDataUrl(e.target.result, 480, 0.85);
       refreshInvoicePreview();
     };
     reader.readAsDataURL(file);
@@ -7055,8 +7056,8 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
       return;
     }
     const reader = new FileReader();
-    reader.onload = function(e) {
-      const dataUrl = e.target.result;
+    reader.onload = async function(e) {
+      const dataUrl = await suShrinkDataUrl(e.target.result, 480, 0.85);
       // Show preview
       const preview = document.getElementById('logoPreviewBox');
       if (preview) preview.innerHTML = `<img src="${dataUrl}" class="w-full h-full object-cover">`;
@@ -7299,6 +7300,46 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
     if (url) pv.innerHTML = `<img src="${dashEsc(url)}" style="max-height:100%;max-width:100%;object-fit:contain" onerror="this.parentElement.textContent='❌'">`;
     else pv.textContent = '🗣️';
   }
+  // [EGRESS-FIX] تصغير الصور الكبيرة (base64) اللي بتتخزن في الإعدادات — كانت 1.5MB لوحدها وبتتنزّل مع كل تحميل
+  function suShrinkDataUrl(url, maxW, q) {
+    return new Promise(function (resolve) {
+      try {
+        const im = new Image();
+        im.onerror = function () { resolve(url); };
+        im.onload = function () {
+          try {
+            const iw = im.naturalWidth || im.width, ih = im.naturalHeight || im.height;
+            const k = Math.min(1, maxW / iw), w = Math.max(1, Math.round(iw * k)), h = Math.max(1, Math.round(ih * k));
+            const c = document.createElement('canvas'); c.width = w; c.height = h;
+            c.getContext('2d').drawImage(im, 0, 0, w, h);
+            let out = c.toDataURL('image/webp', q || 0.85);
+            if (out.indexOf('data:image/webp') !== 0) out = c.toDataURL('image/png');
+            resolve(out.length < url.length ? out : url);
+          } catch (e) { resolve(url); }
+        };
+        im.src = url;
+      } catch (e) { resolve(url); }
+    });
+  }
+  async function suSlimSettings() {
+    try {
+      if (!currentUser || currentUser.role !== 'admin' || !state.settings) return;
+      let n = 0, before = 0, after = 0;
+      const walk = async function (o, d) {
+        if (!o || typeof o !== 'object' || d > 6) return;
+        for (const k of Object.keys(o)) {
+          const v = o[k];
+          if (typeof v === 'string' && v.length > 40000 && /^data:image\/(png|jpe?g|webp|gif);base64,/i.test(v)) {
+            const nv = await suShrinkDataUrl(v, /logo/i.test(k) ? 480 : 900, 0.82);
+            if (nv !== v) { o[k] = nv; n++; before += v.length; after += nv.length; }
+          } else if (v && typeof v === 'object') { await walk(v, d + 1); }
+        }
+      };
+      await walk(state.settings, 0);
+      if (n) { saveState(); showToast('✅ تم تصغير ' + n + ' صورة في الإعدادات (' + Math.round(before / 1024) + ' KB ← ' + Math.round(after / 1024) + ' KB)', 'green'); }
+    } catch (e) { console.warn('suSlimSettings', e); }
+  }
+
   function suResizeImage(file, maxW) {
     return new Promise((resolve, reject) => {
       const fr = new FileReader();
@@ -7311,7 +7352,7 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
           const k = Math.min(1, maxW / im.width), w = Math.max(1, Math.round(im.width * k)), h = Math.max(1, Math.round(im.height * k));
           const c = document.createElement('canvas'); c.width = w; c.height = h;
           c.getContext('2d').drawImage(im, 0, 0, w, h);
-          resolve(c.toDataURL(/png|webp|gif/.test(file.type) ? 'image/png' : 'image/jpeg', 0.92));
+          { let o = c.toDataURL('image/webp', 0.85); if (o.indexOf('data:image/webp') !== 0) o = c.toDataURL(/png|webp|gif/.test(file.type) ? 'image/png' : 'image/jpeg', 0.85); resolve(o); }
         };
         im.src = fr.result;
       };
@@ -7322,7 +7363,7 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
     const f = input.files && input.files[0]; if (!f) return;
     if (f.size > 4 * 1024 * 1024) { alert('الصورة كبيرة — اختر صورة أقل من 4MB'); return; }
     try {
-      const url = await suResizeImage(f, 700);
+      const url = await suResizeImage(f, 480);
       suEl(k + 'LogoUrl').value = url; suSurfLogoPreview(k, url);
       showToast('تم اختيار الصورة — اضغط «حفظ» لتطبيقها', 'blue');
     } catch (e) { alert('تعذر قراءة الصورة'); }
