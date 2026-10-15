@@ -92,6 +92,75 @@
     body.role-therapist button[onclick*="toggleClientStatus("] { pointer-events: none; }
 
     .pp-grid3 { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.75rem; }
+    /* ===== parent portal v3 ===== */
+    #parentPortal .pp-fab-wrap { display: none !important; }
+    #parentPortal { background: #f1f5f9; }
+    .pp-home { min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; background: linear-gradient(180deg,#1e1b4b 0%,#312e81 100%); }
+    .pp-homehead { display:flex; align-items:center; gap:10px; padding: 14px 16px 22px; padding-top: max(14px, env(safe-area-inset-top)); color:#fff; flex-wrap: wrap; }
+    .pp-mini-logo { width:42px; height:42px; border-radius:14px; background:#fff; object-fit:contain; padding:4px; flex-shrink:0; }
+    .pp-kidchips { display:flex; gap:6px; flex-wrap:wrap; padding: 0 16px 14px; margin-top:-10px; }
+    .pp-stack { flex: 1; display: flex; flex-direction: column; position: relative; }
+    .pp-tile { position: relative; overflow: hidden; flex: 1 1 0; min-height: 168px; display: flex; flex-direction: column; justify-content: space-between; gap: 10px;
+      text-align: right; color: #fff; padding: 22px 20px 20px; border-radius: 34px 34px 0 0; box-shadow: 0 -10px 30px rgba(15,23,42,.28); cursor: pointer; border: 0; transition: transform .2s, filter .2s; }
+    .pp-tile + .pp-tile { margin-top: -30px; padding-top: 48px; }
+    .pp-tile:not(:last-child) { padding-bottom: 56px; }
+    .pp-tile:hover { filter: brightness(1.06); transform: translateY(-3px); }
+    .pp-tile:active { transform: scale(.985); }
+    .pp-tile > * { position: relative; z-index: 2; }
+    .pp-deco1, .pp-deco2 { position:absolute !important; z-index:1 !important; border-radius:50%; background: rgba(255,255,255,.10); pointer-events:none; }
+    .pp-deco1 { width:210px; height:210px; left:-60px; top:-70px; }
+    .pp-deco2 { width:140px; height:140px; right:-40px; bottom:-60px; background: rgba(255,255,255,.08); }
+    .pp-tile-main { display:flex; align-items:center; gap:14px; }
+    .pp-glass { width:62px; height:62px; flex-shrink:0; border-radius:22px; background: rgba(255,255,255,.2); border:1px solid rgba(255,255,255,.4); display:grid; place-items:center; font-size:32px; backdrop-filter: blur(6px); }
+    .pp-tile-title { font-weight: 900; font-size: 21px; line-height: 1.2; }
+    .pp-tile-sub { font-weight: 700; font-size: 12px; opacity: .92; margin-top: 3px; }
+    .pp-go { margin-right: auto; width: 38px; height: 38px; border-radius: 50%; background: rgba(255,255,255,.22); display:grid; place-items:center; font-size: 22px; font-weight: 900; }
+    .pp-pocket { background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.28); border-radius: 22px; padding: 10px 14px; display:flex; align-items:center; gap:12px; font-size:12px; font-weight:800; line-height:1.5; }
+    .pp-pocket b { font-family: ui-monospace, monospace; }
+    .pp-mini { display:flex; flex-direction:column; align-items:center; flex:1; background: rgba(255,255,255,.14); border-radius:14px; padding:6px 4px; }
+    .pp-mini b { font-size:18px; }
+    .pp-mini span { font-size:10px; opacity:.9; }
+    @media (min-width: 900px) {
+      .pp-stack { flex-direction: row; }
+      .pp-tile { border-radius: 38px 38px 0 0; min-height: 0; padding: 30px 26px 28px; }
+      .pp-tile + .pp-tile { margin-top: 0; margin-right: -34px; padding-top: 30px; padding-right: 58px; border-radius: 38px 38px 0 0; }
+      .pp-tile:not(:last-child) { padding-bottom: 28px; padding-left: 52px; }
+      .pp-tile { box-shadow: -14px 0 30px rgba(15,23,42,.22); }
+    }
+
+    .pp-pagehead { position: sticky; top: 0; z-index: 20; display:flex; align-items:center; gap:10px; padding: 10px 14px; padding-top: max(10px, env(safe-area-inset-top)); background: rgba(241,245,249,.92); backdrop-filter: blur(10px); border-bottom: 1px solid #e2e8f0; }
+    .pp-back { width:40px; height:40px; border-radius:14px; background:#fff; border:1px solid #e2e8f0; font-weight:900; font-size:18px; color:#334155; box-shadow:0 2px 6px rgba(15,23,42,.06); flex-shrink:0; }
+    .pp-title { color:#fff; font-weight:900; font-size:14px; padding: 9px 16px; border-radius:14px; box-shadow:0 6px 16px rgba(15,23,42,.18); white-space:nowrap; }
+    .pp-pagebody { max-width: 860px; margin: 0 auto; padding: 14px 14px 130px; display:flex; flex-direction:column; gap:14px; }
+    .pp-seg { display:flex; gap:6px; background:#fff; border:1px solid #e2e8f0; border-radius:16px; padding:5px; }
+    .pp-seg button { flex:1; padding:9px 6px; border-radius:12px; font-weight:900; font-size:12px; color:#475569; }
+    .pp-seg button.on { background:#4f46e5; color:#fff; box-shadow:0 4px 12px rgba(79,70,229,.3); }
+
+    .pp-bar-wrap { position: fixed; left: 0; right: 0; bottom: 0; z-index: 60; pointer-events: none; padding: 0 14px max(12px, env(safe-area-inset-bottom)); }
+    .pp-bar { pointer-events: auto; position: relative; max-width: 520px; margin: 0 auto; height: 66px; background: rgba(255,255,255,.96); backdrop-filter: blur(14px); border-radius: 26px; box-shadow: 0 12px 34px rgba(15,23,42,.22); border: 1px solid #e2e8f0; display:flex; align-items:center; justify-content: space-between; padding: 0 10px; }
+    .pp-bar-btn { display:flex; flex-direction:column; align-items:center; gap:3px; width: 33%; font-size:10.5px; font-weight:900; color:#475569; }
+    .pp-bar-ico { width:34px; height:34px; border-radius:12px; display:grid; place-items:center; font-size:18px; color:#fff; box-shadow: 0 4px 10px rgba(15,23,42,.2); }
+    .pp-bar-btn:active .pp-bar-ico { transform: scale(.9); }
+    .pp-bar-gap { width: 84px; flex-shrink: 0; }
+    .pp-logo-btn { pointer-events:auto; position:absolute; left:50%; top:-30px; transform: translateX(-50%); width:72px; height:72px; border-radius:50%; background:#fff; border: 5px solid #f1f5f9; box-shadow: 0 12px 26px rgba(79,70,229,.35), 0 0 0 2px #c7d2fe; display:grid; place-items:center; padding:0; overflow:hidden; transition: transform .2s; }
+    .pp-logo-btn:active { transform: translateX(-50%) scale(.94); }
+    .pp-logo-btn img { width:100%; height:100%; object-fit:contain; padding:7px; }
+    .pp-logo-btn::after { content:""; position:absolute; inset:-5px; border-radius:50%; border:2px solid rgba(79,70,229,.35); animation: pplogopulse 2.4s ease-out infinite; pointer-events:none; }
+    @keyframes pplogopulse { from { transform: scale(.92); opacity:.9; } to { transform: scale(1.25); opacity:0; } }
+    .pp-bar-pos { position: relative; max-width: 520px; margin: 0 auto; }
+    .pp-fan { position:absolute; left:50%; bottom: 88px; width:0; height:0; pointer-events:none; }
+    .pp-fan-btn { position:absolute; bottom:0; pointer-events:none; opacity:0; transform: translate(-50%, 24px) scale(.4); transition: all .28s cubic-bezier(.2,1.4,.4,1); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; width:74px; height:74px; border-radius:50%; color:#fff; font-weight:900; font-size:11px; box-shadow:0 12px 26px rgba(15,23,42,.3); }
+    .pp-fan-btn .e { font-size:24px; line-height:1; }
+    .pp-fan.open .pp-fan-btn { pointer-events:auto; opacity:1; }
+    .pp-fan-wa { background: linear-gradient(145deg,#22c55e,#15803d); }
+    .pp-fan-info { background: linear-gradient(145deg,#6366f1,#4338ca); }
+    .pp-fan.open .pp-fan-wa { transform: translate(-112%, -8px) scale(1); }
+    .pp-fan.open .pp-fan-info { transform: translate(12%, -8px) scale(1); }
+    .pp-fan-bg { position:fixed; inset:0; z-index:55; background: rgba(15,23,42,0); pointer-events:none; transition: background .25s; }
+    .pp-fan-bg.open { background: rgba(15,23,42,.35); pointer-events:auto; }
+    .pp-sheet-bg { position:fixed; inset:0; z-index:70; background: rgba(15,23,42,.5); }
+    .pp-sheet { position:fixed; left:0; right:0; bottom:0; z-index:71; max-width:560px; margin:0 auto; background:#fff; border-radius: 30px 30px 0 0; padding: 22px 20px max(22px, env(safe-area-inset-bottom)); max-height: 82vh; overflow-y:auto; box-shadow: 0 -20px 50px rgba(15,23,42,.35); animation: ppsheet .3s ease-out; }
+    @keyframes ppsheet { from { transform: translateY(100%); } }
     /* ===== parent portal v2: gateways ===== */
     .pp-gate { transition: transform .18s, box-shadow .18s; position: relative; overflow: hidden; }
     .pp-gate:hover { transform: translateY(-4px); box-shadow: 0 18px 38px rgba(30,27,75,.28); }
@@ -1257,6 +1326,21 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
 
       <section id="tab-dashboard" class="tab-content space-y-6">
         <div id="therapistDash"></div>
+        <div id="pbiBar" class="hidden flex flex-wrap items-center gap-2 bg-white border border-slate-200 rounded-2xl p-2 shadow-xs">
+          <div class="flex rounded-xl overflow-hidden border text-xs font-black">
+            <button id="pbiBtnPbi" onclick="pbiSetMode('pbi')" class="px-4 py-2">📊 داشبورد Power BI</button>
+            <button id="pbiBtnSys" onclick="pbiSetMode('sys')" class="px-4 py-2">🏢 لوحة النظام</button>
+          </div>
+          <div class="mr-auto flex items-center gap-2 text-xs font-black">
+            <button onclick="pbiReload()" class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200">🔄 تحديث</button>
+            <button onclick="pbiFullscreen()" class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200">⛶ ملء الشاشة</button>
+            <a id="pbiOpen" href="#" target="_blank" rel="noopener noreferrer" class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200">↗ فتح في تبويب</a>
+          </div>
+        </div>
+        <div id="pbiPanel" class="hidden bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
+          <iframe id="pbiFrame" title="Power BI" allowfullscreen referrerpolicy="strict-origin-when-cross-origin" style="width:100%;height:calc(100vh - 240px);min-height:520px;border:0;display:block"></iframe>
+          <div class="text-[11px] text-slate-400 p-2 text-center">لو الصفحة فاضية: اتأكد إن الرابط "Publish to web"، أو إنك مسجّل دخول Power BI على نفس المتصفح (لو الرابط خاص بالمؤسسة).</div>
+        </div>
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-4">
             <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-2xl">👥</div>
@@ -1948,6 +2032,11 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
               <div>
                 <label class="block text-slate-700 font-bold mb-1.5">اسم المركز الرسمي *</label>
                 <input type="text" id="settingCenterName" required class="w-full border rounded-xl p-2.5 font-bold focus:ring-2 focus:ring-indigo-500">
+              </div>
+              <div class="md:col-span-2 bg-sky-50 border border-sky-200 rounded-xl p-3">
+                <label class="block text-slate-800 font-bold mb-1.5">📊 رابط داشبورد Power BI <span class="text-slate-400 font-normal">(اختياري — بيظهر للمدير فقط في الداشبورد)</span></label>
+                <input type="text" id="settingPowerBiUrl" dir="ltr" placeholder="https://app.powerbi.com/view?r=..." class="w-full border rounded-xl p-2.5 font-mono text-xs focus:ring-2 focus:ring-sky-500">
+                <div class="text-[11px] text-slate-500 mt-1.5 leading-relaxed">الصق الرابط، أو كود التضمين (iframe) كامل. المسموح: app.powerbi.com و app.fabric.microsoft.com. سيب الخانة فاضية لإلغاء الربط.<br><b class="text-rose-600">تنبيه:</b> رابط "Publish to web" مفتوح لأي حد معاه الرابط، وداشبورد فيها أسماء الأطفال. الأأمن إنك تستخدم "Embed" الخاص بالمؤسسة.</div>
               </div>
               
               <div>
@@ -4791,6 +4880,44 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
     };
   })();
 
+  // ---------- Power BI embed (admin only) ----------
+  const PBI_HOSTS = ['app.powerbi.com', 'app.fabric.microsoft.com', 'app.powerbigov.us', 'app.powerbi.cn'];
+  function pbiParseUrl(raw) {
+    let v = String(raw || '').trim();
+    const m = v.match(/src\s*=\s*["']([^"']+)["']/i);   // لو لصق كود iframe كامل
+    if (m) v = m[1];
+    v = v.replace(/&amp;/g, '&');
+    try { const u = new URL(v); if (u.protocol === 'https:' && PBI_HOSTS.indexOf(u.hostname) >= 0) return u.href; } catch (e) {}
+    return '';
+  }
+  function pbiUrl() { return pbiParseUrl(state.settings && state.settings.powerBiUrl); }
+  function pbiAllowed() { return !!(currentUser && currentUser.role === 'admin' && pbiUrl()); }
+  function pbiMode() { try { return localStorage.getItem('SU_DASH_MODE') || 'pbi'; } catch (e) { return 'pbi'; } }
+  function pbiSetMode(m) { try { localStorage.setItem('SU_DASH_MODE', m); } catch (e) {} dashApplyPbi(); }
+  function pbiReload() { const fr = document.getElementById('pbiFrame'); if (fr && fr.getAttribute('data-src')) fr.src = fr.getAttribute('data-src'); }
+  function pbiFullscreen() { const fr = document.getElementById('pbiFrame'); if (fr && fr.requestFullscreen) fr.requestFullscreen(); }
+  function dashApplyPbi() {
+    const sec = document.getElementById('tab-dashboard'); if (!sec) return;
+    const on = pbiAllowed(), pbi = on && pbiMode() === 'pbi';
+    const bar = document.getElementById('pbiBar'), panel = document.getElementById('pbiPanel');
+    if (bar) bar.classList.toggle('hidden', !on);
+    if (panel) panel.classList.toggle('hidden', !pbi);
+    Array.prototype.forEach.call(sec.children, function (ch) { if (ch.id === 'pbiBar' || ch.id === 'pbiPanel') return; ch.style.display = pbi ? 'none' : ''; });
+    const onCls = 'px-4 py-2 bg-indigo-600 text-white', offCls = 'px-4 py-2 bg-white text-slate-600 hover:bg-slate-50';
+    const b1 = document.getElementById('pbiBtnPbi'), b2 = document.getElementById('pbiBtnSys');
+    if (b1) b1.className = pbi ? onCls : offCls;
+    if (b2) b2.className = pbi ? offCls : onCls;
+    if (pbi) {
+      const u = pbiUrl(), fr = document.getElementById('pbiFrame'), a = document.getElementById('pbiOpen');
+      if (a) a.href = u;
+      if (fr && fr.getAttribute('data-src') !== u) { fr.setAttribute('data-src', u); fr.src = u; }
+    }
+  }
+  (function () {
+    const _origDash = renderDashboard;
+    renderDashboard = function () { _origDash(); try { dashApplyPbi(); } catch (e) { console.warn('pbi', e); } };
+  })();
+
   function toggleClientStatus(id) {
     const c = (state.clients || []).find(x => String(x.id) === String(id));
     if (!c) return;
@@ -6652,7 +6779,8 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
       'settingLanguage':      s.language || 'ar',
       'settingCenterPhone':   s.centerPhone || '',
       'settingCenterAddress': s.centerAddress || '',
-      'settingReceiptFooter': s.receiptFooter || ''
+      'settingReceiptFooter': s.receiptFooter || '',
+      'settingPowerBiUrl':    s.powerBiUrl || ''
     };
     Object.entries(fields).forEach(([id, val]) => {
       const el = document.getElementById(id);
@@ -6711,6 +6839,7 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
     if (document.getElementById('settingCenterPhone')) document.getElementById('settingCenterPhone').value = s.centerPhone || '';
     if (document.getElementById('settingCenterAddress')) document.getElementById('settingCenterAddress').value = s.centerAddress || '';
     if (document.getElementById('settingReceiptFooter')) document.getElementById('settingReceiptFooter').value = s.receiptFooter || '';
+    if (document.getElementById('settingPowerBiUrl')) document.getElementById('settingPowerBiUrl').value = s.powerBiUrl || '';
   }
 
   function saveGeneralSettings(e) {
@@ -6733,6 +6862,15 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
     const prevLang = state.settings.language || 'ar';
     if (language) state.settings.language = language;
     if (receiptFooter !== undefined) state.settings.receiptFooter = receiptFooter;
+    const pbiRaw = document.getElementById('settingPowerBiUrl') ? document.getElementById('settingPowerBiUrl').value.trim() : undefined;
+    if (pbiRaw !== undefined) {
+      if (!pbiRaw) { delete state.settings.powerBiUrl; }
+      else {
+        const pu = pbiParseUrl(pbiRaw);
+        if (!pu) { showToast('❌ رابط Power BI غير صحيح. لازم رابط https من app.powerbi.com أو app.fabric.microsoft.com', 'amber'); return; }
+        state.settings.powerBiUrl = pu;
+      }
+    }
     
     saveState();
     if (language && language !== prevLang) { showToast('🌐 جاري تغيير اللغة...', 'green'); setTimeout(() => location.reload(), 700); return; }
@@ -7754,7 +7892,19 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
 
   // ---- Parent portal (child-centred view, no accounting) ----
   let _ppChild = null, _ppTab = 'home';
-  function ppSet(k, v) { if (k === 'child') _ppChild = v; else _ppTab = v; renderParentPortal(); }
+  var _ppSub = 'sessions', _ppSheet = null;
+  function ppSet(k, v) {
+    if (k === 'child') _ppChild = v;
+    else if (k === 'sub') _ppSub = v;
+    else { _ppTab = v; _ppSheet = null; }
+    renderParentPortal();
+    if (k === 'tab') { const pe = document.getElementById('parentPortal'); if (pe) pe.scrollTop = 0; }
+  }
+  function ppToggleMenu(e) { if (e) e.stopPropagation(); const f = document.getElementById('ppFan'); if (f) f.classList.toggle('open'); const b = document.getElementById('ppFanBg'); if (b) b.classList.toggle('open'); }
+  function ppCloseMenu() { const f = document.getElementById('ppFan'); if (f) f.classList.remove('open'); const b = document.getElementById('ppFanBg'); if (b) b.classList.remove('open'); }
+  function ppContact() { ppCloseMenu(); const c = ppChild(); window.open(waLink('السلام عليكم، أنا ولي أمر الطفل/ة ' + (c ? c.name : '') + '، وعندي استفسار:'), '_blank', 'noopener'); }
+  function ppInfo() { ppCloseMenu(); _ppSheet = 'info'; renderParentPortal(); }
+  function ppCloseSheet() { _ppSheet = null; renderParentPortal(); }
   function ppAge(dob) {
     if (!dob) return ''; const d = new Date(dob); if (isNaN(d)) return '';
     const m = Math.floor((Date.now() - d.getTime()) / 2629800000), y = Math.floor(m / 12);
@@ -7766,10 +7916,17 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
     el.classList.remove('hidden');
     const ids = [...(myScope() || [])], kids = (state.clients || []).filter(c => ids.includes(String(c.id)));
     const centre = (state.settings && state.settings.centerName) || 'Speak Up';
-    const head = `<div class="bg-gradient-to-l from-indigo-700 to-cyan-600 text-white p-4 flex items-center gap-3 flex-wrap sticky top-0 z-10"><div class="font-black text-base">👪 ${actEsc(centre)}</div><div class="text-xs opacity-90 mr-auto">أهلًا ${actEsc(currentUser.name || '')}</div><button onclick="handleLogout()" class="bg-white/15 hover:bg-white/25 px-3 py-1.5 rounded-lg text-xs font-bold">🚪 خروج</button></div>`;
-    if (!kids.length) { el.innerHTML = head + '<div class="p-10 text-center text-slate-500 font-bold">لم يتم ربط حسابك بأي طفل بعد. برجاء التواصل مع إدارة المركز.</div>'; return; }
+    const logo = (state.settings && state.settings.logoUrl) || window.SU_DEFAULT_LOGO || 'speakup_logo.png';
+    const logoImg = (cls) => `<img src="${actEsc(logo)}" alt="" class="${cls || ''}" onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,${encodeURIComponent('<svg xmlns=&quot;http://www.w3.org/2000/svg&quot; viewBox=&quot;0 0 40 40&quot;><text x=&quot;20&quot; y=&quot;27&quot; font-size=&quot;22&quot; text-anchor=&quot;middle&quot;>🗣️</text></svg>')}'">`;
+    const logoutBtn = `<button onclick="handleLogout()" class="bg-white/15 hover:bg-white/25 text-white px-3 py-2 rounded-xl text-xs font-black">🚪 خروج</button>`;
+    if (!kids.length) { el.innerHTML = `<div class="pp-home"><div class="pp-homehead">${logoImg('pp-mini-logo')}<div class="font-black flex-1">${actEsc(centre)}</div>${logoutBtn}</div><div class="flex-1 grid place-items-center p-10 text-center text-white font-bold">لم يتم ربط حسابك بأي طفل بعد. برجاء التواصل مع إدارة المركز.</div></div>`; return; }
     if (!kids.some(k => String(k.id) === String(_ppChild))) _ppChild = kids[0].id;
-    if (['home', 'perf', 'book', 'acct', 'acts', 'notes'].indexOf(_ppTab) < 0) _ppTab = (_ppTab === 'inv' || _ppTab === 'pay') ? 'acct' : (_ppTab === 'sessions' ? 'book' : 'home');
+    // legacy tab names -> new structure
+    if (_ppTab === 'acts') { _ppTab = 'book'; _ppSub = 'acts'; }
+    else if (_ppTab === 'notes') { _ppTab = 'book'; _ppSub = 'notes'; }
+    else if (_ppTab === 'sessions') { _ppTab = 'book'; _ppSub = 'sessions'; }
+    else if (_ppTab === 'inv' || _ppTab === 'pay') _ppTab = 'acct';
+    if (['home', 'perf', 'book', 'acct'].indexOf(_ppTab) < 0) _ppTab = 'home';
     const c = kids.find(k => String(k.id) === String(_ppChild));
 
     // ---- data ----
@@ -7788,44 +7945,40 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
     const curRem = curRow ? Math.max(0, curRow.inv.remainingBalance) : 0;
     const curPct = curRow && curRow.inv.totalNetDue > 0 ? Math.min(100, Math.round(curRow.inv.totalPaid / curRow.inv.totalNetDue * 100)) : 100;
     const notesN = ppNotes(c.id).length;
+    const nextS = up[0];
+    const nextTxt = nextS ? `📅 ${AR_WEEKDAYS[ymdWeekday((nextS.date || '').replace(/\//g, '-'))] || ''} ${ymdArabic((nextS.date || '').replace(/\//g, '-'), false)} · ${formatTime12(nextS.time)}` : 'لا توجد جلسة قادمة';
 
+    const PG = {
+      perf: { title: '📈 متابعة الأداء', name: 'متابعة الأداء', ico: '📈', grad: 'linear-gradient(145deg,#059669,#0d9488)' },
+      book: { title: '📔 كراسة المتابعة', name: 'كراسة المتابعة', ico: '📔', grad: 'linear-gradient(145deg,#7c3aed,#4f46e5)' },
+      acct: { title: '💳 حساباتي', name: 'حساباتي', ico: '💳', grad: 'linear-gradient(145deg,#e11d48,#f97316)' }
+    };
     const ring = (pct, size, stroke, color, track, inner) => {
       const r = (size - stroke) / 2, C = 2 * Math.PI * r, h = size / 2;
-      return `<div style="position:relative;width:${size}px;height:${size}px"><svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="transform:rotate(-90deg)"><circle cx="${h}" cy="${h}" r="${r}" fill="none" stroke="${track}" stroke-width="${stroke}"/><circle class="pp-ring" cx="${h}" cy="${h}" r="${r}" fill="none" stroke="${color}" stroke-width="${stroke}" stroke-linecap="round" stroke-dasharray="${(C * pct / 100).toFixed(1)} ${C.toFixed(1)}"/></svg><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column">${inner}</div></div>`;
+      return `<div style="position:relative;width:${size}px;height:${size}px;flex-shrink:0"><svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="transform:rotate(-90deg)"><circle cx="${h}" cy="${h}" r="${r}" fill="none" stroke="${track}" stroke-width="${stroke}"/><circle class="pp-ring" cx="${h}" cy="${h}" r="${r}" fill="none" stroke="${color}" stroke-width="${stroke}" stroke-linecap="round" stroke-dasharray="${(C * pct / 100).toFixed(1)} ${C.toFixed(1)}"/></svg><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column">${inner}</div></div>`;
     };
-    const back = (title, grad) => `<div class="flex items-center gap-3"><button onclick="ppSet('tab','home')" class="bg-white border shadow-sm hover:bg-slate-50 text-slate-700 font-black text-sm px-4 py-2 rounded-xl">→ الرئيسية</button><div class="font-black text-white text-sm px-4 py-2 rounded-xl shadow" style="background:${grad}">${title}</div></div>`;
     const kpi = (i, l, v, col) => `<div class="bg-white rounded-2xl border p-3 text-center"><div class="text-2xl">${i}</div><div class="text-lg font-black ${col || 'text-slate-800'}">${v}</div><div class="text-[11px] text-slate-500 font-bold">${l}</div></div>`;
+    const kidsBar = kids.length > 1 ? kids.map(k => `<button onclick="ppSet('child','${k.id}')" class="px-3 py-1.5 rounded-full text-xs font-black ${String(k.id) === String(c.id) ? 'bg-amber-400 text-slate-900' : 'bg-white/90 text-slate-600'}">👶 ${actEsc(k.name)}</button>`).join('') : '';
 
-    // ---- hero ----
-    const nextS = up[0];
-    const nextHtml = nextS ? `<div class="mt-2 inline-flex items-center gap-2 bg-white/20 rounded-full px-3 py-1 text-[11px] font-black">📅 الجلسة القادمة: ${AR_WEEKDAYS[ymdWeekday((nextS.date || '').replace(/\//g, '-'))] || ''} ${actEsc(ymdArabic((nextS.date || '').replace(/\//g, '-'), false))} · ${formatTime12(nextS.time)}</div>` : '<div class="mt-2 inline-flex items-center gap-2 bg-white/15 rounded-full px-3 py-1 text-[11px] font-bold">لا توجد جلسة قادمة مجدولة</div>';
-    const kidsBar = kids.length > 1 ? `<div class="flex gap-2 flex-wrap">${kids.map(k => `<button onclick="ppSet('child','${k.id}')" class="px-3 py-1.5 rounded-full text-xs font-black ${String(k.id) === String(c.id) ? 'bg-amber-400 text-slate-900' : 'bg-white border text-slate-600'}">👶 ${actEsc(k.name)}</button>`).join('')}</div>` : '';
-    const hero = `<div class="rounded-3xl text-white p-5 flex items-center gap-4 shadow-lg" style="background:linear-gradient(135deg,#4338ca 0%,#0891b2 100%)"><div class="w-16 h-16 shrink-0 rounded-full bg-white/20 border-2 border-white/50 font-black text-3xl grid place-items-center">${actEsc((c.name || '?').trim().charAt(0))}</div><div class="min-w-0"><div class="font-black text-xl truncate">${actEsc(c.name || '')}</div><div class="text-xs font-bold opacity-90">${[ppAge(c.dob), c.diagnosis, getBranchName(c.branch)].filter(Boolean).map(actEsc).join(' · ')}</div>${nextHtml}</div></div>`;
-
-    let body = '';
+    // =============== HOME: 3 interlocking tiles filling the screen ===============
     if (_ppTab === 'home') {
+      const tile = (id, grad, z, icon, title, sub, pocket) => `<button onclick="ppSet('tab','${id}')" class="pp-tile pp-pop" style="background:${grad};z-index:${z};animation-delay:${(z - 1) * 0.09}s"><span class="pp-deco1"></span><span class="pp-deco2"></span>
+        <div class="pp-tile-main"><div class="pp-glass">${icon}</div><div class="min-w-0"><div class="pp-tile-title">${title}</div><div class="pp-tile-sub">${sub}</div></div><div class="pp-go">‹</div></div>
+        <div class="pp-pocket">${pocket}</div></button>`;
       const lastC = comments[0];
-      const gPerf = `<button onclick="ppSet('tab','perf')" class="pp-gate pp-pop text-right rounded-3xl p-5 text-white shadow-lg flex flex-col gap-3 min-h-[210px]" style="background:linear-gradient(145deg,#059669,#0d9488)">
-        <div class="flex items-center gap-4">${ring(rate, 92, 10, '#fff', 'rgba(255,255,255,.28)', `<b class="text-xl">${rate}%</b><span class="text-[9px] font-bold opacity-90">حضور</span>`)}
-        <div><div class="font-black text-lg">📈 متابعة الأداء</div><div class="text-[11px] font-bold opacity-90 mt-1">${cnt.ATT} حضور من ${done} جلسة</div></div></div>
-        <div class="text-[12px] font-bold bg-white/15 rounded-2xl p-3 leading-relaxed">${lastC ? '💬 ' + actEsc(lastC.parentComment.slice(0, 80)) + (lastC.parentComment.length > 80 ? '…' : '') : (evals.length ? '📊 آخر تقييم: ' + actEsc(evals[0].title || '') : 'تعليقات الأخصائي وتقييمات الأداء بتظهر هنا ✨')}</div>
-        <div class="flex gap-2 text-[11px] font-black mt-auto"><span class="bg-white/20 rounded-full px-2.5 py-1">💬 ${comments.length} تعليق</span><span class="bg-white/20 rounded-full px-2.5 py-1">📊 ${evals.length} تقييم</span></div></button>`;
-      const gBook = `<button onclick="ppSet('tab','book')" class="pp-gate pp-pop text-right rounded-3xl p-5 text-white shadow-lg flex flex-col gap-3 min-h-[210px]" style="background:linear-gradient(145deg,#7c3aed,#4f46e5);animation-delay:.08s">
-        <div class="flex items-center gap-4"><div class="w-[92px] h-[92px] rounded-2xl bg-white/15 border border-white/30 grid place-items-center text-5xl shrink-0">📔</div>
-        <div><div class="font-black text-lg">كراسة المتابعة</div><div class="text-[11px] font-bold opacity-90 mt-1">تفاصيل كل جلسة</div></div></div>
-        <div class="text-[12px] font-bold bg-white/15 rounded-2xl p-3 leading-relaxed">ما تم التدريب عليه، وتقييم الجلسة، وواجب البيت.</div>
-        <div class="flex gap-2 text-[11px] font-black mt-auto"><span class="bg-amber-300 text-slate-900 rounded-full px-2.5 py-1">قريباً ✨</span><span class="bg-white/20 rounded-full px-2.5 py-1">📋 ${sess.length} جلسة</span></div></button>`;
-      const gAcct = `<button onclick="ppSet('tab','acct')" class="pp-gate pp-pop text-right rounded-3xl p-5 text-white shadow-lg flex flex-col gap-3 min-h-[210px]" style="background:linear-gradient(145deg,#e11d48,#f97316);animation-delay:.16s">
-        <div class="flex items-center gap-4"><div class="w-[92px] h-[92px] rounded-2xl bg-white/15 border border-white/30 grid place-items-center text-5xl shrink-0">💳</div>
-        <div><div class="font-black text-lg">حساباتي</div><div class="text-[11px] font-bold opacity-90 mt-1">المدفوعات والفواتير</div></div></div>
-        <div class="bg-white/15 rounded-2xl p-3"><div class="text-[11px] font-bold opacity-90">فاتورة ${cpMonthLabel(cur)}</div><div class="font-black text-lg font-mono">${curRow ? (curRem > 0 ? 'المتبقي ' + cpMoney(curRem) : '🟢 مسددة') : 'لا توجد جلسات بعد'}</div><div class="h-2 rounded-full bg-white/25 mt-2 overflow-hidden"><div style="width:${curPct}%" class="h-full bg-white"></div></div></div>
-        <div class="flex gap-2 text-[11px] font-black mt-auto"><span class="bg-white/20 rounded-full px-2.5 py-1">🧾 ${d.rows.filter(r => r.inv && (r.inv.totalNetDue > 0 || r.inv.totalPaid > 0)).length} فاتورة</span><span class="bg-white/20 rounded-full px-2.5 py-1">💵 ${d.payments.length} دفعة</span></div></button>`;
-      const small = (id, ico, title, sub, cls) => `<button onclick="ppSet('tab','${id}')" class="pp-pop text-right rounded-2xl p-4 border bg-white shadow-sm hover:shadow-md hover:-translate-y-0.5 transition flex items-center gap-3 ${cls || ''}"><div class="text-3xl">${ico}</div><div><div class="font-black text-sm text-slate-800">${title}</div><div class="text-[11px] text-slate-500 font-bold">${sub}</div></div></button>`;
-      body = `<div class="text-sm font-black text-slate-500 px-1">اختار البوابة اللي تحب تدخلها 👇</div>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">${gPerf}${gBook}${gAcct}</div>
-        <div class="grid grid-cols-2 gap-3">${small('acts', '🧩', 'أنشطة المنزل', acts.length ? doneActs + ' من ' + acts.length + ' منفّذ' : 'ما حدده الأخصائي')}${small('notes', '📝', 'مفكرتي', notesN ? notesN + ' ملاحظة محفوظة' : 'سجّل ملاحظاتك')}</div>`;
-    } else if (_ppTab === 'perf') {
-      // monthly attendance %
+      const t1 = tile('perf', PG.perf.grad, 1, '📈', 'متابعة الأداء', `${cnt.ATT} حضور من ${done} جلسة`,
+        `${ring(rate, 58, 7, '#fff', 'rgba(255,255,255,.3)', `<b style="font-size:14px">${rate}%</b>`)}<div class="min-w-0 flex-1">${lastC ? '💬 ' + actEsc(lastC.parentComment.slice(0, 70)) + (lastC.parentComment.length > 70 ? '…' : '') : (evals.length ? '📊 آخر تقييم: ' + actEsc(evals[0].title || '') : 'تعليقات الأخصائي وتقييمات الأداء ✨')}</div>`);
+      const t2 = tile('book', PG.book.grad, 2, '📔', 'كراسة المتابعة', 'الجلسات · أنشطة المنزل · مفكرتي',
+        `<div class="pp-mini"><b>${sess.length}</b><span>📋 جلسة</span></div><div class="pp-mini"><b>${acts.length}</b><span>🧩 نشاط</span></div><div class="pp-mini"><b>${notesN}</b><span>📝 ملاحظة</span></div>`);
+      const t3 = tile('acct', PG.acct.grad, 3, '💳', 'حساباتي', 'المدفوعات والفواتير',
+        `<div class="flex-1 min-w-0"><div class="opacity-90">فاتورة ${cpMonthLabel(cur)}</div><div style="font-size:17px;font-weight:900">${curRow ? (curRem > 0 ? 'المتبقي ' + cpMoney(curRem) : '🟢 مسددة') : 'لا توجد جلسات بعد'}</div><div style="height:7px;border-radius:99px;background:rgba(255,255,255,.3);margin-top:6px;overflow:hidden"><div style="width:${curPct}%;height:100%;background:#fff"></div></div></div>`);
+      el.innerHTML = `<div class="pp-home"><div class="pp-homehead">${logoImg('pp-mini-logo')}<div class="min-w-0 flex-1"><div class="font-black text-base truncate">أهلًا ${actEsc(currentUser.name || '')} 👋</div><div class="text-[11px] font-bold leading-snug" style="color:#c7d2fe">👶 ${actEsc(c.name || '')}<br>${nextTxt}</div></div>${logoutBtn}</div>${kidsBar ? `<div class="pp-kidchips">${kidsBar}</div>` : ''}<div class="pp-stack">${t1}${t2}${t3}</div></div>`;
+      return;
+    }
+
+    // =============== INNER PAGES ===============
+    let body = '';
+    if (_ppTab === 'perf') {
       const byM = {};
       sess.forEach(s => { const k = cpStatusKey(s.status); if (k === 'SCH' || k === 'TCA') return; const m = cpNormMonth(s.date); if (!m) return; (byM[m] = byM[m] || { a: 0, n: 0 }); byM[m].n++; if (k === 'ATT') byM[m].a++; });
       const months = Object.keys(byM).sort().slice(-6);
@@ -7834,26 +7987,49 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
       const commentsHtml = comments.length ? comments.slice(0, 12).map(s => `<div class="flex gap-3 items-start"><div class="w-9 h-9 shrink-0 rounded-full bg-cyan-100 text-cyan-800 font-black grid place-items-center text-sm">${actEsc((th(s) || 'أ').replace(/^أ\.\s*/, '').trim().charAt(0))}</div><div class="pp-bubble p-3 flex-1"><div class="text-[11px] font-black text-cyan-800 mb-1">${actEsc(th(s) || 'الأخصائي')} <span class="font-mono font-bold text-slate-400">· ${actEsc(s.date || '')}</span></div><div class="text-sm text-slate-800 leading-relaxed">${actEsc(s.parentComment)}</div></div></div>`).join('') : '<div class="text-center text-slate-400 text-sm py-6">لسه مفيش تعليقات من الأخصائي. أول ما يكتب تعليق بعد جلسة هيظهر هنا 💬</div>';
       const evHtml = evals.length ? evals.map(e => { const sc = Number(e.score), mx = Number(e.max) || 100, has = !isNaN(sc) && e.score !== '' && e.score != null, p = has ? Math.max(0, Math.min(100, Math.round(sc / mx * 100))) : 0, col = p >= 75 ? '#059669' : p >= 50 ? '#f59e0b' : '#e11d48';
         return `<div class="rounded-2xl border p-4 bg-white pp-pop"><div class="flex items-center gap-2"><div class="text-2xl">${e.kind === 'test' ? '📝' : '📊'}</div><div class="min-w-0"><div class="font-black text-sm text-slate-800 truncate">${actEsc(e.title || 'تقييم أداء')}</div><div class="text-[11px] text-slate-400 font-bold">${actEsc(e.date || '')}${e.therapistId ? ' · ' + actEsc(th({ therapistId: e.therapistId })) : ''}</div></div>${has ? `<div class="mr-auto font-mono font-black" style="color:${col}">${sc}<span class="text-slate-400 text-xs">/${mx}</span></div>` : ''}</div>${has ? `<div class="h-2 rounded-full bg-slate-100 mt-3 overflow-hidden"><div style="width:${p}%;background:${col}" class="h-full"></div></div>` : ''}${e.notes ? `<div class="text-xs text-slate-600 mt-3 leading-relaxed">${actEsc(e.notes)}</div>` : ''}</div>`; }).join('') : '<div class="rounded-2xl border border-dashed p-6 text-center text-slate-400 text-sm bg-white">لما الأخصائي يرسل تقييم أداء أو نتيجة اختبار هيظهر هنا ✨</div>';
-      body = `${back('📈 متابعة الأداء', 'linear-gradient(135deg,#059669,#0d9488)')}
-        <div class="grid md:grid-cols-3 gap-3"><div class="bg-white rounded-2xl border p-4 flex items-center gap-4 md:col-span-1">${ring(rate, 84, 9, '#059669', '#e2e8f0', `<b class="text-lg text-slate-800">${rate}%</b>`)}<div><div class="font-black text-sm text-slate-800">نسبة الحضور</div><div class="text-[11px] text-slate-500 font-bold">${cnt.ATT} من ${done} جلسة</div>${streak >= 2 ? `<div class="mt-1 text-[11px] font-black text-amber-600">🔥 ${streak} جلسات حضور متتالية</div>` : ''}</div></div>
+      body = `<div class="grid md:grid-cols-3 gap-3"><div class="bg-white rounded-2xl border p-4 flex items-center gap-4">${ring(rate, 84, 9, '#059669', '#e2e8f0', `<b class="text-lg text-slate-800">${rate}%</b>`)}<div><div class="font-black text-sm text-slate-800">نسبة الحضور</div><div class="text-[11px] text-slate-500 font-bold">${cnt.ATT} من ${done} جلسة</div>${streak >= 2 ? `<div class="mt-1 text-[11px] font-black text-amber-600">🔥 ${streak} جلسات حضور متتالية</div>` : ''}</div></div>
           <div class="pp-grid3 md:col-span-2">${kpi('✅', 'حضر', cnt.ATT, 'text-emerald-600')}${kpi('📨', 'اعتذار', cnt.EXC + cnt.SDE, 'text-amber-600')}${kpi('❌', 'غياب', cnt.CAN, 'text-rose-600')}</div></div>
         <div class="bg-white rounded-2xl border p-4"><div class="font-black text-sm text-slate-800 mb-3">📅 الحضور شهرياً</div><div class="flex items-end gap-2">${bars}</div></div>
         <div class="bg-white rounded-2xl border p-4 space-y-4"><div class="font-black text-sm text-slate-800">💬 تعليقات الأخصائي</div>${commentsHtml}</div>
         <div class="space-y-3"><div class="font-black text-sm text-slate-800 px-1">📊 تقييمات الأداء والاختبارات</div>${evHtml}</div>`;
     } else if (_ppTab === 'book') {
-      body = `${back('📔 كراسة المتابعة', 'linear-gradient(135deg,#7c3aed,#4f46e5)')}
-        <div class="pp-notebook rounded-2xl border shadow-sm p-5" style="min-height:190px;padding-right:22px"><div class="font-black text-lg text-indigo-900">كراسة ${actEsc((c.name || '').split(' ')[0])} ✏️</div><div class="text-sm text-slate-700 font-bold mt-3 leading-[30px]">هنا هتلاقي تفصيل كل جلسة: اللي اتدرّب عليه الطفل، وتقييم الأخصائي للجلسة، وواجب البيت.<br><span class="inline-block bg-amber-300 text-slate-900 rounded-full px-3 leading-7 text-xs font-black">الكراسة قريباً ✨</span></div></div>
+      const seg = `<div class="pp-seg"><button class="${_ppSub === 'sessions' ? 'on' : ''}" onclick="ppSet('sub','sessions')">📋 الجلسات</button><button class="${_ppSub === 'acts' ? 'on' : ''}" onclick="ppSet('sub','acts')">🧩 أنشطة المنزل${acts.length ? ' (' + acts.length + ')' : ''}</button><button class="${_ppSub === 'notes' ? 'on' : ''}" onclick="ppSet('sub','notes')">📝 مفكرتي</button></div>`;
+      let inner = '';
+      if (_ppSub === 'acts') inner = acts.length ? `<div class="grid sm:grid-cols-2 gap-3">${acts.map(a => caCard(c.id, a, false)).join('')}</div>` : '<div class="bg-white rounded-2xl border p-8 text-center text-slate-400">لم يتم تنزيل أنشطة منزلية بعد. سيظهر هنا ما يحدده الأخصائي.</div>';
+      else if (_ppSub === 'notes') inner = ppNotesHtml(c);
+      else inner = `<div class="pp-notebook rounded-2xl border shadow-sm p-5" style="min-height:170px;padding-right:22px"><div class="font-black text-lg text-indigo-900">كراسة ${actEsc((c.name || '').split(' ')[0])} ✏️</div><div class="text-sm text-slate-700 font-bold mt-3 leading-[30px]">هنا هتلاقي تفصيل كل جلسة: اللي اتدرّب عليه الطفل، وتقييم الأخصائي للجلسة، وواجب البيت.<br><span class="inline-block bg-amber-300 text-slate-900 rounded-full px-3 leading-7 text-xs font-black">التفاصيل قريباً ✨</span></div></div>
         <div class="bg-white rounded-2xl border p-4"><div class="font-black text-sm text-slate-800 mb-2">📋 سجل الجلسات (${sess.length})</div>${sess.map(row).join('') || '<div class="text-center text-slate-400 py-6">لا توجد جلسات</div>'}</div>`;
-    } else if (_ppTab === 'acct') {
-      body = `${back('💳 حساباتي', 'linear-gradient(135deg,#e11d48,#f97316)')}
-        <div class="pp-grid3">${kpi('🧾', 'إجمالي المستحق', cpMoney(d.totalDue), 'text-indigo-700')}${kpi('💵', 'إجمالي المدفوع', cpMoney(d.totalPaid), 'text-emerald-700')}${kpi(d.balance > 0 ? '⏳' : '✅', d.balance > 0 ? 'المتبقي' : (d.balance < 0 ? 'رصيد لصالحك' : 'مسدد'), cpMoney(Math.abs(d.balance)), d.balance > 0 ? 'text-rose-600' : 'text-slate-500')}</div>
-        ${ppInvoicesHtml(c)}${ppPaymentsHtml(c)}`;
-    } else if (_ppTab === 'acts') {
-      body = `${back('🧩 أنشطة المنزل', 'linear-gradient(135deg,#4f46e5,#06b6d4)')}` + (acts.length ? `<div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">${acts.map(a => caCard(c.id, a, false)).join('')}</div>` : '<div class="bg-white rounded-2xl border p-8 text-center text-slate-400">لم يتم تنزيل أنشطة منزلية بعد. سيظهر هنا ما يحدده الأخصائي.</div>');
+      body = seg + inner;
     } else {
-      body = `${back('📝 مفكرتي', 'linear-gradient(135deg,#f59e0b,#eab308)')}${ppNotesHtml(c)}`;
+      body = `<div class="pp-grid3">${kpi('🧾', 'إجمالي المستحق', cpMoney(d.totalDue), 'text-indigo-700')}${kpi('💵', 'إجمالي المدفوع', cpMoney(d.totalPaid), 'text-emerald-700')}${kpi(d.balance > 0 ? '⏳' : '✅', d.balance > 0 ? 'المتبقي' : (d.balance < 0 ? 'رصيد لصالحك' : 'مسدد'), cpMoney(Math.abs(d.balance)), d.balance > 0 ? 'text-rose-600' : 'text-slate-500')}</div>
+        ${ppInvoicesHtml(c)}${ppPaymentsHtml(c)}`;
     }
-    el.innerHTML = head + `<div class="max-w-4xl mx-auto p-4 space-y-4 pb-28">${kidsBar}${hero}${body}</div>`;
+
+    const others = ['perf', 'book', 'acct'].filter(x => x !== _ppTab);
+    const barBtn = id => `<button onclick="ppSet('tab','${id}')" class="pp-bar-btn"><span class="pp-bar-ico" style="background:${PG[id].grad}">${PG[id].ico}</span><span>${PG[id].name}</span></button>`;
+    const pageHead = `<div class="pp-pagehead"><button onclick="ppSet('tab','home')" class="pp-back" title="الرئيسية">→</button><div class="pp-title" style="background:${PG[_ppTab].grad}">${PG[_ppTab].title}</div><div class="mr-auto text-[11px] font-black text-slate-500 truncate">👶 ${actEsc((c.name || '').split(' ').slice(0, 2).join(' '))}</div></div>${kidsBar ? `<div class="flex gap-2 flex-wrap px-4 pt-3" style="background:#f1f5f9">${kidsBar.replace(/bg-white\/90/g, 'bg-white border')}</div>` : ''}`;
+    const bar = `<div id="ppFanBg" class="pp-fan-bg" onclick="ppCloseMenu()"></div>
+      <div class="pp-bar-wrap"><div class="pp-bar-pos">
+        <div id="ppFan" class="pp-fan"><button onclick="ppContact()" class="pp-fan-btn pp-fan-wa"><span class="e">💬</span>تواصل</button><button onclick="ppInfo()" class="pp-fan-btn pp-fan-info"><span class="e">ℹ️</span>معلومات</button></div>
+        <nav class="pp-bar">${barBtn(others[0])}<div class="pp-bar-gap"></div>${barBtn(others[1])}</nav>
+        <button class="pp-logo-btn" onclick="ppToggleMenu(event)" title="المركز">${logoImg('')}</button>
+      </div></div>`;
+
+    let sheet = '';
+    if (_ppSheet === 'info') {
+      const bs = (state.branches || []).filter(b => b.status !== 'Inactive');
+      const phone = (state.settings && state.settings.centerPhone) || '';
+      const addr = (state.settings && state.settings.centerAddress) || '';
+      sheet = `<div class="pp-sheet-bg" onclick="ppCloseSheet()"></div><div class="pp-sheet">
+        <div class="flex items-center gap-3 mb-4">${logoImg('w-14 h-14 rounded-2xl border object-contain bg-white p-1')}<div class="min-w-0"><div class="font-black text-slate-900 text-base">${actEsc(centre)}</div><div class="text-[11px] text-slate-500 font-bold">أهلاً بيك في مركزنا 💜</div></div><button onclick="ppCloseSheet()" class="mr-auto w-9 h-9 rounded-full bg-slate-100 font-black text-slate-500">✕</button></div>
+        <div class="space-y-3">
+          ${phone ? `<a href="tel:${actEsc(phone)}" class="flex items-center gap-3 bg-slate-50 border rounded-2xl p-3 text-sm font-black text-slate-800">📞 <span class="font-mono" dir="ltr">${actEsc(phone)}</span></a>` : ''}
+          <a href="${waLink('')}" target="_blank" rel="noopener" class="flex items-center gap-3 bg-emerald-50 border border-emerald-200 rounded-2xl p-3 text-sm font-black text-emerald-800">💬 راسلنا على واتساب</a>
+          ${addr ? `<div class="flex items-start gap-3 bg-slate-50 border rounded-2xl p-3 text-sm font-bold text-slate-700">📍 <span>${actEsc(addr)}</span></div>` : ''}
+          ${bs.length ? `<div class="font-black text-xs text-slate-500 px-1 pt-2">🏢 فروعنا</div>` + bs.map(b => `<div class="rounded-2xl border p-3 ${b.branch_id === c.branch ? 'bg-indigo-50 border-indigo-300' : 'bg-white'}"><div class="font-black text-sm text-slate-800">${actEsc(b.branch_name || '')} ${b.branch_id === c.branch ? '<span class="text-[10px] bg-indigo-600 text-white rounded-full px-2 py-0.5 mr-1">فرع ' + actEsc((c.name || '').split(' ')[0]) + '</span>' : ''}</div><div class="text-xs text-slate-500 font-bold mt-1">${actEsc(b.address || '')}</div></div>`).join('') : ''}
+        </div></div>`;
+    }
+    el.innerHTML = `${pageHead}<div class="pp-pagebody">${body}</div>${bar}${sheet}`;
   }
 
 
@@ -8565,7 +8741,7 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
       if (!el || el.classList.contains('hidden') || !currentUser || currentUser.role !== 'parent') return;
       const c = ppChild(); if (!c) return;
       const msg = `السلام عليكم، أنا ولي أمر الطفل/ة ${c.name}، وعندي استفسار:`;
-      el.insertAdjacentHTML('beforeend', `<div class="pp-fab-wrap"><button onclick="ppSet('tab','notes')" class="pp-fab pp-fab-note" title="اكتب ملاحظة للأخصائي">✍️<span>ملاحظة</span></button><a href="${waLink(msg)}" target="_blank" rel="noopener" class="pp-fab pp-fab-wa" title="تواصل مع المركز على واتساب">${WA_SVG}<span>تواصل مع المركز</span></a></div>`);
+      void msg;
     };
   })();
 
