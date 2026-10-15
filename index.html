@@ -1053,6 +1053,73 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
  .sum-sel select{max-width:48%;height:38px;padding:0 8px;border:1px solid var(--su-line,#ebe8f3);border-radius:10px;background:#fff;font:inherit;font-size:13px;color:inherit}
 }
 </style>
+<style id="nb-css">
+.nb-root{position:fixed;inset:0;z-index:55;background:linear-gradient(160deg,#ede9fe,#fef3c7 60%,#dcfce7);overflow:hidden;direction:rtl}
+.nb-sheet{height:100%;overflow-y:auto;max-width:760px;margin:0 auto;padding:max(12px,env(safe-area-inset-top)) 12px max(24px,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:12px;-webkit-overflow-scrolling:touch}
+.nb-head{display:flex;gap:12px;align-items:center;background:#fff;border-radius:24px;padding:12px;box-shadow:0 8px 24px rgba(79,70,229,.15);border-bottom:4px dotted #c4b5fd;position:relative}
+.nb-logo{width:84px;height:84px;object-fit:contain;border-radius:20px;background:#fff;border:1px solid #ebe8f3;padding:4px;flex-shrink:0}
+.nb-meta{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}
+.nb-row{display:flex;align-items:center;gap:8px;justify-content:space-between;font-size:12px;font-weight:800;color:#475569}
+.nb-row small{color:#7c3aed;margin-right:4px}
+.nb-kid{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px;font-weight:800;color:#1e293b}.nb-kid span{color:#64748b}
+.nb-x{position:absolute;left:10px;top:8px;width:30px;height:30px;border-radius:50%;background:#f1f5f9;font-weight:900;font-size:18px;color:#64748b}
+.nb-in,.nb-ta{border:1.5px solid #e2e8f0;border-radius:14px;padding:8px 10px;font-size:13px;background:#fff;outline:none;font-family:inherit}
+.nb-in:focus,.nb-ta:focus{border-color:#8b5cf6;box-shadow:0 0 0 3px #ede9fe}
+.nb-ta{width:100%;resize:vertical;line-height:1.8}
+.nb-ta.lined{background:repeating-linear-gradient(#fff,#fff 29px,#e0e7ff 30px);line-height:30px;padding-top:2px}
+.nb-hist{display:flex;gap:6px;overflow-x:auto;padding:2px}
+.nb-chip{white-space:nowrap;background:#fff;border-radius:999px;padding:6px 12px;font-size:11px;font-weight:800;color:#475569;border:1.5px solid #e2e8f0}
+.nb-chip i{color:#7c3aed;font-style:normal}.nb-chip.on{background:#7c3aed;color:#fff;border-color:#7c3aed}.nb-chip.on i{color:#ddd6fe}.nb-chip.new{background:#ecfdf5;border-color:#6ee7b7;color:#047857}
+.nb-card{background:#fff;border-radius:24px;padding:14px;box-shadow:0 6px 18px rgba(15,23,42,.07);border-top:5px solid var(--k)}
+.nb-card h4{display:flex;align-items:center;gap:8px;font-weight:900;font-size:14px;color:#1e293b;margin-bottom:10px}
+.nb-card h4 small{font-size:10px;color:#94a3b8;font-weight:700}.nb-card h4 .nb-btn{margin-right:auto}
+.c1{--k:#8b5cf6}.c2{--k:#14b8a6}.c3{--k:#f59e0b}.c4{--k:#0ea5e9}.c5{--k:#22c55e}
+.nb-btn{background:#7c3aed;color:#fff;font-weight:900;font-size:12px;border-radius:14px;padding:9px 16px;box-shadow:0 4px 12px rgba(124,58,237,.3)}
+.nb-btn.sm{padding:6px 12px;font-size:11px}.nb-btn.alt{background:#f1f5f9;color:#475569;box-shadow:none}
+.nb-dots{display:flex;flex-wrap:wrap;gap:12px}
+.nb-dotw{position:relative;width:68px;text-align:center}
+.nb-dot{width:54px;height:54px;border-radius:50%;background:color-mix(in srgb,var(--c) 18%,#fff);border:3px solid var(--c);font-size:24px;display:grid;place-items:center;margin:0 auto;box-shadow:0 5px 12px color-mix(in srgb,var(--c) 35%,transparent);transition:transform .15s}
+.nb-dot:active{transform:scale(.9)}.nb-dot.sm{width:34px;height:34px;font-size:17px;flex-shrink:0;border-width:2px}
+.nb-dotw small{display:block;font-size:10px;font-weight:800;color:#475569;margin-top:4px;line-height:1.2}
+.nb-dotw b,.nb-dr b,.nb-hi b,.nb-link b{cursor:pointer;color:#e11d48;font-weight:900}
+.nb-dotw b{position:absolute;top:-4px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;border:1px solid #fecdd3;font-size:12px;line-height:16px}
+.nb-empty{font-size:12px;color:#94a3b8;font-weight:700;padding:8px 2px}
+.nb-rl{font-size:12px;font-weight:900;color:#475569;margin:10px 0 6px}
+.nb-scale{display:grid;grid-template-columns:repeat(10,1fr);gap:4px}
+.nb-scale button{aspect-ratio:1;border-radius:10px;font-size:12px;font-weight:900;background:#f8fafc;color:#64748b;border:1.5px solid #e2e8f0}
+.nb-scale button.on{color:#fff;border-color:transparent;transform:scale(1.12)}
+.nb-scale .s1.on,.nb-scale .s2.on,.nb-scale .s3.on{background:#ef4444}.nb-scale .s4.on,.nb-scale .s5.on,.nb-scale .s6.on{background:#f59e0b}.nb-scale .s7.on,.nb-scale .s8.on{background:#84cc16}.nb-scale .s9.on,.nb-scale .s10.on{background:#16a34a}
+.nb-sum{display:flex;flex-wrap:wrap;gap:8px}.nb-sum span{background:#fffbeb;border:1.5px solid #fde68a;border-radius:999px;padding:5px 12px;font-size:12px;font-weight:800;color:#92400e}
+.nb-bar{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.nb-bar>button{background:#f0f9ff;color:#0369a1;font-weight:800;font-size:12px;border-radius:12px;padding:7px 12px;border:1.5px solid #bae6fd}
+.nb-seg{margin-right:auto;display:flex;background:#f1f5f9;border-radius:12px;padding:3px}.nb-seg button{font-size:12px;font-weight:800;padding:5px 10px;border-radius:9px;color:#64748b}.nb-seg button.on{background:#fff;color:#0369a1;box-shadow:0 1px 4px rgba(0,0,0,.12)}
+.nb-draws{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.nb-dr{position:relative}
+.nb-dr img{width:120px;height:80px;object-fit:cover;border-radius:12px;border:2px solid #e0f2fe;cursor:zoom-in;background:#fff}
+.nb-dr b{position:absolute;top:2px;left:2px;background:#fff;border-radius:50%;width:20px;height:20px;text-align:center;line-height:19px;font-size:13px}
+.nb-links{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}.nb-link{background:#eff6ff;border:1px solid #bfdbfe;border-radius:999px;padding:5px 12px;font-size:11px;font-weight:800;color:#1d4ed8;display:inline-flex;gap:8px;align-items:center;max-width:100%}
+.nb-hi{display:flex;align-items:center;gap:10px;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:16px;padding:10px 12px;margin-bottom:6px;font-size:13px;font-weight:700;color:#1e293b;cursor:pointer}
+.nb-hi .t{flex:1}.nb-hi.done{background:#f0fdf4;border-color:#86efac}.nb-hi.done .t{text-decoration:line-through;color:#64748b}
+.nb-ck{width:26px;height:26px;border-radius:9px;border:2.5px solid #cbd5e1;background:#fff;display:grid;place-items:center;font-weight:900;color:#fff;flex-shrink:0}.nb-hi.done .nb-ck{background:#22c55e;border-color:#22c55e}
+.nb-add{display:flex;gap:8px;margin-top:8px}.nb-add .nb-in{flex:1}
+.nb-foot{text-align:center;font-size:11px;color:#64748b;font-weight:700}
+.nb-ov{position:fixed;inset:0;z-index:70;background:rgba(15,23,42,.6);display:flex;align-items:center;justify-content:center;padding:12px;direction:rtl}
+.nb-pbox{background:#fff;border-radius:24px;max-width:560px;width:100%;max-height:92vh;display:flex;flex-direction:column;padding:14px;gap:10px}
+.nb-ph{display:flex;justify-content:space-between;align-items:center;font-size:14px}.nb-ph button{font-size:22px;color:#64748b}
+.nb-pl{overflow-y:auto;flex:1;min-height:180px}.nb-pg{font-weight:900;font-size:12px;color:#475569;margin:10px 0 6px}
+.nb-pgrid{display:grid;grid-template-columns:1fr 1fr;gap:6px}.nb-pi{display:flex;align-items:center;gap:6px;border:1.5px solid #e2e8f0;border-radius:14px;padding:6px 8px;font-size:11px;font-weight:800;cursor:pointer}
+.nb-pf{display:flex;justify-content:flex-end}
+.nb-cv{width:100%;border:2px dashed #c7d2fe;border-radius:16px;touch-action:none;background:#fff;cursor:crosshair}
+.nb-tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.nb-col{width:28px;height:28px;border-radius:50%;border:2px solid #cbd5e1}.nb-col.on{outline:3px solid #8b5cf6;outline-offset:2px}
+.nb-cta{display:flex;gap:12px;align-items:center;flex-wrap:wrap;background:linear-gradient(135deg,#f5f3ff,#fffbeb);border:1.5px solid #ddd6fe;border-radius:24px;padding:14px}
+.nb-cta img{width:64px;height:64px;object-fit:contain;border-radius:18px;background:#fff;border:1px solid #ebe8f3;padding:4px}.nb-cta p{font-size:12px;color:#64748b;font-weight:700}
+.nb-entry{text-align:right;background:#fff;border:1.5px solid #e2e8f0;border-radius:18px;padding:12px;display:flex;flex-direction:column;gap:4px;font-size:12px}.nb-entry b{color:#4c1d95}.nb-entry small{color:#94a3b8;font-weight:700}
+.nb-pnote{background:#fffbeb;border:1px solid #fde68a;border-radius:20px;padding:18px}
+.nb-pcard{background:#fff;border:1px solid #e2e8f0;border-radius:24px;padding:14px;margin-bottom:12px;box-shadow:0 4px 14px rgba(79,70,229,.08)}
+.nb-ptop{display:flex;align-items:center;gap:10px;border-bottom:3px dotted #ddd6fe;padding-bottom:10px;margin-bottom:6px}.nb-ptop img{width:50px;height:50px;object-fit:contain;border-radius:14px;border:1px solid #ebe8f3;padding:3px}.nb-ptop small{display:block;color:#64748b;font-weight:700;font-size:11px}
+.nb-ps{font-weight:900;font-size:12px;color:#7c3aed;margin:12px 0 6px}.nb-ps small{color:#94a3b8;font-weight:700}.nb-pt{white-space:pre-wrap;font-size:13px;line-height:1.9;color:#1e293b;font-weight:600}
+.nb-pbar{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:800;margin-bottom:6px}.nb-pbar span{width:92px}.nb-pbar div{flex:1;height:10px;background:#f1f5f9;border-radius:99px;overflow:hidden}.nb-pbar i{display:block;height:100%;background:linear-gradient(90deg,#f59e0b,#16a34a)}
+</style>
+
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen">
 <div id="suSplash" aria-hidden="true"><span class="orb o1"></span><span class="orb o2"></span><span class="orb o3"></span><div class="mark"><img src="icons/icon-192.png" alt="" onerror="this.style.display='none'"><b>Speak Up</b></div></div>
@@ -2799,6 +2866,23 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
             </div>
           </div>
 
+          <div class="border rounded-xl p-3 bg-indigo-50/60 border-indigo-200 space-y-3">
+            <div>
+              <label class="block text-slate-700 font-bold mb-1">نوع الموظف (الدور) *</label>
+              <select id="staffType" class="w-full border rounded-lg p-2 font-bold">
+                <option value="therapist">👩‍⚕️ أخصائي</option>
+                <option value="trainee">🎓 متدرب</option>
+                <option value="secretary">⚡ سكرتارية</option>
+              </select>
+            </div>
+            <label class="flex items-start gap-2 font-bold text-slate-700"><input type="checkbox" id="staffCreateAccount" checked class="mt-0.5" onchange="staffAccToggle()"> <span>إنشاء / تحديث حساب دخول للنظام تلقائيًا (Supabase)</span></label>
+            <div id="staffAccBox" class="space-y-1">
+              <label class="block text-slate-700 font-bold mb-1">كلمة المرور المبدئية (8 أحرف على الأقل)</label>
+              <input type="text" id="staffPassword" autocomplete="new-password" placeholder="هتديها للموظف وهو يغيّرها بعد أول دخول" class="w-full border rounded-lg p-2 font-mono">
+              <p id="staffAccHint" class="text-[10px] text-slate-500">الإيميل أعلاه هو إيميل الدخول. الموظف هيتطلب منه يغيّر الباسورد أول ما يدخل.</p>
+            </div>
+          </div>
+
           <!-- Dynamic Custom Fields Container -->
           <div id="staffCustomFieldsContainer" class="border-t pt-3 space-y-2 hidden"></div>
 
@@ -3889,6 +3973,7 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
     if (d.branches && d.branches.length) state.branches = d.branches;
     state.clientActivities = d.clientActivities || {};
     state.evaluations = d.evaluations || [];
+    state.notebooks = d.notebooks || {};
     if (d.settings && d.settings.permissions) state.settings = d.settings;
     const ids = (d.client_ids || []).map(String);
     state.users = [{ name: d.name || '', email: d.email || '', role: 'parent', clientIds: ids, password: '' }];
@@ -4006,6 +4091,10 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
         const up = await sb.auth.updateUser({ password: n1 });
         if (up.error) { msg('تعذر التغيير: ' + up.error.message, false); return; }
         msg('✅ تم تغيير كلمة المرور', true);
+        try {
+          const me = (state.users || []).find(x => (x.email || '').toLowerCase() === (cloudUser.email || '').toLowerCase());
+          if (me && me.mustChangePw) { delete me.mustChangePw; saveState(); }
+        } catch (x) {}
         setTimeout(() => m.remove(), 1500);
       } catch (e) { msg('تعذر الاتصال. تأكد من النت.', false); }
       finally { btn.disabled = false; }
@@ -4061,6 +4150,13 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
   function updateUserHeader() {
     const userHeaderEl = document.getElementById('userInfoHeader');
     if (currentUser) {
+      try {
+        const _me = (state.users || []).find(x => (x.email || '').toLowerCase() === (currentUser.email || '').toLowerCase());
+        if (_me && _me.mustChangePw && sb && cloudUser && !window._pwPrompted) {
+          window._pwPrompted = true;
+          setTimeout(() => { showToast('🔑 من فضلك غيّر كلمة المرور المبدئية', 'amber'); changeMyPassword(); }, 1000);
+        }
+      } catch (x) {}
       if (userHeaderEl) userHeaderEl.classList.remove('hidden');
       const nameEl = document.getElementById('headerUserName');
       if (nameEl) nameEl.textContent = currentUser.name;
@@ -4600,6 +4696,7 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
     tabs += tabBtn('activities', `🧩 الأنشطة (${caList(c.id).length})`);
     tabs += tabBtn('schedule', '🗓️ الجدول الأسبوعي');
     if (isTherapist()) tabs += tabBtn('mynotes', '🔒 ملاحظاتي الخاصة');
+    if (caCanEdit()) tabs = tabBtn('notebook', '📓 كراسة المتابعة') + tabs;
     if (_cpTab === 'payments' && !canPay) _cpTab = 'sessions';
     if (_cpTab === 'invoices' && !canInv) _cpTab = 'sessions';
 
@@ -4616,6 +4713,8 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
       }).join('');
       content = `<div class="flex flex-wrap items-center gap-2 mb-3"><select class="border rounded-lg px-2 py-1.5 text-xs font-bold" onchange="cpSetFilter('month',this.value)">${monthOpts}</select><select class="border rounded-lg px-2 py-1.5 text-xs font-bold" onchange="cpSetFilter('status',this.value)">${statusOpts}</select><div class="text-xs text-slate-500 mr-auto">${list.length} جلسة${canInv ? ' • صافي قيمتها ' + cpMoney(net) : ''}</div></div>
         <div class="overflow-x-auto"><table class="w-full text-xs"><thead class="bg-slate-50 text-slate-600"><tr><th>التاريخ</th><th>اليوم</th><th>الوقت</th><th>النوع</th><th>الأخصائي</th><th>الفرع</th><th>الحالة</th>${isTherapist() ? '' : '<th>السعر</th><th>الصافي</th>'}<th>ملاحظات</th><th></th></tr></thead><tbody>${trs || '<tr><td colspan="11" class="py-8 text-slate-400">لا توجد جلسات</td></tr>'}</tbody></table></div>`;
+    } else if (_cpTab === 'notebook' && caCanEdit()) {
+      content = nbTabHtml(c);
     } else if (_cpTab === 'mynotes' && isTherapist()) {
       content = cpMyNotesHtml(c);
     } else if (_cpTab === 'activities') {
@@ -6357,7 +6456,20 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
   function openNewStaffModal() {
     document.getElementById('staffForm').reset();
     document.getElementById('staffId').value = '';
+    document.getElementById('staffCreateAccount').checked = true;
+    document.getElementById('staffPassword').value = '';
+    staffAccToggle();
     openModal('staffModal');
+  }
+
+  function staffAccToggle() {
+    const on = document.getElementById('staffCreateAccount').checked;
+    document.getElementById('staffAccBox').style.display = on ? '' : 'none';
+  }
+
+  function staffFindUser(s) {
+    const email = (s.email || '').toLowerCase();
+    return (state.users || []).find(u => (u.staffId && String(u.staffId) === String(s.id)) || (email && (u.email || '').toLowerCase() === email));
   }
 
   function editStaff(id) {
@@ -6369,6 +6481,12 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
     document.getElementById('staffPhone').value = s.phone || '';
     document.getElementById('staffEmail').value = s.email || '';
     document.getElementById('staffStatus').value = s.status || 'Active';
+    document.getElementById('staffType').value = s.type || 'therapist';
+    document.getElementById('staffPassword').value = '';
+    const hasAcc = !!staffFindUser(s);
+    document.getElementById('staffCreateAccount').checked = !hasAcc;
+    document.getElementById('staffAccHint').textContent = hasAcc ? 'عنده حساب بالفعل. علّم على الخانة ده واكتب باسورد لو عايز تغيّر الباسورد أو تحدّث بياناته.' : 'مفيش حساب لهذا الموظف. هيتعمله حساب لو علّمت الخانة.';
+    staffAccToggle();
     openModal('staffModal');
   }
 
@@ -6381,22 +6499,68 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
     }
   }
 
-  function saveStaff(e) {
+  async function saveStaff(e) {
     e.preventDefault();
+    const isNew = !document.getElementById('staffId').value;
     const id = document.getElementById('staffId').value || ('st-' + Date.now().toString().slice(-4));
+    const type = document.getElementById('staffType').value || 'therapist';
     const staffData = {
       id,
       name: document.getElementById('staffName').value.trim(),
       specialty: document.getElementById('staffSpecialty').value.trim(),
       phone: document.getElementById('staffPhone').value.trim(),
-      email: document.getElementById('staffEmail').value.trim(),
-      status: document.getElementById('staffStatus').value
+      email: document.getElementById('staffEmail').value.trim().toLowerCase(),
+      status: document.getElementById('staffStatus').value,
+      type
     };
+    const wantAcc = document.getElementById('staffCreateAccount').checked;
+    const pass = document.getElementById('staffPassword').value;
+    const existingUser = staffFindUser(staffData);
+    // validate BEFORE saving anything
+    if (wantAcc) {
+      if (!staffData.email) { showToast('اكتب إيميل الموظف عشان يتعمله حساب دخول', 'amber'); return; }
+      if (!existingUser && pass.length < 8) { showToast('اكتب كلمة مرور مبدئية 8 أحرف على الأقل', 'amber'); return; }
+      if (pass && pass.length < 8) { showToast('كلمة المرور لازم تكون 8 أحرف على الأقل', 'amber'); return; }
+    }
     const idx = state.staff.findIndex(s => s.id === id);
-    if (idx >= 0) state.staff[idx] = staffData;
+    if (idx >= 0) state.staff[idx] = Object.assign({}, state.staff[idx], staffData);
     else state.staff.push(staffData);
     saveState();
     closeModal('staffModal');
+    if (!wantAcc) return;
+
+    // trainee + therapist both log in as "therapist" role; secretary as "secretary"
+    const role = type === 'secretary' ? 'secretary' : 'therapist';
+    const staffId = role === 'therapist' ? id : '';
+    const useCloud = !!(sb && cloudUser);
+    if (useCloud) {
+      const r = await cloudAdmin({ action: 'upsert', email: staffData.email, password: pass, name: staffData.name, role, staff_id: staffId });
+      if (!r.ok) {
+        showToast('❌ ' + r.error, 'red');
+        alert('⚠️ تم حفظ الموظف، لكن حساب الدخول لم يُنشأ على Supabase.\nالسبب: ' + r.error + '\n\nافتح الموظف بالتعديل وعلّم "إنشاء حساب دخول" وحاول تاني.');
+        return;
+      }
+    }
+    if (!state.users) state.users = [];
+    let u = state.users.find(x => (x.email || '').toLowerCase() === staffData.email);
+    if (!u) {
+      u = { email: staffData.email, clientIds: [], limitClients: false, commissionPct: '', countCan: false };
+      state.users.push(u);
+    }
+    u.name = staffData.name;
+    u.role = role;
+    u.staffType = type;
+    if (role === 'therapist') u.staffId = id; else delete u.staffId;
+    if (pass) u.mustChangePw = true; // force first-login password change
+    delete u.password; // never keep the password in app state
+    saveState();
+    if (typeof renderUsersTable === 'function') renderUsersTable();
+    if (useCloud) {
+      clearTimeout(cloudPushTimer);
+      for (let i = 0; i < 15 && cloudBusy; i++) await new Promise(r2 => setTimeout(r2, 200));
+      try { await cloudPush(); } catch (x) {}
+    }
+    showToast(pass ? '✅ تم حفظ الموظف وإنشاء حساب الدخول — الباسورد المبدئي: ' + pass : '✅ تم حفظ الموظف وتحديث حسابه', 'green');
   }
 
   function editBranch(id) {
@@ -7890,6 +8054,185 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
     showToast(`✅ تمت إضافة ${_apSel.size} نشاط`, 'green');
   }
 
+  // ===================== كراسة المتابعة (Follow-up notebook) =====================
+  function suGateLogoUrl() {
+    let u = ''; try { const im = document.getElementById('loginLogoImg'); u = (im && im.getAttribute('src')) || ''; } catch (e) {}
+    if (!u) { try { u = localStorage.getItem('SU_LOGO') || ''; } catch (e) {} }
+    return u || window.SU_DEFAULT_LOGO || 'icons/icon-192.png';
+  }
+  function nbAll() { if (!state.notebooks) state.notebooks = {}; return state.notebooks; }
+  function nbList(cid) { return (nbAll()[String(cid)] || []).slice().sort((a, b) => (b.date || '').localeCompare(a.date || '')); }
+  function nbSessNo(cid, date) {
+    const d = normYmd(date);
+    return (state.sessions || []).filter(s => String(s.clientId) === String(cid) && normYmd(s.date) <= d && cpStatusKey(s.status) !== 'TCA').length || 1;
+  }
+  let _nb = null, _nbT = null;
+  function nbTouch() {
+    const arr = nbAll()[_nb.cid] = nbAll()[_nb.cid] || [];
+    const i = arr.findIndex(x => x.id === _nb.e.id);
+    if (i < 0) arr.push(_nb.e); else if (arr[i] !== _nb.e) arr[i] = _nb.e;
+    _nb.e.upd = Date.now();
+    clearTimeout(_nbT); _nbT = setTimeout(saveState, 400);
+  }
+  function openNotebook(cid, date) {
+    cid = String(cid); date = normYmd(date || todayCairo()) || todayCairo();
+    const ex = (nbAll()[cid] || []).find(x => x.date === date), u = freshUser();
+    const e = ex || { id: 'nb' + Date.now().toString(36), date, no: null, goals: '', acts: [], perf: 0, goal: 0, notes: '', mode: 'plain', draws: [], links: [], hw: [], by: (u && u.name) || '' };
+    _nb = { cid, e, rate: !!(e.perf || e.goal) };
+    let m = document.getElementById('nbModal');
+    if (!m) { m = document.createElement('div'); m.id = 'nbModal'; m.className = 'nb-root'; document.body.appendChild(m); }
+    m.style.display = ''; document.body.style.overflow = 'hidden';
+    const av = document.getElementById('actViewModal'); if (av) av.style.zIndex = 90;
+    nbRender();
+  }
+  function nbClose() {
+    clearTimeout(_nbT); if (_nb && (nbAll()[_nb.cid] || []).some(x => x.id === _nb.e.id)) saveState();
+    const m = document.getElementById('nbModal'); if (m) m.style.display = 'none';
+    document.body.style.overflow = ''; _nb = null;
+    try { if (_cpId !== null) renderClientProfile(); } catch (x) {}
+  }
+  function nbGo(date) { openNotebook(_nb.cid, date); }
+  function nbSet(f, v) { _nb.e[f] = v; nbTouch(); if (f === 'date') { nbGo(v); } }
+  function nbSetNo(v) { _nb.e.no = v ? Number(v) : null; nbTouch(); }
+  function nbRate(f, n) { _nb.e[f] = _nb.e[f] === n ? 0 : n; nbTouch(); nbRender(); }
+  function nbToggleRate() { _nb.rate = !_nb.rate; nbRender(); }
+  function nbOpenAct(k) { const av = document.getElementById('actViewModal'); if (av) av.style.zIndex = 90; caView(k); }
+  function nbDelAct(k) { _nb.e.acts = (_nb.e.acts || []).filter(x => x !== k); nbTouch(); nbRender(); }
+  function nbFmt(mode) {
+    const ta = document.getElementById('nbNotes'); if (!ta) return;
+    let i = 0;
+    const lines = ta.value.split('\n').map(l => l.replace(/^\s*(•|\d+[\.\)])\s?/, ''));
+    ta.value = lines.map(l => mode === 'plain' || !l.trim() ? l : (mode === 'bullets' ? '• ' : (++i) + '. ') + l).join('\n');
+    _nb.e.mode = mode; _nb.e.notes = ta.value; nbTouch(); nbRender();
+  }
+  function nbKey(ev) {
+    const mode = _nb.e.mode; if (ev.key !== 'Enter' || mode === 'plain') return;
+    const ta = ev.target, pos = ta.selectionStart, before = ta.value.slice(0, pos), ls = before.lastIndexOf('\n') + 1, line = before.slice(ls);
+    const mm = line.match(/^(•|(\d+)[\.\)])\s?(.*)$/); if (!mm) return;
+    ev.preventDefault();
+    if (!mm[3].trim()) { ta.value = before.slice(0, ls) + ta.value.slice(pos); ta.selectionStart = ta.selectionEnd = ls; }
+    else { const mk = mode === 'bullets' ? '• ' : (Number(mm[2] || 0) + 1) + '. '; ta.value = before + '\n' + mk + ta.value.slice(pos); ta.selectionStart = ta.selectionEnd = pos + 1 + mk.length; }
+    _nb.e.notes = ta.value; nbTouch();
+  }
+  function nbAddLink() {
+    const v = (prompt('الصق رابط (فيديو / موقع / ملف) أو اكتب أي مصدر:') || '').trim(); if (!v) return;
+    _nb.e.links = (_nb.e.links || []).concat([{ id: 'l' + Date.now().toString(36), v }]); nbTouch(); nbRender();
+  }
+  function nbDelLink(id) { _nb.e.links = (_nb.e.links || []).filter(x => x.id !== id); nbTouch(); nbRender(); }
+  function nbDelDraw(i) { if (!confirm('حذف الرسمة؟')) return; _nb.e.draws.splice(i, 1); nbTouch(); nbRender(); }
+  function nbAddHw() {
+    const inp = document.getElementById('nbHwIn'); const t = (inp.value || '').trim(); if (!t) return;
+    _nb.e.hw = (_nb.e.hw || []).concat([{ id: 'h' + Date.now().toString(36), text: t, done: false }]); nbTouch(); nbRender();
+    setTimeout(() => { const i2 = document.getElementById('nbHwIn'); if (i2) i2.focus(); }, 30);
+  }
+  function nbDelHw(id) { _nb.e.hw = (_nb.e.hw || []).filter(x => x.id !== id); nbTouch(); nbRender(); }
+  function nbTicks() { try { return JSON.parse(localStorage.getItem('SU_NBTICK') || '{}'); } catch (e) { return {}; } }
+  function nbDone(eid, it) { const t = nbTicks()[eid + ':' + it.id]; if (t != null) return !!t; const sv = (state.notebookTicks || {})[eid + ':' + it.id]; return sv ? !!sv.done : !!it.done; }
+  function nbTick(cid, eid, iid) {
+    const en = (nbAll()[String(cid)] || []).find(x => x.id === eid), it = en && (en.hw || []).find(x => x.id === iid); if (!it) return;
+    const val = !nbDone(eid, it);
+    if (caCanEdit()) { it.done = val; if (state.notebookTicks) delete state.notebookTicks[eid + ':' + iid]; saveState(); if (_nb) nbRender(); else if (_cpId !== null) renderClientProfile(); return; }
+    const t = nbTicks(); t[eid + ':' + iid] = val; try { localStorage.setItem('SU_NBTICK', JSON.stringify(t)); } catch (x) {}
+    renderParentPortal();
+    try { if (sb) sb.functions.invoke('parent-data', { body: { action: 'notebook_tick', client_id: String(cid), entry_id: eid, item_id: iid, done: val } }).catch(() => {}); } catch (x) {}
+  }
+  function nbPick() {
+    const have = new Set(_nb.e.acts || []), mine = new Set(caList(_nb.cid).map(a => a.key));
+    let o = document.getElementById('nbPick'); if (o) o.remove();
+    o = document.createElement('div'); o.id = 'nbPick'; o.className = 'nb-ov';
+    const all = caFlat(); window._nbSel = new Set(have);
+    const draw = () => {
+      const q = (document.getElementById('nbPq').value || '').toLowerCase(), g = {};
+      all.filter(x => !q || (x.node.ar + ' ' + x.group).toLowerCase().includes(q)).forEach(x => { const k = mine.has(x.key) ? '📌 أنشطة الطفل' : '📁 ' + x.group; (g[k] = g[k] || []).push(x); });
+      document.getElementById('nbPl').innerHTML = Object.keys(g).sort((a, b) => (b[0] === '📌') - (a[0] === '📌')).map(k => `<div class="nb-pg">${actEsc(k)}</div><div class="nb-pgrid">${g[k].map(x => `<label class="nb-pi"><input type="checkbox" ${_nbSel.has(x.key) ? 'checked' : ''} onchange="this.checked?_nbSel.add('${x.key}'):_nbSel.delete('${x.key}');document.getElementById('nbPc').textContent=_nbSel.size"><span class="nb-dot sm" style="--c:${(x.node.act && x.node.act.color) || '#6366f1'}">${x.node.icon || '🧩'}</span><span>${actEsc(x.node.ar)}</span></label>`).join('')}</div>`).join('') || '<div class="nb-empty">مفيش نتائج</div>';
+    };
+    o.innerHTML = `<div class="nb-pbox"><div class="nb-ph"><b>🧩 اختار أنشطة الجلسة</b><button onclick="document.getElementById('nbPick').remove()">×</button></div><input id="nbPq" class="nb-in" placeholder="🔍 ابحث عن نشاط..."><div id="nbPl" class="nb-pl"></div><div class="nb-pf"><button class="nb-btn" onclick="nbPickSave()">تأكيد (<span id="nbPc">${have.size}</span>)</button></div></div>`;
+    document.body.appendChild(o); document.getElementById('nbPq').oninput = draw; draw();
+  }
+  function nbPickSave() { _nb.e.acts = Array.from(_nbSel); nbTouch(); document.getElementById('nbPick').remove(); nbRender(); }
+  function nbDraw() {
+    let o = document.getElementById('nbDraw'); if (o) o.remove();
+    o = document.createElement('div'); o.id = 'nbDraw'; o.className = 'nb-ov';
+    const cols = ['#1e293b', '#7c3aed', '#0ea5e9', '#16a34a', '#f59e0b', '#e11d48', '#ffffff'];
+    o.innerHTML = `<div class="nb-pbox"><div class="nb-ph"><b>🖌️ ارسم للأهل</b><button onclick="document.getElementById('nbDraw').remove()">×</button></div><canvas id="nbCv" width="720" height="480" class="nb-cv"></canvas><div class="nb-tools">${cols.map((c, i) => `<button class="nb-col ${i ? '' : 'on'}" style="background:${c}" data-c="${c}"></button>`).join('')}<select id="nbSz" class="nb-in" style="width:auto"><option value="3">رفيع</option><option value="7" selected>وسط</option><option value="16">عريض</option></select><button class="nb-btn alt" id="nbClr">مسح</button><button class="nb-btn" id="nbSave">حفظ الرسمة</button></div></div>`;
+    document.body.appendChild(o);
+    const cv = document.getElementById('nbCv'), cx = cv.getContext('2d'); let col = cols[0], on = false;
+    cx.fillStyle = '#fff'; cx.fillRect(0, 0, cv.width, cv.height); cx.lineCap = cx.lineJoin = 'round';
+    const pt = ev => { const r = cv.getBoundingClientRect(); return [(ev.clientX - r.left) * cv.width / r.width, (ev.clientY - r.top) * cv.height / r.height]; };
+    cv.onpointerdown = ev => { on = true; cv.setPointerCapture(ev.pointerId); const [x, y] = pt(ev); cx.strokeStyle = col; cx.lineWidth = Number(document.getElementById('nbSz').value); cx.beginPath(); cx.moveTo(x, y); cx.lineTo(x + .1, y + .1); cx.stroke(); };
+    cv.onpointermove = ev => { if (!on) return; const [x, y] = pt(ev); cx.lineTo(x, y); cx.stroke(); };
+    cv.onpointerup = cv.onpointercancel = () => { on = false; };
+    o.querySelectorAll('.nb-col').forEach(b => b.onclick = () => { col = b.dataset.c; o.querySelectorAll('.nb-col').forEach(x => x.classList.toggle('on', x === b)); });
+    document.getElementById('nbClr').onclick = () => { cx.fillStyle = '#fff'; cx.fillRect(0, 0, cv.width, cv.height); };
+    document.getElementById('nbSave').onclick = () => { _nb.e.draws = (_nb.e.draws || []).concat([cv.toDataURL('image/jpeg', .72)]); nbTouch(); o.remove(); nbRender(); };
+  }
+  function nbImgView(src) {
+    const o = document.createElement('div'); o.className = 'nb-ov'; o.style.zIndex = 95; o.onclick = () => o.remove();
+    o.innerHTML = `<img src="${src}" style="max-width:96vw;max-height:90vh;border-radius:16px;background:#fff">`; document.body.appendChild(o);
+  }
+  const nbIsUrl = v => /^https?:\/\//i.test(v);
+  function nbLinkHtml(l, del) {
+    const v = actEsc(l.v);
+    return `<span class="nb-link">${nbIsUrl(l.v) ? `<a href="${v}" target="_blank" rel="noopener">🔗 ${v.replace(/^https?:\/\/(www\.)?/i, '').slice(0, 34)}</a>` : `<span>📎 ${v}</span>`}${del ? `<b onclick="nbDelLink('${l.id}')">×</b>` : ''}</span>`;
+  }
+  function nbDotsHtml(keys, del) {
+    return (keys || []).map(k => { const n = caNode(k); if (!n) return ''; const cl = (n.act && n.act.color) || '#6366f1';
+      return `<div class="nb-dotw"><button class="nb-dot" style="--c:${cl}" onclick="nbOpenAct('${k}')" title="${actEsc(n.ar)}">${n.icon || '🧩'}</button><small>${actEsc(n.ar)}</small>${del ? `<b onclick="nbDelAct('${k}')">×</b>` : ''}</div>`; }).join('');
+  }
+  function nbRender() {
+    const m = document.getElementById('nbModal'), e = _nb.e, cid = _nb.cid;
+    const c = (state.clients || []).find(x => String(x.id) === cid) || { name: '' };
+    const sc = m.querySelector('.nb-sheet'), top = sc ? sc.scrollTop : 0;
+    const no = e.no || nbSessNo(cid, e.date), wd = AR_WEEKDAYS[ymdWeekday(e.date)] || '';
+    const hist = nbList(cid).map(x => `<button class="nb-chip ${x.id === e.id ? 'on' : ''}" onclick="nbGo('${x.date}')">${actEsc(x.date.slice(5))} <i>#${x.no || nbSessNo(cid, x.date)}</i></button>`).join('');
+    const scale = f => `<div class="nb-scale">${Array.from({ length: 10 }, (_, i) => i + 1).map(n => `<button class="s${n} ${e[f] === n ? 'on' : ''}" onclick="nbRate('${f}',${n})">${n}</button>`).join('')}</div>`;
+    const sum = (e.perf || e.goal) ? `<div class="nb-sum">${e.perf ? `<span>الأداء العام <b>${e.perf}/10</b></span>` : ''}${e.goal ? `<span>إنجاز الأهداف <b>${e.goal}/10</b></span>` : ''}</div>` : '';
+    const fm = md => `<button class="${(e.mode || 'plain') === md ? 'on' : ''}" onclick="nbFmt('${md}')">${{ plain: '¶ نص', bullets: '• نقاط', numbers: '1. أرقام' }[md]}</button>`;
+    m.innerHTML = `<div class="nb-sheet">
+      <div class="nb-head">
+        <img class="nb-logo" src="${actEsc(suGateLogoUrl())}" alt="">
+        <div class="nb-meta">
+          <div class="nb-row"><label>📅 التاريخ <small>${wd}</small></label><input type="date" class="nb-in" value="${e.date}" onchange="nbSet('date',this.value)"></div>
+          <div class="nb-row"><label>🔢 رقم الجلسة</label><input type="number" min="1" class="nb-in" style="width:84px" value="${no}" oninput="nbSetNo(this.value)"></div>
+          <div class="nb-kid"><b>👶 ${actEsc(c.name || '')}</b><span>🎂 ${actEsc(c.dob || '—')}</span></div>
+        </div>
+        <button class="nb-x" onclick="nbClose()" title="إغلاق">×</button>
+      </div>
+      <div class="nb-hist"><button class="nb-chip new" onclick="openNotebook('${cid}')">＋ اليوم</button>${hist}</div>
+      <section class="nb-card c1"><h4>🎯 الأهداف الأساسية للجلسة</h4><textarea class="nb-ta" rows="3" placeholder="اكتب أهداف الجلسة..." oninput="_nb.e.goals=this.value;nbTouch()">${actEsc(e.goals || '')}</textarea></section>
+      <section class="nb-card c2"><h4>🧩 أنشطة الجلسة <button class="nb-btn sm" onclick="nbPick()">＋ اختيار أنشطة</button></h4>
+        <div class="nb-dots">${nbDotsHtml(e.acts, true) || '<div class="nb-empty">اضغط «اختيار أنشطة»، وكل نقطة هتفتحلك النشاط نفسه</div>'}</div></section>
+      <section class="nb-card c3"><h4>⭐ تقييم الجلسة <button class="nb-btn sm alt" onclick="nbToggleRate()">${_nb.rate ? 'إخفاء' : 'تسجيل التقييم'}</button></h4>${sum}
+        ${_nb.rate ? `<div class="nb-rl">الأداء العام للطفل</div>${scale('perf')}<div class="nb-rl">إنجاز الأهداف</div>${scale('goal')}` : ''}</section>
+      <section class="nb-card c4"><h4>📝 ملاحظات</h4>
+        <div class="nb-bar"><button onclick="nbDraw()">🖌️ رسم</button><button onclick="nbAddLink()">🔗 مصادر خارجية</button><span class="nb-seg">${fm('plain')}${fm('bullets')}${fm('numbers')}</span></div>
+        <textarea id="nbNotes" class="nb-ta lined" rows="6" placeholder="اكتب ملاحظاتك للأهل هنا..." onkeydown="nbKey(event)" oninput="_nb.e.notes=this.value;nbTouch()">${actEsc(e.notes || '')}</textarea>
+        ${(e.draws || []).length ? `<div class="nb-draws">${e.draws.map((d, i) => `<div class="nb-dr"><img src="${d}" onclick="nbImgView(this.src)"><b onclick="nbDelDraw(${i})">×</b></div>`).join('')}</div>` : ''}
+        ${(e.links || []).length ? `<div class="nb-links">${e.links.map(l => nbLinkHtml(l, true)).join('')}</div>` : ''}</section>
+      <section class="nb-card c5"><h4>✅ الواجب العملي <small>الأهل هم اللي بيعلّموا عليه</small></h4>
+        <div class="nb-hw">${(e.hw || []).map(h => `<div class="nb-hi ${nbDone(e.id, h) ? 'done' : ''}"><span class="nb-ck" onclick="nbTick('${cid}','${e.id}','${h.id}')">${nbDone(e.id, h) ? '✔' : ''}</span><span class="t">${actEsc(h.text)}</span><b onclick="nbDelHw('${h.id}')">×</b></div>`).join('') || '<div class="nb-empty">مفيش مهام لسه</div>'}</div>
+        <div class="nb-add"><input id="nbHwIn" class="nb-in" placeholder="أضف مهمة للبيت..." onkeydown="if(event.key==='Enter'){event.preventDefault();nbAddHw()}"><button class="nb-btn" onclick="nbAddHw()">إضافة</button></div></section>
+      <div class="nb-foot">💾 بيتحفظ تلقائيًا</div></div>`;
+    m.querySelector('.nb-sheet').scrollTop = top;
+  }
+  function nbTabHtml(c) {
+    const l = nbList(c.id);
+    return `<div class="nb-cta"><img src="${actEsc(suGateLogoUrl())}" alt=""><div class="flex-1"><b>📓 كراسة متابعة ${actEsc((c.name || '').split(' ')[0])}</b><p>أهداف الجلسة، الأنشطة، التقييم، الملاحظات والواجب في مكان واحد.</p></div><button class="nb-btn" onclick="openNotebook('${c.id}')">فتح كراسة اليوم</button></div>`
+      + (l.length ? `<div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 mt-3">${l.map(x => `<button class="nb-entry" onclick="openNotebook('${c.id}','${x.date}')"><b>${actEsc(x.date)} · جلسة ${x.no || nbSessNo(c.id, x.date)}</b><span>${actEsc((x.goals || 'بدون أهداف مكتوبة').slice(0, 70))}</span><small>${(x.acts || []).length} نشاط · ${(x.hw || []).filter(h => h.done).length}/${(x.hw || []).length} واجب${x.perf ? ' · ⭐ ' + x.perf + '/10' : ''}</small></button>`).join('')}</div>` : '<div class="py-8 text-center text-slate-400 text-sm">لسه مفيش كراسات. اضغط «فتح كراسة اليوم».</div>');
+  }
+  function nbParentHtml(c) {
+    const l = nbList(c.id);
+    if (!l.length) return `<div class="nb-pnote"><div class="font-black text-lg text-indigo-900">كراسة ${actEsc((c.name || '').split(' ')[0])} ✏️</div><div class="text-sm text-slate-700 font-bold mt-2">هنا هتلاقي تفصيل كل جلسة: الأهداف والأنشطة والتقييم وواجب البيت. لسه مفيش كراسات اتسجلت.</div></div>`;
+    const bar = (lb, v) => v ? `<div class="nb-pbar"><span>${lb}</span><div><i style="width:${v * 10}%"></i></div><b>${v}/10</b></div>` : '';
+    return l.map(e => `<div class="nb-pcard"><div class="nb-ptop"><img src="${actEsc(suGateLogoUrl())}" alt=""><div><b>جلسة رقم ${e.no || nbSessNo(c.id, e.date)}</b><small>${AR_WEEKDAYS[ymdWeekday(e.date)] || ''} ${actEsc(e.date)}</small></div></div>
+      ${e.goals ? `<div class="nb-ps">🎯 أهداف الجلسة</div><div class="nb-pt">${actEsc(e.goals)}</div>` : ''}
+      ${(e.acts || []).length ? `<div class="nb-ps">🧩 الأنشطة</div><div class="nb-dots">${nbDotsHtml(e.acts, false)}</div>` : ''}
+      ${(e.perf || e.goal) ? `<div class="nb-ps">⭐ التقييم</div>${bar('الأداء العام', e.perf)}${bar('إنجاز الأهداف', e.goal)}` : ''}
+      ${(e.notes || (e.draws || []).length || (e.links || []).length) ? `<div class="nb-ps">📝 ملاحظات الأخصائي</div>${e.notes ? `<div class="nb-pt">${actEsc(e.notes)}</div>` : ''}${(e.draws || []).length ? `<div class="nb-draws">${e.draws.map(d => `<div class="nb-dr"><img src="${d}" onclick="nbImgView(this.src)"></div>`).join('')}</div>` : ''}${(e.links || []).length ? `<div class="nb-links">${e.links.map(x => nbLinkHtml(x, false)).join('')}</div>` : ''}` : ''}
+      ${(e.hw || []).length ? `<div class="nb-ps">✅ الواجب العملي <small>اضغط للتعليم لما تخلصوه</small></div>${e.hw.map(h => `<div class="nb-hi ${nbDone(e.id, h) ? 'done' : ''}" onclick="nbTick('${c.id}','${e.id}','${h.id}')"><span class="nb-ck">${nbDone(e.id, h) ? '✔' : ''}</span><span class="t">${actEsc(h.text)}</span></div>`).join('')}` : ''}
+    </div>`).join('');
+  }
+
   // ---- Parent portal (child-centred view, no accounting) ----
   let _ppChild = null, _ppTab = 'home';
   var _ppSub = 'sessions', _ppSheet = null;
@@ -7916,7 +8259,7 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
     el.classList.remove('hidden');
     const ids = [...(myScope() || [])], kids = (state.clients || []).filter(c => ids.includes(String(c.id)));
     const centre = (state.settings && state.settings.centerName) || 'Speak Up';
-    const logo = (state.settings && state.settings.logoUrl) || window.SU_DEFAULT_LOGO || 'speakup_logo.png';
+    const logo = suGateLogoUrl();
     const logoImg = (cls) => `<img src="${actEsc(logo)}" alt="" class="${cls || ''}" onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,${encodeURIComponent('<svg xmlns=&quot;http://www.w3.org/2000/svg&quot; viewBox=&quot;0 0 40 40&quot;><text x=&quot;20&quot; y=&quot;27&quot; font-size=&quot;22&quot; text-anchor=&quot;middle&quot;>🗣️</text></svg>')}'">`;
     const logoutBtn = `<button onclick="handleLogout()" class="bg-white/15 hover:bg-white/25 text-white px-3 py-2 rounded-xl text-xs font-black">🚪 خروج</button>`;
     if (!kids.length) { el.innerHTML = `<div class="pp-home"><div class="pp-homehead">${logoImg('pp-mini-logo')}<div class="font-black flex-1">${actEsc(centre)}</div>${logoutBtn}</div><div class="flex-1 grid place-items-center p-10 text-center text-white font-bold">لم يتم ربط حسابك بأي طفل بعد. برجاء التواصل مع إدارة المركز.</div></div>`; return; }
@@ -7997,7 +8340,7 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
       let inner = '';
       if (_ppSub === 'acts') inner = acts.length ? `<div class="grid sm:grid-cols-2 gap-3">${acts.map(a => caCard(c.id, a, false)).join('')}</div>` : '<div class="bg-white rounded-2xl border p-8 text-center text-slate-400">لم يتم تنزيل أنشطة منزلية بعد. سيظهر هنا ما يحدده الأخصائي.</div>';
       else if (_ppSub === 'notes') inner = ppNotesHtml(c);
-      else inner = `<div class="pp-notebook rounded-2xl border shadow-sm p-5" style="min-height:170px;padding-right:22px"><div class="font-black text-lg text-indigo-900">كراسة ${actEsc((c.name || '').split(' ')[0])} ✏️</div><div class="text-sm text-slate-700 font-bold mt-3 leading-[30px]">هنا هتلاقي تفصيل كل جلسة: اللي اتدرّب عليه الطفل، وتقييم الأخصائي للجلسة، وواجب البيت.<br><span class="inline-block bg-amber-300 text-slate-900 rounded-full px-3 leading-7 text-xs font-black">التفاصيل قريباً ✨</span></div></div>
+      else inner = `${nbParentHtml(c)}
         <div class="bg-white rounded-2xl border p-4"><div class="font-black text-sm text-slate-800 mb-2">📋 سجل الجلسات (${sess.length})</div>${sess.map(row).join('') || '<div class="text-center text-slate-400 py-6">لا توجد جلسات</div>'}</div>`;
       body = seg + inner;
     } else {
@@ -8458,7 +8801,7 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
       <div class="w-14 h-14 rounded-full bg-gradient-to-tr from-indigo-600 to-cyan-500 text-white font-black grid place-items-center text-2xl">${actEsc((c.name || '?').trim().charAt(0))}</div>
       <div class="flex-1 min-w-[160px]"><div class="font-black text-lg text-slate-900">${actEsc(c.name)}</div>
         <div class="text-xs text-slate-500 font-bold">${dayName} ${actEsc(d)} • ${formatTime12(s.time)} • ${getBranchName(s.branch)}</div></div>
-      <div>${statusBadgeHtml(s.status)}</div></div>`;
+      <div>${statusBadgeHtml(s.status)}</div><button onclick="openNotebook('${c.id}','${d}')" class="bg-violet-600 text-white font-black text-xs px-3 py-2 rounded-xl shadow">📓 كراسة المتابعة</button></div>`;
     let body;
     if (_sdView === 'details') {
       const row = (k, v) => `<div class="flex justify-between gap-3 border-b border-slate-100 py-2 text-xs"><span class="text-slate-500 font-bold">${k}</span><b class="text-slate-800 text-left">${v}</b></div>`;
