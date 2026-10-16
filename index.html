@@ -1220,6 +1220,17 @@ body.sidebar-collapsed #sideNav .side-gear{justify-content:center;padding:8px 0}
 .pp-wph{background:#fff}
 .pp-wph img.lg{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;padding:13%;border-radius:50%}
 .pp-wph img.ph{z-index:2}
+/* ===== stage1: child quick-card ===== */
+.pp-wc{pointer-events:auto!important;cursor:pointer;transition:transform .15s}
+.pp-wc:active{transform:translate(-50%,-50%) scale(.96)}
+.pp-wc .pp-tap{position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);background:#fff;color:#4338ca;font-size:10px;font-weight:900;padding:2px 9px;border-radius:99px;box-shadow:0 4px 10px rgba(0,0,0,.25);white-space:nowrap;z-index:5}
+.pp-kc-ph{width:84px;height:84px;border-radius:50%;overflow:hidden;border:4px solid #fff;box-shadow:0 6px 16px rgba(67,56,202,.35);background:linear-gradient(145deg,#c7d2fe,#fde68a);display:grid;place-items:center;font-size:34px;font-weight:900;color:#4338ca;flex-shrink:0}
+.pp-kc-ph img{width:100%;height:100%;object-fit:cover}
+.pp-kc-row{display:flex;align-items:center;gap:10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;padding:9px 12px;font-size:13px}
+.pp-kc-row .k{color:#64748b;font-weight:800;font-size:11px;min-width:78px}
+.pp-kc-row .v{color:#0f172a;font-weight:900;flex:1;min-width:0;word-break:break-word}
+.pp-kc-cta{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:16px;padding:14px;font:inherit;font-weight:900;font-size:14px;color:#fff;background:linear-gradient(145deg,#059669,#0d9488);box-shadow:0 8px 18px rgba(5,150,105,.35);cursor:pointer}
+
 
 /* textured titles / bar icons */
 .pp-tx{position:relative;overflow:hidden;isolation:isolate}
@@ -2357,7 +2368,34 @@ body.sidebar-collapsed #sideNav .side-gear{justify-content:center;padding:8px 0}
                 
               </div>
 
-              
+              <!-- الألوان الثانوية (زي بروفيل الأخصائي) -->
+              <div class="space-y-5">
+                <div class="space-y-2">
+                  <label class="block text-slate-700 font-bold">🟢 اللون الثانوي (نجاح / حضور / تم)</label>
+                  <div id="secPalette" class="flex flex-wrap gap-2"></div>
+                  <div class="flex items-center gap-2 text-xs font-bold text-slate-600"><input type="color" id="settingSecColor" class="w-12 h-9 rounded cursor-pointer border" oninput="pickSecColor('secondaryColor',this.value)"> لون مخصص <button type="button" onclick="pickSecColor('secondaryColor','')" class="text-[11px] text-slate-500 hover:text-rose-600">↺ الافتراضي</button></div>
+                </div>
+                <div class="space-y-2">
+                  <label class="block text-slate-700 font-bold">🟡 لون التنبيه (قيد الانتظار / تحذير)</label>
+                  <div id="warnPalette" class="flex flex-wrap gap-2"></div>
+                  <div class="flex items-center gap-2 text-xs font-bold text-slate-600"><input type="color" id="settingWarnColor" class="w-12 h-9 rounded cursor-pointer border" oninput="pickSecColor('warnColor',this.value)"> لون مخصص <button type="button" onclick="pickSecColor('warnColor','')" class="text-[11px] text-slate-500 hover:text-rose-600">↺ الافتراضي</button></div>
+                </div>
+                <div class="rounded-xl p-3 bg-slate-50 border border-slate-200 flex flex-wrap gap-2 items-center" id="secPreview">
+                  <span class="px-3 py-1 rounded-full font-black text-white" style="background:var(--su-primary,#7e3ab8)">الأساسي</span>
+                  <span class="px-3 py-1 rounded-full font-black text-white" style="background:var(--su-green,#2fa36b)">حضر ✓</span>
+                  <span class="px-3 py-1 rounded-full font-black" style="background:var(--su-yellow,#f5b829);color:#3b2a00">انتظار</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- جدول الإيقونات -->
+            <div class="space-y-3 border-t pt-5">
+              <div class="flex items-center gap-2 flex-wrap">
+                <h3 class="font-extrabold text-slate-900 text-sm">🖼️ جدول الإيقونات (تغيير أيقونات القوائم)</h3>
+                <button type="button" onclick="iconResetAll()" class="mr-auto text-[11px] font-bold text-slate-500 hover:text-rose-600">↺ رجوع كل الأيقونات للافتراضي</button>
+              </div>
+              <div class="text-[11px] font-bold text-slate-500">اضغط على أي أيقونة لاختيار بديل من مكتبة فيها مئات الأيقونات (أطفال، مراهقين، كبار، تخاطب، مهارات، سلوك، نفسي، حركي، حسي…). التغيير بيظهر فوراً في السايدبار وشريط الموبايل وقائمة «المزيد».</div>
+              <div id="iconTable" class="grid grid-cols-1 sm:grid-cols-2 gap-2"></div>
             </div>
 
             <div class="flex justify-end pt-3 border-t">
@@ -7374,18 +7412,142 @@ body.sidebar-collapsed #sideNav .side-gear{justify-content:center;padding:8px 0}
     setTimeout(() => toast.remove(), 2500);
   }
 
+  // ===== الألوان الثانوية (أخضر النجاح + أصفر التنبيه) — بتتحكم في --su-green / --su-yellow =====
+  const SEC_DEFAULT = { secondaryColor: '#2fa36b', warnColor: '#f5b829' };
+  const SEC_PRESETS = {
+    secondaryColor: [['#2fa36b','أخضر'],['#16a34a','أخضر فاتح'],['#059669','زمردي'],['#0d9488','تركواز'],['#0891b2','سماوي'],['#2563eb','أزرق'],['#65a30d','ليموني'],['#475569','رمادي']],
+    warnColor: [['#f5b829','أصفر'],['#f59e0b','عنبري'],['#ea580c','برتقالي'],['#dc2626','أحمر'],['#db2777','وردي'],['#c026d3','فوشيا'],['#7c3aed','بنفسجي'],['#0ea5e9','أزرق فاتح']]
+  };
+  function secMix(hex, pct, withWhite) { return `color-mix(in srgb, ${hex} ${pct}%, ${withWhite ? '#fff' : '#000'})`; }
+  function applySecondaryColors(sOpt) {
+    const s = sOpt || (state && state.settings) || {};
+    const g = suHex(s.secondaryColor) ? s.secondaryColor : '', y = suHex(s.warnColor) ? s.warnColor : '';
+    let st = document.getElementById('secColorStyle');
+    if (!g && !y) { if (st) st.remove(); return; }
+    let css = ':root{';
+    if (g) css += `--su-green:${g};`;
+    if (y) css += `--su-yellow:${y};`;
+    css += '}';
+    if (g) css += `.cal-ev.ok,.cal-chip.ok{background:${secMix(g,12,true)}!important;color:${secMix(g,45,false)}!important;border-color:${g}!important}`
+      + `.badge-att{background:${secMix(g,14,true)}!important;color:${secMix(g,60,false)}!important;border-color:${secMix(g,30,true)}!important}`;
+    if (y) css += `.cal-ev.warn,.cal-chip.warn{background:${secMix(y,14,true)}!important;color:${secMix(y,40,false)}!important;border-color:${y}!important}`
+      + `.badge-exc{background:${secMix(y,16,true)}!important;color:${secMix(y,45,false)}!important;border-color:${secMix(y,35,true)}!important}`;
+    if (!st) { st = document.createElement('style'); st.id = 'secColorStyle'; document.head.appendChild(st); }
+    st.textContent = css;
+  }
+  function renderSecPalette(key, cur) {
+    const boxId = key === 'secondaryColor' ? 'secPalette' : 'warnPalette', inId = key === 'secondaryColor' ? 'settingSecColor' : 'settingWarnColor';
+    const box = document.getElementById(boxId); if (!box) return;
+    const c = (cur || SEC_DEFAULT[key]).toLowerCase();
+    box.innerHTML = SEC_PRESETS[key].map(([hx, nm]) => `<button type="button" title="${nm}" onclick="pickSecColor('${key}','${hx}')" class="w-9 h-9 rounded-full border-2 transition hover:scale-110" style="background:${hx};border-color:${hx.toLowerCase() === c ? '#0f172a' : 'transparent'};box-shadow:${hx.toLowerCase() === c ? '0 0 0 2px #fff inset' : 'none'}"></button>`).join('');
+    const ci = document.getElementById(inId); if (ci && suHex(c)) ci.value = c;
+  }
+  window._secPick = {};
+  function pickSecColor(key, hex) {
+    window._secPick[key] = hex || '';
+    const tmp = Object.assign({}, state.settings || {}, window._secPick);
+    applySecondaryColors(tmp);
+    renderSecPalette(key, hex);
+  }
+
+  // ===== جدول الإيقونات: تغيير أيقونات القوائم من مكتبة كبيرة (بتتخزن في state.settings.icons) =====
+  const ICON_ITEMS = [
+    ['dashboard', 'side-nav-dashboard', 'لوحة التحكم'], ['myappts', 'side-nav-myappts', 'مواعيدي'], ['followup', 'side-nav-followup', 'كراسة المتابعة'],
+    ['secretary', 'side-nav-secretary', 'كشف الحضور اليومي'], ['calendar', 'side-nav-calendar', 'الكاليندر والمواعيد'], ['myearn', 'side-nav-myearn', 'حساباتي'],
+    ['clients', 'side-nav-clients', 'العملاء'], ['sessions', 'side-nav-sessions', 'سجل الجلسات'], ['activities', 'side-nav-activities', 'الأنشطة'],
+    ['invoices', 'side-nav-invoices', 'الفواتير الشهرية'], ['payments', 'side-nav-payments', 'المدفوعات'], ['purchases', 'side-nav-purchases', 'المشتريات والمصروفات'],
+    ['staff', 'side-nav-staff', 'الأخصائيين والفروع'], ['settings', 'side-nav-settings', 'الإعدادات والصلاحيات'], ['photos', 'side-nav-photos', 'إدارة الصور'],
+    ['quicktools', 'side-quick-tools', 'أدوات سريعة']
+  ];
+  const ICON_LIB = [
+    ['👶 الفئات العمرية', '👶 🍼 🧒 👦 👧 🧑 👨 👩 🧓 👴 👵 👱 👱‍♀️ 🧔 👨‍🦱 👩‍🦱 👨‍🦳 👩‍🦳 🤱 🧑‍🍼 👩‍🍼 👨‍🍼 🚼 🧸 🎒 🎓 👨‍👩‍👧 👨‍👩‍👦 👨‍👩‍👧‍👦 👨‍👧 👩‍👦 👪 🫂 👫 👬 👭 🧑‍🤝‍🧑 💑 🏫 🏠 🪴 🌱 🌿 🌳'],
+    ['🗣️ تخاطب ولغة', '🗣️ 👄 👅 🦷 👂 🦻 🔊 🔉 🔈 🔇 📢 📣 🎤 🎙️ 🎧 📻 💬 💭 🗨️ 🗯️ 🔤 🔡 🔠 🅰️ 🆎 📖 📚 📝 ✍️ 🖊️ 🔖 🤟 🤲 👐 🙌 👋 🤙 🙏 👏 🎵 🎶 🎼 🎹 🥁 🎺 🎷 🎸 🪗 🔔 📞 ☎️ 💻 🔍 🔎 📺 🎬'],
+    ['🧠 نفسي وانفعالي', '🧠 💭 ❤️ 🧡 💛 💚 💙 💜 🤍 🖤 💗 💖 💞 💕 🫀 😊 😀 😃 😄 😁 🙂 😌 😍 🥰 🤗 🤔 😐 😶 🙈 😢 😭 😡 😠 😤 😰 😨 😱 😴 🥱 🧘 🧘‍♀️ 🧘‍♂️ ☮️ 🕊️ 🌈 ☀️ 🌤️ 🌟 ⭐ ✨ 🪞 🫶 🤝 🛡️ 🔒 🔑 🧩 🎭'],
+    ['🎯 سلوك وتعديل سلوك', '🎯 🏅 🥇 🥈 🥉 🎖️ 🏆 👍 👎 👏 ✅ ☑️ ✔️ ❌ 🛑 ⛔ 🚦 🚥 ⚖️ 🔄 🔁 ⏳ ⌛ ⏰ ⏱️ ⏲️ 🕐 📅 📆 🗓️ 📊 📈 📉 🪙 🎁 🎉 🎊 🍬 🍭 🍪 🧁 ⭐ 🌟 🔥 🚩 🏁 📌 📍 🧭 🪜 🪧 🔔 🔕 🤫 🙊 🖐️ ✋'],
+    ['🏃 حركي وعلاج طبيعي', '🏃 🏃‍♀️ 🚶 🚶‍♀️ 🤸 🤸‍♀️ 🧗 🧗‍♀️ 🏋️ 🏋️‍♀️ 🤾 🤹 ⚽ 🏀 🏐 🏈 🎾 🏓 🏸 🥅 ⛳ 🏊 🚴 🏇 🤼 🥋 🛹 🛼 🪁 🎳 🪀 🏹 🦵 🦶 🦴 💪 🖐️ ✋ 🤚 ✊ 👆 ☝️ 👌 🤏 🤌 🫱 🫲 👣 🦽 🦼 🩼 🧑‍🦽 🧑‍🦼 🧑‍🦯 🦯 🧱 ⚖️'],
+    ['✋ علاج وظيفي وحركة دقيقة', '✋ 🤲 🖐️ 🤏 👌 ✌️ 🤞 🤟 ☝️ 👆 🪢 🧵 🧶 🪡 ✂️ 🖍️ 🖌️ 🖊️ ✏️ 📏 📐 🧩 🧱 🎲 ♟️ 🪀 🔩 🔧 🪛 🔨 🧷 📎 🖇️ 🔗 🧲 🪙 🫘 🥄 🍴 🔑 🔘 🔴 🟡 🟢 🔵 🔺 🔶 ⬛ ⬜ 🟦 🟥 🟩'],
+    ['👁️ حسي وتكامل حسي', '👁️ 👀 👃 👂 👅 🤲 🖐️ 🫧 🌬️ 💨 🔔 🕯️ 💡 🔦 🌈 🎨 🖌️ 🧴 🧼 🧽 🏖️ ⛱️ 🪣 🍚 💧 🌊 🎈 🪩 🧶 🛁 🧊 🔥 ❄️ ☁️ 🌙 🌞 🎐 🎡 🎠 🛝 🪞 🔮 🧸 🛌 🛏️ 🧦 🎧 🔇 🔉 🔊'],
+    ['🧩 مهارات وتعليم', '🧩 🎨 🖍️ ✂️ 📐 📏 🔢 🔟 ➕ ➖ ✖️ ➗ 🔠 📖 📚 📒 📓 📔 📕 📗 📘 📙 🎲 ♟️ 🃏 🎴 🧮 🔬 🔭 🧪 🌍 🗺️ 🕐 🎭 🎪 🎠 🎡 🎢 🪆 🎮 🕹️ 🧠 💡 🏫 🎓 👩‍🏫 👨‍🏫 🧑‍🏫 📝 ✏️ 🗂️ 🖼️ 📷 🎬 🎞️ 🔤 🔡'],
+    ['🍽️ مهارات الحياة اليومية', '🍽️ 🥄 🍴 🥛 🍼 🥤 🧃 🍎 🍌 🍇 🍓 🥕 🥦 🍞 🥪 🍳 🪥 🧼 🧴 🚿 🛁 🚽 🧻 🧺 👕 👖 👗 🧦 👟 🥾 🧥 🧤 🧢 🎒 🛏️ 🛌 🚪 🪟 🧹 🧽 🪣 🛒 💵 🚌 🚗 🚸 🚦 🏠 🏪 🧑‍🍳 🍽️ ⏰'],
+    ['🐶 حيوانات وطبيعة (للأنشطة)', '🐶 🐱 🐰 🐻 🐼 🦁 🐯 🐘 🐒 🦒 🦓 🐴 🐄 🐑 🐔 🐥 🦆 🐸 🐢 🐍 🐟 🐠 🐬 🐳 🐙 🦀 🐦 🦜 🦉 🦋 🐝 🐞 🐜 🌸 🌼 🌻 🌹 🌷 🌲 🌴 🌵 🍀 🍁 ⛰️ 🌊 ☀️ 🌙 ⭐ ☁️ 🌧️ ⛄ 🚗 🚂 ✈️ 🚀 ⛵ 🚁'],
+    ['🩺 تقييم وطبي', '🩺 🩻 💉 💊 🩹 🩸 🧬 🧪 🏥 ⚕️ 🧑‍⚕️ 👩‍⚕️ 👨‍⚕️ 🌡️ 📋 📝 📊 📈 📉 🗂️ 📁 📂 🗒️ 🔍 🔎 🧾 📑 ✅ ❗ ⚠️ 🚑 🧑‍🔬 👩‍🔬 👨‍🔬 🔬 🧫 🧠 🫁 🫀 🦴 🦷 👁️ 👂 🩺 🧏 🧑‍🦽 🏷️'],
+    ['🏢 إدارة وحسابات', '📊 🗓️ 📅 📆 ⚡ 💰 💵 💴 💶 💳 🧾 🛒 🛍️ 🏦 🏢 🏠 🏫 🏷️ 📦 🧰 🔧 🛠️ ⚙️ 🔔 📞 📱 💻 🖥️ 🖨️ 📧 ✉️ 📨 📎 📌 📍 🖼️ 📷 🎥 ☁️ 🔐 🔒 👥 👤 🧑‍💼 👨‍💼 👩‍💼 🪪 🗃️ 🗄️ 📇 🔖 📜 📃 📄'],
+    ['⭐ رموز عامة', '⭐ 🌟 ✨ 💫 🔥 ❤️ 💯 ✅ ❌ ➕ ❓ ❗ 🔴 🟠 🟡 🟢 🔵 🟣 ⚫ ⚪ 🔶 🔷 🔸 🔹 🏁 🚩 🎉 🎊 🎁 🏆 🎗️ 🔖 💎 👑 🪄 🎈 🧿 ♾️ ☀️ 🌙 ⚡ 🌈 🍀 🧸 🕊️ 🤍']
+  ].map(c => [c[0], c[1].split(/\s+/).filter(Boolean)]);
+  window._iconPick = {}; let _iconTarget = null, _iconCat = 0;
+
+  function iconOrigHtml(el) { const i3 = el && el.querySelector('.i3d'); if (!i3) return ''; if (i3.dataset.orig === undefined) i3.dataset.orig = i3.innerHTML; return i3.dataset.orig; }
+  function applyIconOverrides(sOpt) {
+    const map = (sOpt && sOpt.icons) || ((state && state.settings && state.settings.icons) || {});
+    let changed = false;
+    ICON_ITEMS.forEach(([key, id]) => {
+      const el = document.getElementById(id); if (!el) return;
+      const i3 = el.querySelector('.i3d'); if (!i3) return;
+      const orig = iconOrigHtml(el), want = map[key];
+      if (want) { if (i3.textContent !== want || i3.querySelector('svg')) { i3.textContent = want; changed = true; } }
+      else if (i3.innerHTML !== orig) { i3.innerHTML = orig; changed = true; }
+    });
+    if (changed) { try { window.mRebuildNav && window.mRebuildNav(); } catch (e) {} }
+  }
+  function renderIconTable() {
+    const box = document.getElementById('iconTable'); if (!box) return;
+    box.innerHTML = ICON_ITEMS.map(([key, id, lbl]) => {
+      const el = document.getElementById(id), live = el ? ((el.querySelector('.side-label') || {}).textContent || lbl).trim() : lbl;
+      const cur = window._iconPick[key], orig = iconOrigHtml(el);
+      const shown = cur ? cur : (orig || '•');
+      return `<div class="flex items-center gap-3 bg-slate-50 border border-slate-200 rounded-xl p-2">
+        <button type="button" onclick="iconOpenPicker('${key}')" title="غيّر الأيقونة" class="w-12 h-12 shrink-0 rounded-xl bg-white border-2 ${cur ? 'border-indigo-400' : 'border-slate-200'} hover:border-indigo-500 flex items-center justify-center text-2xl overflow-hidden"><span style="display:flex;width:28px;height:28px;align-items:center;justify-content:center;font-size:24px">${shown}</span></button>
+        <div class="flex-1 min-w-0"><div class="font-black text-slate-800 truncate">${live}</div><div class="text-[10px] font-bold ${cur ? 'text-indigo-600' : 'text-slate-400'}">${cur ? 'أيقونة مخصصة' : 'الافتراضية'}</div></div>
+        ${cur ? `<button type="button" onclick="iconChoose('${key}','')" title="رجوع للافتراضي" class="text-slate-400 hover:text-rose-600 font-black px-2">↺</button>` : ''}
+      </div>`;
+    }).join('');
+  }
+  function iconChoose(key, emoji) {
+    if (emoji) window._iconPick[key] = emoji; else delete window._iconPick[key];
+    applyIconOverrides({ icons: window._iconPick });
+    renderIconTable(); iconClosePicker();
+  }
+  function iconResetAll() { if (!confirm('رجوع كل الأيقونات للافتراضي؟')) return; window._iconPick = {}; applyIconOverrides({ icons: {} }); renderIconTable(); }
+  function iconClosePicker() { const m = document.getElementById('iconPickerModal'); if (m) m.remove(); _iconTarget = null; }
+  function iconOpenPicker(key) {
+    iconClosePicker(); _iconTarget = key;
+    const item = ICON_ITEMS.find(x => x[0] === key) || [key, '', key];
+    const m = document.createElement('div'); m.id = 'iconPickerModal';
+    m.style.cssText = 'position:fixed;inset:0;z-index:300;background:rgba(15,23,42,.6);display:flex;align-items:center;justify-content:center;padding:12px';
+    m.onclick = e => { if (e.target === m) iconClosePicker(); };
+    m.innerHTML = `<div dir="rtl" style="background:#fff;border-radius:20px;width:100%;max-width:640px;max-height:88vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,.35);font-family:inherit">
+      <div style="padding:12px 16px;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;gap:8px"><b style="font-size:14px;color:#0f172a">اختر أيقونة لـ «${item[2]}»</b><button type="button" onclick="iconClosePicker()" style="margin-right:auto;width:30px;height:30px;border-radius:50%;background:#f1f5f9;font-weight:900">×</button></div>
+      <div id="iconCats" style="display:flex;gap:6px;overflow-x:auto;padding:8px 12px;border-bottom:1px solid #f1f5f9;white-space:nowrap"></div>
+      <div id="iconGrid" style="padding:12px;overflow-y:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(46px,1fr));gap:6px"></div>
+      <div style="padding:10px 14px;border-top:1px solid #e2e8f0;display:flex;gap:8px;align-items:center;background:#f8fafc">
+        <input id="iconCustom" maxlength="8" placeholder="أو الصق/اكتب أي إيموجي هنا" style="flex:1;border:1px solid #cbd5e1;border-radius:10px;padding:7px 10px;font-size:15px">
+        <button type="button" onclick="iconChoose(_iconTarget,(document.getElementById('iconCustom').value||'').trim())" style="background:#4f46e5;color:#fff;font-weight:900;font-size:12px;padding:8px 14px;border-radius:10px">استخدم</button>
+      </div></div>`;
+    document.body.appendChild(m); iconRenderCats();
+  }
+  function iconRenderCats() {
+    const c = document.getElementById('iconCats'), g = document.getElementById('iconGrid'); if (!c || !g) return;
+    c.innerHTML = ICON_LIB.map((cat, i) => `<button type="button" onclick="_iconCat=${i};iconRenderCats()" style="flex:0 0 auto;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:800;border:1px solid ${i === _iconCat ? '#4f46e5' : '#e2e8f0'};background:${i === _iconCat ? '#eef2ff' : '#fff'};color:${i === _iconCat ? '#4338ca' : '#475569'}">${cat[0]}</button>`).join('');
+    g.innerHTML = ICON_LIB[_iconCat][1].map(e => `<button type="button" onclick="iconChoose(_iconTarget,this.textContent)" style="height:46px;border-radius:12px;background:#f8fafc;border:1px solid #e2e8f0;font-size:24px;line-height:1" onmouseover="this.style.background='#eef2ff'" onmouseout="this.style.background='#f8fafc'">${e}</button>`).join('');
+  }
+
   function renderThemeSettingsForm() {
     const s = state.settings || defaultSettings;
+    window._iconPick = Object.assign({}, s.icons || {}); renderIconTable();
     window._brandPick = s.brandColor || ''; renderBrandPalette(s.brandColor);
+    window._secPick = { secondaryColor: s.secondaryColor || '', warnColor: s.warnColor || '' };
+    renderSecPalette('secondaryColor', s.secondaryColor); renderSecPalette('warnColor', s.warnColor);
   }
 
   function saveThemeSettings(e) {
     if (e && e.preventDefault) e.preventDefault();
     if (!state.settings) state.settings = JSON.parse(JSON.stringify(defaultSettings));
     state.settings.brandColor = window._brandPick || state.settings.brandColor || '';
+    { const ic = {}; Object.keys(window._iconPick || {}).forEach(k => { if (window._iconPick[k]) ic[k] = window._iconPick[k]; }); if (Object.keys(ic).length) state.settings.icons = ic; else delete state.settings.icons; }
+    ['secondaryColor', 'warnColor'].forEach(k => { const v = (window._secPick || {})[k]; if (suHex(v)) state.settings[k] = v; else delete state.settings[k]; });
     saveState();
     applyThemeSystem();
-    showToast('✅ تم حفظ وتطبيق اللون فوراً!', 'green');
+    showToast('✅ تم حفظ وتطبيق الألوان فوراً!', 'green');
   }
 
 
@@ -7976,6 +8138,8 @@ body.sidebar-collapsed #sideNav .side-gear{justify-content:center;padding:8px 0}
     const s = (state && state.settings) || defaultSettings;
     const headerColor = s.headerColor || 'indigo';
     applyBrandTheme(s.brandColor);
+    try { applySecondaryColors(s); } catch (e) {}
+    try { applyIconOverrides(s); } catch (e) {}
     const navStyle = s.navStyle || 'sidebar';
     // الشريط الجانبي يبدأ مصغّر (إعداد السيستم) — بس لو المستخدم ماغيّرش بإيده على الجهاز ده
     try { if (localStorage.getItem('SPEAK_UP_SIDEBAR_COLLAPSED') === null && s.sys && s.sys.sideCollapsed) document.body.classList.add('sidebar-collapsed'); } catch (e) {}
@@ -8685,7 +8849,7 @@ body.sidebar-collapsed #sideNav .side-gear{justify-content:center;padding:8px 0}
         <line stroke="#fff" stroke-width="5" vector-effect="non-scaling-stroke" stroke-linecap="round"/><line stroke="#fff" stroke-width="5" vector-effect="non-scaling-stroke" stroke-linecap="round"/></svg>
       ${items.map(i => `<div class="pp-wl" data-s="${i.id}"><div class="pp-wi">${i.ico}</div><b>${i.title}</b></div>`).join('')}
       <div class="pp-wring"></div>
-      <div class="pp-wc"><div class="pp-wph"><img class="lg" src="${actEsc(logo)}" alt="">${photo}</div></div>
+      <div class="pp-wc" onclick="ppChildOpen()" title="بيانات الطفل"><div class="pp-wph"><img class="lg" src="${actEsc(logo)}" alt="">${photo}</div><span class="pp-tap">👆 بياناته</span></div>
     </div>`;
   }
 
@@ -8847,6 +9011,29 @@ body.sidebar-collapsed #sideNav .side-gear{justify-content:center;padding:8px 0}
     const m = Math.floor((Date.now() - d.getTime()) / 2629800000), y = Math.floor(m / 12);
     return y >= 1 ? `${y} سنة${m % 12 ? ' و' + (m % 12) + ' شهر' : ''}` : `${m} شهر`;
   }
+  function ppChildOpen() { _ppSheet = 'child'; renderParentPortal(); }
+  function ppChildSheetHtml(c, cnt, done, rate) {
+    const ph = clientPhoto(c);
+    const av = ph ? `<img src="${actEsc(ph)}" alt="" onerror="this.remove()">` : actEsc((c.name || '👶').trim().charAt(0));
+    const stMap = { Active: ['🟢 نشط', 'text-emerald-700'], Stopped: ['🔴 موقوف', 'text-rose-700'], Completed: ['🔵 مكتمل', 'text-sky-700'] };
+    const st = stMap[c.status] || ['—', 'text-slate-500'];
+    let br = ''; try { br = getBranchName(c.branch) || ''; } catch (e) {}
+    const age = ppAge(c.dob);
+    const row = (k, v) => v ? `<div class="pp-kc-row"><span class="k">${k}</span><span class="v">${v}</span></div>` : '';
+    return `<div class="pp-sheet-bg" onclick="ppCloseSheet()"></div><div class="pp-sheet">
+      <div class="flex items-center gap-3 mb-4"><div class="pp-kc-ph">${av}</div>
+        <div class="min-w-0 flex-1"><div class="font-black text-slate-900 text-lg leading-tight">${actEsc(c.name || '')}</div>${age ? `<div class="text-xs font-bold text-slate-500 mt-1">🎂 ${actEsc(age)}</div>` : ''}<div class="text-xs font-black mt-1 ${st[1]}">${st[0]}</div></div>
+        <button onclick="ppCloseSheet()" class="w-9 h-9 rounded-full bg-slate-100 font-black text-slate-500 self-start">✕</button></div>
+      <div class="space-y-2 mb-4">
+        ${row('🩺 التشخيص', actEsc(c.diagnosis || ''))}
+        ${row('📅 تاريخ الميلاد', actEsc(c.dob || ''))}
+        ${row('🏢 الفرع', actEsc(br))}
+        ${row('🚀 بداية البرنامج', actEsc(c.startDate || ''))}
+        ${row('✅ نسبة الحضور', done ? rate + '% (' + cnt.ATT + ' من ' + done + ' جلسة)' : 'لا توجد جلسات منتهية بعد')}
+      </div>
+      <button onclick="ppSet('tab','perf')" class="pp-kc-cta">📊 الإحصائيات والتقييمات</button>
+    </div>`;
+  }
   function renderParentPortal() {
     const el = document.getElementById('parentPortal'); if (!el) return;
     if (!currentUser || currentUser.role !== 'parent') { el.classList.add('hidden'); return; }
@@ -8918,7 +9105,7 @@ body.sidebar-collapsed #sideNav .side-gear{justify-content:center;padding:8px 0}
         { id: 'cal', ico: ppIco('cal', 40), title: 'مواعيد الجلسات' },
         { id: 'acct', ico: ppIco('acct', 40), title: 'الحسابات' }
       ]);
-      el.innerHTML = `<div class="pp-home pp-wheelhome"><div class="pp-homehead">${logoImg('pp-mini-logo')}<div class="min-w-0 flex-1"><div class="font-black text-base truncate">أهلًا ${actEsc(currentUser.name || '')} 👋</div><div class="text-[11px] font-bold leading-snug" style="color:#c7d2fe">👶 ${actEsc(c.name || '')}<br>${nextTxt}</div></div>${logoutBtn}</div>${kidsBar ? `<div class="pp-kidchips">${kidsBar}</div>` : ''}${wheel}</div>`;
+      el.innerHTML = `<div class="pp-home pp-wheelhome"><div class="pp-homehead">${logoImg('pp-mini-logo')}<div class="min-w-0 flex-1"><div class="font-black text-base truncate">أهلًا ${actEsc(currentUser.name || '')} 👋</div><div class="text-[11px] font-bold leading-snug" style="color:#c7d2fe">👶 ${actEsc(c.name || '')}<br>${nextTxt}</div></div>${logoutBtn}</div>${kidsBar ? `<div class="pp-kidchips">${kidsBar}</div>` : ''}${wheel}${_ppSheet === 'child' ? ppChildSheetHtml(c, cnt, done, rate) : ''}</div>`;
       requestAnimationFrame(ppWheelFit); setTimeout(ppWheelFit, 80);
       return;
     }
