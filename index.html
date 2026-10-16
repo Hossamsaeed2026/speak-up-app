@@ -12360,5 +12360,484 @@ html.su-dark #suProfile .sp-msg.ok{background:rgba(16,185,129,.16);color:#6ee7b7
   window.suTheme = { apply: applyPrefs, get: themePref };
 })();
 </script>
+<style id="su-notif-css">
+/* ===== نظام الإشعارات (الأهل + الأخصائي) ===== */
+.sun-bell{position:relative;display:inline-grid;place-items:center;flex:none;width:38px;height:38px;border-radius:12px;border:1px solid rgba(15,23,42,.08);background:#fff;color:#4f46e5;cursor:pointer;box-shadow:0 2px 8px rgba(15,23,42,.14);-webkit-tap-highlight-color:transparent;transition:transform .12s}
+.sun-bell:active{transform:scale(.92)}
+.sun-bell svg{width:20px;height:20px}
+.sun-bell.ring svg{animation:sunRing .9s ease 2}
+@keyframes sunRing{0%,100%{transform:rotate(0)}15%{transform:rotate(16deg)}30%{transform:rotate(-14deg)}45%{transform:rotate(10deg)}60%{transform:rotate(-8deg)}75%{transform:rotate(4deg)}}
+.sun-badge{position:absolute;top:-5px;inset-inline-start:-5px;min-width:18px;height:18px;padding:0 4px;border-radius:9px;background:#ef4444;color:#fff;font:800 10px/18px system-ui,sans-serif;text-align:center;border:2px solid #fff;box-sizing:content-box;display:none}
+.sun-bell.has .sun-badge{display:block}
+#suNotifFixed{display:none;position:fixed;z-index:41;top:calc(env(safe-area-inset-top,0px) + 12px);left:10px}
+html.has-pin #suNotifFixed{left:54px}
+body.sun-therapist #suNotifFixed{display:inline-grid}
+#pinLock:not([style*="display: none"]) ~ #suNotifFixed{display:none}
+#suNotifRoot{display:none;position:fixed;inset:0;z-index:2000;direction:rtl;font-family:inherit}
+#suNotifRoot.open{display:block}
+.sun-bg{position:absolute;inset:0;background:rgba(15,23,42,.38);animation:sunFade .18s ease}
+@keyframes sunFade{from{opacity:0}to{opacity:1}}
+.sun-panel{position:absolute;top:calc(env(safe-area-inset-top,0px) + 60px);left:10px;width:min(380px,calc(100vw - 20px));max-height:min(72vh,640px);display:flex;flex-direction:column;background:#fff;color:#1f1b2e;border-radius:18px;box-shadow:0 20px 50px rgba(15,23,42,.30);overflow:hidden;animation:sunPop .18s ease}
+@keyframes sunPop{from{opacity:0;transform:translateY(-8px) scale(.98)}to{opacity:1;transform:none}}
+.sun-head{display:flex;align-items:center;gap:8px;padding:14px 14px 10px;border-bottom:1px solid #ebe8f3}
+.sun-head b{flex:1;font-size:15px;font-weight:900}
+.sun-head button{border:0;background:#f3f1fa;color:#4f46e5;font:800 11px inherit;font-family:inherit;padding:6px 10px;border-radius:9px;cursor:pointer}
+.sun-head .sun-x{width:30px;height:30px;padding:0;border-radius:50%;color:#64748b;font-size:14px}
+.sun-list{overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.sun-item{display:flex;gap:11px;align-items:flex-start;width:100%;text-align:start;padding:12px 14px;border:0;border-bottom:1px solid #f1eff7;background:#fff;color:inherit;font-family:inherit;cursor:pointer;position:relative}
+.sun-item:hover{background:#faf9ff}
+.sun-item.unread{background:#f5f3ff}
+.sun-item.unread::before{content:"";position:absolute;inset-inline-end:8px;top:16px;width:8px;height:8px;border-radius:50%;background:#7c3aed}
+.sun-ico{flex:none;width:38px;height:38px;border-radius:12px;display:grid;place-items:center;font-size:19px;background:#ede9fe}
+.sun-tx{min-width:0;flex:1;padding-inline-end:10px}
+.sun-tx b{display:block;font-size:13px;font-weight:900;line-height:1.5}
+.sun-tx span{display:block;font-size:12px;font-weight:600;color:#475569;line-height:1.6;margin-top:1px;word-break:break-word}
+.sun-tx em{display:block;font-style:normal;font-size:10.5px;font-weight:700;color:#94a3b8;margin-top:3px}
+.sun-empty{padding:42px 20px;text-align:center;color:#64748b;font-weight:700;font-size:13px;line-height:1.8}
+.sun-empty div{font-size:38px;margin-bottom:6px}
+.sun-toast{position:fixed;z-index:2100;top:calc(env(safe-area-inset-top,0px) + 14px);left:50%;transform:translateX(-50%);max-width:min(420px,calc(100vw - 24px));display:flex;gap:10px;align-items:center;background:#312e81;color:#fff;border-radius:14px;padding:10px 14px;font-weight:800;font-size:13px;box-shadow:0 10px 30px rgba(0,0,0,.3);cursor:pointer;animation:sunPop .2s ease;direction:rtl}
+@media (max-width:640px){
+  .sun-panel{top:auto;bottom:0;left:0;right:0;width:100%;max-height:80vh;border-radius:22px 22px 0 0;padding-bottom:env(safe-area-inset-bottom,0px);animation:sunUp .22s ease}
+  @keyframes sunUp{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+}
+html.su-dark .sun-panel{background:#1c1a2b;color:#ece9f8}
+html.su-dark .sun-head{border-color:#2d2a42}
+html.su-dark .sun-head button{background:#2a2740;color:#c4b5fd}
+html.su-dark .sun-item{background:#1c1a2b;border-color:#2a2740}
+html.su-dark .sun-item:hover{background:#242137}
+html.su-dark .sun-item.unread{background:#26213f}
+html.su-dark .sun-ico{background:#322d52}
+html.su-dark .sun-tx span{color:#b5b0cc}
+html.su-dark .sun-empty{color:#9a95b5}
+@media print{#suNotifFixed,#suNotifRoot,.sun-bell,.sun-toast{display:none!important}}
+</style>
+<script id="su-notif">
+/* ===================================================================
+   نظام الإشعارات
+   - ولي الأمر: كراسة جديدة / إضافة جديدة في كراسة اليوم / نشاط بيت جديد / تعليق من الأخصائي
+   - الأخصائي: حالة جديدة / جدول جديد أو اتغيّر / جلسة جديدة أو اتعدّلت أو اتلغت / تغيير حالة الطفل
+   الفكرة: بنقارن "بصمة" البيانات الحالية بآخر بصمة محفوظة على الجهاز، والفرق = إشعارات.
+   مفيش أي تعديل مطلوب على Supabase، وبيشتغل برضه لو التطبيق كان مقفول (بيظهر أول ما يتفتح).
+   =================================================================== */
+(function () {
+  'use strict';
+  var LS = 'SU_NOTIF_V1_', MAXN = 60, MAX_PER_SCAN = 8;
+  var S = null;            // { uid, snap, list }
+  var scanT = null, toastT = null;
+
+  function $(id) { return document.getElementById(id); }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function hash(s) { s = String(s); var h = 5381; for (var i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0; return (h >>> 0).toString(36); }
+  function user() { try { return (typeof currentUser !== 'undefined' && currentUser) || null; } catch (e) { return null; } }
+  function role() { var u = user(); return u && u.role; }
+  function enabled() { var r = role(); return r === 'parent' || r === 'therapist'; }
+  function fn(name) { return String(name || '').trim().split(/\s+/)[0] || 'الطفل'; }
+  function ymd(d) { return String(d || '').replace(/\//g, '-'); }
+  function today() { try { return todayCairo(); } catch (e) { return new Date().toISOString().slice(0, 10); } }
+  function fmtDay(d) {
+    try { var x = new Date(ymd(d) + 'T12:00:00'); if (isNaN(x)) return d; return x.toLocaleDateString('ar-EG', { weekday: 'long', day: 'numeric', month: 'long' }); } catch (e) { return d; }
+  }
+  function fmtT(t) { try { return formatTime12(t); } catch (e) { return t || ''; } }
+  function ago(t) {
+    var s = (Date.now() - t) / 1000; if (s < 60) return 'الآن';
+    var m = Math.floor(s / 60); if (m < 60) return 'من ' + m + ' دقيقة';
+    var h = Math.floor(m / 60); if (h < 24) return 'من ' + h + ' ساعة';
+    var d = Math.floor(h / 24); if (d === 1) return 'امبارح'; if (d < 7) return 'من ' + d + ' أيام';
+    try { return new Date(t).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short' }); } catch (e) { return ''; }
+  }
+
+  /* ---------- التخزين (لكل مستخدم على الجهاز) ---------- */
+  function load() {
+    var u = user(); if (!u) { S = null; return null; }
+    var uid = String(u.id || u.email || ''); if (!uid) { S = null; return null; }
+    if (S && S.uid === uid) return S;
+    var raw = null; try { raw = JSON.parse(localStorage.getItem(LS + uid) || 'null'); } catch (e) {}
+    S = { uid: uid, snap: raw && raw.snap || null, list: raw && Array.isArray(raw.list) ? raw.list : [] };
+    return S;
+  }
+  function save() { if (!S) return; try { localStorage.setItem(LS + S.uid, JSON.stringify({ snap: S.snap, list: S.list.slice(0, MAXN) })); } catch (e) {} }
+  function unread() { return S ? S.list.filter(function (n) { return !n.r; }).length : 0; }
+
+  /* ---------- البصمات ---------- */
+  function kids() { var s = myScope(); return (state.clients || []).filter(function (c) { return s && s.has(String(c.id)); }); }
+
+  function snapParent() {
+    var ks = kids(); if (!ks.length) return null;
+    var out = { cl: {} };
+    ks.forEach(function (c) {
+      var cid = String(c.id), nb = {}, ac = {}, pc = {};
+      (nbAll()[cid] || []).forEach(function (e) {
+        nb[e.id] = { d: ymd(e.date), u: e.upd || 0, a: (e.acts || []).length, w: (e.hw || []).length, l: (e.links || []).length, r: (e.draws || []).length, n: hash((e.notes || '') + '|' + (e.goals || '')), p: (e.perf || 0) + '/' + (e.goal || 0) };
+      });
+      caList(cid).forEach(function (a) { ac[a.uid] = a.key; });
+      (state.sessions || []).forEach(function (s) { if (String(s.clientId) === cid && (s.parentComment || '').trim()) pc[s.id] = hash(s.parentComment); });
+      out.cl[cid] = { n: c.name || '', nb: nb, ac: ac, pc: pc };
+    });
+    return out;
+  }
+
+  function snapTher() {
+    var st = myStaff(); if (!st || !(state.clients || []).length) return null;
+    var sid = stfId(st), td = today(), cl = {}, ss = {}, hasS = {};
+    (state.sessions || []).forEach(function (s) {
+      if (String(s.therapistId) !== sid || !inScope(s.clientId)) return;
+      var cid = String(s.clientId); hasS[cid] = 1;
+      var d = ymd(s.date); if (d >= td) ss[s.id] = [d, s.time || '', cid];
+    });
+    (state.clients || []).forEach(function (c) {
+      var cid = String(c.id); if (!inScope(cid)) return;
+      var mine = (c.weeklySchedule || []).filter(function (x) { return String(x.therapistId) === sid; });
+      if (!mine.length && !hasS[cid]) return;
+      cl[cid] = { n: c.name || '', st: c.status || '', sch: mine.map(function (x) { return x.day + '|' + x.time + '|' + (x.type || ''); }).sort().join(';'), txt: mine.map(function (x) { return x.day + ' ' + fmtT(x.time); }).join('، ') };
+    });
+    return { cl: cl, ss: ss };
+  }
+
+  function build() { return role() === 'parent' ? snapParent() : (role() === 'therapist' ? snapTher() : null); }
+
+  /* ---------- المقارنة ---------- */
+  function diffParent(o, n) {
+    var items = [], td = today();
+    Object.keys(n.cl).forEach(function (cid) {
+      var N = n.cl[cid], O = o.cl && o.cl[cid]; if (!O) return;   // طفل اتربط حديثاً: نبدأ منه من غير إشعار
+      var who = fn(N.n);
+      Object.keys(N.nb).forEach(function (id) {
+        var e = N.nb[id], p = O.nb && O.nb[id];
+        if (!p) {
+          var ex = []; if (e.a) ex.push(e.a + ' نشاط'); if (e.w) ex.push('واجب منزلي'); if (e.l) ex.push('روابط/فيديو');
+          items.push({ k: 'nb:' + id, type: 'nb', ico: '📓', cid: cid, tags: ['جديدة'], title: (e.d === td ? 'كراسة النهارده جاهزة' : 'كراسة جديدة') + ' — ' + who, body: 'الأخصائي أضاف كراسة جلسة ' + fmtDay(e.d) + (ex.length ? ' (' + ex.join(' + ') + ')' : '') });
+          return;
+        }
+        var w = [];
+        if (e.a > p.a) w.push('أنشطة جديدة (' + (e.a - p.a) + ')');
+        if (e.w > p.w) w.push('واجب منزلي جديد');
+        if (e.l > p.l) w.push('رابط/فيديو جديد');
+        if (e.r > p.r) w.push('رسمة أو صورة');
+        if (e.n !== p.n) w.push('ملاحظات الأخصائي');
+        if (e.p !== p.p) w.push('تقييم الجلسة');
+        if (w.length) items.push({ k: 'nb:' + id, type: 'nb', ico: '📝', cid: cid, tags: w, date: e.d, title: 'إضافة جديدة في كراسة ' + who, body: 'كراسة ' + fmtDay(e.d) + ': ' + w.join('، ') });
+      });
+      var newAc = Object.keys(N.ac).filter(function (u) { return !(O.ac && O.ac[u]); });
+      if (newAc.length) {
+        var names = newAc.map(function (u) { try { var nd = caNode(N.ac[u]); return nd && nd.ar; } catch (e) { return ''; } }).filter(Boolean);
+        items.push({ k: null, type: 'ac', ico: '🧩', cid: cid, title: 'نشاط جديد للبيت — ' + who, body: names.length ? names.slice(0, 3).join('، ') + (names.length > 3 ? ' و' + (names.length - 3) + ' كمان' : '') : newAc.length + ' نشاط جديد في أنشطة البيت' });
+      }
+      Object.keys(N.pc).forEach(function (id) {
+        if (O.pc && O.pc[id] === N.pc[id]) return;
+        var s = (state.sessions || []).find(function (x) { return x.id === id; }) || {}, t = String(s.parentComment || '').trim();
+        items.push({ k: 'pc:' + id, type: 'pc', ico: '💬', cid: cid, title: 'تعليق جديد من الأخصائي — ' + who, body: t.slice(0, 90) + (t.length > 90 ? '…' : '') });
+      });
+    });
+    return items;
+  }
+
+  function diffTher(o, n) {
+    var items = [], skip = {};
+    Object.keys(n.cl).forEach(function (cid) {
+      var N = n.cl[cid], O = o.cl && o.cl[cid];
+      if (!O) {
+        skip[cid] = 1;
+        items.push({ k: null, type: 'cl', ico: '🆕', cid: cid, title: 'حالة جديدة: ' + N.n, body: 'اتضافت لأطفالك' + (N.txt ? ' — المواعيد: ' + N.txt : '') });
+        return;
+      }
+      if (O.sch !== N.sch) {
+        skip[cid] = 1;
+        items.push({ k: 'sch:' + cid, type: 'sch', ico: '🗓️', cid: cid, title: 'جدول جديد: ' + N.n, body: N.txt ? 'المواعيد الأسبوعية: ' + N.txt : 'اتلغى الجدول الأسبوعي الثابت' });
+      }
+      if (O.st !== N.st) {
+        var m = { Active: '🟢 نشط', Stopped: '🔴 موقوف', Completed: '🔵 مكتمل' };
+        items.push({ k: 'st:' + cid, type: 'st', ico: '⚙️', cid: cid, title: 'تغيير من الإدارة: ' + N.n, body: 'حالة الطفل بقت ' + (m[N.st] || N.st || 'غير محددة') });
+      }
+    });
+    var added = [];
+    Object.keys(n.ss).forEach(function (id) {
+      var s = n.ss[id], p = o.ss && o.ss[id];
+      if (!p) { if (!skip[s[2]]) added.push(s); return; }
+      if (p[0] !== s[0] || p[1] !== s[1]) {
+        var nm = n.cl[s[2]] ? n.cl[s[2]].n : '';
+        items.push({ k: 'mv:' + id, type: 'mv', ico: '🔄', cid: s[2], title: 'تعديل موعد جلسة: ' + nm, body: 'من ' + fmtDay(p[0]) + ' ' + fmtT(p[1]) + ' إلى ' + fmtDay(s[0]) + ' ' + fmtT(s[1]) });
+      }
+    });
+    if (added.length) {
+      added.sort(function (a, b) { return (a[0] + a[1]).localeCompare(b[0] + b[1]); });
+      var lines = added.slice(0, 3).map(function (s) { var c = n.cl[s[2]]; return (c ? fn(c.n) : '') + ' — ' + fmtDay(s[0]) + ' ' + fmtT(s[1]); });
+      items.push({ k: null, type: 'ses', ico: '➕', cid: added[0][2], title: added.length === 1 ? 'جلسة جديدة في جدولك' : added.length + ' جلسات جديدة في جدولك', body: lines.join(' • ') + (added.length > 3 ? ' • و' + (added.length - 3) + ' كمان' : '') });
+    }
+    Object.keys(o.ss || {}).forEach(function (id) {
+      if (n.ss[id]) return;
+      var p = o.ss[id], real = (state.sessions || []).find(function (x) { return x.id === id; });
+      var nm = (o.cl && o.cl[p[2]] && o.cl[p[2]].n) || (n.cl[p[2]] && n.cl[p[2]].n) || '';
+      if (!real) items.push({ k: null, type: 'del', ico: '❌', cid: p[2], title: 'تم إلغاء جلسة: ' + nm, body: 'جلسة ' + fmtDay(p[0]) + ' ' + fmtT(p[1]) + ' اتشالت من جدولك' });
+      else if (real && stfId({ id: real.therapistId }) !== stfId(myStaff() || {}) ) items.push({ k: null, type: 'del', ico: '↪️', cid: p[2], title: 'جلسة اتنقلت لأخصائي تاني: ' + nm, body: fmtDay(p[0]) + ' ' + fmtT(p[1]) });
+    });
+    return items;
+  }
+
+  /* ---------- إضافة الإشعارات للقائمة ---------- */
+  function push(items) {
+    if (!items.length) return 0;
+    var extra = 0;
+    if (items.length > MAX_PER_SCAN) { extra = items.length - (MAX_PER_SCAN - 1); items = items.slice(0, MAX_PER_SCAN - 1); }
+    var now = Date.now(), c = 0;
+    items.forEach(function (it, i) {
+      var prev = it.k && S.list.find(function (x) { return x.k === it.k && !x.r; });
+      if (prev) {                         // نفس الكراسة اتعدّلت تاني قبل ما تتقري: نجمّع في إشعار واحد
+        if (it.tags) { prev.tags = (prev.tags || []).concat(it.tags.filter(function (t) { return (prev.tags || []).indexOf(t) < 0; })); }
+        prev.t = now; prev.body = it.tags && it.date ? 'كراسة ' + fmtDay(it.date) + ': ' + prev.tags.join('، ') : it.body;
+        S.list.splice(S.list.indexOf(prev), 1); S.list.unshift(prev); c++; return;
+      }
+      S.list.unshift({ id: 'n' + now.toString(36) + i, k: it.k || null, t: now, r: 0, type: it.type, ico: it.ico, cid: it.cid, title: it.title, body: it.body, tags: it.tags || null, date: it.date || null });
+      c++;
+    });
+    if (extra) { S.list.unshift({ id: 'n' + now.toString(36) + 'x', k: null, t: now, r: 0, type: 'more', ico: '🔔', title: 'وفي ' + extra + ' تحديثات تانية', body: 'افتح الكراسة / الجدول عشان تشوف كل الجديد' }); c++; }
+    S.list = S.list.slice(0, MAXN);
+    return c;
+  }
+
+  /* ---------- الفحص ---------- */
+  function scan() {
+    if (!enabled() || !load()) return;
+    var n; try { n = build(); } catch (e) { console.warn('notif build', e); return; }
+    if (!n) return;                     // البيانات لسه ما اتحمّلتش (أو الحساب مش مربوط): ما نلمسش البصمة القديمة
+    var fresh = 0;
+    if (S.snap) {
+      try { var it = role() === 'parent' ? diffParent(S.snap, n) : diffTher(S.snap, n); fresh = push(it); } catch (e) { console.warn('notif diff', e); }
+    }
+    S.snap = n; save(); paint();
+    if (fresh) announce(fresh);
+  }
+  function scanSoon() { clearTimeout(scanT); scanT = setTimeout(scan, 700); }
+  // تعديل المستخدم نفسه (حفظ محلي) مش إشعار: نحدّث البصمة بصمت
+  function rebase() {
+    if (!enabled() || !load()) return;
+    try { var n = build(); if (n && S.snap) { S.snap = n; save(); } } catch (e) {}
+  }
+
+  /* ---------- الواجهة ---------- */
+  var BELL = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>';
+  function makeBell(extra) {
+    var b = document.createElement('button'); b.type = 'button'; b.className = 'sun-bell' + (extra ? ' ' + extra : ''); b.setAttribute('aria-label', 'الإشعارات'); b.title = 'الإشعارات';
+    b.innerHTML = BELL + '<b class="sun-badge"></b>'; b.addEventListener('click', function (e) { e.stopPropagation(); toggle(); }); return b;
+  }
+  function paint() {
+    var n = unread(), has = n > 0;
+    document.querySelectorAll('.sun-bell').forEach(function (b) {
+      b.classList.toggle('has', has); var bd = b.querySelector('.sun-badge'); if (bd) bd.textContent = n > 9 ? '9+' : n;
+    });
+    try { document.title = document.title.replace(/^\(\d+\)\s*/, ''); if (has) document.title = '(' + n + ') ' + document.title; } catch (e) {}
+    if ($('suNotifRoot') && $('suNotifRoot').classList.contains('open')) renderList();
+  }
+  function ensureFixed() {
+    var th = role() === 'therapist';
+    document.body.classList.toggle('sun-therapist', th);
+    if (th && !$('suNotifFixed')) { var b = makeBell(''); b.id = 'suNotifFixed'; document.body.appendChild(b); }
+  }
+  function injectParentBells() {
+    var pe = $('parentPortal'); if (!pe || role() !== 'parent') return;
+    pe.querySelectorAll('.pp-homehead').forEach(function (h) {
+      if (h.querySelector('.sun-bell')) return;
+      var lo = h.querySelector('button[onclick="handleLogout()"]'), b = makeBell('');
+      if (lo) h.insertBefore(b, lo); else h.appendChild(b);
+    });
+    pe.querySelectorAll('.pp-pagehead').forEach(function (h) { if (!h.querySelector('.sun-bell')) h.appendChild(makeBell('')); });
+    paint();
+  }
+  function root() {
+    var r = $('suNotifRoot'); if (r) return r;
+    r = document.createElement('div'); r.id = 'suNotifRoot';
+    r.innerHTML = '<div class="sun-bg"></div><div class="sun-panel" role="dialog" aria-label="الإشعارات"><div class="sun-head"><b>🔔 الإشعارات</b><button type="button" data-a="read">قراءة الكل</button><button type="button" data-a="clear">مسح</button><button type="button" class="sun-x" data-a="close" aria-label="إغلاق">✕</button></div><div class="sun-list" id="sunList"></div></div>';
+    r.addEventListener('click', function (e) {
+      if (e.target.classList.contains('sun-bg')) return close();
+      var a = e.target.closest && e.target.closest('[data-a]');
+      if (a) { var k = a.getAttribute('data-a'); if (k === 'close') close(); else if (k === 'read') markAll(); else if (k === 'clear') clearAll(); else if (window.suPush) window.suPush.act(k); return; }
+      var it = e.target.closest && e.target.closest('.sun-item'); if (it) go(it.getAttribute('data-id'));
+    });
+    document.body.appendChild(r); return r;
+  }
+  function renderList() {
+    var el = $('sunList'); if (!el || !S) return;
+    var extra = ''; try { extra = (window.suPush && window.suPush.box()) || ''; } catch (e) {}
+    if (!S.list.length) { el.innerHTML = extra + '<div class="sun-empty"><div>🔕</div>مفيش إشعارات لسه<br>هتظهر هنا أي إضافة جديدة أول ما تحصل</div>'; return; }
+    el.innerHTML = extra + S.list.map(function (n) {
+      return '<button type="button" class="sun-item' + (n.r ? '' : ' unread') + '" data-id="' + esc(n.id) + '"><span class="sun-ico">' + esc(n.ico || '🔔') + '</span><span class="sun-tx"><b>' + esc(n.title) + '</b><span>' + esc(n.body) + '</span><em>' + esc(ago(n.t)) + '</em></span></button>';
+    }).join('');
+  }
+  function open() { if (!enabled() || !load()) return; var r = root(); r.classList.add('open'); renderList(); }
+  function close() { var r = $('suNotifRoot'); if (r) r.classList.remove('open'); }
+  function toggle() { var r = $('suNotifRoot'); if (r && r.classList.contains('open')) close(); else open(); }
+  function markAll() { if (!S) return; S.list.forEach(function (n) { n.r = 1; }); save(); paint(); }
+  function clearAll() { if (!S) return; S.list = []; save(); paint(); }
+  function go(id) {
+    if (!S) return; var n = S.list.find(function (x) { return x.id === id; }); if (!n) return;
+    n.r = 1; save(); paint(); close();
+    try {
+      if (role() === 'parent') {
+        if (n.cid) { var c = (state.clients || []).find(function (x) { return String(x.id) === String(n.cid); }); if (c) ppSet('child', c.id); }
+        if (n.type === 'nb') { ppSet('tab', 'book'); ppSet('sub', 'sessions'); }
+        else if (n.type === 'ac') { ppSet('tab', 'book'); ppSet('sub', 'acts'); }
+        else if (n.type === 'pc') ppSet('tab', 'perf');
+      } else if (role() === 'therapist') {
+        if ((n.type === 'cl') && n.cid && window.fuOpenChild) window.fuOpenChild(n.cid);
+        else switchTab('myappts');
+      }
+    } catch (e) { console.warn('notif go', e); }
+  }
+  function announce(n) {
+    try {
+      document.querySelectorAll('.sun-bell').forEach(function (b) { b.classList.remove('ring'); void b.offsetWidth; b.classList.add('ring'); });
+      var old = document.querySelector('.sun-toast'); if (old) old.remove();
+      var t = document.createElement('div'); t.className = 'sun-toast'; t.innerHTML = '<span>🔔</span><span>' + (n === 1 ? 'عندك إشعار جديد' : 'عندك ' + n + ' إشعارات جديدة') + '</span>';
+      t.onclick = function () { t.remove(); open(); }; document.body.appendChild(t);
+      clearTimeout(toastT); toastT = setTimeout(function () { if (t.parentNode) t.remove(); }, 5000);
+      if (document.hidden && window.Notification && Notification.permission === 'granted') { try { new Notification('Speak Up', { body: n === 1 ? 'عندك إشعار جديد' : 'عندك ' + n + ' إشعارات جديدة' }); } catch (e) {} }
+    } catch (e) {}
+  }
+
+  /* ---------- الربط مع باقي النظام ---------- */
+  var _ra = window.refreshAll;
+  if (typeof _ra === 'function') window.refreshAll = function () {
+    var r = _ra.apply(this, arguments);
+    try { if (enabled()) { load(); ensureFixed(); injectParentBells(); scanSoon(); } else document.body.classList.remove('sun-therapist'); } catch (e) {}
+    return r;
+  };
+  var _ss = window.saveState;
+  if (typeof _ss === 'function') window.saveState = function () {
+    var r = _ss.apply(this, arguments);
+    try { if (role() === 'therapist') rebase(); } catch (e) {}
+    return r;
+  };
+  var _rp = window.renderParentPortal;
+  if (typeof _rp === 'function') window.renderParentPortal = function () {
+    var r = _rp.apply(this, arguments);
+    try { injectParentBells(); } catch (e) {}
+    return r;
+  };
+  var _lo = window.handleLogout;
+  if (typeof _lo === 'function') window.handleLogout = function () { try { close(); S = null; document.body.classList.remove('sun-therapist'); } catch (e) {} return _lo.apply(this, arguments); };
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
+  document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') { try { paint(); } catch (e) {} } });
+
+  window.suNotif = { refresh: function () { var r = $('suNotifRoot'); if (r && r.classList.contains('open')) renderList(); }, open: open, close: close, scan: scan, markAll: markAll, clear: clearAll, get: function () { return S; } };
+})();
+</script>
+
+<style id="su-push-css">
+.sup-box{margin:10px 12px 4px;padding:6px 10px;border-radius:14px;background:#eef2ff;border:1px solid #e0e7ff}
+.sup-row{display:flex;align-items:center;gap:10px;padding:6px 0;font-size:12px;font-weight:700;color:#3730a3;line-height:1.6}
+.sup-row+.sup-row{border-top:1px dashed #c7d2fe}
+.sup-row .e{font-size:18px;flex:none}
+.sup-row span.t{flex:1;min-width:0}
+.sup-row button{flex:none;border:0;border-radius:10px;background:#4f46e5;color:#fff;font:800 12px inherit;font-family:inherit;padding:7px 12px;cursor:pointer}
+.sup-row.ok{color:#047857}
+.sup-banner{position:fixed;z-index:2050;top:calc(env(safe-area-inset-top,0px) + 10px);left:10px;right:10px;margin:auto;max-width:440px;display:flex;align-items:center;gap:10px;background:#312e81;color:#fff;border-radius:16px;padding:10px 12px;box-shadow:0 12px 32px rgba(0,0,0,.35);direction:rtl;animation:sunPop .25s ease}
+.sup-banner .e{font-size:24px}
+.sup-banner div{flex:1;min-width:0;font-size:12px;font-weight:800;line-height:1.5}
+.sup-banner div small{display:block;font-weight:600;opacity:.8;font-size:11px}
+.sup-banner button{flex:none;border:0;border-radius:10px;background:#fff;color:#312e81;font:900 12px inherit;font-family:inherit;padding:8px 12px;cursor:pointer}
+.sup-banner button.x{background:transparent;color:#fff;opacity:.7;padding:6px}
+html.su-dark .sup-box{background:#26213f;border-color:#3a3560}
+html.su-dark .sup-row{color:#c4b5fd}
+html.su-dark .sup-row.ok{color:#6ee7b7}
+@media print{.sup-banner{display:none!important}}
+</style>
+<script id="su-push">
+/* إشعارات الجهاز (Web Push) + تثبيت التطبيق.
+   محتاج: push-sw.js مرفوع جنب index.html، وسطر importScripts في service-worker.js، وإعداد Supabase (push-setup.sql + دالة push-notify). */
+(function () {
+  'use strict';
+  var VAPID = 'BB-QQbPcDyI0wkYwutHxeMIU81l6hBHLoF_bD58KZu5eP8hk4e-qnXPEL5z8vp46meY8q-J5bVUHoKCZfb5FLFA';
+  var DISMISS = 'SU_INSTALL_DISMISS', deferred = null, subbed = false, synced = '', bannerEl = null;
+  function $(id) { return document.getElementById(id); }
+  function user() { try { return (typeof currentUser !== 'undefined' && currentUser) || null; } catch (e) { return null; } }
+  function enabled() { var u = user(); return !!u && (u.role === 'parent' || u.role === 'therapist'); }
+  function supported() { return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window; }
+  function standalone() { try { return window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true; } catch (e) { return false; } }
+  function ios() { return /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1); }
+  function toast(m, c) { try { showToast(m, c || 'green'); } catch (e) {} }
+  function u8(b) { b = (b + '='.repeat((4 - b.length % 4) % 4)).replace(/-/g, '+').replace(/_/g, '/'); var r = atob(b), a = new Uint8Array(r.length); for (var i = 0; i < r.length; i++) a[i] = r.charCodeAt(i); return a; }
+  function withTimeout(p, ms) { return Promise.race([p, new Promise(function (_, rej) { setTimeout(function () { rej(new Error('timeout')); }, ms); })]); }
+  function reg() { return withTimeout(navigator.serviceWorker.ready, 6000); }
+  function curSub() { return reg().then(function (r) { return r.pushManager.getSubscription(); }).catch(function () { return null; }); }
+  function repaint() { try { if (window.suNotif && window.suNotif.refresh) window.suNotif.refresh(); } catch (e) {} }
+
+  function register(sub) {
+    var j = sub.toJSON();
+    return sb.rpc('push_register', { p_endpoint: j.endpoint, p_p256dh: j.keys.p256dh, p_auth: j.keys.auth, p_ua: (navigator.userAgent || '').slice(0, 120) })
+      .then(function (r) { if (r.error) throw r.error; subbed = true; });
+  }
+  function enable() {
+    if (!supported()) { toast('المتصفح ده مش بيدعم إشعارات الجهاز', 'amber'); return; }
+    if (ios() && !standalone()) { toast('على الآيفون لازم تضيف التطبيق للشاشة الرئيسية الأول', 'amber'); return; }
+    Notification.requestPermission().then(function (p) {
+      if (p !== 'granted') { repaint(); return; }
+      return reg().then(function (r) {
+        return r.pushManager.getSubscription().then(function (s) { return s || r.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: u8(VAPID) }); });
+      }).then(register).then(function () { toast('✅ تم تفعيل إشعارات الجهاز'); repaint(); });
+    }).catch(function (e) { console.warn('push enable', e); toast('❌ تعذر تفعيل الإشعارات: ' + (e && e.message || e), 'red'); });
+  }
+  function install() {
+    if (!deferred) return;
+    deferred.prompt();
+    deferred.userChoice.then(function (c) { deferred = null; if (c && c.outcome === 'accepted') toast('📲 جاري تثبيت التطبيق'); repaint(); hideBanner(); }).catch(function () {});
+  }
+
+  /* ---------- صندوق الجهاز جوه شاشة الإشعارات ---------- */
+  function row(cls, ico, txt, act, lbl) { return '<div class="sup-row ' + cls + '"><span class="e">' + ico + '</span><span class="t">' + txt + '</span>' + (act ? '<button type="button" data-a="' + act + '">' + lbl + '</button>' : '') + '</div>'; }
+  function box() {
+    if (!enabled()) return '';
+    var rows = [];
+    if (!standalone()) {
+      if (deferred) rows.push(row('', '📲', 'ثبّت التطبيق على جهازك زي أي تطبيق', 'install', 'تثبيت'));
+      else if (ios()) rows.push(row('', '📲', 'على الآيفون: اضغط زر المشاركة ⬆️ في سفاري ثم «إضافة إلى الشاشة الرئيسية»، وافتح التطبيق منها وفعّل الإشعارات', '', ''));
+    }
+    if (supported() && !(ios() && !standalone())) {
+      if (Notification.permission === 'denied') rows.push(row('', '🔕', 'الإشعارات مقفولة من إعدادات المتصفح للموقع ده — افتحها من هناك', '', ''));
+      else if (!subbed) rows.push(row('', '🔔', 'وصّلني الإشعارات على الجهاز حتى لو التطبيق مقفول', 'push-on', 'تفعيل'));
+      else rows.push(row('ok', '✅', 'إشعارات الجهاز شغّالة', '', ''));
+    }
+    return rows.length ? '<div class="sup-box">' + rows.join('') + '</div>' : '';
+  }
+  function act(k) { if (k === 'install') install(); else if (k === 'push-on') enable(); else if (k === 'banner-x') { try { localStorage.setItem(DISMISS, String(Date.now())); } catch (e) {} hideBanner(); } else if (k === 'banner-go') { hideBanner(); if (deferred) install(); else if (window.suNotif) window.suNotif.open(); } }
+
+  /* ---------- بانر دعوة التثبيت (مرة كل 7 أيام) ---------- */
+  function hideBanner() { if (bannerEl) { bannerEl.remove(); bannerEl = null; } }
+  function maybeBanner() {
+    if (bannerEl || standalone() || !enabled()) return;
+    if (!(deferred || ios())) return;
+    try { var t = +localStorage.getItem(DISMISS) || 0; if (Date.now() - t < 7 * 864e5) return; } catch (e) {}
+    bannerEl = document.createElement('div'); bannerEl.className = 'sup-banner';
+    bannerEl.innerHTML = '<span class="e">📲</span><div>ثبّت التطبيق على موبايلك<small>عشان توصلك إشعارات الكراسة والمواعيد</small></div><button type="button" data-a="banner-go">' + (deferred ? 'تثبيت' : 'إزاي؟') + '</button><button type="button" class="x" data-a="banner-x" aria-label="إغلاق">✕</button>';
+    bannerEl.addEventListener('click', function (e) { var a = e.target.closest && e.target.closest('[data-a]'); if (a) act(a.getAttribute('data-a')); });
+    document.body.appendChild(bannerEl);
+  }
+
+  /* ---------- ربط الجهاز بالمستخدم الحالي بعد الدخول ---------- */
+  function sync() {
+    var u = user(); if (!enabled() || !supported() || typeof sb === 'undefined' || !sb) return;
+    var key = String(u.id || u.email); if (synced === key) return; synced = key;
+    if (Notification.permission !== 'granted') { curSub().then(function (s) { subbed = false; repaint(); }); return; }
+    curSub().then(function (s) { if (s) return register(s).then(repaint); subbed = false; repaint(); }).catch(function (e) { console.warn('push sync', e); });
+  }
+
+  window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); deferred = e; repaint(); setTimeout(maybeBanner, 3000); });
+  window.addEventListener('appinstalled', function () { deferred = null; hideBanner(); repaint(); });
+
+  var _ra = window.refreshAll;
+  if (typeof _ra === 'function') window.refreshAll = function () {
+    var r = _ra.apply(this, arguments);
+    try { if (enabled()) { sync(); setTimeout(maybeBanner, 4000); } } catch (e) {}
+    return r;
+  };
+  var _lo = window.handleLogout;
+  if (typeof _lo === 'function') window.handleLogout = async function () {
+    try { var s = await curSub(); if (s && typeof sb !== 'undefined' && sb) await withTimeout(sb.rpc('push_unregister', { p_endpoint: s.endpoint }), 2000); } catch (e) {}
+    synced = ''; subbed = false;
+    return _lo.apply(this, arguments);
+  };
+
+  window.suPush = { box: box, act: act, enable: enable, install: install };
+})();
+</script>
+
 </body>
 </html>
