@@ -1,9 +1,8 @@
+importScripts('push-sw.js');
 /* Speak Up - Service Worker
-   - بيخزّن شكل البرنامج (الصفحة + المكتبات) عشان يفتح بسرعة ويفتح حتى من غير نت.
-   - بيانات Supabase (تسجيل الدخول والبيانات) عمره ما بيخزنها: دايماً من النت.
-   - لما تنزّل نسخة جديدة من index.html بتوصل تلقائياً أول ما النت يكون موجود.
+   - بيخزّن شكل البرنامج ...
    لو غيّرت ملفات التطبيق وعايز تجبر التحديث: غيّر رقم VERSION. */
-const VERSION = 'v1';
+const VERSION = 'v2';
 const CACHE = 'speakup-' + VERSION;
 const SHELL = ['./', './index.html', './manifest.json',
   './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png'];
