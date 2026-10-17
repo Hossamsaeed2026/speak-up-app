@@ -1,8 +1,6 @@
-importScripts('push-sw.js');
-/* Speak Up - Service Worker
-   - بيخزّن شكل البرنامج ...
-   لو غيّرت ملفات التطبيق وعايز تجبر التحديث: غيّر رقم VERSION. */
-const VERSION = 'v3';
+importScripts('push-sw.js?v=4');
+...
+const VERSION = 'v4';
 const CACHE = 'speakup-' + VERSION;
 const SHELL = ['./', './index.html', './manifest.json',
   './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png'];
