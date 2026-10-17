@@ -12772,7 +12772,7 @@ html.su-dark .sup-row.ok{color:#6ee7b7}
       if (p !== 'granted') { repaint(); return; }
       return reg().then(function (r) {
         return r.pushManager.getSubscription().then(function (s) { return s || r.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: u8(VAPID) }); });
-      }).then(register).then(function () { toast('✅ تم تفعيل إشعارات الجهاز'); repaint(); });
+      }).then(register).then(function () { toast('✅ تم تفعيل إشعارات الجهاز'); hideBanner(); repaint(); });
     }).catch(function (e) { console.warn('push enable', e); toast('❌ تعذر تفعيل الإشعارات: ' + (e && e.message || e), 'red'); });
   }
   function install() {
@@ -12797,16 +12797,30 @@ html.su-dark .sup-row.ok{color:#6ee7b7}
     }
     return rows.length ? '<div class="sup-box">' + rows.join('') + '</div>' : '';
   }
-  function act(k) { if (k === 'install') install(); else if (k === 'push-on') enable(); else if (k === 'banner-x') { try { localStorage.setItem(DISMISS, String(Date.now())); } catch (e) {} hideBanner(); } else if (k === 'banner-go') { hideBanner(); if (deferred) install(); else if (window.suNotif) window.suNotif.open(); } }
+  function act(k) {
+    if (k === 'install') install(); else if (k === 'push-on') enable();
+    else if (k === 'banner-x') { var m = bannerEl && bannerEl.getAttribute('data-m'); try { localStorage.setItem(m === 'push' ? 'SU_PUSH_DISMISS' : 'SU_INSTALL_DISMISS', String(Date.now())); } catch (e) {} hideBanner(); }
+    else if (k === 'banner-push') { hideBanner(); enable(); }
+    else if (k === 'banner-go') { hideBanner(); if (deferred) install(); else if (window.suNotif) window.suNotif.open(); }
+  }
 
-  /* ---------- بانر دعوة التثبيت (مرة كل 7 أيام) ---------- */
+  /* ---------- بانر الدعوة: تثبيت (مرة كل 7 أيام) أو تفعيل الإشعارات (مرة كل 3 أيام) ---------- */
+  var DISMISS_P = 'SU_PUSH_DISMISS';
+  function recent(k, days) { try { return Date.now() - (+localStorage.getItem(k) || 0) < days * 864e5; } catch (e) { return false; } }
+  function bannerMode() {
+    if (!enabled()) return '';
+    if (!standalone() && (deferred || ios()) && !recent(DISMISS, 7)) return 'install';
+    if (supported() && !subbed && Notification.permission === 'default' && !(ios() && !standalone()) && !recent(DISMISS_P, 3)) return 'push';
+    return '';
+  }
   function hideBanner() { if (bannerEl) { bannerEl.remove(); bannerEl = null; } }
   function maybeBanner() {
-    if (bannerEl || standalone() || !enabled()) return;
-    if (!(deferred || ios())) return;
-    try { var t = +localStorage.getItem(DISMISS) || 0; if (Date.now() - t < 7 * 864e5) return; } catch (e) {}
-    bannerEl = document.createElement('div'); bannerEl.className = 'sup-banner';
-    bannerEl.innerHTML = '<span class="e">📲</span><div>ثبّت التطبيق على موبايلك<small>عشان توصلك إشعارات الكراسة والمواعيد</small></div><button type="button" data-a="banner-go">' + (deferred ? 'تثبيت' : 'إزاي؟') + '</button><button type="button" class="x" data-a="banner-x" aria-label="إغلاق">✕</button>';
+    if (bannerEl) return;
+    var m = bannerMode(); if (!m) return;
+    bannerEl = document.createElement('div'); bannerEl.className = 'sup-banner'; bannerEl.setAttribute('data-m', m);
+    bannerEl.innerHTML = m === 'install'
+      ? '<span class="e">📲</span><div>ثبّت التطبيق على موبايلك<small>عشان توصلك إشعارات الكراسة والمواعيد</small></div><button type="button" data-a="banner-go">' + (deferred ? 'تثبيت' : 'إزاي؟') + '</button><button type="button" class="x" data-a="banner-x" aria-label="إغلاق">✕</button>'
+      : '<span class="e">🔔</span><div>فعّل الإشعارات<small>هيوصلك تنبيه أول ما يتضاف جديد، حتى والتطبيق مقفول</small></div><button type="button" data-a="banner-push">تفعيل</button><button type="button" class="x" data-a="banner-x" aria-label="إغلاق">✕</button>';
     bannerEl.addEventListener('click', function (e) { var a = e.target.closest && e.target.closest('[data-a]'); if (a) act(a.getAttribute('data-a')); });
     document.body.appendChild(bannerEl);
   }
