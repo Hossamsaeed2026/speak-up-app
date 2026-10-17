@@ -3,10 +3,13 @@
 self.addEventListener('push', function (e) {
   var d = {};
   try { d = e.data ? e.data.json() : {}; } catch (_) { d = { title: 'Speak Up', body: e.data ? e.data.text() : '' }; }
-  var opt = {
-    body: d.body || '', icon: 'icons/icon-192.png', badge: 'icons/icon-192.png', dir: 'rtl', lang: 'ar',
-    data: { url: d.url || './' }
-  };
+ var opt = {
+  body: d.body || '',
+  icon: 'icons/notif-icon-192.png',
+  badge: 'icons/notif-badge-96.png',
+  dir: 'rtl', lang: 'ar',
+  data: { url: d.url || './' }
+};
   if (d.tag) { opt.tag = d.tag; opt.renotify = true; }
   e.waitUntil(self.registration.showNotification(d.title || 'Speak Up', opt));
 });
