@@ -12856,10 +12856,118 @@ html.su-dark .sup-row.ok{color:#6ee7b7}
 })();
 </script>
 
-<style>#suLangBtn{position:fixed;top:calc(env(safe-area-inset-top,0px) + 8px);right:10px;left:auto;z-index:2147483000;min-width:38px;height:28px;padding:0 9px;border:0;border-radius:99px;background:#7e3ab8;color:#fff;font:800 12px/28px system-ui,sans-serif;letter-spacing:.5px;box-shadow:0 2px 8px rgba(0,0,0,.25);cursor:pointer;opacity:.92}#suLangBtn:active{transform:scale(.94)}</style>
+<div id="therapistPortal" class="fixed inset-0 z-[45] hidden overflow-y-auto"></div>
+<script>
+(function(){
+var EN={"كراسة المتابعة":"Progress Notebook","جلسات اليوم":"Today's Sessions","الحسابات":"Accounts","تقييم الأداء":"Performance","اختر الطفل":"Select child","كل الفروع":"All branches","جلسات هذا اليوم فقط":"With sessions only","فتح كراسة اليوم":"Open today's notebook","لا توجد جلسات":"No sessions","الواجهة القديمة":"Classic view","🚪 خروج":"🚪 Log out","حضر":"Attended","ملغية":"Cancelled","مجدولة":"Scheduled","نسبة الحضور":"Attendance rate","هذا الشهر":"This month","نسبة العمولة":"Commission rate","لا توجد تقييمات":"No evaluations yet","أهلًا":"Welcome","الرئيسية":"Home","جلسة قادمة":"Next session","لا يوجد أطفال":"No children","القائمة":"Menu","لوحتي":"My dashboard","الواجهة الأساسية":"Main view","العملاء":"Clients","الأداء":"Performance","الكراسة":"Notebook","الجلسات":"Sessions","التشخيص":"Diagnosis","تاريخ الميلاد":"Date of birth","الفرع":"Branch","بداية البرنامج":"Program start","مواعيدي معه":"My schedule with him","جلساتي معه":"My sessions","نسبة حضوره معي":"Attendance with me","الجلسة القادمة":"Next session","لا توجد جلسات منتهية بعد":"No completed sessions yet","الإحصائيات والتقييمات":"Statistics & evaluations","الملف الكامل":"Full file","الإعدادات والبروفايل":"Settings & profile"};
+var L=function(){try{return localStorage.getItem('SU_LANG')||'ar'}catch(e){return'ar'}};
+var T=function(s){return L()==='en'?(EN[s]||s):s};
+var F={child:'',tab:'home',date:'',today:false,branch:''},sig='',el=function(){return document.getElementById('therapistPortal')};
+var esc=function(x){return String(x==null?'':x).replace(/[&<>"]/g,function(m){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]})};
+var GR={perf:'linear-gradient(145deg,#059669,#0d9488)',book:'linear-gradient(145deg,#7c3aed,#4f46e5)',acct:'linear-gradient(145deg,#e11d48,#f97316)',cal:'linear-gradient(145deg,#0ea5e9,#0369a1)'},BL={perf:'الأداء',book:'الكراسة',cal:'الجلسات',acct:'الحسابات'};
+var SEC=[['perf','تقييم الأداء'],['book','كراسة المتابعة'],['cal','جلسات اليوم'],['acct','الحسابات']];
+window.thpSet=function(k,v){F[k]=v;if(k==='tab')el().scrollTop=0;sig='';render()};
+
+function sheetHtml(c){
+ var ph=clientPhoto(c),av=ph?'<img src="'+esc(ph)+'" alt="" onerror="this.remove()">':esc((c.name||'👶').trim().charAt(0));
+ var stMap={Active:['🟢 نشط','text-emerald-700'],Stopped:['🔴 موقوف','text-rose-700'],Completed:['🔵 مكتمل','text-sky-700']},st=stMap[c.status]||['—','text-slate-500'];
+ var br='';try{br=getBranchName(c.branch)||''}catch(x){}
+ var age='';try{age=ppAge(c.dob)}catch(x){}
+ var sid=String((freshUser()||{}).staffId||'');
+ var mine=mySessions().filter(function(s){return String(s.clientId)===String(c.id)}),k=tdCount(mine),dn=k.ATT+k.CAN+k.EXC+k.SDE,rate=dn?Math.round(k.ATT/dn*100):0;
+ var sch=(c.weeklySchedule||[]).filter(function(x){return String(x.therapistId)===sid}).map(function(x){return esc(x.day)+' '+esc(formatTime12(x.time))}).join('، ');
+ var nx=mine.filter(function(s){return cpStatusKey(s.status)==='SCH'&&normYmd(s.date)>=todayCairo()}).sort(function(a,b){return (normYmd(a.date)+(a.time||'')).localeCompare(normYmd(b.date)+(b.time||''))})[0];
+ var row=function(i,l,v){return v?'<div class="pp-kc-row"><span class="k">'+i+' '+T(l)+'</span><span class="v">'+v+'</span></div>':''};
+ return '<div class="pp-sheet-bg" onclick="thpSheet(null)"></div><div class="pp-sheet"><div class="flex items-center gap-3 mb-4"><div class="pp-kc-ph">'+av+'</div><div class="min-w-0 flex-1"><div class="font-black text-slate-900 text-lg leading-tight">'+esc(c.name||'')+'</div>'+(age?'<div class="text-xs font-bold text-slate-500 mt-1">🎂 '+esc(age)+'</div>':'')+'<div class="text-xs font-black mt-1 '+st[1]+'">'+st[0]+'</div></div><button onclick="thpSheet(null)" class="w-9 h-9 rounded-full bg-slate-100 font-black text-slate-500 self-start">✕</button></div><div class="space-y-2 mb-4">'
+  +row('🩺','التشخيص',esc(c.diagnosis||''))+row('📅','تاريخ الميلاد',esc(c.dob||''))+row('🏢','الفرع',esc(br))+row('🚀','بداية البرنامج',esc(c.startDate||''))
+  +row('🗓️','مواعيدي معه',sch)+row('👩‍⚕️','جلساتي معه',mine.length?String(mine.length):'')
+  +row('✅','نسبة حضوره معي',dn?rate+'% ('+k.ATT+'/'+dn+')':T('لا توجد جلسات منتهية بعد'))
+  +row('⏭️','الجلسة القادمة',nx?esc(normYmd(nx.date))+' · '+esc(formatTime12(nx.time)):'')
+  +'</div><button onclick="thpSheet(null);thpSet(\'tab\',\'perf\')" class="pp-kc-cta">📊 '+T('الإحصائيات والتقييمات')+'</button><button onclick="thpSheet(null);openClientProfile(F.child)" class="pp-kc-cta" style="margin-top:8px;background:linear-gradient(145deg,#475569,#334155)">📂 '+T('الملف الكامل')+'</button></div>'}
+function scope(){return (state.clients||[]).filter(function(c){return inScope(c.id)})}
+function kids(){var d=F.date||todayCairo(),a=scope();
+ if(F.branch)a=a.filter(function(c){return (c.branch||c.branchName||'')===F.branch});
+ if(F.today){var ids={};mySessions().forEach(function(s){if(normYmd(s.date)===d)ids[String(s.clientId)]=1});a=a.filter(function(c){return ids[String(c.id)]})}
+ return a}
+function controls(list){var d=F.date||todayCairo(),br=[];
+ scope().forEach(function(c){var b=c.branch||c.branchName;if(b&&br.indexOf(b)<0)br.push(b)});
+ var chip='px-3 py-1.5 rounded-full text-xs font-black ';
+ var h='<select onchange="thpSet(\'child\',this.value)" class="'+chip+'bg-amber-400 text-slate-900 flex-1" style="min-width:170px;max-width:100%">'+(list.length?list.map(function(k){return'<option value="'+esc(k.id)+'"'+(String(k.id)===F.child?' selected':'')+'>👶 '+esc(k.name)+'</option>'}).join(''):'<option>'+T('لا يوجد أطفال')+'</option>')+'</select>';
+ h+='<input type="date" value="'+esc(d)+'" onchange="thpSet(\'date\',this.value)" class="'+chip+'bg-white/90 text-slate-700">';
+ if(br.length)h+='<select onchange="thpSet(\'branch\',this.value)" class="'+chip+'bg-white/90 text-slate-700"><option value="">'+T('كل الفروع')+'</option>'+br.map(function(b){return'<option'+(b===F.branch?' selected':'')+'>'+esc(b)+'</option>'}).join('')+'</select>';
+ h+='<label class="'+chip+(F.today?'bg-emerald-400 text-slate-900':'bg-white/90 text-slate-600')+' cursor-pointer"><input type="checkbox" class="hidden" '+(F.today?'checked ':'')+'onchange="thpSet(\'today\',this.checked)">📅 '+T('جلسات هذا اليوم فقط')+'</label>';
+ return h}
+function render(){var e=el();if(!e)return;
+ if(!currentUser||currentUser.role!=='therapist'||sessionStorage.getItem('SU_TH_CLASSIC')||window._thpClassic){e.classList.add('hidden');return}
+ e.classList.remove('hidden');
+ var d=F.date||todayCairo(),list=kids();
+ if(!list.some(function(c){return String(c.id)===String(F.child)}))F.child=list[0]?String(list[0].id):'';
+ var c=list.filter(function(x){return String(x.id)===String(F.child)})[0],ph=c?clientPhoto(c):'';
+ var logo=window.SU_PARENT_LOGO||suGateLogoUrl(),loc=L()==='en'?'en-US':'ar-EG';
+ var logout='<button onclick="handleLogout()" class="bg-white/15 hover:bg-white/25 text-white px-3 py-2 rounded-xl text-xs font-black">'+T('🚪 خروج')+'</button>';
+ var dash='<button onclick="thpGo(\'dashboard\')" class="bg-white/15 hover:bg-white/25 text-white w-10 h-10 rounded-xl text-xl grid place-items-center" title="'+T('لوحتي')+'" aria-label="'+T('لوحتي')+'">👩‍⚕️</button>';
+ var up='';try{up=userPhoto(freshUser()||currentUser)||''}catch(x){}
+ var av='<img src="'+esc(up||logo)+'" onclick="thpProfile()" class="pp-mini-logo" style="cursor:pointer;'+(up?'object-fit:cover;padding:0;border-radius:50%;':'')+'" alt="">';
+ var y=e.scrollTop;
+ if(F.tab==='home'){
+  e.style.background='';
+  var nx=c?mySessions().filter(function(s){return String(s.clientId)===String(c.id)&&cpStatusKey(s.status)==='SCH'&&normYmd(s.date)>=todayCairo()}).sort(function(a,b){return (normYmd(a.date)+(a.time||'')).localeCompare(normYmd(b.date)+(b.time||''))})[0]:null;
+  var dt=new Date().toLocaleDateString(loc,{weekday:'long',day:'numeric',month:'long'});
+  var sub='📅 '+dt+(nx?' · '+T('جلسة قادمة')+' '+esc(formatTime12(nx.time)):'');
+  var wheel=c?ppWheelHtml(c,SEC.map(function(s){return{id:s[0],ico:ppIco(s[0],40),title:T(s[1])}})):'<div class="flex-1 grid place-items-center text-white font-bold p-10">'+T('لا يوجد أطفال')+'</div>';
+  e.innerHTML='<div class="pp-home pp-wheelhome" style="background:linear-gradient(180deg,#042f2e 0%,#134e4a 100%)"><div class="pp-homehead">'+av+'<div class="min-w-0 flex-1"><div class="font-black text-base truncate">'+T('أهلًا')+' '+esc(currentUser.name||'')+' 👋</div><div class="text-[11px] font-bold leading-snug" style="color:#99f6e4">'+(c?'👶 '+esc(c.name)+'<br>':'')+sub+'</div></div>'+dash+logout+'</div><div class="pp-kidchips">'+controls(list)+'</div>'+wheel+'</div>';
+  e.querySelectorAll('polygon[data-s]').forEach(function(p){p.setAttribute('onclick',"thpSet('tab','"+p.getAttribute('data-s')+"')")});
+  var wc=e.querySelector('.pp-wc');if(wc)wc.setAttribute('onclick','thpChild()');
+  requestAnimationFrame(ppWheelFit);setTimeout(ppWheelFit,80);
+ }else{
+  e.style.background='#f1f5f9';
+  var sess=mySessions().filter(function(s){return c&&String(s.clientId)===String(c.id)}).sort(function(a,b){return ((b.date||'')+(b.time||'')).localeCompare((a.date||'')+(a.time||''))});
+  var cur=SEC.filter(function(z){return z[0]===F.tab})[0]||['',''];
+  var h='<div class="pp-pagehead"><button onclick="thpSet(\'tab\',\'home\')" class="pp-back" title="'+T('الرئيسية')+'">→</button><div class="pp-title" style="background:'+GR[F.tab]+'">'+ppIco(F.tab,22)+'<span>'+T(cur[1])+'</span></div><div class="mr-auto text-[11px] font-black text-slate-500 truncate">'+(c?'👶 '+esc((c.name||'').split(' ').slice(0,2).join(' ')):'')+'</div></div><div class="max-w-xl mx-auto px-4 pt-3 pb-32 text-slate-800">';
+  h+='<div class="pp-kidchips" style="padding:0 0 12px;margin:0">'+controls(list).replace(/bg-white\/90/g,'bg-white border')+'</div>';
+  if(c)h+='<div onclick="thpChild()" style="cursor:pointer" class="bg-white rounded-3xl shadow-xl p-3 mb-3 flex items-center gap-3"><div class="w-20 h-20 rounded-full border-4 border-teal-500 bg-teal-50 grid place-items-center text-3xl font-black text-teal-700 overflow-hidden shrink-0">'+(ph?'<img src="'+esc(ph)+'" class="w-full h-full object-cover">':esc((c.name||'?').charAt(0)))+'</div><div class="min-w-0"><div class="font-black text-lg truncate">'+esc(c.name)+'</div><div class="text-xs font-bold text-teal-700">'+T((SEC.filter(function(s){return s[0]===F.tab})[0]||[0,''])[1])+'</div></div></div>';
+  var sec='';
+  if(F.tab==='book'){sec='<button onclick="openNotebook(\''+esc(F.child)+'\',todayCairo())" class="w-full bg-teal-600 text-white rounded-2xl p-4 font-black mb-3">📒 '+T('فتح كراسة اليوم')+'</button>'+sess.slice(0,15).map(function(s){return'<button onclick="openNotebook(\''+esc(F.child)+'\',\''+esc(normYmd(s.date))+'\')" class="w-full bg-white rounded-2xl p-3 mb-2 flex justify-between text-xs font-bold shadow-sm"><span class="font-mono">'+esc(normYmd(s.date))+'</span><span>'+esc(formatTime12(s.time))+'</span></button>'}).join('')}
+  else if(F.tab==='cal'){var ds=mySessions().filter(function(s){return normYmd(s.date)===d&&(!F.child||String(s.clientId)===F.child)}).sort(function(a,b){return (a.time||'').localeCompare(b.time||'')});
+   sec=ds.length?ds.map(function(s){var k=(state.clients||[]).filter(function(x){return String(x.id)===String(s.clientId)})[0],st=CP_STATUS[cpStatusKey(s.status)];return'<button onclick="openSessionDetail(\''+esc(s.id)+'\')" class="w-full bg-white rounded-2xl p-3 mb-2 flex justify-between items-center text-sm font-black shadow-sm"><span>'+esc(k?k.name:'')+'</span><span class="text-xs text-slate-500">'+esc(formatTime12(s.time))+' · '+esc(st?st[0]:'')+'</span></button>'}).join(''):'<div class="text-center text-slate-400 font-bold p-8">'+T('لا توجد جلسات')+'</div>'}
+  else if(F.tab==='acct'){var cm=todayCairo().slice(0,7),ms=sess.filter(function(s){return cpNormMonth(s.date)===cm}),k=tdCount(ms),u=freshUser()||{},dn=k.ATT+k.CAN+k.EXC+k.SDE;
+   var box=function(a,b,col){return'<div class="bg-white rounded-2xl p-3 text-center shadow-sm"><div class="text-2xl font-black '+col+'">'+a+'</div><div class="text-[11px] font-bold text-slate-500">'+b+'</div></div>'};
+   sec='<div class="font-black text-sm mb-2">'+T('هذا الشهر')+'</div><div class="grid grid-cols-2 gap-2">'+box(k.ATT,T('حضر'),'text-emerald-600')+box(k.CAN+k.EXC+k.SDE,T('ملغية'),'text-rose-500')+box(k.SCH,T('مجدولة'),'text-sky-600')+box((dn?Math.round(k.ATT/dn*100):0)+'%',T('نسبة الحضور'),'text-teal-700')+'</div>'+(u.commissionPct!==''&&u.commissionPct!=null?'<div class="bg-white rounded-2xl p-3 mt-2 text-xs font-bold">'+T('نسبة العمولة')+': '+esc(u.commissionPct)+'%</div>':'')}
+  else{var ev=(state.evaluations||[]).filter(function(x){return String(x.clientId)===F.child}).sort(function(a,b){return (b.date||'').localeCompare(a.date||'')});
+   sec=ev.length?ev.map(function(x){return'<div class="bg-white rounded-2xl p-3 mb-2 text-xs shadow-sm"><b class="font-mono">'+esc(x.date||'')+'</b><div class="text-slate-600 mt-1">'+esc(x.summary||x.notes||x.note||x.title||'')+'</div></div>'}).join(''):'<div class="text-center text-slate-400 font-bold p-8">'+T('لا توجد تقييمات')+'</div>'}
+  var bb=function(id){return'<button onclick="thpSet(\'tab\',\''+id+'\')" class="pp-bar-btn'+(id===F.tab?' on':'')+'"><span class="pp-bar-ico" style="background:'+GR[id]+'">'+ppIco(id,20)+'</span><span>'+T(BL[id])+'</span></button>'};
+  h+=sec+'</div><div class="pp-bar-wrap"><div class="pp-bar-pos"><nav class="pp-bar">'+bb('perf')+bb('book')+'<div class="pp-bar-gap"></div>'+bb('cal')+bb('acct')+'</nav><button class="pp-logo-btn" onclick="thpMenu()" title="Menu"><img src="'+esc(logo)+'" alt=""></button></div></div>';
+  e.innerHTML=h;
+ }
+ if(F.sheet==='child'&&c)e.insertAdjacentHTML('beforeend',sheetHtml(c));
+ e.scrollTop=y;
+ try{if(window.suApplyLang&&L()==='en')window.suApplyLang('en')}catch(x){}}
+window.renderTherapistPortal=render;
+window.thpProfile=function(){try{suProfileOpen();var m=document.getElementById('suProfile');if(m)m.style.zIndex=99999}catch(x){}};
+window.thpChild=function(){if(F.child){F.sheet='child';sig='';render()}};
+window.thpSheet=function(v){F.sheet=v;sig='';render()};
+window.thpHome=function(){window._thpClassic=false;F.tab='home';sig='';var bk=document.getElementById('thpBack');if(bk)bk.style.display='none';var m=document.getElementById('thpMenu');if(m)m.remove();render()};
+window.thpGo=function(id){var m=document.getElementById('thpMenu');if(m)m.remove();if(id==='__prof'){thpProfile();return}if(id==='__home'){thpHome();return}window._thpClassic=true;el().classList.add('hidden');try{switchTab(id)}catch(x){}var bk=document.getElementById('thpBack');if(bk){bk.textContent='🏠';bk.style.display='flex'}};
+window.thpMenu=function(){var old=document.getElementById('thpMenu');if(old){old.remove();return}
+ var bad=['purchases','staff','settings','payments','invoices'],items=[['__prof','⚙️',T('الإعدادات والبروفايل')],['__home','🏠',T('الرئيسية')]],logo=window.SU_PARENT_LOGO||suGateLogoUrl();
+ document.querySelectorAll('#sideNav .side-tab').forEach(function(b){var id=(b.id||'').replace('side-nav-','');if(!id||bad.indexOf(id)>=0)return;var cs=getComputedStyle(b);if(cs.display==='none'||b.hidden)return;var ic=b.querySelector('.i3d'),lb=b.querySelector('.side-label');items.push([id,ic?ic.textContent:'•',lb?lb.textContent.trim():id])});
+ var m=document.createElement('div');m.id='thpMenu';m.style.cssText='position:fixed;inset:0;z-index:70;background:rgba(30,41,59,.35);backdrop-filter:blur(3px);display:flex;align-items:flex-end';m.onclick=function(ev){if(ev.target===m)m.remove()};
+ var cols=['#ede9fe','#d1fae5','#ffe4e6','#e0f2fe','#fef3c7','#cffafe'];
+ m.innerHTML='<div style="width:100%;max-width:520px;margin:0 auto;background:linear-gradient(180deg,#ffffff,#f5f3ff 55%,#ecfeff);border-radius:30px 30px 0 0;padding:14px 16px calc(20px + env(safe-area-inset-bottom,0px));max-height:82vh;overflow-y:auto;box-shadow:0 -12px 40px rgba(30,41,59,.25)"><div style="width:44px;height:5px;border-radius:9px;background:#cbd5e1;margin:0 auto 12px"></div><div class="flex items-center gap-3 mb-4"><img src="'+esc(logo)+'" style="width:44px;height:44px;border-radius:14px;background:#fff;object-fit:contain;padding:4px;box-shadow:0 3px 10px rgba(0,0,0,.1)" alt=""><div class="font-black text-slate-800 flex-1">'+esc((state.settings&&state.settings.centerName)||'Speak Up')+'</div><button onclick="document.getElementById(\'thpMenu\').remove()" class="w-9 h-9 rounded-full bg-white font-black text-slate-500 shadow">✕</button></div><div class="grid grid-cols-3 gap-3">'+items.map(function(i,n){return'<button onclick="thpGo(\''+i[0]+'\')" style="background:#fff;border-radius:20px;box-shadow:0 4px 14px rgba(99,102,241,.12)" class="p-3 flex flex-col items-center gap-2 text-[11px] font-black text-slate-700 active:scale-95"><span style="width:46px;height:46px;border-radius:16px;background:'+cols[n%cols.length]+';display:grid;place-items:center;font-size:23px">'+esc(i[1])+'</span><span class="text-center leading-tight">'+esc(i[2])+'</span></button>'}).join('')+'</div></div>';
+ document.body.appendChild(m);try{if(window.suApplyLang&&L()==='en')window.suApplyLang('en')}catch(x){}};
+(function(){if(document.getElementById('thpBack'))return;var b=document.createElement('button');b.id='thpBack';b.onclick=thpHome;b.setAttribute('aria-label','Home');b.textContent='🏠';b.style.cssText='display:none;position:fixed;left:14px;top:calc(env(safe-area-inset-top,0px) + 10px);z-index:58;width:44px;height:44px;border-radius:50%;border:0;align-items:center;justify-content:center;font-size:22px;color:#fff;background:radial-gradient(circle at 30% 28%,#99f6e4,#0f766e 70%);box-shadow:0 8px 20px rgba(15,118,110,.5);cursor:pointer';document.body.appendChild(b)})();
+
+setInterval(function(){try{if(!currentUser||currentUser.role!=='therapist'){var e=el();if(e)e.classList.add('hidden');window._thpClassic=false;var bk=document.getElementById('thpBack');if(bk)bk.style.display='none';return}
+ if(window._thpClassic){el().classList.add('hidden');return}
+ var s=[currentUser.email,(state.sessions||[]).length,(state.clients||[]).length,(state.evaluations||[]).length,L()].join('|');
+ var ae=document.activeElement;if(ae&&ae.closest&&ae.closest('#therapistPortal')&&ae.tagName!=='BUTTON')return;
+ if(s!==sig||el().classList.contains('hidden')){sig=s;render()}}catch(x){}},1200);
+})();
+</script>
+<style>#suLangBtn{position:absolute;top:12px;left:12px;right:auto;z-index:5;min-width:34px;height:24px;padding:0 8px;border:0;border-radius:99px;background:#7e3ab8;color:#fff;font:800 11px/24px system-ui,sans-serif;letter-spacing:.5px;box-shadow:0 2px 8px rgba(0,0,0,.25);cursor:pointer;opacity:.92}#suLangBtn:active{transform:scale(.94)}</style>
 <button id="suLangBtn" type="button" aria-label="Language"></button>
 <script>(function(){var L='ar';try{L=localStorage.getItem('SU_LANG')||'ar'}catch(e){}
-var b=document.getElementById('suLangBtn');b.textContent=L==='en'?'AR':'EN';
+var b=document.getElementById('suLangBtn');var card=document.querySelector('#loginOverlay > div');if(card){card.style.position='relative';card.appendChild(b)}else{b.style.display='none'}b.textContent=L==='en'?'AR':'EN';
 b.onclick=function(){try{localStorage.setItem('SU_LANG',L==='en'?'ar':'en')}catch(e){}location.reload()};
 if(L==='en'){['alert','confirm','prompt'].forEach(function(k){var o=window[k];window[k]=function(m){var a=[].slice.call(arguments);if(typeof a[0]==='string'&&window.suTr)a[0]=window.suTr(a[0]);return o.apply(window,a)}})}})();</script>
 </body>
