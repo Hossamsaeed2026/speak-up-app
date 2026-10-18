@@ -1313,6 +1313,10 @@ body.sidebar-collapsed #sideNav .side-gear{justify-content:center;padding:8px 0}
 </style>
 
 
+<style id="su-wide-guard">
+/* شبكة أمان: قوائم الموبايل (.sul) ما تظهرش على العرض العريض (تابلت أفقي / كمبيوتر) */
+@media (min-width:821px){.sul,#suClients,#suSet{display:none!important}}
+</style>
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen">
 <div id="suSplash" aria-hidden="true"><span class="orb o1"></span><span class="orb o2"></span><span class="orb o3"></span><div class="mark"><img src="icons/icon-192.png" alt="" onerror="this.style.display='none'"><b>Speak Up</b></div></div>
@@ -13179,5 +13183,24 @@ setInterval(function(){try{inject();['clientsExpBtn','clientsImpBtn'].forEach(fu
 var b=document.getElementById('suLangBtn');var card=document.querySelector('#loginOverlay > div');if(card){card.style.position='relative';card.appendChild(b)}else{b.style.display='none'}b.textContent=L==='en'?'AR':'EN';
 b.onclick=function(){try{localStorage.setItem('SU_LANG',L==='en'?'ar':'en')}catch(e){}location.reload()};
 if(L==='en'){['alert','confirm','prompt'].forEach(function(k){var o=window[k];window[k]=function(m){var a=[].slice.call(arguments);if(typeof a[0]==='string'&&window.suTr)a[0]=window.suTr(a[0]);return o.apply(window,a)}})}})();</script>
+<script id="su-bp-reload">
+/* لما الشاشة تعدّي حد 820px (لف التابلت) نعيد تحميل الصفحة عشان الواجهة تتبني صح للعرض الجديد.
+   مش بنعيد التحميل لو المستخدم بيكتب في خانة، وبنستنى لحد ما يخلّص. */
+(function(){
+  try{
+    var mq=window.matchMedia('(max-width:820px)'),was=mq.matches,timer=null,tries=0;
+    function typing(){var a=document.activeElement;if(!a)return false;var t=(a.tagName||'').toLowerCase();return t==='input'||t==='textarea'||t==='select'||a.isContentEditable}
+    function go(){
+      if(mq.matches===was){clearInterval(timer);timer=null;return}
+      if(typing()&&tries++<150)return;            // استنى لحد 5 دقايق لو بيكتب
+      clearInterval(timer);timer=null;
+      try{if(typeof cloudPush==='function')cloudPush()}catch(e){}
+      setTimeout(function(){location.reload()},800);
+    }
+    function onChange(){if(mq.matches===was){return}if(!timer){tries=0;timer=setInterval(go,2000);setTimeout(go,1000)}}
+    if(mq.addEventListener)mq.addEventListener('change',onChange);else if(mq.addListener)mq.addListener(onChange);
+  }catch(e){}
+})();
+</script>
 </body>
 </html>
