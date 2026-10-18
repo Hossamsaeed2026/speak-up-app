@@ -2854,7 +2854,7 @@ body.sidebar-collapsed #sideNav .side-gear{justify-content:center;padding:8px 0}
           <div class="grid grid-cols-3 gap-3">
             <div>
               <label class="block text-slate-700 font-bold mb-1">الفرع المباشر *</label>
-              <select id="clientBranch" class="w-full border rounded-lg p-2 font-bold">
+              <select id="clientBranch" onchange="suRefreshScheduleFees()" class="w-full border rounded-lg p-2 font-bold">
                 <option value="B001">البيطاش (B001)</option>
                 <option value="B002">سموحه (B002)</option>
                 <option value="B003">أونلاين (B003)</option>
@@ -2884,7 +2884,7 @@ body.sidebar-collapsed #sideNav .side-gear{justify-content:center;padding:8px 0}
               <input type="text" id="clientAddress" class="w-full border rounded-lg p-2">
             </div>
           </div>
-          <div class="grid grid-cols-3 gap-3">
+          <div class="grid grid-cols-2 gap-3">
             <div>
               <label class="block text-slate-700 font-bold mb-1">تاريخ البدء (Start Date)</label>
               <input type="date" id="clientStartDate" class="w-full border rounded-lg p-2 font-mono">
@@ -2893,10 +2893,16 @@ body.sidebar-collapsed #sideNav .side-gear{justify-content:center;padding:8px 0}
               <label class="block text-slate-700 font-bold mb-1">تاريخ الانتهاء (End Date)</label>
               <input type="date" id="clientEndDate" class="w-full border rounded-lg p-2 font-mono">
             </div>
-            <div>
-              <label class="block text-slate-700 font-bold mb-1">رابط أو مكان الصورة</label>
-              <input type="text" id="clientPhotoUrl" placeholder="https://... أو اسم الملف" class="w-full border rounded-lg p-2 text-[11px]">
+          </div>
+
+          <!-- تخفيض الحالة على الخدمات -->
+          <div class="border-t pt-3 space-y-2">
+            <label class="font-extrabold text-slate-800">🏷️ تخفيض الحالة على الخدمات (ديسكاونت ثابت لكل جلسة بالجنيه)</label>
+            <div class="grid grid-cols-2 gap-3">
+              <div><label class="block text-slate-700 font-bold mb-1">تخفيض على «جلسة»</label><input type="number" min="0" id="clientDiscSession" value="0" oninput="suRefreshScheduleFees()" class="w-full border rounded-lg p-2 font-mono font-bold"></div>
+              <div><label class="block text-slate-700 font-bold mb-1">تخفيض على «تقييم»</label><input type="number" min="0" id="clientDiscAssess" value="0" oninput="suRefreshScheduleFees()" class="w-full border rounded-lg p-2 font-mono font-bold"></div>
             </div>
+            <div class="text-[10px] font-bold text-slate-500">بيتسجّل تلقائي في أي جلسة جديدة للحالة (سعر الفرع − التخفيض)، وتقدر تعدّله لجلسة بعينها من نموذج الجلسة.</div>
           </div>
 
           <!-- Dynamic Custom Fields Container -->
@@ -2962,11 +2968,11 @@ body.sidebar-collapsed #sideNav .side-gear{justify-content:center;padding:8px 0}
           <div class="grid grid-cols-3 gap-3">
             <div>
               <label class="block text-slate-700 font-bold mb-1">نوع الجلسة</label>
-              <input type="text" id="sessionType" value="S.T Session" class="w-full border rounded-lg p-2 font-bold">
+              <select id="sessionType" onchange="updateSessionPriceByBranch()" class="w-full border rounded-lg p-2 font-bold"><option value="جلسة">جلسة</option><option value="تقييم">تقييم</option></select>
             </div>
             <div>
-              <label class="block text-slate-700 font-bold mb-1">السعر الأساسي</label>
-              <input type="number" id="sessionPrice" value="150" class="w-full border rounded-lg p-2 font-mono font-bold">
+              <label class="block text-slate-700 font-bold mb-1">السعر الأساسي 🔒 (من ملف الفرع)</label>
+              <input type="number" id="sessionPrice" value="150" readonly tabindex="-1" title="بيتولد تلقائي من ملف الفرع ومينفعش يتغير من هنا" class="w-full border rounded-lg p-2 font-mono font-bold bg-slate-100 text-slate-600 cursor-not-allowed">
             </div>
             <div>
               <label class="block text-slate-700 font-bold mb-1">حالة الحضور</label>
@@ -2979,6 +2985,19 @@ body.sidebar-collapsed #sideNav .side-gear{justify-content:center;padding:8px 0}
                 <option value="SCHEDULED">محجوزة</option>
               </select>
             </div>
+          </div>
+
+          <!-- التخفيض (ديسكاونت) + الصافي -->
+          <div class="grid grid-cols-2 gap-3 bg-amber-50 border border-amber-200 rounded-xl p-3">
+            <div>
+              <label class="block text-amber-800 font-bold mb-1">🏷️ تخفيض / ديسكاونت (ج.م)</label>
+              <input type="number" id="sessionDiscount" value="0" min="0" oninput="suUpdateSessionNet()" class="w-full border border-amber-300 rounded-lg p-2 font-mono font-bold bg-white">
+            </div>
+            <div>
+              <label class="block text-emerald-800 font-bold mb-1">✅ الصافي بعد التخفيض</label>
+              <input type="number" id="sessionNet" value="150" readonly class="w-full border border-emerald-300 rounded-lg p-2 font-mono font-black bg-emerald-50 text-emerald-800">
+            </div>
+            <div id="sessionDiscHint" class="col-span-2 text-[10px] font-bold text-amber-700"></div>
           </div>
 
           <!-- Dynamic Custom Fields Container -->
@@ -3876,8 +3895,33 @@ body.sidebar-collapsed #sideNav .side-gear{justify-content:center;padding:8px 0}
 
   // أي حالة مش من الأنواع المعروفة (SCHEDULED / Scheduled / فاضي...) = محجوزة
   function suStKey(st) { const k = String(st == null ? '' : st).trim().toUpperCase(); return ['ATT', 'CAN', 'SDE', 'EXC', 'TCA'].indexOf(k) >= 0 ? k : 'SCHEDULED'; }
+  // نوع الجلسة: قيمتين بس (جلسة / تقييم) — القيم القديمة (S.T Session / Assessment) بتتحول للعرض
+  function suTypeVal(t) { const x = String(t == null ? '' : t).toLowerCase(); return (x.includes('assess') || x.includes('تقييم')) ? 'تقييم' : 'جلسة'; }
+  // ===== التسعير التلقائي: سعر الفرع حسب نوع الخدمة − تخفيض الحالة (ديسكاونت) =====
+  function suBranchOf(b) { return (state.branches || []).find(x => x.id === b || x.branch_id === b || x.name === b); }
+  function suBasePrice(branch, type) {
+    const isA = suTypeVal(type) === 'تقييم', bo = suBranchOf(branch);
+    if (!bo) return isA ? 250 : 150;
+    const v = Number(isA ? (bo.assessmentPrice || bo.assessment_price) : (bo.sessionPrice || bo.session_price));
+    return (isFinite(v) && v > 0) ? v : (isA ? 250 : 150);
+  }
+  function suClientDisc(client, type) {
+    const d = client && client.serviceDiscounts, v = d ? Number(d[suTypeVal(type)]) : 0;
+    return (isFinite(v) && v > 0) ? v : 0;
+  }
+  function suCalcPrice(client, branch, type) {
+    const base = suBasePrice(branch, type), disc = Math.min(base, suClientDisc(client, type));
+    return { base: base, discount: disc, net: base - disc };
+  }
+  // ===== منع تكرار نفس الجلسة: نفس العميل + نفس اليوم + نفس النوع (جلسة/تقييم) بغض النظر عن الساعة =====
+  function suNormDate(d) { return String(d == null ? '' : d).replace(/\//g, '-').slice(0, 10); }
+  function suFindSameDaySession(clientId, date, type, ignoreId) {
+    const ty = suTypeVal(type), dd = suNormDate(date);
+    return (state.sessions || []).find(s => s.id !== ignoreId && s.clientId === clientId && suNormDate(s.date) === dd && suTypeVal(s.type) === ty);
+  }
   function calculateSessionFee(session) {
-    const base = Number(session.price) || 150;
+    const _p = Number(session.price);
+    const base = (_p === 0 && Number(session.discount) > 0) ? 0 : (_p || 150);
     switch (session.status) {
       case 'ATT':
       case 'CAN':
@@ -5061,7 +5105,7 @@ body.sidebar-collapsed #sideNav .side-gear{justify-content:center;padding:8px 0}
       const trs = list.map(s => {
         const k = cpStatusKey(s.status), fee = calculateSessionFee(s);
         const th = state.staff.find(x => x.id === s.therapistId);
-        return `<tr class="border-b border-slate-100 hover:bg-slate-50"><td class="font-mono">${s.date}</td><td>${AR_WEEKDAYS[ymdWeekday((s.date || '').replace(/\//g, '-'))] || ''}</td><td>${formatTime12(s.time)}</td><td>${s.type || ''}</td><td>${th ? th.name : '-'}</td><td>${getBranchName(s.branch)}</td><td><span class="px-2 py-0.5 rounded text-[11px] font-bold ${CP_STATUS[k][2]}">${CP_STATUS[k][0]}</span></td>${isTherapist() ? '' : `<td class="font-mono">${s.price || ''}</td><td class="font-mono font-bold">${fee.net}</td>`}<td class="text-slate-500 max-w-[180px] truncate" title="${(s.notes || '').replace(/"/g, '&quot;')}">${s.notes || ''}</td><td><button onclick="editSession('${s.id}')" class="text-indigo-600 font-bold text-xs hover:underline">تعديل</button></td></tr>`;
+        return `<tr class="border-b border-slate-100 hover:bg-slate-50"><td class="font-mono">${s.date}</td><td>${AR_WEEKDAYS[ymdWeekday((s.date || '').replace(/\//g, '-'))] || ''}</td><td>${formatTime12(s.time)}</td><td>${s.type || ''}</td><td>${th ? th.name : '-'}</td><td>${getBranchName(s.branch)}</td><td><span class="px-2 py-0.5 rounded text-[11px] font-bold ${CP_STATUS[k][2]}">${CP_STATUS[k][0]}</span></td>${isTherapist() ? '' : `<td class="font-mono">${s.price === 0 ? 0 : (s.price || '')}${Number(s.discount) > 0 ? ' <small class="text-amber-600" title="تخفيض">(-' + s.discount + ')</small>' : ''}</td><td class="font-mono font-bold">${fee.net}</td>`}<td class="text-slate-500 max-w-[180px] truncate" title="${(s.notes || '').replace(/"/g, '&quot;')}">${s.notes || ''}</td><td><button onclick="editSession('${s.id}')" class="text-indigo-600 font-bold text-xs hover:underline">تعديل</button></td></tr>`;
       }).join('');
       content = `<div class="flex flex-wrap items-center gap-2 mb-3"><select class="border rounded-lg px-2 py-1.5 text-xs font-bold" onchange="cpSetFilter('month',this.value)">${monthOpts}</select><select class="border rounded-lg px-2 py-1.5 text-xs font-bold" onchange="cpSetFilter('status',this.value)">${statusOpts}</select><div class="text-xs text-slate-500 mr-auto">${list.length} جلسة${canInv ? ' • صافي قيمتها ' + cpMoney(net) : ''}</div></div>
         <div class="overflow-x-auto"><table class="w-full text-xs"><thead class="bg-slate-50 text-slate-600"><tr><th>التاريخ</th><th>اليوم</th><th>الوقت</th><th>النوع</th><th>الأخصائي</th><th>الفرع</th><th>الحالة</th>${isTherapist() ? '' : '<th>السعر</th><th>الصافي</th>'}<th>ملاحظات</th><th></th></tr></thead><tbody>${trs || '<tr><td colspan="11" class="py-8 text-slate-400">لا توجد جلسات</td></tr>'}</tbody></table></div>`;
@@ -5458,7 +5502,7 @@ body.sidebar-collapsed #sideNav .side-gear{justify-content:center;padding:8px 0}
         <td class="p-3 font-extrabold text-slate-900">${client.name}</td>
         <td class="p-3"><span class="bg-slate-100 px-2 py-0.5 rounded font-bold text-xs">${getBranchName(s.branch)}</span></td>
         <td class="p-3 font-medium text-slate-700">${therapist.name}</td>
-        <td class="p-3 text-slate-500">${s.type || 'S.T Session'}</td>
+        <td class="p-3 text-slate-500">${suTypeVal(s.type)}</td>
         <td class="p-3">
           <span class="px-2.5 py-1 rounded-full font-black text-[11px] ${statusBadgeClass[suStKey(s.status)] || 'badge-scheduled'}">
             ${statusLabels[suStKey(s.status)]}
@@ -5524,7 +5568,7 @@ body.sidebar-collapsed #sideNav .side-gear{justify-content:center;padding:8px 0}
         <td class="p-3 font-extrabold text-slate-900">${client.name} <span class="text-[10px] text-slate-400 font-mono">#${client.id}</span></td>
         <td class="p-3"><span class="bg-slate-100 px-2 py-0.5 rounded font-bold text-xs">${getBranchName(s.branch)}</span></td>
         <td class="p-3 font-medium text-slate-700">${therapist.name}</td>
-        <td class="p-3 text-slate-500">${s.type || 'S.T Session'}</td>
+        <td class="p-3 text-slate-500">${suTypeVal(s.type)}</td>
         <td class="p-3 text-center">
           <div class="flex items-center justify-center gap-1 flex-wrap">
             <button onclick="quickUpdateSessionStatus('${s.id}', 'ATT')" class="px-2 py-1 rounded text-[10px] font-black ${s.status === 'ATT' ? 'bg-emerald-600 text-white shadow' : 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200'}">حضور</button>
@@ -5559,9 +5603,27 @@ body.sidebar-collapsed #sideNav .side-gear{justify-content:center;padding:8px 0}
     const month = parseInt(monthStr, 10);
 
     const daysMap = { 'الأحد': 0, 'الإثنين': 1, 'الثلاثاء': 2, 'الأربعاء': 3, 'الخميس': 4, 'الجمعة': 5, 'السبت': 6 };
-    let generatedCount = 0;
+    let generatedCount = 0, skippedBefore = 0, alreadyThere = 0, skippedConf = 0, replacedCount = 0;
+    const conflicts = [];   // مواعيد فيها تعارض (نفس العميل + نفس اليوم + نفس النوع بساعة مختلفة) → هنسألك
 
     const daysInMonth = new Date(year, month, 0).getDate();
+    const mkSession = (c, slot, dateStr) => {
+      const pr = suCalcPrice(c, c.branch || 'B001', slot.type);
+      return {
+        id: 'S' + Math.floor(100000 + Math.random() * 900000),
+        clientId: c.id,
+        branch: c.branch || 'B001',
+        therapistId: slot.therapistId || '785e56df',
+        date: dateStr,
+        time: slot.time || '16:00',
+        type: suTypeVal(slot.type),
+        price: pr.net,
+        basePrice: pr.base,
+        discount: pr.discount,
+        status: 'SCHEDULED',
+        notes: 'جلسة مولدة تلقائياً من الجدول الأسبوعي'
+      };
+    };
 
     state.clients.forEach(c => {
       if (c.status !== 'Active' || !c.weeklySchedule || c.weeklySchedule.length === 0) return;
@@ -5574,31 +5636,95 @@ body.sidebar-collapsed #sideNav .side-gear{justify-content:center;padding:8px 0}
           const curDate = new Date(year, month - 1, day);
           if (curDate.getDay() === targetDayIndex) {
             const dateStr = year + '-' + String(month).padStart(2, '0') + '-' + String(day).padStart(2, '0');
+            // ما نولّدش جلسات قبل تاريخ بداية البرنامج
+            if (c.startDate && dateStr < String(c.startDate).replace(/\//g, '-').slice(0, 10)) { skippedBefore++; continue; }
 
-            const exists = state.sessions.some(s => s.clientId === c.id && s.date === dateStr && s.time === slot.time);
-            if (!exists) {
-              state.sessions.push({
-                id: 'S' + Math.floor(100000 + Math.random() * 900000),
-                clientId: c.id,
-                branch: c.branch || 'B001',
-                therapistId: slot.therapistId || '785e56df',
-                date: dateStr,
-                time: slot.time || '16:00',
-                type: slot.type || 'S.T Session',
-                price: slot.netFee || 150,
-                status: 'SCHEDULED',
-                notes: 'جلسة مولدة تلقائياً من الجدول الأسبوعي'
-              });
-              generatedCount++;
-            }
+            const slotTime = slot.time || '16:00';
+            // 1) نفس العميل + نفس اليوم + نفس الساعة = موجودة بالفعل → تتخطى بدون سؤال
+            if (state.sessions.some(s => s.clientId === c.id && suNormDate(s.date) === dateStr && s.time === slotTime)) { alreadyThere++; continue; }
+            // 2) نفس العميل + نفس اليوم + نفس النوع بس بساعة مختلفة → نسألك
+            const dup = suFindSameDaySession(c.id, dateStr, slot.type);
+            if (dup) { conflicts.push({ c: c, slot: slot, dateStr: dateStr, dup: dup }); continue; }
+            state.sessions.push(mkSession(c, slot, dateStr));
+            generatedCount++;
           }
         }
       });
     });
 
-    saveState();
-    refreshAll();
-    alert(`تم توليد ${generatedCount} جلسة جديدة لشهر ${chosenMonth} بنجاح! ⚡ وتم تحديث الفواتير تلقائياً.`);
+    const finish = () => {
+      saveState();
+      refreshAll();
+      alert(`تم توليد ${generatedCount} جلسة جديدة لشهر ${chosenMonth} بنجاح! ⚡ وتم تحديث الفواتير تلقائياً.`
+        + (replacedCount ? `\n(تم تبديل موعد ${replacedCount} جلسة موجودة بالموعد الجديد)` : '')
+        + (skippedBefore ? `\n(تم تجاهل ${skippedBefore} موعد قبل تاريخ بداية البرنامج)` : '')
+        + (alreadyThere ? `\n(${alreadyThere} موعد كان موجود بالفعل)` : '')
+        + (skippedConf ? `\n(تم تخطي ${skippedConf} موعد بناءً على اختيارك)` : ''));
+    };
+
+    if (conflicts.length) {
+      suAskGenConflicts(conflicts, choices => {
+        const replacedIds = new Set();
+        conflicts.forEach((x, i) => {
+          const ch = choices[i] || 'skip';
+          if (ch === 'add') { state.sessions.push(mkSession(x.c, x.slot, x.dateStr)); generatedCount++; }
+          else if (ch === 'replace' && !replacedIds.has(x.dup.id)) {
+            x.dup.time = x.slot.time || '16:00';          // نبدّل ميعاد الجلسة الموجودة بالميعاد الجديد
+            replacedIds.add(x.dup.id); replacedCount++;
+          } else skippedConf++;
+        });
+        finish();
+      });
+    } else finish();
+  }
+
+  // نافذة سؤال التعارض: العميل عنده جلسة في نفس اليوم بساعة تانية — تخطي / ولّد كمان / بدّل الموجودة
+  function suAskGenConflicts(conflicts, done) {
+    const old = document.getElementById('genConflictModal'); if (old) old.remove();
+    const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+    const fmt = tm => { try { return formatTime12(tm); } catch (e) { return tm; } };
+    const ST = { ATT: 'حضور', SDE: 'محسوبة', EXC: 'اعتذار', CAN: 'إلغاء', TCA: 'غ. أخصائي', SCHEDULED: 'محجوزة' };
+    const m = document.createElement('div'); m.id = 'genConflictModal';
+    m.style.cssText = 'position:fixed;inset:0;z-index:300;background:rgba(15,23,42,.65);display:flex;align-items:center;justify-content:center;padding:12px';
+    const opt = (i, v, label, checked, disabled) => `<label class="gco" data-v="${v}" style="flex:1 1 0;text-align:center;padding:8px 4px;border-radius:10px;font-size:12px;font-weight:900;border:2px solid ${checked ? '#4f46e5' : '#e2e8f0'};background:${checked ? '#eef2ff' : '#fff'};color:${disabled ? '#cbd5e1' : (checked ? '#4338ca' : '#475569')};cursor:${disabled ? 'not-allowed' : 'pointer'}"><input type="radio" name="gc${i}" value="${v}" ${checked ? 'checked' : ''} ${disabled ? 'disabled' : ''} style="display:none">${label}</label>`;
+    const rows = conflicts.map((x, i) => {
+      let dl = x.dateStr; try { dl = new Date(x.dateStr + 'T00:00:00').toLocaleDateString('ar-EG', { weekday: 'long', day: 'numeric', month: 'long' }); } catch (e) {}
+      const ty = suTypeVal(x.slot.type), st = suStKey(x.dup.status), locked = st !== 'SCHEDULED';
+      return `<div style="padding:10px 12px;border:1px solid #e2e8f0;border-radius:14px;background:#f8fafc">
+        <div style="font-size:13px;line-height:1.8;color:#0f172a"><b>${esc(x.c.name)}</b> — ${esc(dl)}<br>
+          عنده ${ty} الساعة <b style="color:#b45309">${esc(fmt(x.dup.time))}</b> <span style="font-size:11px;color:#64748b">(${ST[st]})</span>
+          والجدول بيقول ${ty} الساعة <b style="color:#4338ca">${esc(fmt(x.slot.time || '16:00'))}</b></div>
+        <div style="display:flex;gap:6px;margin-top:8px" data-row="${i}">
+          ${opt(i, 'skip', 'تخطي', true, false)}${opt(i, 'add', '➕ ولّد كمان', false, false)}${opt(i, 'replace', locked ? '🔄 بدّل (مقفول)' : '🔄 بدّل الموجودة', false, locked)}
+        </div>${locked ? '<div style="font-size:10px;font-weight:700;color:#94a3b8;margin-top:4px">التبديل مقفول لأن الجلسة الموجودة اتسجّل عليها حالة.</div>' : ''}</div>`;
+    }).join('');
+    m.innerHTML = `<div dir="rtl" style="background:#fff;border-radius:20px;width:100%;max-width:640px;max-height:90vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,.35);font-family:inherit">
+      <div style="padding:14px 16px;border-bottom:1px solid #e2e8f0"><b style="font-size:15px;color:#0f172a">⚠️ ${conflicts.length} موعد فيه تعارض</b>
+        <div style="font-size:12px;color:#64748b;margin-top:4px;font-weight:700">العميل عنده جلسة من نفس النوع في نفس اليوم بساعة مختلفة. اختار لكل واحد: تخطي، أو ولّد جلسة كمان، أو بدّل ميعاد الجلسة الموجودة بالميعاد الجديد.</div></div>
+      <div style="padding:8px 12px;display:flex;gap:6px;flex-wrap:wrap;border-bottom:1px solid #f1f5f9;align-items:center"><span style="font-size:11px;font-weight:800;color:#64748b">للكل:</span>
+        <button type="button" data-all="skip" style="font-size:12px;font-weight:800;padding:5px 12px;border-radius:10px;background:#f1f5f9;color:#475569">تخطي</button>
+        <button type="button" data-all="add" style="font-size:12px;font-weight:800;padding:5px 12px;border-radius:10px;background:#eef2ff;color:#4338ca">ولّد كمان</button>
+        <button type="button" data-all="replace" style="font-size:12px;font-weight:800;padding:5px 12px;border-radius:10px;background:#ecfdf5;color:#047857">بدّل</button></div>
+      <div style="padding:12px;overflow-y:auto;display:flex;flex-direction:column;gap:8px">${rows}</div>
+      <div style="padding:12px 14px;border-top:1px solid #e2e8f0;display:flex;gap:8px;align-items:center;background:#f8fafc"><span id="gcSum" style="font-size:12px;font-weight:800;color:#64748b;margin-left:auto"></span>
+        <button type="button" id="gcGo" style="font-weight:900;font-size:13px;padding:9px 20px;border-radius:12px;background:#4f46e5;color:#fff">تأكيد</button></div></div>`;
+    document.body.appendChild(m);
+    const val = i => { const r = m.querySelector(`input[name="gc${i}"]:checked`); return r ? r.value : 'skip'; };
+    const paint = () => {
+      conflicts.forEach((x, i) => m.querySelectorAll(`[data-row="${i}"] .gco`).forEach(l => {
+        const on = l.dataset.v === val(i), dis = l.querySelector('input').disabled;
+        l.style.borderColor = on ? '#4f46e5' : '#e2e8f0'; l.style.background = on ? '#eef2ff' : '#fff'; l.style.color = dis ? '#cbd5e1' : (on ? '#4338ca' : '#475569');
+      }));
+      const c = { skip: 0, add: 0, replace: 0 }; conflicts.forEach((x, i) => c[val(i)]++);
+      m.querySelector('#gcSum').textContent = 'تخطي ' + c.skip + ' · ولّد ' + c.add + ' · بدّل ' + c.replace;
+    };
+    m.addEventListener('change', paint);
+    m.querySelectorAll('[data-all]').forEach(b => b.onclick = () => {
+      conflicts.forEach((x, i) => { const r = m.querySelector(`input[name="gc${i}"][value="${b.dataset.all}"]`); if (r && !r.disabled) r.checked = true; });
+      paint();
+    });
+    m.querySelector('#gcGo').onclick = () => { const res = conflicts.map((x, i) => val(i)); m.remove(); done(res); };
+    paint();
   }
 
   // ===== Cairo / Alexandria time (Africa/Cairo) =====
@@ -5730,15 +5856,8 @@ body.sidebar-collapsed #sideNav .side-gear{justify-content:center;padding:8px 0}
     const normYearMonth = yearMonth.replace('/', '-');
     const prevYearMonth = getPreviousMonth(normYearMonth);
 
-    let clientSessionPrice = 150;
-    if (client.weeklySchedule && client.weeklySchedule.length > 0 && client.weeklySchedule[0].netFee) {
-      const sp = Number(client.weeklySchedule[0].netFee);
-      clientSessionPrice = (!isNaN(sp) && sp > 0) ? sp : 150;
-    } else {
-      const branchObj = state.branches.find(b => b.id === client.branch || b.branch_id === client.branch || b.name === client.branch);
-      const bsp = branchObj ? Number(branchObj.sessionPrice || branchObj.session_price) : NaN;
-      clientSessionPrice = (!isNaN(bsp) && bsp > 0) ? bsp : 150;
-    }
+    const _slot0 = (client.weeklySchedule && client.weeklySchedule[0]) || null;
+    let clientSessionPrice = suCalcPrice(client, client.branch, _slot0 ? _slot0.type : 'جلسة').net;
 
     // Previous month credits calculation
     const prevSessions = state.sessions.filter(s => {
@@ -5753,8 +5872,9 @@ body.sidebar-collapsed #sideNav .side-gear{justify-content:center;padding:8px 0}
     const prevFullRefundCount = (prevCounts.EXC || 0) + (prevCounts.TCA || 0);
     const prevHalfRefundCount = (prevCounts.SDE || 0);
 
-    const prevCreditFromFull = prevFullRefundCount * clientSessionPrice;
-    const prevCreditFromHalf = prevHalfRefundCount * (0.5 * clientSessionPrice);
+    const _sp = s => { const p = Number(s.price); return (s.price === '' || s.price == null || !isFinite(p)) ? clientSessionPrice : p; };
+    const prevCreditFromFull = prevSessions.filter(s => s.status === 'EXC' || s.status === 'TCA').reduce((a, s) => a + _sp(s), 0);
+    const prevCreditFromHalf = prevSessions.filter(s => s.status === 'SDE').reduce((a, s) => a + 0.5 * _sp(s), 0);
     const totalPreviousCredit = prevCreditFromFull + prevCreditFromHalf;
 
     // Current month scheduled sessions
@@ -5789,13 +5909,14 @@ body.sidebar-collapsed #sideNav .side-gear{justify-content:center;padding:8px 0}
         const typeKey = normalizeSessionType(s.type);
         const label = TYPE_LABELS[typeKey] || 'جلسة تخاطب';
         const rawPrice = Number(s.price);
-        const priceEach = (!isNaN(rawPrice) && rawPrice > 0) ? rawPrice : (Number(clientSessionPrice) || 150);
+        const priceEach = (!isNaN(rawPrice) && (rawPrice > 0 || (rawPrice === 0 && Number(s.discount) > 0))) ? rawPrice : (Number(clientSessionPrice) || 150);
         if (!sessionsByType[typeKey]) {
           sessionsByType[typeKey] = { label, count: 0, pricePerSession: priceEach, total: 0 };
         }
         sessionsByType[typeKey].count++;
         sessionsByType[typeKey].total = (sessionsByType[typeKey].total || 0) + (isNaN(priceEach) ? 150 : priceEach);
       });
+      Object.values(sessionsByType).forEach(g => { if (g.count) g.pricePerSession = Math.round(g.total / g.count * 100) / 100; });
       currentGrossDue = Object.values(sessionsByType).reduce((sum, g) => sum + g.total, 0);
     } else {
       const weeklySlots = (client.weeklySchedule || []).length;
@@ -6950,7 +7071,7 @@ body.sidebar-collapsed #sideNav .side-gear{justify-content:center;padding:8px 0}
     document.getElementById('scheduleRowsContainer').innerHTML = '';
     if (document.getElementById('clientStartDate')) document.getElementById('clientStartDate').value = todayCairo();
     if (document.getElementById('clientEndDate')) document.getElementById('clientEndDate').value = '';
-    if (document.getElementById('clientPhotoUrl')) document.getElementById('clientPhotoUrl').value = '';
+    document.getElementById('clientDiscSession').value = 0; document.getElementById('clientDiscAssess').value = 0;
     addScheduleRow();
     openModal('clientModal');
   }
@@ -6968,7 +7089,8 @@ body.sidebar-collapsed #sideNav .side-gear{justify-content:center;padding:8px 0}
     document.getElementById('clientAddress').value = client.address || '';
     if (document.getElementById('clientStartDate')) document.getElementById('clientStartDate').value = client.startDate || '';
     if (document.getElementById('clientEndDate')) document.getElementById('clientEndDate').value = client.endDate || '';
-    if (document.getElementById('clientPhotoUrl')) document.getElementById('clientPhotoUrl').value = client.photoUrl || '';
+    document.getElementById('clientDiscSession').value = Number((client.serviceDiscounts || {})['جلسة']) || 0;
+    document.getElementById('clientDiscAssess').value = Number((client.serviceDiscounts || {})['تقييم']) || 0;
 
     const container = document.getElementById('scheduleRowsContainer');
     container.innerHTML = '';
@@ -6980,7 +7102,7 @@ body.sidebar-collapsed #sideNav .side-gear{justify-content:center;padding:8px 0}
     openModal('clientModal');
   }
 
-  function addScheduleRow(slot = { day: 'السبت', time: '16:00', therapistId: '785e56df', type: 'S.T Session', netFee: 150 }) {
+  function addScheduleRow(slot = { day: 'السبت', time: '16:00', therapistId: '785e56df', type: 'جلسة', netFee: 150 }) {
     const container = document.getElementById('scheduleRowsContainer');
     const div = document.createElement('div');
     div.className = 'schedule-row grid grid-cols-4 gap-2 items-center bg-slate-50 p-2 rounded border text-xs';
@@ -6990,13 +7112,22 @@ body.sidebar-collapsed #sideNav .side-gear{justify-content:center;padding:8px 0}
     div.innerHTML = `
       <select class="schedule-day border rounded p-1 font-bold">${dayOptions}</select>
       <input type="time" class="schedule-time border rounded p-1 font-mono" value="${slot.time || '16:00'}">
-      <input type="number" class="schedule-fee border rounded p-1 font-bold" value="${slot.netFee || 150}" placeholder="السعر">
+      <input type="number" class="schedule-fee border rounded p-1 font-bold bg-emerald-50 text-emerald-800" value="" readonly title="بيتحسب تلقائي: سعر الفرع − تخفيض الحالة" placeholder="تلقائي">
       <div class="flex items-center gap-1">
-        <input type="text" class="schedule-type border rounded p-1 w-full" value="${slot.type || 'S.T Session'}">
+        <select class="schedule-type border rounded p-1 w-full" onchange="suRefreshScheduleFees()"><option value="جلسة" ${suTypeVal(slot.type) === 'جلسة' ? 'selected' : ''}>جلسة</option><option value="تقييم" ${suTypeVal(slot.type) === 'تقييم' ? 'selected' : ''}>تقييم</option></select>
         <button type="button" onclick="this.parentElement.parentElement.remove()" class="text-red-500 font-bold px-1.5 hover:text-red-700">&times;</button>
       </div>
     `;
     container.appendChild(div);
+    suRefreshScheduleFees();
+  }
+  function suRefreshScheduleFees() {
+    const g = id => document.getElementById(id), br = g('clientBranch') ? g('clientBranch').value : 'B001';
+    const tmp = { serviceDiscounts: { 'جلسة': Number(g('clientDiscSession') && g('clientDiscSession').value) || 0, 'تقييم': Number(g('clientDiscAssess') && g('clientDiscAssess').value) || 0 } };
+    document.querySelectorAll('.schedule-row').forEach(r => {
+      const f = r.querySelector('.schedule-fee'), ty = r.querySelector('.schedule-type');
+      if (f && ty) f.value = suCalcPrice(tmp, br, ty.value).net;
+    });
   }
 
   // ======== [STAGE-2] كود العميل الجديد: أكبر كود رقمي موجود (حد أدنى 2046) + 1 ========
@@ -7021,9 +7152,11 @@ body.sidebar-collapsed #sideNav .side-gear{justify-content:center;padding:8px 0}
         time: r.querySelector('.schedule-time').value,
         therapistId: '785e56df',
         type: r.querySelector('.schedule-type').value,
-        netFee: Number(r.querySelector('.schedule-fee').value) || 150
+        netFee: isFinite(Number(r.querySelector('.schedule-fee').value)) && r.querySelector('.schedule-fee').value !== '' ? Number(r.querySelector('.schedule-fee').value) : 150
       });
     });
+    const _dS = Math.max(0, Number((document.getElementById('clientDiscSession') || {}).value) || 0), _dA = Math.max(0, Number((document.getElementById('clientDiscAssess') || {}).value) || 0);
+    const serviceDiscounts = {}; if (_dS > 0) serviceDiscounts['جلسة'] = _dS; if (_dA > 0) serviceDiscounts['تقييم'] = _dA;
 
     const clientData = {
       id,
@@ -7036,7 +7169,8 @@ body.sidebar-collapsed #sideNav .side-gear{justify-content:center;padding:8px 0}
       address: document.getElementById('clientAddress').value.trim(),
       startDate: document.getElementById('clientStartDate') ? document.getElementById('clientStartDate').value : '',
       endDate: document.getElementById('clientEndDate') ? document.getElementById('clientEndDate').value : '',
-      photoUrl: document.getElementById('clientPhotoUrl') ? document.getElementById('clientPhotoUrl').value.trim() : '',
+      photoUrl: ((state.clients.find(c => c.id === id) || {}).photoUrl) || '',
+      serviceDiscounts,
       weeklySchedule
     };
 
@@ -7069,8 +7203,10 @@ body.sidebar-collapsed #sideNav .side-gear{justify-content:center;padding:8px 0}
     document.getElementById('sessionTherapist').value = sess.therapistId;
     document.getElementById('sessionDate').value = sess.date;
     document.getElementById('sessionTime').value = sess.time;
-    document.getElementById('sessionType').value = sess.type;
-    document.getElementById('sessionPrice').value = sess.price;
+    document.getElementById('sessionType').value = suTypeVal(sess.type);
+    { const _d = Number(sess.discount) || 0, _b = (sess.basePrice != null && sess.basePrice !== '') ? Number(sess.basePrice) : ((Number(sess.price) || 0) + _d);
+      document.getElementById('sessionPrice').value = _b; document.getElementById('sessionDiscount').value = _d; suUpdateSessionNet();
+      const _h = document.getElementById('sessionDiscHint'); if (_h) _h.textContent = _d > 0 ? 'هذه الجلسة عليها تخفيض ' + _d + ' ج.م (تقدر تعدّله).' : ''; }
     document.getElementById('sessionStatus').value = suStKey(sess.status);
     document.getElementById('sessionParentComment').value = sess.parentComment || '';
     openModal('sessionModal');
@@ -7079,16 +7215,24 @@ body.sidebar-collapsed #sideNav .side-gear{justify-content:center;padding:8px 0}
   function autoFillSessionDetails() {
     const clientId = document.getElementById('sessionClientId').value;
     const client = state.clients.find(c => c.id === clientId);
-    if (client) {
-      document.getElementById('sessionBranch').value = client.branch;
-      updateSessionPriceByBranch();
-    }
+    if (client) { document.getElementById('sessionBranch').value = client.branch; }
+    updateSessionPriceByBranch();
   }
 
+  function suUpdateSessionNet() {
+    const b = Number(document.getElementById('sessionPrice').value) || 0;
+    const d = Math.min(b, Math.max(0, Number(document.getElementById('sessionDiscount').value) || 0));
+    document.getElementById('sessionNet').value = b - d;
+  }
   function updateSessionPriceByBranch() {
-    const branchId = document.getElementById('sessionBranch').value;
-    const branchObj = state.branches.find(b => b.id === branchId || b.name === branchId);
-    if (branchObj) document.getElementById('sessionPrice').value = branchObj.sessionPrice;
+    const branchId = document.getElementById('sessionBranch').value, type = document.getElementById('sessionType').value;
+    const client = state.clients.find(c => c.id === document.getElementById('sessionClientId').value);
+    const pr = suCalcPrice(client, branchId, type);
+    document.getElementById('sessionPrice').value = pr.base;
+    document.getElementById('sessionDiscount').value = pr.discount;
+    const h = document.getElementById('sessionDiscHint');
+    if (h) h.textContent = pr.discount > 0 ? 'تخفيض الحالة على «' + suTypeVal(type) + '»: ' + pr.discount + ' ج.م — اتسجّل تلقائي، تقدر تعدّله لهذه الجلسة بس.' : '';
+    suUpdateSessionNet();
   }
 
   function saveSession(e) {
@@ -7102,7 +7246,9 @@ body.sidebar-collapsed #sideNav .side-gear{justify-content:center;padding:8px 0}
       date: document.getElementById('sessionDate').value,
       time: document.getElementById('sessionTime').value,
       type: document.getElementById('sessionType').value,
-      price: Number(document.getElementById('sessionPrice').value) || 150,
+      price: (Number(document.getElementById('sessionNet').value) >= 0 && document.getElementById('sessionNet').value !== '') ? Number(document.getElementById('sessionNet').value) : 150,
+      basePrice: Number(document.getElementById('sessionPrice').value) || 150,
+      discount: Math.min(Number(document.getElementById('sessionPrice').value) || 150, Math.max(0, Number(document.getElementById('sessionDiscount').value) || 0)),
       status: document.getElementById('sessionStatus').value,
       notes: '',
       parentComment: ((document.getElementById('sessionParentComment') || {}).value || '').trim().slice(0, 500)
@@ -7111,17 +7257,11 @@ body.sidebar-collapsed #sideNav .side-gear{justify-content:center;padding:8px 0}
     // ─── منع تكرار الجلسات ───────────────────────────────────
     // جلسة مكررة = نفس العميل + نفس التاريخ + نفس الوقت + نفس النوع
     const isEditing = !!document.getElementById('sessionId').value;
-    const duplicate = state.sessions.find(s =>
-      s.id !== id &&                          // مش نفس الجلسة اللي بنعدلها
-      s.clientId === sessionData.clientId &&
-      s.date     === sessionData.date &&
-      s.time     === sessionData.time &&
-      s.type     === sessionData.type
-    );
+    const duplicate = suFindSameDaySession(sessionData.clientId, sessionData.date, sessionData.type, id);
     if (duplicate) {
       const clientName = (state.clients.find(c => c.id === sessionData.clientId) || {}).name || 'العميل';
       showToast(
-        `⚠️ جلسة مكررة! يوجد بالفعل جلسة لـ "${clientName}" بتاريخ ${sessionData.date} الساعة ${sessionData.time} من نوع ${sessionData.type}`,
+        `⚠️ جلسة مكررة! "${clientName}" عنده بالفعل ${suTypeVal(sessionData.type)} يوم ${sessionData.date} الساعة ${duplicate.time || ''}. عدّل عليها بدل ما تضيف واحدة جديدة.`,
         'amber'
       );
       return; // ← لا تحفظ
@@ -8012,6 +8152,7 @@ body.sidebar-collapsed #sideNav .side-gear{justify-content:center;padding:8px 0}
   // ================= Language (Arabic / English) =================
   const I18N_EN = {"لوحة التحكم والإحصائيات": "Dashboard & Statistics", "لوحة التحكم": "Dashboard", "كشف الحضور اليومي": "Daily Attendance", "الكاليندر والمواعيد": "Calendar & Appointments", "العملاء والجلسات": "Clients & Sessions", "العملاء": "Clients", "سجل الجلسات": "Sessions Log", "الفواتير الشهرية": "Monthly Invoices", "المدفوعات": "Payments", "المشتريات والمصروفات": "Purchases & Expenses", "الأخصائيين والفروع": "Staff & Branches", "الإعدادات والصلاحيات": "Settings & Permissions", "الرئيسية": "Main", "الحسابات": "Accounting", "الإدارة": "Administration", "جلسة جديدة": "New Session", "عميل جديد": "New Client", "أخصائي جديد": "New Specialist", "تصفية حسب الفرع": "Filter by Branch", "الكل": "All", "البيطاش": "Bitash", "سموحه": "Smouha", "أونلاين": "Online", "تصغير القائمة": "Collapse", "خروج": "Logout", "الإكسيل متصل": "Excel connected", "مزامنة تلقائية": "Auto sync", "المدير": "Admin", "السكرتارية": "Secretary", "السكرتيرة": "Secretary", "الأخصائي": "Therapist", "أب / أم": "Parent", "صلاحية المدير": "Admin role", "صلاحية السكرتارية": "Secretary role", "صلاحية الأخصائي": "Therapist role", "صلاحية أب / أم": "Parent role", "الكود": "Code", "اسم الطفل": "Child Name", "الهاتف": "Phone", "الفرع": "Branch", "التشخيص": "Diagnosis", "العنوان": "Address", "الحالة": "Status", "الجدول الأسبوعي": "Weekly Schedule", "الإجراءات": "Actions", "التاريخ": "Date", "الوقت": "Time", "السعر": "Price", "الصافي": "Net", "اسم العميل": "Client Name", "عدد الجلسات": "Sessions", "تفاصيل الحالات": "Status Details", "الإجمالي": "Total", "الخصومات": "Discounts", "الصافي المستحق": "Net Due", "المسدد": "Paid", "المتبقي": "Remaining", "طباعة": "Print", "المبلغ": "Amount", "الشهر": "Month", "ملاحظات": "Notes", "رقم السند": "Receipt No.", "الاسم": "Name", "تعديل": "Edit", "حذف": "Delete", "حفظ": "Save", "إلغاء": "Cancel", "إغلاق": "Close", "التفاصيل": "Details", "نشط": "Active", "موقوف": "Stopped", "مكتمل": "Completed", "بحث": "Search", "رجوع": "Back", "توقيع": "Signature", "إجمالي الجلسات": "Total Sessions", "العملاء النشطين": "Active Clients", "نسبة الحضور": "Attendance Rate", "إجمالي التحصيل": "Total Collected", "الفترة": "Period", "كل الفترات": "All periods", "حالات الجلسات حسب الفرع": "Session Status by Branch", "توزيع العملاء حسب التشخيص": "Clients by Diagnosis", "رجوع للفروع": "Back to branches", "حضور": "Attended", "غياب": "Absent", "اعتذار بعذر": "Excused", "اعتذار نفس اليوم": "Same-day excuse", "إلغاء من المركز": "Center cancelled", "مجدولة": "Scheduled", "السبت": "Saturday", "الأحد": "Sunday", "الإثنين": "Monday", "الثلاثاء": "Tuesday", "الأربعاء": "Wednesday", "الخميس": "Thursday", "الجمعة": "Friday", "اليوم": "Today", "الإعدادات": "Settings", "المشتريات": "Purchases", "الفواتير": "Invoices", "الجلسات": "Sessions", "المدفوعات وسندات القبض": "Payments & Receipts", "الأخصائيين": "Specialists", "الفروع": "Branches", "الأنشطة": "Activities", "ملف": "files", "جلسات": "sessions", "جلسة": "session", "عميل": "client"};
 Object.assign(I18N_EN, {"ج.م": "EGP", "كراسة المتابعة": "Progress Notebook", "من": "from", "مواعيدي": "My Appointments", "حساباتي": "My Accounts", "تصفية": "Filter", "نوفمبر": "November", "سبتمبر": "September", "غير معروف": "Unknown", "مسح": "Clear", "م": "PM", "أكتوبر": "October", "ديسمبر": "December", "جميع الفروع": "All Branches", "خاص": "Private", "تفريغ": "Clear All", "النوع": "Type", "أغسطس": "August", "مسددة": "Paid", "نشاط": "Activity", "تفاصيل الجلسة": "Session Details", "متابعة الأداء": "Performance Tracking", "المزيد": "More", "القائمة": "Menu", "،": ",", "الإشعارات": "Notifications", "أدوات سريعة": "Quick Tools", "التحكم والإجراءات": "Controls and Actions", "كل الأقسام": "All Sections", "مركز": "Center", "للتخاطب وتأهيل اللغة والكلام": "for Speech, Language, and Communication Rehabilitation", "فاتورة": "Invoice", "سعر الجلسة": "Session Price", "المحدد": "Selected", "تقييم الجلسة": "Session Evaluation", "ملاحظات الأخصائي": "Therapist Notes", "إضافة": "Add", "كراسة": "Notebook", "يناير": "January", "فبراير": "February", "مارس": "March", "أبريل": "April", "مايو": "May", "يونيو": "June", "يوليو": "July", "ص": "AM", "السلام عليكم، أنا ولي أمر الطفل/ة": "Hello, I am the parent/guardian of the child", "الكراسة": "The Notebook", "مواعيد الجلسات": "Session Schedule", "حضر": "Attended", "نشاط جديد": "New Activity", "كشف الحضور السريع": "Quick Attendance Sheet", "اكتب الملاحظة أولًا": "Enter the note first", "جلسات اليوم": "Today's Sessions", "الطفل": "Child", "إضافة عميل": "Add Client", "إجراءات سريعة": "Quick Actions", "رفع صورة": "Upload Image", "قفل التطبيق": "Lock App", "ادخل الكود": "Enter the Code", "إعدادات النظام، الثيم، والصلاحيات": "System Settings, Theme, and Permissions", "إدارة الصور الشخصية": "Profile Image Management", "إدارة الصور": "Image Management", "إعدادات البروفيل": "Profile Settings", "الشهر الحالي": "Current Month", "إلغاء أخصائي": "Remove Therapist", "كشف الحضور اليومي السريع (واجهة السكرتيرة أ. منة": "Quick Daily Attendance Sheet (Receptionist Menna's Interface", "توليد وتسجيل الحضور المباشر للجلسات المحجوزة اليوم لجميع الفروع": "Generate and record live attendance for today's scheduled sessions across all branches", "اضغط على زر الحالة لتغيير الحضور فوراً": "Click the status button to update attendance immediately", "الطفل العميل": "Child Client", "نوع الجلسة": "Session Type", "رقم الهاتف": "Phone Number", "اعتذار": "Cancellation", "الشهر المحاسبي": "Accounting Month", "أخرى": "Other", "الكمية": "Quantity", "سعر الوحدة": "Unit Price", "عرض النظام بصلاحية": "View System As Role", "فحص التحديثات": "Check for Updates", "تسجيل الخروج": "Log Out", "رابط": "Link", "اختر صورة من جهازك": "Choose an Image from Your Device", "إلى": "to", "جلسة تخاطب": "Speech Therapy Session", "خصم الشهر السابق": "Previous Month Credit", "نصفي": "Half", "الإسكندرية، مصر": "Alexandria, Egypt", "إدارة مركز": "Center Management", "كشف حساب الشهر": "Monthly Statement", "البيان": "Description", "تأكيد": "Confirm", "إيصال": "Receipt", "سعر التقييم": "Assessment Price", "؟": "?", "أخصائي": "Therapist", "أو": "or", "لا توجد نتائج": "No Results", "إضافة أنشطة": "Add Activities", "جلسة رقم": "Session No.", "أهداف الجلسة": "Session Goals", "أنشطة الجلسة": "Session Activities", "اختيار أنشطة": "Select Activities", "اضغط": "Click", "الأداء العام للطفل": "Child's Overall Performance", "إنجاز الأهداف": "Goal Achievement", "رسمة الأخصائي": "Therapist's Drawing", "واجب البيت": "Homework", "فتح كراسة اليوم": "Open Today's Notebook", "السابق": "Previous", "التالي": "Next", "، وعندي استفسار": ", and I have a question", "شهر": "Month", "المواعيد": "Appointments", "أنشطة المنزل": "Home Activities", "مفكرتي": "My Notes", "أهلًا": "Welcome", "حسابي": "My Account", "نشاط مخصص": "Custom Activity", "المستخدمين": "Users", "الجلسة رقم": "Session No.", "حذف هذه الملاحظة؟": "Delete this note?", "جلسات حضرها الأطفال": "Sessions Attended by Children", "جلسات اعتذرتُ عنها": "Sessions I Cancelled", "متبقي": "Remaining", "تفعيل البصمة / الوجه": "Enable Fingerprint / Face ID", "مش دلوقتي": "Not Now", "تم تفعيل الدخول السريع": "Quick Login Enabled", "تحديث الآن": "Update Now", "أنت على أحدث نسخة": "You're Using the Latest Version", "لا توجد نتائج مطابقة": "No Matching Results", "تطبيق": "Apply", "تعذّر فتح النموذج، حاول مرة أخرى": "Could not open the form. Please try again", "سكرتارية": "Reception", "تغيير الصورة": "Change Image", "كمان": "Also", "عندك إشعار جديد": "You Have a New Notification", "عندك": "You Have", "إشعارات جديدة": "New Notifications", "تثبيت": "Install", "تفعيل": "Enable", "نظام الإدارة المتكامل": "Integrated Management System", "٤ أرقام": "4 digits", "٦ أرقام": "6 digits", "كشف الحضور اليومي السريع (منة": "Quick Daily Attendance Sheet (Menna", "العملاء والجدول الأسبوعي": "Clients and Weekly Schedule", "سجل الجلسات الكامل": "Complete Session Log", "إعدادات النظام والصلاحيات": "System Settings and Permissions", "أقسام النظام والخدمات": "System Sections and Services", "الإحصائيات والكشوف": "Statistics and Reports", "الإحصائيات والكشوف المباشرة": "Live Statistics and Reports", "لوحة التحكم والإحصائيات العامة": "Dashboard and General Statistics", "كشف الحضور اليومي السريع (أ. منة": "Quick Daily Attendance Sheet (Ms. Menna", "الكاليندر والمواعيد الأسبوعية": "Calendar and Weekly Appointments", "العملاء والجدول الأسبوعي الثابت": "Clients and Fixed Weekly Schedule", "سجل الجلسات اليومي الكامل": "Complete Daily Session Log", "المالية والتقارير": "Finance and Reports", "الحسابات والماليات": "Accounts and Finance", "الفواتير الشهرية والتقارير": "Monthly Invoices and Reports", "المدفوعات وسندات القبض النقدية": "Payments and Cash Receipts", "الإدارة والسيستم": "Administration and System", "الإدارة وإعدادات النظام": "Administration and System Settings", "الأخصائيين وأسعار الفروع": "Therapists and Branch Pricing", "القسم الحالي": "Current Section", "الفرع المعروض": "Displayed Branch", "إضافة سريعة": "Quick Add", "متصل بالسحابة": "Connected to Cloud", "للمدير فقط: يسحب كل البيانات من السحابة ويحدّث ملف النسخة الاحتياطية": "Manager only: pulls all data from the cloud and updates the backup file", "حفظ نسخة على اللابتوب": "Save a Copy to the Laptop", "اختيار مجلد تاني للنسخة الاحتياطية": "Choose Another Folder for the Backup", "تغيير مكان الملف": "Change File Location", "أقسام النظام": "System Sections", "أدوات سريعة: الفرع / إضافة / الإكسيل": "Quick Tools: Branch / Add / Excel", "الترس + تحته البروفيل (كل الباقي جوه الإعدادات/البروفيل": "Gear icon + profile below it (everything else is under Settings/Profile", "تصغير / تكبير القائمة": "Collapse / Expand Menu", "بيظهر على الموبايل فقط": "Shown on mobile only", "التنقل": "Navigation", "داشبورد": "Dashboard", "لوحة النظام": "System Dashboard", "تحديث": "Refresh", "ملء الشاشة": "Full Screen", "فتح في تبويب": "Open in Tab", "لو الصفحة فاضية: اتأكد إن الرابط": "If the page is blank, make sure the link", "، أو إنك مسجّل دخول": ", or that you're signed in", "على نفس المتصفح (لو الرابط خاص بالمؤسسة": "in the same browser (if the link is organization-specific", "العملاء النشطون": "Active Clients", "من إجمالي": "out of total", "حضور مؤكد": "Confirmed Attendance", "من سندات القبض": "from receipts", "صافي المطلوب سداده": "Net Amount Due", "متبقي غير مسدد": "Unpaid Balance", "تقرير التحليلات": "Analytics Report", "مطابق لملف": "Matches file", "الحقول": "Fields", "ربط تقرير": "Link Report", "المنشور": "Published", "حالات الجلسات حسب الفرع والعميل": "Session Status by Branch and Client", "مجمّع": "Grouped", "متراكم": "Cumulative", "العملاء حسب التشخيص": "Clients by Diagnosis", "النشطون فقط": "Active Only", "توزيع حالات الجلسات (قواعد الخصم": "Session Status Distribution (Discount Rules", "حضور فعلي": "Attended", "غياب بدون إخطار": "Absent Without Notice", "اعتذار بنفس اليوم": "Same-Day Cancellation", "اعتذار قبل 24س": "Cancellation 24 Hours in Advance", "وصول سريع للعملاء النشطين": "Quick Access to Active Clients", "عرض الكل": "View All", "توليد جلسات الشهر بالكامل وفواتيره": "Generate All Sessions and Invoices for the Month", "كشف مواعيد اليوم": "Today's Appointments", "الموعد": "Appointment", "حالة الحضور": "Attendance Status", "إجراء": "Action", "الأسبوع السابق": "Previous Week", "الأسبوع الحالي": "Current Week", "الأسبوع التالي": "Next Week", "ابحث بالاسم، الهاتف، الكود، العنوان، أو التشخيص": "Search by name, phone, code, address, or diagnosis", "كل الحالات": "All Statuses", "ترتيب: أ - ي": "Sort: A–Z", "ترتيب: ي - أ": "Sort: Z–A", "الأحدث إضافة": "Recently Added", "الأقدم إضافة": "Oldest Added", "فلاتر مخصصة ومتقدمة": "Custom and Advanced Filters", "إضافة طفل عميل جديد": "Add New Child Client", "تخصيص الفلاتر المتقدمة (تشخيص، أيام الجلسات، مواعيد، صور، وتواريخ": "Customize advanced filters (diagnosis, session days, appointments, photos, and dates", "يمكنك الجمع بين أكثر من فلتر في نفس الوقت": "You can combine multiple filters at the same time", "التشخيص الطبي": "Medical Diagnosis", "كل التشخيصات": "All Diagnoses", "يوم الحضور الأسبوعي": "Weekly Attendance Day", "كل الأيام": "All Days", "حالة صورة الطفل": "Child Photo Status", "الكل (بصورة وبدون": "All (With or Without Photo", "لديه صورة شخصية فقط": "Has Profile Photo Only", "بدون صورة (حرف فقط": "No Photo (Initial Only", "له مواعيد مجدولة أسبوعياً": "Has a Weekly Schedule", "بدون جدول أسبوعي مسجل": "No Weekly Schedule Recorded", "النتائج المطابقة": "Matching Results", "مسح وإلغاء جميع الفلاتر": "Clear All Filters", "اسم الطفل العميل": "Child Client Name", "ابحث باسم العميل أو الأخصائي أو الكود": "Search by client name, therapist, or code", "جميع الحالات": "All Statuses", "اعتذار مسبق": "Advance Cancellation", "إضافة جلسة فردية": "Add Individual Session", "التاريخ والوقت": "Date and Time", "السعر الأساسي": "Base Price", "الخصم المعتمد": "Approved Discount", "التحكم والعمليات": "Controls and Operations", "ابحث باسم العميل أو الكود": "Search by client name or code", "أكتوبر الحالي": "Current October", "كل حالات التحصيل": "All Payment Statuses", "متبقي مستحق (لم يكتمل": "Balance Due (Not Fully Paid", "تم التحصيل بالكامل": "Paid in Full", "حساب تلقائي وقواعد خصم معتمدة": "Automatic Calculation and Approved Discount Rules", "اسم العميل والبيانات": "Client Name and Details", "المتبقي / الرصيد": "Remaining / Balance", "طباعة الفاتورة": "Print Invoice", "ابحث باسم العميل أو رقم السند أو البيان": "Search by client name, receipt number, or description", "تسجيل سند قبض جديد": "Record New Receipt", "المبلغ المسدد": "Amount Paid", "ملاحظات والبيان": "Notes and Description", "فروع المركز وأسعار الجلسات والتقييمات": "Center Branches and Session/Assessment Prices", "فريق العمل والأخصائيين السريريين": "Team and Clinical Therapists", "إضافة أخصائي جديد": "Add New Therapist", "الاسم الكامل": "Full Name", "التخصص": "Specialty", "البريد الإلكتروني": "Email", "سجل المشتريات والمصروفات التشغيلية": "Purchases and Operating Expenses Log", "إدارة الفواتير، أدوات التأهيل، مستلزمات الفروع، والعهد النقدية": "Manage invoices, therapy tools, branch supplies, and cash advances", "تسجيل فاتورة / مشتريات جديدة": "Record New Invoice / Purchase", "طباعة الكشف": "Print Report", "إجمالي المصروفات المسجلة": "Total Recorded Expenses", "مشتريات البيطاش": "Purchases - El Bitash Branch", "مشتريات سموحه": "Purchases - Smouha Branch", "عدد الفواتير والحركات": "Number of Invoices and Transactions", "حركة": "Transaction", "ابحث باسم الصنف، المورد، أو رقم الفاتورة": "Search by item name, supplier, or invoice number", "أدوات مكتبية وورق": "Office Supplies and Paper", "أدوات وخامات جلسات": "Therapy Tools and Materials", "صيانة وإصلاحات": "Maintenance and Repairs", "ضيافة وبوفيه": "Hospitality and Refreshments", "نظافة ومطهرات": "Cleaning Supplies and Disinfectants", "يتم تسجيل وتدقيق جميع المصروفات التشغيلية للمركز": "All center operating expenses are recorded and reviewed", "رقم الفاتورة": "Invoice Number", "اسم الصنف والبيان": "Item Name and Description", "القسم / التصنيف": "Department / Category", "المورد / المحل": "Supplier / Store", "إجمالي التكلفة": "Total Cost", "القائم بالشراء": "Purchased By", "الصورة الشخصية": "Profile Picture", "الإيميل وكلمة المرور": "Email and Password", "المظهر": "Appearance", "فتح إعدادات البروفيل": "Open Profile Settings", "مشترك للاتنين": "Shared by Both", "إعدادات التطبيق (الموبايل": "App Settings (Mobile", "إعدادات سيستم المركز (اللابتوب": "Center System Settings (Laptop", "الصلاحيات والأقسام": "Permissions and Sections", "مشترك: المركز واللوجو": "Shared: Center and Logo", "اللون العام (مشترك": "Global Color (Shared", "إعدادات التطبيق": "App Settings", "إعدادات سيستم المركز": "Center System Settings", "الصلاحيات والمستخدمين": "Permissions and Users", "تخصيص الأعمدة والخانات لكل قسم": "Customize columns and fields for each section", "مشترك — بيتطبق على التطبيق والسيستم على كل الأجهزة": "Shared — applies to the app and system on all devices", "البيانات الأساسية للمركز واللوجو الرسمي": "Center Details and Official Logo", "اسم المركز الرسمي": "Official Center Name", "رابط داشبورد": "Dashboard URL", "اختياري — بيظهر للمدير فقط في الداشبورد": "Optional — shown only to the manager on the dashboard", "الصق الرابط، أو كود التضمين": "Paste the URL or embed code", "كامل. المسموح": "in full. Allowed", "سيب الخانة فاضية لإلغاء الربط": "Leave the field empty to unlink", "تنبيه": "Warning", "مفتوح لأي حد معاه الرابط، وداشبورد فيها أسماء الأطفال. الأأمن إنك تستخدم": "Accessible to anyone with the link, and the dashboard contains children's names. It's safer to use", "الخاص بالمؤسسة": "the organization-specific", "اللوجو الرسمي (صفحة الدخول، شاشة القفل، الطباعة — وهو اللوجو الافتراضي للبار العلوي": "Official Logo (Login Page, Lock Screen, Printouts, and Default Top Bar Logo", "لوجو المركز": "Center Logo", "أسبوع": "Week", "لا توجد مواعيد": "No Appointments", "تقييم": "Assessment", "جماعي": "Group", "اونلاين": "Online", "جلسة جماعية": "Group Session", "جلسة تقييم": "Assessment Session", "جلسة أونلاين": "Online Session", "جلسات التخاطب": "Speech Therapy Sessions", "رصيد دائن": "Credit Balance", "حسب الجدول": "As Scheduled", "قيمة الجلسات": "Session Value", "كلي": "Full", "لا يوجد خصم من الشهر السابق": "No Credit from Previous Month", "شكراً لثقتكم في مركز": "Thank you for trusting our center", "نسعى دائماً لخدمة أطفالكم بأفضل مستوى": "We always strive to provide the best care for your children", "شكراً لثقتكم": "Thank you for your trust", "رقم العميل": "Client Number", "تاريخ الإصدار": "Issue Date", "بداية التعاقد": "Contract Start Date", "ثمن الجلسة": "Session Fee", "العدد": "Count", "السعر / جلسة": "Price per Session", "جلسات شهر": "Sessions for Month", "غياب معتذر": "Excused Absence", "الصافي المستحق السداد": "Net Amount Payable", "المطلوب دفعه لهذا الشهر": "Amount Due This Month", "شامل احتساب خصومات الجلسات المستحقة من الشهر السابق إن وجدت": "Includes applicable session discounts carried over from the previous month, if any", "توقيع مدير المركز": "Center Manager's Signature", "التوقيع": "Signature", "مدير المركز": "Center Manager", "ختم المركز الرسمي": "Official Center Stamp", "مخفية لحد ما تدوس زرار الإعدادات": "Hidden until you click the Settings button", "رجوع للفاتورة": "Back to Invoice", "تعديل بيانات الفاتورة": "Edit Invoice Details", "اسم المركز على الفاتورة": "Center Name on Invoice", "رقم التليفون": "Phone Number", "نص تذييل الفاتورة": "Invoice Footer Text", "ملاحظات إضافية على الفاتورة": "Additional Invoice Notes", "اكتب ملاحظات خاصة بهذه الفاتورة": "Enter notes for this invoice", "لوجو المركز (رابط صورة أو اختر ملف": "Center Logo (Image URL or Choose File", "أو اتركه فارغاً للأيقونة": "Or leave blank to use the icon", "تعذّر إنشاء ملف": "Could not create file", "تأكد من اتصال الإنترنت). تقدر تستخدم زر الطباعة واختار": "Check your internet connection). You can use the Print button and choose", "حفظ كـ": "Save As", "وقّع هنا بالقلم": "Sign Here", "تم حفظ إعدادات الفاتورة بنجاح": "Invoice settings saved successfully", "لا توجد سندات قبض مسجلة": "No Receipts Recorded", "سند قبض نقدية": "Cash Receipt Voucher", "رقم الإيصال": "Receipt Number", "استلمنا من ولي أمر الطفل": "Received from the child's parent/guardian", "مبلغ وقدره": "Amount", "جنيهاً مصرياً": "Egyptian Pounds", "سداد رسوم جلسات تأهيل": "Payment for Rehabilitation Sessions", "توقيع المستلم": "Recipient's Signature", "ختم المركز": "Center Stamp", "ختم معتمد": "Official Stamp", "لا توجد مشتريات مطابقة للبحث": "No purchases match your search", "تم حفظ الفاتورة بنجاح": "Invoice saved successfully", "هل أنت متأكد من حذف هذا السجل من المشتريات؟": "Are you sure you want to delete this purchase record?", "كشف المصروفات والمشتريات التشغيلية": "Operating Expenses and Purchases Report", "تاريخ الاستخراج": "Export Date", "الصنف والبيان": "Item and Description", "إجمالي قيمة المصروفات والمشتريات": "Total Expenses and Purchases", "عنده حساب بالفعل. علّم على الخانة ده واكتب باسورد لو عايز تغيّر الباسورد أو تحدّث بياناته": "This person already has an account. Check this box and enter a password if you want to change the password or update their details", "مفيش حساب لهذا الموظف. هيتعمله حساب لو علّمت الخانة": "This employee has no account. An account will be created if you check the box", "هل أنت متأكد من حذف الأخصائي": "Are you sure you want to delete the therapist", "اكتب إيميل الموظف عشان يتعمله حساب دخول": "Enter the employee's email to create a login account", "اكتب كلمة مرور مبدئية 8 أحرف على الأقل": "Enter an initial password of at least 8 characters", "كلمة المرور لازم تكون 8 أحرف على الأقل": "The password must be at least 8 characters long", "تم حفظ الموظف، لكن حساب الدخول لم يُنشأ على": "Employee saved, but the login account was not created on", "السبب": "Reason", "افتح الموظف بالتعديل وعلّم": "Open the employee for editing and check", "إنشاء حساب دخول": "Create Login Account", "وحاول تاني": "and try again", "تم حفظ الموظف وإنشاء حساب الدخول — الباسورد المبدئي": "Employee saved and login account created — temporary password", "تم حفظ الموظف وتحديث حسابه": "Employee saved and account updated", "الأكواد الطويلة": "Long codes", "بتتجاهل": "are ignored", "تم حفظ بيانات العميل بنجاح": "Client details saved successfully", "مش نفس الجلسة اللي بنعدلها": "is not the same session being edited", "العميل": "Client", "جلسة مكررة! يوجد بالفعل جلسة لـ": "Duplicate session! A session already exists for", "بتاريخ": "on date", "الساعة": "at", "من نوع": "of type", "لا تحفظ": "Do not save", "تم حفظ الجلسة بنجاح": "Session saved successfully", "هل أنت متأكد من حذف هذا السند المالي؟": "Are you sure you want to delete this financial receipt?", "اختر الطفل العميل": "Select Child Client", "حجم الصورة كبير جداً — اختر صورة أقل من": "Image is too large — choose an image smaller than", "تم رفع اللوجو وحفظه بنجاح": "Logo uploaded and saved successfully", "غير صحيح. لازم رابط": "Invalid. A URL is required", "جاري تغيير اللغة": "Changing language", "تم حفظ الإعدادات بنجاح": "Settings saved successfully", "أخضر": "Green", "أخضر فاتح": "Light Green", "زمردي": "Emerald", "تركواز": "Turquoise", "سماوي": "Cyan", "أزرق": "Blue", "ليموني": "Lime", "رمادي": "Gray", "أصفر": "Yellow", "عنبري": "Amber", "برتقالي": "Orange", "أحمر": "Red", "وردي": "Pink", "فوشيا": "Fuchsia", "بنفسجي": "Purple", "أزرق فاتح": "Light Blue", "الفئات العمرية": "Age Groups", "تخاطب ولغة": "Speech and Language", "نفسي وانفعالي": "Psychological and Emotional", "سلوك وتعديل سلوك": "Behavior and Behavior Modification", "حركي وعلاج طبيعي": "Motor Skills and Physical Therapy", "علاج وظيفي وحركة دقيقة": "Occupational Therapy and Fine Motor Skills", "حسي وتكامل حسي": "Sensory and Sensory Integration", "مهارات وتعليم": "Skills and Learning", "مهارات الحياة اليومية": "Daily Living Skills", "حيوانات وطبيعة (للأنشطة": "Animals and Nature (for Activities", "تقييم وطبي": "Assessment and Medical", "إدارة وحسابات": "Administration and Accounts", "رموز عامة": "General Icons", "غيّر الأيقونة": "Change Icon", "أيقونة مخصصة": "Custom Icon", "الافتراضية": "Default", "رجوع للافتراضي": "Reset to Default", "رجوع كل الأيقونات للافتراضي؟": "Reset all icons to default?", "اختر أيقونة لـ": "Choose an Icon for", "أو الصق/اكتب أي إيموجي هنا": "Or paste/type an emoji here", "استخدم": "Use", "تم حفظ وتطبيق الألوان فوراً": "Colors saved and applied immediately", "كشف الحضور": "Attendance Report", "الكاليندر": "Calendar", "شعار البار العلوي": "Top Bar Logo", "تم حذف": "Deleted", "جلسة مكررة": "Duplicate Session", "ابن": "Son", "أبناء": "Children", "طفل": "Child", "أبناء هذا الحساب (يرى بروفايل أبنائه فقط": "Children on this account (can view only their children's profiles", "الأطفال الذين يتابعهم الأخصائي": "Children Followed by the Therapist", "تم التدريب": "Trained", "أُضيف": "Added", "عرض الشرح": "View Instructions", "تعليم كمنفّذ": "Mark as Completed", "إزالة": "Remove", "نشاط ضمن برنامج": "Activity in Program", "لم تُضَف أنشطة لهذا الطفل بعد. اضغط": "No activities have been added for this child yet. Click", "لاختيارها من ملف الأنشطة": "to select them from the activity library", "إزالة هذا النشاط من برنامج الطفل؟": "Remove this activity from the child's program?", "مضاف": "Added", "لا توجد أنشطة مطابقة": "No matching activities", "اختر نشاطًا واحدًا على الأقل": "Select at least one activity", "تمت إضافة": "Added", "الصق رابط (فيديو / موقع / ملف) أو اكتب أي مصدر": "Paste a link (video / website / file) or enter any source", "حذف الرسمة؟": "Delete drawing?", "أنشطة الطفل": "Child's Activities", "مفيش نتائج": "No results", "اختار أنشطة الجلسة": "Choose Session Activities", "ابحث عن نشاط": "Search for an activity", "ارسم للأهل": "Draw for Parents", "رفيع": "Thin", "وسط": "Medium", "عريض": "Thick", "حفظ الرسمة": "Save Drawing", "اضغط على النجوم": "Tap the stars", "نص": "Text", "نقاط": "Points", "أرقام": "Numbers", "اكتب أهداف الجلسة هنا": "Enter session goals here", "، وكل نقطة هتفتحلك النشاط نفسه": ", and each point will open the activity itself", "سكيتش / رسم": "Sketch / Drawing", "مصادر خارجية": "External Resources", "اكتب ملاحظاتك للأهل هنا": "Enter your notes for the parents here", "مفيش مهام لسه — الأهل هم اللي بيعلّموا عليها لما يخلصوها": "No tasks yet — parents mark them as complete when finished", "أضف مهمة للبيت": "Add a Homework Task", "بيتحفظ تلقائيًا": "Saved Automatically", "كراسة متابعة": "Progress Notebook", "أهداف الجلسة، الأنشطة، التقييم، الملاحظات والواجب في مكان واحد": "Session goals, activities, assessment, notes, and homework in one place", "بدون أهداف مكتوبة": "No goals written", "واجب": "Homework", "لسه مفيش كراسات. اضغط": "No notebooks yet. Click", "لسه فاضية": "Still empty", "أول ما الأخصائي يسجّل جلسة هتلاقوا هنا الأهداف والأنشطة والتقييم وواجب البيت": "Once the therapist records a session, its goals, activities, assessment, and homework will appear here", "اضغط على أي نشاط عشان تشوف شرحه": "Click any activity to view its instructions", "أحسنتم! خلّصتوا الواجب": "Well done! You finished the homework", "اضغط على المهمة لما تخلصوها": "Tap the task when you finish it", "بيانات الطفل": "Child Information", "بياناته": "Their Information", "فيديو": "Video", "فيديو من الأخصائي": "Video from Therapist", "لو الفيديو مش بيظهر افتحه من هنا": "If the video isn't showing, open it here", "لا توجد جلسات في اليوم ده": "No sessions on this day", "فتح اليوم": "Open Day", "الميعاد": "Appointment Time", "تعليق الأخصائي": "Therapist Comment", "يومي": "Daily", "أسبوعي": "Weekly", "شهري": "Monthly", "لا توجد جلسات في الفترة دي": "No sessions during this period", "جدول الجلسات": "Session Schedule", "لا توجد جلسات": "No sessions", "سنة": "Year", "تاريخ الميلاد": "Date of Birth", "بداية البرنامج": "Program Start Date", "لا توجد جلسات منتهية بعد": "No completed sessions yet", "الإحصائيات والتقييمات": "Statistics and Assessments", "لم يتم ربط حسابك بأي طفل بعد. برجاء التواصل مع إدارة المركز": "Your account is not linked to any child yet. Please contact the center administration", "لا توجد جلسة قادمة": "No upcoming session", "الأداء": "Performance", "حضور من": "Attendance from", "آخر تقييم": "Last Assessment", "تعليقات الأخصائي وتقييمات الأداء": "Therapist Comments and Performance Assessments", "ملاحظة": "Note", "المدفوعات والفواتير": "Payments and Invoices", "لا توجد جلسات بعد": "No sessions yet", "لسه مفيش جلسات منتهية": "No completed sessions yet", "لسه مفيش تعليقات من الأخصائي. أول ما يكتب تعليق بعد جلسة هيظهر هنا": "No therapist comments yet. A comment will appear here after the therapist adds one following a session", "تقييم أداء": "Performance Assessment", "لما الأخصائي يرسل تقييم أداء أو نتيجة اختبار هيظهر هنا": "A performance assessment or test result will appear here when the therapist sends one", "جلسات حضور متتالية": "Consecutive Attended Sessions", "الحضور شهرياً": "Monthly Attendance", "تعليقات الأخصائي": "Therapist Comments", "تقييمات الأداء والاختبارات": "Performance Assessments and Tests", "لم يتم تنزيل أنشطة منزلية بعد. سيظهر هنا ما يحدده الأخصائي": "No home activities have been assigned yet. Activities selected by the therapist will appear here", "إجمالي المستحق": "Total Due", "إجمالي المدفوع": "Total Paid", "رصيد لصالحك": "Credit Balance", "مسدد": "Paid", "تواصل": "Contact", "معلومات": "Information", "المركز": "Center", "أهلاً بيك في مركزنا": "Welcome to Our Center", "راسلنا على واتساب": "Message Us on WhatsApp", "فروعنا": "Our Branches", "فرع": "Branch", "حذف النشاط": "Delete Activity", "اختر الفولدر": "Choose Folder", "تعديل النشاط": "Edit Activity", "اضغط لإضافة صورة": "Click to Add an Image", "حسابك غير مرتبط بملف أخصائي، لذلك بتظهر لك كل الجلسات. اطلب من الإدارة ربطه من: الإعدادات": "Your account is not linked to a therapist profile, so you can see all sessions. Ask the administration to link it under Settings", "تعديل الحساب": "Edit Account", "هذا الإجراء غير متاح لحساب الأخصائي": "This action is not available for therapist accounts", "كشف الحضور السريع — جلساتي": "Quick Attendance Report — My Sessions", "الجلسات المسجلة لك في اليوم المحدد — اضغط على أي جلسة لعرض تفاصيلها": "Sessions recorded for you on the selected day — click any session to view details", "اضغط على الجلسة لعرض التفاصيل": "Click the session to view details", "حسابك غير مرتبط بملف أخصائي فبتظهر كل الجلسات. اطلب من الإدارة ربطه": "Your account is not linked to a therapist profile, so all sessions are displayed. Ask the administration to link it", "لا توجد جلسات لك في": "You have no sessions on", "تفاصيل": "Details", "الجلسة غير موجودة": "Session Not Found", "رقم الجلسة مع هذا الطفل": "Session number with this child", "الجلسات التي حضرها قبل هذه الجلسة": "Sessions attended before this session", "آخر جلسة قبلها": "Previous session", "لا توجد (أول جلسة": "None (first session", "ملاحظات الجلسة": "Session Notes", "المزيد من التفاصيل (الأهداف، التقدم، التقييم) سيتم إضافتها قريبًا": "More details (goals, progress, assessment) will be added soon", "ملف العميل": "Client File", "البيانات + ملاحظاتي الخاصة": "Details + My Private Notes", "آخر ملاحظاتك الخاصة عن الطفل (لا يراها غيرك": "Your latest private notes about the child (visible only to you", "تم حفظ الملاحظة (ظاهرة لك أنت فقط": "Note saved (visible only to you", "ملاحظاتي الخاصة عن": "My Private Notes About", "مسودة شخصية — لا يراها أي مستخدم آخر (لا السكرتارية ولا الإدارة ولا ولي الأمر": "Personal draft — not visible to any other user (reception, administration, or parent/guardian", "اكتب تعليقك أو ملاحظتك عن الطفل هنا": "Write your comment or note about the child here", "تُحفظ تلقائيًا كمسودة حتى تضغط حفظ": "Automatically saved as a draft until you click Save", "حفظ الملاحظة": "Save Note", "لا توجد ملاحظات محفوظة بعد": "No saved notes yet", "جلساتي هذا الشهر": "My Sessions This Month", "الإجمالي من البداية": "Lifetime Total", "نسبة الالتزام": "Attendance Rate", "من البداية": "Since Start", "قادمة مجدولة": "Upcoming Scheduled", "غياب بدون عذر": "Unexcused Absence", "اعتذارات الأهل": "Parent Cancellations", "بعذر": "Excused", "نفس اليوم": "Same Day", "الأطفال المتابَعون حاليًا": "Currently Followed Children", "آخر ٦٠ يوم / ٣٠ يوم قادمة": "Last 60 Days / Next 30 Days", "إجمالي ما حضره الأطفال": "Total Sessions Attended by Children", "منذ بداية التسجيل": "Since Registration", "توزيع حالات جلساتي هذا الشهر": "Distribution of My Session Statuses This Month", "آخر ٦ شهور": "Last 6 Months", "اعتذرتُ": "I Cancelled", "لا توجد جلسات اليوم": "No sessions today", "أطفالي": "My Children", "لا يوجد أطفال حاليًا": "No children currently", "مستحقاتك حسب النسبة التي تحددها الإدارة": "Your earnings are based on the percentage set by the administration", "لم تحدد الإدارة نسبتك بعد، لذلك لا يمكن احتساب المبلغ. اطلب منهم تحديدها من: الإعدادات": "The administration hasn't set your percentage yet, so the amount can't be calculated. Ask them to set it in Settings", "لا تدخل في الحساب": "Not included in the calculation", "نسبتي": "My Percentage", "من قيمة الجلسة المحتسبة": "of the calculated session value", "مستحقاتي هذا الشهر": "My Earnings This Month", "من قيمة جلسات": "of the value of sessions", "تفاصيل جلسات": "Session Details", "قيمة الجلسة المحتسبة": "Calculated Session Value", "نصيبي": "My Share", "لا توجد جلسات في هذا الشهر": "No sessions this month", "طريقة الاحتساب: جلسة الحضور بكامل قيمتها، واعتذار نفس اليوم": "Calculation method: attended sessions count at full value; same-day cancellations", "بنصف القيمة": "at half value", "، والغياب بدون عذر": ", and unexcused absences", "بقيمته الكاملة": "at full value", "الاعتذار بعذر وجلسات الإلغاء من المركز/الأخصائي لا تدخل في الحساب. الجلسات المجدولة لم تُحتسب بعد": "Excused cancellations and sessions cancelled by the center/therapist are excluded. Scheduled sessions have not yet been counted", "اختر ملف الأخصائي": "Select Therapist Profile", "تم حفظ الملاحظة": "Note Saved", "ملاحظة للأخصائي": "Note for Therapist", "لون الورقة": "Note Color", "واتساب": "WhatsApp", "مفكرة ملاحظاتي للأخصائي": "My Notes for the Therapist", "اكتب هنا أي حاجة عايز تقولها عن": "Write anything you want to say about", "أو نشاط حصل — وابعتها للمركز بضغطة": "or an activity that happened — and send it to the center with one tap", "مثال: النهارده نطق كلمة جديدة": "Example: Today, they pronounced a new word", "بيتضايق من الأصوات العالية": "Gets upset by loud sounds", "عايز أسأل عن تمرين البيت": "I want to ask about the home exercise", "مسح المسودة": "Clear Draft", "إرسال للمركز": "Send to Center", "حفظ كملاحظة": "Save as Note", "ملاحظاتك المحفوظة هتظهر هنا كورق ملاحظات": "Your saved notes will appear here as sticky notes", "لا توجد فاتورة لهذا الشهر": "No invoice for this month", "المستحق": "Amount Due", "المدفوع": "Paid Amount", "عرض الفاتورة": "View Invoice", "لا توجد جلسات مسجلة لشهر": "No sessions recorded for the month of", "حتى الآن": "So Far", "فاتورة الشهر الحالي": "Current Month Invoice", "كل الفواتير": "All Invoices", "لا توجد فواتير": "No invoices", "الفواتير للعرض والطباعة فقط. لأي استفسار تواصل مع المركز عبر واتساب": "Invoices are view-only and can be printed. For questions, contact the center via WhatsApp", "الإجمالي المدفوع": "Total Paid", "تاريخ الدفع": "Payment Date", "عن شهر": "For Month", "لا توجد مدفوعات مسجلة": "No payments recorded", "هذه الصفحة للعرض فقط ولا يمكن تعديل أي دفعة": "This page is view-only; payments cannot be edited", "اضغط لعرض الفواتير": "Click to view invoices", "سجل كل ما تم دفعه": "Record of All Payments", "اكتب ملاحظة للأخصائي": "Write a Note to the Therapist", "ملاحظة محفوظة": "Note Saved", "سجّل أي حاجة تحب تقولها للأخصائي": "Record anything you'd like to tell the therapist", "إضافة أنشطة للبرنامج العلاجي": "Add Activities to Treatment Program", "ابحث باسم النشاط أو الهدف": "Search by activity name or goal", "إنشاء نشاط جديد": "Create New Activity", "إضافة المحدد": "Add Selected", "اسم النشاط": "Activity Name", "مثال: تسمية الحيوانات": "Example: Naming Animals", "يُحفظ في الفولدر": "Saved in Folder", "وسم قصير": "Short Tag", "سنوات": "Years", "اللون": "Color", "هدف النشاط": "Activity Goal", "اكتب هدف النشاط هنا": "Enter the activity goal here", "الأنشطة / الأدوات المستخدمة (صور": "Activities / Tools Used (Images", "أداة": "Tool", "معيار النجاح": "Success Criterion", "اكتب معيار النجاح هنا": "Enter the success criterion here", "طريقة تنفيذ النشاط (صورة + شرح تحتها": "How to Perform the Activity (Image + Description Below", "خطوة": "Step", "أي ملاحظات إضافية (اختياري": "Additional Notes (Optional", "حفظ النشاط": "Save Activity", "زر": "Button", "الإدارية": "Administrative", "المباشرة": "Live", "اليومي": "Daily", "الكامل": "Complete", "إعداد التطبيق: القفل التلقائي (الافتراضي دقيقة": "App Settings: Auto-lock (default: 1 minute", "بعد 5 محاولات غلط: خروج كامل": "After 5 incorrect attempts: full logout", "افتح بالبصمة / الوجه": "Unlock with Fingerprint / Face ID", "إيقاف البصمة / الوجه": "Disable Fingerprint / Face ID", "تعذّر التحقق بالبصمة — استخدم الكود": "Fingerprint verification failed — use the code", "تم تفعيل البصمة / الوجه": "Fingerprint / Face ID Enabled", "تعذّر تفعيل البصمة على الجهاز ده": "Could not enable fingerprint on this device", "إيقاف فتح التطبيق بالبصمة / الوجه؟": "Disable app unlocking with fingerprint / Face ID?", "تم إيقاف البصمة": "Fingerprint Disabled", "نسيت الكود؟ سجّل دخول بالإيميل": "Forgot the code? Log in with email", "اختار كود الدخول السريع": "Choose a Quick Login Code", "الكود ده بيفتح التطبيق على الجهاز ده بس": "This code opens the app on this device only", "إيقاف الكود نهائياً": "Disable Code Permanently", "فعّل البصمة / الوجه؟": "Enable Fingerprint / Face ID?", "تفتح بيه التطبيق بسرعة بدل ما تكتب الكود": "Use it to open the app quickly instead of entering the code", "اكتب الكود تاني للتأكيد": "Re-enter the code to confirm", "هتسجّل خروج وتدخل بالإيميل والباسورد، وبعدها تقدر تعمل كود جديد. متأكد؟": "You'll be logged out and must sign in with email and password before creating a new code. Are you sure?", "إيقاف الدخول السريع بالكود؟": "Disable quick code login?", "تم إيقاف الكود": "Code Disabled", "الكودين مش متطابقين، جرّب تاني": "The codes don't match. Try again", "تعذر حفظ الكود على الجهاز ده": "Could not save the code on this device", "الكود غلط — باقي": "Incorrect code — remaining", "محاولات": "Attempts", "الدخول بالكود محتاج رابط": "Code login requires a link", "مستخدم تاني دخل: الكود القديم يتمسح": "Another user signed in: the old code will be deleted", "الصفحة الافتتاحية للتطبيق (إعداد التطبيق": "App landing page (app settings", "أهلاً،": "Hello,", "يتوفر تحديث جديد للبرنامج": "A new app update is available", "لتحميل آخر نسخة (بياناتك محفوظة": "To download the latest version (your data is saved", "لاحقاً": "Later", "محتاج اتصال بالإنترنت للتحديث": "An internet connection is required to update", "جاري التحديث": "Updating", "مفيش اتصال بالإنترنت": "No internet connection", "تعذّر فحص التحديثات الآن": "Could not check for updates right now", "يوم الجلسة": "Session Date", "الجدول": "Schedule", "الصورة": "Image", "الترتيب": "Order", "لم يبدأ": "Not Started", "متوقف": "Paused", "منتهي": "Completed", "ابحث بالاسم أو الهاتف أو رقم الملف": "Search by name, phone, or file number", "ابحث بالعميل أو الأخصائي": "Search by client or therapist", "ابحث باسم العميل": "Search by client name", "ابحث بالعميل أو رقم السند": "Search by client or receipt number", "ابحث بالصنف أو المورد": "Search by item or supplier", "ابحث بالاسم أو التخصص": "Search by name or specialty", "نتيجة": "Result", "لا توجد فروع": "No branches", "اسم المركز واللوجو الرسمي واللغة والتليفون والعنوان": "Center name, official logo, language, phone, and address", "اللون الأساسي للنظام": "System Primary Color", "لوجو الشريط العلوي، حجم الخط، الشريط السفلي، القفل التلقائي": "Top bar logo, font size, bottom bar, and auto-lock", "للابتوب فقط": "Laptop Only", "المستخدمون والصلاحيات وكلمات المرور": "Users, permissions, and passwords", "أقسام مخصصة للنظام": "Custom System Sections", "إغلاق القائمة": "Close Menu", "جدولة جلسة": "Schedule a Session", "تسجيل دفعة": "Record Payment", "أدوات": "Tools", "متدرب": "Trainee", "إدارة": "Management", "غير نشط": "Inactive", "الأخصائيون": "Therapists", "الأطفال": "Children", "تغيير": "Change", "بصورة": "With Photo", "هذه الصفحة للمدير والسكرتارية فقط": "This page is for the manager and reception staff only", "ارفع صورة من الجهاز لأي أخصائي أو طفل أو سكرتير أو مدير — بتتصغّر تلقائيًا وبتتزامن مع السحابة": "Upload an image from your device for any therapist, child, receptionist, or manager — it will be resized automatically and synced to the cloud", "بحث بالاسم أو الكود": "Search by name or code", "تغيير صورتي": "Change My Photo", "أخصائي — لوحة أدائي": "Therapist — My Performance Dashboard", "جلسات اليوم والكاليندر": "Today's Sessions and Calendar", "سجّل ما تم مع كل طفل": "Record what was done with each child", "تسجيل الحضور": "Record Attendance", "مستحقاتي الشهرية": "My Monthly Earnings", "الجلسة القادمة": "Next Session", "كراسة الطفل": "Child's Notebook", "جلساتي وجدولي الشهري": "My Sessions and Monthly Schedule", "جلسات يوم": "Sessions for Day", "لا توجد جلسات في هذا اليوم": "No sessions on this day", "اختر الطفل": "Select Child", "اختر طفلًا من الأعلى لتظهر كراسة المتابعة الخاصة به": "Select a child above to display their progress notebook", "نفس الكراسة اللي بيشوفها ولي الأمر — وأنت بتكتب فيها مباشرة": "The same notebook the parent/guardian sees — you write in it directly", "ابحث باسم الطفل": "Search by child's name", "صفحة جديدة": "New Page", "تعديل هذه الصفحة": "Edit This Page", "الحضور": "Attendance", "الطفل ده مش ضمن أطفالك": "This child is not assigned to you", "ولي أمر": "Parent/Guardian", "يحوّل كل ألوان القيمة لو كلها تعدّي الاختبار": "Converts all value colors if they all pass the test", "دايمًا آخر ستايل عشان يكسب على إعدادات المركز": "Always use the last style so it overrides the center settings", "ولي الأمر: على الجهاز بس": "Parent/guardian: on this device only", "اكتب إيميل صحيح": "Enter a valid email address", "ده نفس الإيميل الحالي": "This is the current email address", "اكتب كلمة المرور الحالية للتأكيد": "Enter your current password to confirm", "لازم تكون مسجّل دخول ومتصل بالسحابة": "You must be signed in and connected to the cloud", "جاري التحقق": "Verifying", "كلمة المرور الحالية غلط": "Current password is incorrect", "تعذر تغيير الإيميل": "Could not change email", "اتبعت رابط تأكيد على": "A confirmation link was sent to", "افتحه عشان الإيميل يتغيّر، وبعدها سجّل دخول بالإيميل الجديد": "Open it to change your email, then sign in with the new email address", "تعذر الاتصال. تأكد من النت": "Connection failed. Check your internet connection", "اتحدّث الإيميل لـ": "Email updated to", "بدون": "Without", "أزرار الشريط السفلي في الموبايل (3 أزرار": "Mobile bottom bar buttons (3 buttons", "الحساب والأمان": "Account and Security", "الصورة بتتحفظ على الجهاز ده": "The image is saved on this device", "الآن": "Now", "دقيقة": "Minute", "ساعة": "Hour", "امبارح": "Yesterday", "أيام": "Days", "طفل اتربط حديثاً: نبدأ منه من غير إشعار": "Newly linked child: start with this child without a notification", "واجب منزلي": "Homework", "روابط/فيديو": "Links / Video", "جديدة": "New", "كراسة النهارده جاهزة": "Today's Notebook Is Ready", "كراسة جديدة": "New Notebook", "الأخصائي أضاف كراسة جلسة": "The therapist added a session notebook", "أنشطة جديدة": "New Activities", "واجب منزلي جديد": "New Homework", "رابط/فيديو جديد": "New Link / Video", "رسمة أو صورة": "Drawing or Image", "إضافة جديدة في كراسة": "New Addition to Notebook", "نشاط جديد للبيت": "New Home Activity", "نشاط جديد في أنشطة البيت": "New Activity in Home Activities", "تعليق جديد من الأخصائي": "New Comment from Therapist", "حالة جديدة": "New Status", "اتضافت لأطفالك": "Added for Your Children", "جدول جديد": "New Schedule", "المواعيد الأسبوعية": "Weekly Appointments", "اتلغى الجدول الأسبوعي الثابت": "Fixed Weekly Schedule Cancelled", "تغيير من الإدارة": "Change Made by Administration", "حالة الطفل بقت": "Child's Status Changed to", "غير محددة": "Unspecified", "تعديل موعد جلسة": "Edit Session Appointment", "جلسة جديدة في جدولك": "New Session in Your Schedule", "جلسات جديدة في جدولك": "New Sessions in Your Schedule", "تم إلغاء جلسة": "Session Cancelled", "اتشالت من جدولك": "Removed from Your Schedule", "جلسة اتنقلت لأخصائي تاني": "Session Reassigned to Another Therapist", "نفس الكراسة اتعدّلت تاني قبل ما تتقري: نجمّع في إشعار واحد": "The same notebook was updated again before being read: combine into one notification", "وفي": "and", "تحديثات تانية": "other updates", "افتح الكراسة / الجدول عشان تشوف كل الجديد": "Open the notebook / schedule to see all updates", "البيانات لسه ما اتحمّلتش (أو الحساب مش مربوط): ما نلمسش البصمة القديمة": "Data hasn't loaded yet (or the account isn't linked): don't change the existing fingerprint", "قراءة الكل": "Mark All as Read", "مفيش إشعارات لسه": "No notifications yet", "هتظهر هنا أي إضافة جديدة أول ما تحصل": "Any new additions will appear here as soon as they happen", "المتصفح ده مش بيدعم إشعارات الجهاز": "This browser does not support device notifications", "على الآيفون لازم تضيف التطبيق للشاشة الرئيسية الأول": "On iPhone, you must first add the app to the Home Screen", "تم تفعيل إشعارات الجهاز": "Device notifications enabled", "تعذر تفعيل الإشعارات": "Could not enable notifications", "جاري تثبيت التطبيق": "Installing the app", "ثبّت التطبيق على جهازك زي أي تطبيق": "Install the app on your device like any other app", "على الآيفون: اضغط زر المشاركة": "On iPhone: tap the Share button", "في سفاري ثم": "in Safari, then", "إضافة إلى الشاشة الرئيسية": "Add to Home Screen", "، وافتح التطبيق منها وفعّل الإشعارات": ", open the app from there, and enable notifications", "الإشعارات مقفولة من إعدادات المتصفح للموقع ده — افتحها من هناك": "Notifications are blocked in this site's browser settings — enable them there", "وصّلني الإشعارات على الجهاز حتى لو التطبيق مقفول": "Receive device notifications even when the app is closed", "إشعارات الجهاز شغّالة": "Device notifications are on", "ثبّت التطبيق على موبايلك": "Install the app on your phone", "عشان توصلك إشعارات الكراسة والمواعيد": "to receive notebook and appointment notifications", "إزاي؟": "How?", "فعّل الإشعارات": "Enable Notifications", "هيوصلك تنبيه أول ما يتضاف جديد، حتى والتطبيق مقفول": "You'll get an alert whenever something new is added, even when the app is closed"});
+Object.assign(I18N_EN, {"جلسة":"Session","تقييم":"Assessment","تم تجاهل":"Skipped","موعد قبل تاريخ بداية البرنامج":"dates before the program start date"});
 Object.assign(I18N_EN, {"حضور": "Attended", "الغاء": "Cancelled", "اعتذار": "Excused", "محسوبة": "Charged", "غ. أخصائي": "Therapist absent", "محجوزة": "Booked", "مجدولة": "Booked", "المحجوزة": "booked"});
 Object.assign(I18N_EN, Object.assign({"قبل 24س": "before 24h", "اعتذار بنفس اليوم": "same-day excuse", "اعتذار نفس اليوم": "Same-day excuse", "اعتذار بعذر": "Excused", "إلغاء من المركز": "Cancelled by center", "إلغاء المركز": "Center cancellation", "ألغاها المركز": "Cancelled by center", "غياب": "Absent", "حضر": "Attended", "محجوزة قادمة": "Upcoming booked", "قادمة محجوزة": "Upcoming booked", "جلسات اعتذرتُ عنها": "Sessions I cancelled", "احتساب جلسات الالغاء ضمن مستحقاته": "Count cancelled sessions in his dues", "طريقة الاحتساب": "Calculation method", "بنصف القيمة": "at half price", "بقيمته الكاملة": "at full price", "لا تدخل في الحساب": "are not counted", "لم تُحتسب بعد": "not counted yet", "الجلسات المحجوزة": "Booked sessions"}, I18N_EN));
   let _i18nRegex = null, _i18nObs = null;
@@ -9564,7 +9705,7 @@ Object.assign(I18N_EN, Object.assign({"قبل 24س": "before 24h", "اعتذار
         <td class="p-3 font-extrabold text-slate-900">${actEsc(c.name)} <span class="text-[10px] text-slate-400 font-mono">#${actEsc(c.id)}</span></td>
         <td class="p-3"><span class="bg-slate-100 px-2 py-0.5 rounded font-bold text-xs">${getBranchName(s.branch)}</span></td>
         <td class="p-3 font-medium text-slate-700">${actEsc(th ? th.name : '')}</td>
-        <td class="p-3 text-slate-500">${actEsc(s.type || 'S.T Session')}</td>
+        <td class="p-3 text-slate-500">${suTypeVal(s.type)}</td>
         <td class="p-3 text-center">${statusBadgeHtml(s.status)}</td>
         <td class="p-3 text-slate-500">${actEsc(s.notes || '-')}</td>
         <td class="p-3 text-center"><button onclick="event.stopPropagation();openSessionDetail('${s.id}')" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-3 py-1 rounded-lg text-xs">📂 تفاصيل</button></td>
@@ -11185,7 +11326,7 @@ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/sv
       var c = client(x.clientId) || { name: '؟' }, isNx = x.id === nextId;
       return '<tr class="' + (isNx ? 'nx' : '') + '"><td class="font-mono font-black">' + E(formatTime12(x.time)) + (isNx ? '<br><span class="ma-nx">⏭️ الجلسة القادمة</span>' : '') + '</td>' +
         '<td><b>' + E(c.name) + '</b> <span class="font-mono text-slate-400 text-[11px]">#' + E(x.clientId) + '</span></td>' +
-        '<td>' + E(x.type || 'S.T Session') + '</td><td>' + E(getBranchName(c.branch || dashSessBranch(x))) + '</td>' +
+        '<td>' + E(suTypeVal(x.type)) + '</td><td>' + E(getBranchName(c.branch || dashSessBranch(x))) + '</td>' +
         '<td>' + statusBadgeHtml(x.status) + '</td>' +
         '<td><div style="display:flex;gap:6px"><button class="ma-ab k" onclick="maOpenBook(\'' + E(x.clientId) + '\')" title="كراسة الطفل">📒</button><button class="ma-ab d" onclick="maOpenSession(\'' + E(x.id) + '\')" title="تفاصيل الجلسة">📂</button></div></td></tr>';
     }).join('');
