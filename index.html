@@ -4,6 +4,7 @@
 <script>try{if(localStorage.getItem("SU_LANG")==="en"){var _d=document.documentElement;_d.lang="en";_d.dir="ltr"}}catch(e){}</script>
 <script>try{var _t=localStorage.getItem('SU_THEME')||'light';if(_t==='dark'||(_t==='system'&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.classList.add('su-dark')}catch(e){}</script>
   <meta charset="UTF-8">
+  <script>window.escH=function(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]})};</script>
   <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, viewport-fit=cover">
   <script>/* موبايل: لو الصفحة اتفتحت بعرض أكبر من الشاشة (وضع الكمبيوتر / تكبير تلقائي) نرجّعها لعرض الموبايل عشان القوائم والقائمة الجانبية تشتغل */
   (function(){try{var sw=Math.min(screen.width,screen.height);if(navigator.maxTouchPoints>0&&sw<=500&&window.innerWidth>820){var m=document.querySelector('meta[name=viewport]');if(m)m.setAttribute('content','width='+sw+', initial-scale=1, minimum-scale=1, viewport-fit=cover');}}catch(e){}})();</script>
@@ -1595,7 +1596,7 @@ body.sidebar-collapsed #sideNav .side-gear{justify-content:center;padding:8px 0}
           </div>
         </div>
         <div id="pbiPanel" class="hidden bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
-          <iframe id="pbiFrame" title="Power BI" allowfullscreen referrerpolicy="strict-origin-when-cross-origin" style="width:100%;height:calc(100vh - 240px);min-height:520px;border:0;display:block"></iframe>
+          <iframe id="pbiFrame" sandbox="allow-scripts allow-same-origin allow-popups allow-forms" title="Power BI" allowfullscreen referrerpolicy="strict-origin-when-cross-origin" style="width:100%;height:calc(100vh - 240px);min-height:520px;border:0;display:block"></iframe>
           <div class="text-[11px] text-slate-400 p-2 text-center">لو الصفحة فاضية: اتأكد إن الرابط "Publish to web"، أو إنك مسجّل دخول Power BI على نفس المتصفح (لو الرابط خاص بالمؤسسة).</div>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -2296,7 +2297,7 @@ body.sidebar-collapsed #sideNav .side-gear{justify-content:center;padding:8px 0}
               </div>
               <div class="md:col-span-2 bg-sky-50 border border-sky-200 rounded-xl p-3">
                 <label class="block text-slate-800 font-bold mb-1.5">📊 رابط داشبورد Power BI <span class="text-slate-400 font-normal">(اختياري — بيظهر للمدير فقط في الداشبورد)</span></label>
-                <input type="text" id="settingPowerBiUrl" dir="ltr" placeholder="https://app.powerbi.com/view?r=..." class="w-full border rounded-xl p-2.5 font-mono text-xs focus:ring-2 focus:ring-sky-500">
+                <input type="text" id="settingPowerBiUrl" dir="ltr" placeholder="https://app.powerbi.com/reportEmbed?reportId=..." class="w-full border rounded-xl p-2.5 font-mono text-xs focus:ring-2 focus:ring-sky-500">
                 <div class="text-[11px] text-slate-500 mt-1.5 leading-relaxed">الصق الرابط، أو كود التضمين (iframe) كامل. المسموح: app.powerbi.com و app.fabric.microsoft.com. سيب الخانة فاضية لإلغاء الربط.<br><b class="text-rose-600">تنبيه:</b> رابط "Publish to web" مفتوح لأي حد معاه الرابط، وداشبورد فيها أسماء الأطفال. الأأمن إنك تستخدم "Embed" الخاص بالمؤسسة.</div>
               </div>
               
@@ -3117,7 +3118,7 @@ body.sidebar-collapsed #sideNav .side-gear{justify-content:center;padding:8px 0}
             </div>
             <label class="flex items-start gap-2 font-bold text-slate-700"><input type="checkbox" id="staffCreateAccount" checked class="mt-0.5" onchange="staffAccToggle()"> <span>إنشاء / تحديث حساب دخول للنظام تلقائيًا (Supabase)</span></label>
             <div id="staffAccBox" class="space-y-1">
-              <label class="block text-slate-700 font-bold mb-1">كلمة المرور المبدئية (8 أحرف على الأقل)</label>
+              <label class="block text-slate-700 font-bold mb-1">كلمة المرور المبدئية (10 أحرف على الأقل)</label>
               <input type="text" id="staffPassword" autocomplete="new-password" placeholder="هتديها للموظف وهو يغيّرها بعد أول دخول" class="w-full border rounded-lg p-2 font-mono">
               <p id="staffAccHint" class="text-[10px] text-slate-500">الإيميل أعلاه هو إيميل الدخول. الموظف هيتطلب منه يغيّر الباسورد أول ما يدخل.</p>
             </div>
@@ -3153,7 +3154,7 @@ body.sidebar-collapsed #sideNav .side-gear{justify-content:center;padding:8px 0}
           </div>
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block text-slate-700 font-bold mb-1">كلمة المرور (8 أحرف على الأقل)</label>
+              <label class="block text-slate-700 font-bold mb-1">كلمة المرور (10 أحرف على الأقل)</label>
               <input type="text" id="userPassword" placeholder="سيبها فاضية لو مش عايز تغيّرها" autocomplete="new-password" class="w-full border rounded-lg p-2 font-mono">
             </div>
             <div>
@@ -4465,7 +4466,7 @@ body.sidebar-collapsed #sideNav .side-gear{justify-content:center;padding:8px 0}
       '<h3 class="text-lg font-black text-slate-900">🔑 تغيير كلمة المرور</h3>' +
       '<div id="pwMsg" class="hidden px-3 py-2 rounded-xl font-bold"></div>' +
       '<div><label class="block font-bold text-slate-700 mb-1">كلمة المرور الحالية</label><input id="pwOld" type="password" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 font-mono"></div>' +
-      '<div><label class="block font-bold text-slate-700 mb-1">كلمة المرور الجديدة (8 أحرف على الأقل)</label><input id="pwNew" type="password" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 font-mono"></div>' +
+      '<div><label class="block font-bold text-slate-700 mb-1">كلمة المرور الجديدة (10 أحرف على الأقل)</label><input id="pwNew" type="password" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 font-mono"></div>' +
       '<div><label class="block font-bold text-slate-700 mb-1">أعد كتابة الجديدة</label><input id="pwNew2" type="password" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 font-mono"></div>' +
       '<div class="flex gap-2 pt-1"><button id="pwSave" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-black py-2.5 rounded-xl">حفظ</button>' +
       '<button id="pwCancel" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 rounded-xl">إلغاء</button></div></div>';
@@ -4477,7 +4478,7 @@ body.sidebar-collapsed #sideNav .side-gear{justify-content:center;padding:8px 0}
       const n1 = document.getElementById('pwNew').value;
       const n2 = document.getElementById('pwNew2').value;
       if (!oldP) return msg('اكتب كلمة المرور الحالية', false);
-      if (n1.length < 8) return msg('الباسورد الجديد لازم يكون 8 أحرف على الأقل', false);
+      if (n1.length < 10) return msg('الباسورد الجديد لازم يكون 10 أحرف على الأقل', false);
       if (n1 !== n2) return msg('الباسورد الجديد والتأكيد مش متطابقين', false);
       if (n1 === oldP) return msg('الباسورد الجديد لازم يختلف عن الحالي', false);
       const btn = document.getElementById('pwSave'); btn.disabled = true;
@@ -4702,7 +4703,7 @@ body.sidebar-collapsed #sideNav .side-gear{justify-content:center;padding:8px 0}
               ${c.name.trim().charAt(0)}
             </div>
             <div>
-              <div class="font-bold text-slate-800">${c.name}</div>
+              <div class="font-bold text-slate-800">${escH(c.name)}</div>
               <div class="text-[10px] text-slate-400 font-mono">${c.phone ? phoneLink(c.phone) : 'بدون هاتف'} &bull; ${getBranchName(c.branch)}</div>
             </div>
           </div>
@@ -5105,7 +5106,7 @@ body.sidebar-collapsed #sideNav .side-gear{justify-content:center;padding:8px 0}
       const trs = list.map(s => {
         const k = cpStatusKey(s.status), fee = calculateSessionFee(s);
         const th = state.staff.find(x => x.id === s.therapistId);
-        return `<tr class="border-b border-slate-100 hover:bg-slate-50"><td class="font-mono">${s.date}</td><td>${AR_WEEKDAYS[ymdWeekday((s.date || '').replace(/\//g, '-'))] || ''}</td><td>${formatTime12(s.time)}</td><td>${s.type || ''}</td><td>${th ? th.name : '-'}</td><td>${getBranchName(s.branch)}</td><td><span class="px-2 py-0.5 rounded text-[11px] font-bold ${CP_STATUS[k][2]}">${CP_STATUS[k][0]}</span></td>${isTherapist() ? '' : `<td class="font-mono">${s.price === 0 ? 0 : (s.price || '')}${Number(s.discount) > 0 ? ' <small class="text-amber-600" title="تخفيض">(-' + s.discount + ')</small>' : ''}</td><td class="font-mono font-bold">${fee.net}</td>`}<td class="text-slate-500 max-w-[180px] truncate" title="${(s.notes || '').replace(/"/g, '&quot;')}">${s.notes || ''}</td><td><button onclick="editSession('${s.id}')" class="text-indigo-600 font-bold text-xs hover:underline">تعديل</button></td></tr>`;
+        return `<tr class="border-b border-slate-100 hover:bg-slate-50"><td class="font-mono">${s.date}</td><td>${AR_WEEKDAYS[ymdWeekday((s.date || '').replace(/\//g, '-'))] || ''}</td><td>${formatTime12(s.time)}</td><td>${s.type || ''}</td><td>${escH(th ? th.name : '-')}</td><td>${getBranchName(s.branch)}</td><td><span class="px-2 py-0.5 rounded text-[11px] font-bold ${CP_STATUS[k][2]}">${CP_STATUS[k][0]}</span></td>${isTherapist() ? '' : `<td class="font-mono">${s.price === 0 ? 0 : (s.price || '')}${Number(s.discount) > 0 ? ' <small class="text-amber-600" title="تخفيض">(-' + s.discount + ')</small>' : ''}</td><td class="font-mono font-bold">${fee.net}</td>`}<td class="text-slate-500 max-w-[180px] truncate" title="${escH(s.notes || '')}">${escH(s.notes || '')}</td><td><button onclick="editSession('${s.id}')" class="text-indigo-600 font-bold text-xs hover:underline">تعديل</button></td></tr>`;
       }).join('');
       content = `<div class="flex flex-wrap items-center gap-2 mb-3"><select class="border rounded-lg px-2 py-1.5 text-xs font-bold" onchange="cpSetFilter('month',this.value)">${monthOpts}</select><select class="border rounded-lg px-2 py-1.5 text-xs font-bold" onchange="cpSetFilter('status',this.value)">${statusOpts}</select><div class="text-xs text-slate-500 mr-auto">${list.length} جلسة${canInv ? ' • صافي قيمتها ' + cpMoney(net) : ''}</div></div>
         <div class="overflow-x-auto"><table class="w-full text-xs"><thead class="bg-slate-50 text-slate-600"><tr><th>التاريخ</th><th>اليوم</th><th>الوقت</th><th>النوع</th><th>الأخصائي</th><th>الفرع</th><th>الحالة</th>${isTherapist() ? '' : '<th>السعر</th><th>الصافي</th>'}<th>ملاحظات</th><th></th></tr></thead><tbody>${trs || '<tr><td colspan="11" class="py-8 text-slate-400">لا توجد جلسات</td></tr>'}</tbody></table></div>`;
@@ -5116,7 +5117,7 @@ body.sidebar-collapsed #sideNav .side-gear{justify-content:center;padding:8px 0}
     } else if (_cpTab === 'activities') {
       content = cpActivitiesHtml(c);
     } else if (_cpTab === 'payments') {
-      const trs = d.payments.map(p => `<tr class="border-b border-slate-100 hover:bg-slate-50"><td class="font-mono">${p.date || ''}</td><td class="font-mono">${p.month || ''}</td><td class="font-mono font-black text-emerald-700">${cpMoney(p.amount)}</td><td>${getBranchName(p.branch)}</td><td class="text-slate-500">${p.notes || ''}</td><td><button onclick="editPayment('${p.id}')" class="text-indigo-600 font-bold text-xs hover:underline">تعديل</button></td></tr>`).join('');
+      const trs = d.payments.map(p => `<tr class="border-b border-slate-100 hover:bg-slate-50"><td class="font-mono">${p.date || ''}</td><td class="font-mono">${p.month || ''}</td><td class="font-mono font-black text-emerald-700">${cpMoney(p.amount)}</td><td>${getBranchName(p.branch)}</td><td class="text-slate-500">${escH(p.notes || '')}</td><td><button onclick="editPayment('${p.id}')" class="text-indigo-600 font-bold text-xs hover:underline">تعديل</button></td></tr>`).join('');
       content = `<div class="flex items-center mb-3"><div class="text-xs text-slate-500">${d.payments.length} دفعة • الإجمالي <b class="text-emerald-700">${cpMoney(d.totalPaid)}</b></div><button onclick="cpAddPayment()" class="mr-auto bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1.5 rounded-lg text-xs">+ إضافة دفعة</button></div>
         <div class="overflow-x-auto"><table class="w-full text-xs"><thead class="bg-slate-50 text-slate-600"><tr><th>تاريخ الدفع</th><th>عن شهر</th><th>المبلغ</th><th>الفرع</th><th>ملاحظات</th><th></th></tr></thead><tbody>${trs || '<tr><td colspan="6" class="py-8 text-slate-400">لا توجد مدفوعات</td></tr>'}</tbody></table></div>`;
     } else if (_cpTab === 'invoices') {
@@ -5148,7 +5149,7 @@ body.sidebar-collapsed #sideNav .side-gear{justify-content:center;padding:8px 0}
       <div class="cp-card p-5 flex items-center gap-5 flex-wrap bg-gradient-to-l from-indigo-50 to-white">
         ${avatar}
         <div class="flex-1 min-w-[220px]">
-          <div class="flex items-center gap-2 flex-wrap"><h2 class="text-2xl font-black text-slate-900">${c.name}</h2><span class="text-xs font-black px-2 py-0.5 rounded-full bg-white border">${statusBadge}</span><span class="text-xs font-mono text-slate-400">#${c.id}</span></div>
+          <div class="flex items-center gap-2 flex-wrap"><h2 class="text-2xl font-black text-slate-900">${escH(c.name)}</h2><span class="text-xs font-black px-2 py-0.5 rounded-full bg-white border">${statusBadge}</span><span class="text-xs font-mono text-slate-400">#${c.id}</span></div>
           <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-1 text-xs mt-2">
             ${info('الهاتف', c.phone ? phoneLink(c.phone) : '')}
             ${info('الفرع', getBranchName(c.branch))}
@@ -5237,7 +5238,7 @@ body.sidebar-collapsed #sideNav .side-gear{justify-content:center;padding:8px 0}
     if (_dashPage === 'pbi') {
       s.className += ' hidden'; d.className += ' hidden';
       p.className = 'xl:col-span-3 bg-white p-3 rounded-2xl border border-slate-200 shadow-xs';
-      if (p.dataset.src !== pbi) { p.dataset.src = pbi; p.innerHTML = `<iframe title="Power BI" src="${dashEsc(pbi)}" style="width:100%;height:620px;border:0;border-radius:12px" allowfullscreen></iframe>`; }
+      if (p.dataset.src !== pbi) { p.dataset.src = pbi; p.innerHTML = `<iframe title="Power BI" sandbox="allow-scripts allow-same-origin allow-popups allow-forms" src="${dashEsc(pbi)}" style="width:100%;height:620px;border:0;border-radius:12px" allowfullscreen></iframe>`; }
     } else p.className = 'hidden';
   }
 
@@ -5382,7 +5383,7 @@ body.sidebar-collapsed #sideNav .side-gear{justify-content:center;padding:8px 0}
     const m = v.match(/src\s*=\s*["']([^"']+)["']/i);   // لو لصق كود iframe كامل
     if (m) v = m[1];
     v = v.replace(/&amp;/g, '&');
-    try { const u = new URL(v); if (u.protocol === 'https:' && PBI_HOSTS.indexOf(u.hostname) >= 0) return u.href; } catch (e) {}
+    try { const u = new URL(v); if (u.protocol === 'https:' && PBI_HOSTS.indexOf(u.hostname) >= 0) { if (/^\/view\/?$/i.test(u.pathname) && u.searchParams.has('r')) return ''; return u.href; } } catch (e) {}
     return '';
   }
   function pbiUrl() { return pbiParseUrl(state.settings && state.settings.powerBiUrl); }
@@ -5499,9 +5500,9 @@ body.sidebar-collapsed #sideNav .side-gear{justify-content:center;padding:8px 0}
           <div class="font-bold text-slate-800 font-mono">${s.date}</div>
           <div class="text-[11px] text-indigo-700 font-black font-mono">${formatTime12(s.time)}</div>
         </td>
-        <td class="p-3 font-extrabold text-slate-900">${client.name}</td>
+        <td class="p-3 font-extrabold text-slate-900">${escH(client.name)}</td>
         <td class="p-3"><span class="bg-slate-100 px-2 py-0.5 rounded font-bold text-xs">${getBranchName(s.branch)}</span></td>
-        <td class="p-3 font-medium text-slate-700">${therapist.name}</td>
+        <td class="p-3 font-medium text-slate-700">${escH(therapist.name)}</td>
         <td class="p-3 text-slate-500">${suTypeVal(s.type)}</td>
         <td class="p-3">
           <span class="px-2.5 py-1 rounded-full font-black text-[11px] ${statusBadgeClass[suStKey(s.status)] || 'badge-scheduled'}">
@@ -5565,9 +5566,9 @@ body.sidebar-collapsed #sideNav .side-gear{justify-content:center;padding:8px 0}
 
       tr.innerHTML = `
         <td class="p-3 font-mono font-bold text-indigo-900">${formatTime12(s.time)}</td>
-        <td class="p-3 font-extrabold text-slate-900">${client.name} <span class="text-[10px] text-slate-400 font-mono">#${client.id}</span></td>
+        <td class="p-3 font-extrabold text-slate-900">${escH(client.name)} <span class="text-[10px] text-slate-400 font-mono">#${client.id}</span></td>
         <td class="p-3"><span class="bg-slate-100 px-2 py-0.5 rounded font-bold text-xs">${getBranchName(s.branch)}</span></td>
-        <td class="p-3 font-medium text-slate-700">${therapist.name}</td>
+        <td class="p-3 font-medium text-slate-700">${escH(therapist.name)}</td>
         <td class="p-3 text-slate-500">${suTypeVal(s.type)}</td>
         <td class="p-3 text-center">
           <div class="flex items-center justify-center gap-1 flex-wrap">
@@ -5578,7 +5579,7 @@ body.sidebar-collapsed #sideNav .side-gear{justify-content:center;padding:8px 0}
             <button onclick="quickUpdateSessionStatus('${s.id}', 'TCA')" class="px-2 py-1 rounded text-[10px] font-black ${s.status === 'TCA' ? 'bg-slate-600 text-white shadow' : 'bg-slate-100 text-slate-800 hover:bg-slate-200'}">غ. أخصائي</button>
           </div>
         </td>
-        <td class="p-3 text-slate-500">${s.notes || '-'}</td>
+        <td class="p-3 text-slate-500">${escH(s.notes || '-')}</td>
         <td class="p-3 text-center">
           <button onclick="editSession('${s.id}')" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold px-2 py-1 rounded text-xs border border-indigo-200">تعديل ✏️</button>
         </td>
@@ -5821,8 +5822,8 @@ body.sidebar-collapsed #sideNav .side-gear{justify-content:center;padding:8px 0}
                 <span class="font-mono font-black text-indigo-900 text-[11px]">${formatTime12(s.time)}</span>
                 <span class="px-1.5 py-0.5 rounded text-[9px] font-bold ${s.status === 'ATT' ? 'badge-att' : 'badge-scheduled'}">${({ATT:'حضور',CAN:'الغاء',SDE:'محسوبة',EXC:'اعتذار',TCA:'غ. أخصائي',SCHEDULED:'محجوزة'})[suStKey(s.status)]}</span>
               </div>
-              <div class="font-extrabold text-slate-800 text-[11px] truncate">${client.name}</div>
-              <div class="text-[10px] text-slate-400 font-mono">${getBranchName(s.branch)} &bull; ${therapist.name}</div>
+              <div class="font-extrabold text-slate-800 text-[11px] truncate">${escH(client.name)}</div>
+              <div class="text-[10px] text-slate-400 font-mono">${getBranchName(s.branch)} &bull; ${escH(therapist.name)}</div>
             </div>`;
         });
       }
@@ -6009,7 +6010,7 @@ body.sidebar-collapsed #sideNav .side-gear{justify-content:center;padding:8px 0}
 
       tr.innerHTML = `
         <td class="p-3">
-          <div class="font-extrabold text-slate-900">${client.name}</div>
+          <div class="font-extrabold text-slate-900">${escH(client.name)}</div>
           <div class="text-[11px] text-slate-400 font-mono">#${client.id} &bull; ${client.phone ? phoneLink(client.phone) : ''}</div>
         </td>
         <td class="p-3"><span class="bg-slate-100 px-2 py-0.5 rounded font-bold text-xs">${getBranchName(client.branch)}</span></td>
@@ -6104,7 +6105,7 @@ body.sidebar-collapsed #sideNav .side-gear{justify-content:center;padding:8px 0}
   <!-- Client Info -->
   <div style="background:#f1f5f9;border-radius:8px;padding:12px 16px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;">
     <div>
-      <div style="font-size:15px;font-weight:900;color:#1e293b;">${client.name}</div>
+      <div style="font-size:15px;font-weight:900;color:#1e293b;">${escH(client.name)}</div>
       
     </div>
     <div style="text-align:left;">
@@ -6226,7 +6227,7 @@ body.sidebar-collapsed #sideNav .side-gear{justify-content:center;padding:8px 0}
       <div class="bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[95vh] overflow-hidden flex flex-col">
         <!-- Modal Header -->
         <div class="flex flex-wrap items-center justify-between gap-2 px-3 sm:px-6 py-3 border-b bg-indigo-900 text-white">
-          <div class="font-black text-sm sm:text-lg">🧾 كشف حساب الشهر — ${inv.client.name} — ${yearMonth}</div>
+          <div class="font-black text-sm sm:text-lg">🧾 كشف حساب الشهر — ${escH(inv.client.name)} — ${yearMonth}</div>
           <div class="flex flex-wrap items-center gap-2">
             <button onclick="printInvoiceNow()" 
                     class="bg-emerald-500 hover:bg-emerald-600 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold flex items-center gap-1">
@@ -6640,11 +6641,11 @@ body.sidebar-collapsed #sideNav .side-gear{justify-content:center;padding:8px 0}
       tr.innerHTML = `
         <td class="p-3 font-mono font-bold text-indigo-700">#${p.id}</td>
         <td class="p-3 font-mono">${p.date}</td>
-        <td class="p-3 font-bold text-slate-900">${client.name} <span class="text-[10px] text-slate-400 font-mono">#${client.id}</span></td>
+        <td class="p-3 font-bold text-slate-900">${escH(client.name)} <span class="text-[10px] text-slate-400 font-mono">#${client.id}</span></td>
         <td class="p-3"><span class="bg-slate-100 px-2 py-0.5 rounded font-bold text-xs">${getBranchName(p.branch)}</span></td>
         <td class="p-3 font-mono font-black text-emerald-700 text-sm">${p.amount} ج.م</td>
         <td class="p-3 font-mono font-bold text-slate-600">${p.month || '-'}</td>
-        <td class="p-3 text-slate-500">${p.notes || '-'}</td>
+        <td class="p-3 text-slate-500">${escH(p.notes || '-')}</td>
         <td class="p-3 text-center">
           <div class="flex items-center justify-center gap-1">
             <button onclick="printPaymentReceipt('${p.id}')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-2 py-1 rounded text-xs border border-slate-300">🧾 إيصال</button>
@@ -6670,10 +6671,10 @@ body.sidebar-collapsed #sideNav .side-gear{justify-content:center;padding:8px 0}
       <div class="space-y-3 py-4 text-xs">
         <div class="flex justify-between border-b pb-2"><span class="text-slate-500 font-bold">رقم الإيصال:</span><span class="font-mono font-bold">#${p.id}</span></div>
         <div class="flex justify-between border-b pb-2"><span class="text-slate-500 font-bold">التاريخ:</span><span class="font-mono font-bold">${p.date}</span></div>
-        <div class="flex justify-between border-b pb-2"><span class="text-slate-500 font-bold">استلمنا من ولي أمر الطفل:</span><span class="font-bold text-slate-900">${client.name} (#${client.id})</span></div>
+        <div class="flex justify-between border-b pb-2"><span class="text-slate-500 font-bold">استلمنا من ولي أمر الطفل:</span><span class="font-bold text-slate-900">${escH(client.name)} (#${client.id})</span></div>
         <div class="flex justify-between border-b pb-2"><span class="text-slate-500 font-bold">مبلغ وقدره:</span><span class="font-black text-emerald-700 text-base font-mono">${p.amount} جنيهاً مصرياً</span></div>
         <div class="flex justify-between border-b pb-2"><span class="text-slate-500 font-bold">الشهر المحاسبي:</span><span class="font-bold font-mono">${p.month || '-'}</span></div>
-        <div class="flex justify-between pb-2"><span class="text-slate-500 font-bold">البيان:</span><span class="text-slate-700 font-medium">${p.notes || 'سداد رسوم جلسات تأهيل'}</span></div>
+        <div class="flex justify-between pb-2"><span class="text-slate-500 font-bold">البيان:</span><span class="text-slate-700 font-medium">${escH(p.notes || 'سداد رسوم جلسات تأهيل')}</span></div>
       </div>
       <div class="flex justify-between items-center pt-6 border-t text-xs">
         <div class="text-center"><div class="text-slate-400 font-bold">توقيع المستلم</div><div class="mt-6 font-bold text-slate-800">إدارة مركز Speak Up</div></div>
@@ -6885,13 +6886,13 @@ body.sidebar-collapsed #sideNav .side-gear{justify-content:center;padding:8px 0}
         card.className = 'bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs space-y-2';
         card.innerHTML = `
           <div class="flex justify-between items-center border-b pb-2">
-            <span class="font-black text-indigo-950 text-sm">📍 ${b.name || b.branch_name}</span>
+            <span class="font-black text-indigo-950 text-sm">📍 ${escH(b.name || b.branch_name)}</span>
             <div class="flex items-center gap-1">
               <span class="bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded font-bold font-mono text-xs">${b.id}</span>
               <button onclick="editBranch('${b.id || b.branch_id}')" class="text-indigo-600 hover:text-indigo-800 font-bold text-xs px-1">✏️ تعديل</button>
             </div>
           </div>
-          <p class="text-slate-600 text-[11px]">${b.address}</p>
+          <p class="text-slate-600 text-[11px]">${escH(b.address)}</p>
           <div class="grid grid-cols-2 gap-2 pt-2 border-t font-bold">
             <div class="bg-white p-2 rounded border"><span class="text-slate-400 block text-[10px]">سعر الجلسة</span><span class="text-indigo-700 text-sm font-black">${b.sessionPrice || b.session_price || 150} ج.م</span></div>
             <div class="bg-white p-2 rounded border"><span class="text-slate-400 block text-[10px]">سعر التقييم</span><span class="text-purple-700 text-sm font-black">${b.assessmentPrice || b.assessment_price || 250} ج.م</span></div>
@@ -6909,7 +6910,7 @@ body.sidebar-collapsed #sideNav .side-gear{justify-content:center;padding:8px 0}
         tr.className = 'hover:bg-slate-50 border-b border-slate-100 text-xs';
         tr.innerHTML = `
           <td class="p-3 font-mono font-bold text-slate-500">#${s.id}</td>
-          <td class="p-3 font-bold text-slate-800">${s.name}</td>
+          <td class="p-3 font-bold text-slate-800">${escH(s.name)}</td>
           <td class="p-3 text-slate-600">${s.specialty || 'Speech Therapist'}</td>
           <td class="p-3 font-mono font-bold">${s.phone ? phoneLink(s.phone) : '-'}</td>
           <td class="p-3 font-mono text-slate-500">${s.email || '-'}</td>
@@ -6992,8 +6993,8 @@ body.sidebar-collapsed #sideNav .side-gear{justify-content:center;padding:8px 0}
     // validate BEFORE saving anything
     if (wantAcc) {
       if (!staffData.email) { showToast('اكتب إيميل الموظف عشان يتعمله حساب دخول', 'amber'); return; }
-      if (!existingUser && pass.length < 8) { showToast('اكتب كلمة مرور مبدئية 8 أحرف على الأقل', 'amber'); return; }
-      if (pass && pass.length < 8) { showToast('كلمة المرور لازم تكون 8 أحرف على الأقل', 'amber'); return; }
+      if (!existingUser && pass.length < 10) { showToast('اكتب كلمة مرور مبدئية 10 أحرف على الأقل', 'amber'); return; }
+      if (pass && pass.length < 10) { showToast('كلمة المرور لازم تكون 10 أحرف على الأقل', 'amber'); return; }
     }
     const idx = state.staff.findIndex(s => s.id === id);
     if (idx >= 0) state.staff[idx] = Object.assign({}, state.staff[idx], staffData);
@@ -7534,7 +7535,7 @@ body.sidebar-collapsed #sideNav .side-gear{justify-content:center;padding:8px 0}
       if (!pbiRaw) { delete state.settings.powerBiUrl; }
       else {
         const pu = pbiParseUrl(pbiRaw);
-        if (!pu) { showToast('❌ رابط Power BI غير صحيح. لازم رابط https من app.powerbi.com أو app.fabric.microsoft.com', 'amber'); return; }
+        if (!pu) { showToast('❌ رابط Power BI غير صحيح. لازم رابط https من app.powerbi.com أو app.fabric.microsoft.com، وروابط النشر العام (view?r=) غير مسموحة لأنها بدون تسجيل دخول', 'amber'); return; }
         state.settings.powerBiUrl = pu;
       }
     }
@@ -7954,7 +7955,7 @@ body.sidebar-collapsed #sideNav .side-gear{justify-content:center;padding:8px 0}
       const roleText = ({ admin: '👑 المدير', secretary: '⚡ السكرتارية', therapist: '👩‍⚕️ الأخصائي', parent: '👪 أب / أم' }[u.role] || u.role);
 
       tr.innerHTML = `
-        <td class="p-3 font-bold text-slate-800">${u.name}${userScopeBadge(u)}</td>
+        <td class="p-3 font-bold text-slate-800">${escH(u.name)}${userScopeBadge(u)}</td>
         <td class="p-3 font-mono font-medium text-slate-600">${u.email}</td>
         <td class="p-3"><span class="bg-indigo-100 text-indigo-800 px-2.5 py-1 rounded-lg font-extrabold text-xs">${roleText}</span></td>
         <td class="p-3"><span class="bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-bold text-[11px]">حسب الوظيفة</span></td>
