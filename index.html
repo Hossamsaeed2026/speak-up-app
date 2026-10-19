@@ -10487,19 +10487,27 @@ Object.assign(I18N_EN, Object.assign({"قبل 24س": "before 24h", "اعتذار
         const visible = PRIORITY_LIST().filter(id => isVisible(sideBtn(id)) || (sideBtn(id) && !sideBtn(id).classList.contains('hidden')));
         const items = visible.slice(0, MAX_ITEMS);
         const activeId = (document.querySelector('#sideNav .side-tab.active') || {}).id || '';
+        const PPK = { calendar: 'cal', myappts: 'cal', payments: 'acct', myearn: 'acct', invoices: 'acct', followup: 'perf', dashboard: 'perf', activities: 'book' };
+        const GBY = { perf: 0, book: 1, acct: 2, cal: 3 };
+        const GRD = ['linear-gradient(145deg,#059669,#0d9488)', 'linear-gradient(145deg,#7c3aed,#4f46e5)', 'linear-gradient(145deg,#e11d48,#f97316)', 'linear-gradient(145deg,#0ea5e9,#0369a1)'];
+        const tp = document.getElementById('therapistPortal');
+        const portalOn = !!(tp && tp.offsetParent !== null && getComputedStyle(tp).display !== 'none');   // بوابة الأخصائي ليها شريطها الخاص
         const parts = [];
-        items.forEach(id => {
+        items.forEach((id, idx) => {
           const b = sideBtn(id);
-          const ico = b.querySelector('.i3d') ? b.querySelector('.i3d').innerHTML : '•';
           const lbl = (b.querySelector('.side-label') || {}).textContent || id;
           const short = lbl.replace(/(الإدارية|المباشرة|اليومي|الكامل)/g, '').trim().split(' ').slice(0, 2).join(' ');
-          const act = activeId === 'side-nav-' + id ? ' active' : '';
-          parts.push('<button class="mn-btn' + act + '" data-id="' + id + '" onclick="mGo(\'' + id + '\')"><span class="mn-ico">' + ico + '</span><span class="mn-lbl">' + short + '</span></button>');
+          const k = PPK[id];
+          let ico, fb = '';
+          if (k && typeof ppIco === 'function') ico = ppIco(k, 20);
+          else { ico = b.querySelector('.i3d') ? b.querySelector('.i3d').innerHTML : '•'; fb = ' fb'; }
+          const g = GRD[k ? GBY[k] : idx % 4];
+          const on = activeId === 'side-nav-' + id ? ' on' : '';
+          parts.push('<button type="button" class="pp-bar-btn' + on + '" data-id="' + id + '" onclick="mGo(\'' + id + '\')"><span class="pp-bar-ico' + fb + '" style="background:' + g + '">' + ico + '</span><span>' + short + '</span></button>');
         });
-        const center = '<button type="button" class="mn-btn mn-center" onclick="suMenuGo()" aria-label="القائمة"><img class="mn-logo" alt=""></button>';
-        const html = parts.slice(0, 2).join('') + center + parts.slice(2).join('');
+        const html = portalOn ? '' : '<div class="pp-bar-wrap"><div class="pp-bar-pos"><nav class="pp-bar">' + parts.slice(0, 2).join('') + '<div class="pp-bar-gap"></div>' + parts.slice(2).join('') + '</nav><button type="button" class="pp-logo-btn" onclick="suMenuGo()" aria-label="القائمة"><img alt=""></button></div></div>';
         if (nav.dataset.sig !== html) { nav.innerHTML = html; nav.dataset.sig = html; }
-        const lg = nav.querySelector('.mn-logo');
+        const lg = nav.querySelector('.pp-logo-btn img');
         if (lg) { let u = window.SU_APP_LOGO || window.SU_HEADER_LOGO || ''; if (!u) { try { u = localStorage.getItem('SU_LOGO') || ''; } catch (e) {} } u = u || window.SU_DEFAULT_LOGO || 'icons/icon-192.png'; if (lg.getAttribute('src') !== u) lg.src = u; }
       } finally { building = false; }
     }
@@ -10522,7 +10530,7 @@ Object.assign(I18N_EN, Object.assign({"قبل 24س": "before 24h", "اعتذار
       const side = document.getElementById('sideNav');
       if (side) new MutationObserver(buildMobileNav).observe(side, { attributes: true, attributeFilter: ['class'], subtree: true });
       MQ.addEventListener && MQ.addEventListener('change', function () { mCloseMore(); buildMobileNav(); });
-      setTimeout(buildMobileNav, 600); setTimeout(buildMobileNav, 2000);
+      setTimeout(buildMobileNav, 600); setTimeout(buildMobileNav, 2000); setInterval(buildMobileNav, 2000);
       window.mRebuildNav = function () { const n = document.getElementById('mNav'); if (n) n.dataset.sig = ''; buildMobileNav(); };
     }
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
@@ -10988,10 +10996,9 @@ Object.assign(I18N_EN, Object.assign({"قبل 24س": "before 24h", "اعتذار
 </script>
 <style id="su-nav5-css">
 @media (max-width:820px){
-#mNav{width:min(470px,calc(100% - 20px))!important;overflow:visible!important}
-#mNav .mn-btn.mn-center,#mNav .mn-btn.mn-center.active{flex:0 0 64px!important;width:64px!important;height:64px!important;border-radius:50%!important;background:#fff!important;border:3px solid var(--su-primary,#7c3aed)!important;box-shadow:0 8px 20px rgba(60,30,100,.3)!important;transform:translateY(-22px)!important;padding:0!important;overflow:hidden;margin:0 4px}
-#mNav .mn-logo{width:100%;height:100%;object-fit:cover;border-radius:50%;display:block}
-#mNav .mn-btn .mn-lbl{font-size:10px!important}
+html body #mNav{position:static!important;display:block!important;width:0!important;height:0!important;padding:0!important;margin:0!important;background:none!important;border:0!important;box-shadow:none!important;transform:none!important;overflow:visible!important}
+.pp-bar-ico.fb svg,.pp-bar-ico.fb i,.pp-bar-ico.fb span{filter:brightness(0) invert(1)}
+html.su-menu-open .pp-bar-wrap,body.m-more-open .pp-bar-wrap{display:none}
 }
 </style>
 <style id="su-cal-cards">
