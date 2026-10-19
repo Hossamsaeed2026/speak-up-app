@@ -2424,9 +2424,11 @@ body.sidebar-collapsed #sideNav .side-gear{justify-content:center;padding:8px 0}
               <div id="iconTable" class="grid grid-cols-1 sm:grid-cols-2 gap-2"></div>
             </div>
 
+            <div id="suAdvBox" class="space-y-6"></div>
+
             <div class="flex justify-end pt-3 border-t">
               <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-black px-6 py-2.5 rounded-xl shadow text-xs flex items-center gap-1.5">
-                <span>حفظ وتطبيق اللون 🎨</span>
+                <span>حفظ وتطبيق 🎨</span>
               </button>
             </div>
           </form>
@@ -10853,6 +10855,41 @@ Object.assign(I18N_EN, Object.assign({"قبل 24س": "before 24h", "اعتذار
   document.addEventListener('keydown',function(e){if(e.key==='Escape'&&window.mCloseMore)mCloseMore()});
 })();
 </script>
+<style id="su-cal-cards">
+.cw-on{max-height:none!important;overflow:visible!important}
+.cw-scroll{display:flex;gap:8px;overflow-x:auto;padding:8px 8px 14px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch}
+.cw-col{flex:0 0 var(--cw-w,170px);scroll-snap-align:center;background:#fff;border:1px solid var(--su-line,#e6e3ee);border-radius:var(--cw-r,16px);padding:8px;display:flex;flex-direction:column;gap:8px;align-self:flex-start;min-height:120px}
+.cw-col.is-today{border-color:var(--cw-today,#06b6d4);box-shadow:0 0 0 2px var(--cw-today,#06b6d4) inset}
+.cw-col>header{text-align:center;border-radius:calc(var(--cw-r,16px) - 4px);padding:7px 4px;background:#f6f5fa;display:flex;flex-direction:column;gap:1px}
+.cw-col.is-today>header{background:var(--cw-today,#06b6d4);color:#fff}
+.cw-col>header b{font-size:calc(var(--cw-fs,12px) + 1px);font-weight:800}
+.cw-col>header small{font-size:calc(var(--cw-fs,12px) - 2px);opacity:.75}
+.cw-col>header em{font-style:normal;font-size:calc(var(--cw-fs,12px) - 2px);font-weight:800;color:var(--su-primary,#7e3ab8)}
+.cw-col.is-today>header em{color:#fff}
+.cw-list{display:flex;flex-direction:column;gap:6px}
+.cw-card{width:100%;text-align:start;border:1px solid var(--su-line,#e6e3ee);border-inline-start:3px solid var(--su-primary,#7e3ab8);border-radius:calc(var(--cw-r,16px) - 4px);background:#fff;padding:var(--cw-pad,8px 10px);font:inherit;font-size:var(--cw-fs,12px);display:flex;flex-direction:column;gap:3px;cursor:pointer;color:inherit}
+.cw-card.ok{border-inline-start-color:var(--su-green,#2fa36b)}
+.cw-card.warn{border-inline-start-color:var(--su-yellow,#f5b829)}
+.cw-card.mute{border-inline-start-color:#b9b6c6}
+.cw-r1{display:flex;justify-content:space-between;align-items:center;gap:6px}
+.cw-t{color:#3b1763;font-variant-numeric:tabular-nums;font-weight:800}
+.cw-b{font-size:calc(var(--cw-fs,12px) - 3px);padding:1px 7px;border-radius:7px;background:#e0f2fe;color:#075985;border:1px solid #bae6fd;font-weight:700;white-space:nowrap}
+.cw-b.ok{background:color-mix(in srgb,var(--su-green,#2fa36b) 14%,#fff);color:color-mix(in srgb,var(--su-green,#2fa36b) 60%,#000);border-color:color-mix(in srgb,var(--su-green,#2fa36b) 30%,#fff)}
+.cw-b.warn{background:color-mix(in srgb,var(--su-yellow,#f5b829) 16%,#fff);color:color-mix(in srgb,var(--su-yellow,#f5b829) 45%,#000);border-color:color-mix(in srgb,var(--su-yellow,#f5b829) 35%,#fff)}
+.cw-b.mute{background:#f1f0f5;color:#6b6880;border-color:#e2e0ea}
+.cw-n{font-weight:800;color:#1f1b2e;line-height:1.35}
+.cw-s{color:var(--su-muted,#7a7690);font-size:calc(var(--cw-fs,12px) - 2px);line-height:1.4}
+.cw-none{text-align:center;color:#c0bdd0;font-size:12px;padding:18px 0;margin:0}
+.cw-strip{display:flex;gap:6px;overflow-x:auto;padding:8px 8px 4px}
+.cw-dp{flex:1 0 46px;border:1px solid var(--su-line,#e6e3ee);background:#fff;border-radius:calc(var(--cw-r,16px) - 2px);padding:6px 2px;display:flex;flex-direction:column;align-items:center;gap:2px;font:inherit;cursor:pointer;color:inherit}
+.cw-dp small{font-size:10px;opacity:.75}.cw-dp b{font-size:15px}.cw-dp i{font-style:normal;font-size:10px;font-weight:800;min-height:14px}
+.cw-dp.on{background:var(--su-primary,#7e3ab8);color:#fff;border-color:var(--su-primary,#7e3ab8)}
+.cw-dp.is-today:not(.on){border-color:var(--cw-today,#06b6d4);box-shadow:0 0 0 1px var(--cw-today,#06b6d4) inset}
+.cw-day{padding:8px}
+.cw-prev{display:flex;gap:8px;overflow:hidden;padding:4px}
+html.su-dark .cw-col,html.su-dark .cw-card,html.su-dark .cw-dp{background:#1a1822;border-color:#2e2b3a;color:#e9e7f1}
+html.su-dark .cw-col>header{background:#232030}html.su-dark .cw-n,html.su-dark .cw-t{color:#f1effa}
+</style>
 <script id="su-calendar">
 if(window.matchMedia('(max-width:820px)').matches){
 /* Speak Up: minimal calendar (Day / Week / Month). Reads state.sessions only; saving untouched. */
@@ -10922,11 +10959,30 @@ if(window.matchMedia('(max-width:820px)').matches){
       if(L.length)h+='<em class="cal-cnt">'+L.length+'</em>';
       h+='</div>'}
     return h+'</div></div>'}
+  function CFG(){try{return window.suCalCfg()}catch(e){return {view:'cards',colW:170,fs:12,dens:'comfy',radius:16,showBadge:true,showBranch:true,showTher:true,hideEmpty:false,todayColor:'#06b6d4'}}}
+  function cwVars(c){return '--cw-w:'+c.colW+'px;--cw-fs:'+c.fs+'px;--cw-r:'+c.radius+'px;--cw-today:'+c.todayColor+';--cw-pad:'+(c.dens==='compact'?'5px 7px':'8px 10px')}
+  function stLabel(s){try{var m={ATT:'\u062d\u0636\u0648\u0631',CAN:'\u0625\u0644\u063a\u0627\u0621',SDE:'\u0645\u062d\u0633\u0648\u0628\u0629',EXC:'\u0627\u0639\u062a\u0630\u0627\u0631',TCA:'\u063a. \u0623\u062e\u0635\u0627\u0626\u064a',SCHEDULED:'\u0645\u062d\u062c\u0648\u0632\u0629'};return m[suStKey(s.status)]||sl(sk(s))}catch(e){return sl(sk(s))}}
+  function brName(s){try{return getBranchName(s.branch)}catch(e){return ''}}
+  function cwCard(s,c,full){var k=tone(s),sub=[];if(c.showBranch&&brName(s))sub.push(esc(brName(s)));if(c.showTher&&th(s).name)sub.push(esc(th(s).name));
+    if(full&&TYPES[ntype(s.type)])sub.push(esc(TYPES[ntype(s.type)]));
+    return '<button type="button" class="cw-card '+k+'" data-id="'+esc(s.id)+'"><div class="cw-r1"><b class="cw-t">'+esc(formatTime12(s.time))+'</b>'+(c.showBadge?'<span class="cw-b '+k+'">'+esc(stLabel(s))+'</span>':'')+'</div><div class="cw-n">'+esc(cl(s).name)+'</div>'+(sub.length?'<div class="cw-s">'+sub.join(' \u2022 ')+'</div>':'')+'</button>'}
+  function byDay(vis){var by={};vis.forEach(function(s){(by[s.date]=by[s.date]||[]).push(s)});Object.keys(by).forEach(function(d){by[d].sort(function(a,b){return (tmin(a.time)||0)-(tmin(b.time)||0)})});return by}
+  function cardWeek(days,vis,c){var today=todayCairo(),by=byDay(vis),h='<div class="cw-scroll">';
+    days.forEach(function(d){var L=by[d]||[];if(c.hideEmpty&&!L.length&&d!==today)return;var isT=d===today;
+      h+='<section class="cw-col'+(isT?' is-today':'')+'" data-d="'+d+'"><header><b>'+AR_WEEKDAYS[ymdWeekday(d)]+(isT?' \u2022 \u0627\u0644\u064a\u0648\u0645':'')+'</b><small>'+d+'</small><em>'+L.length+' \u062c\u0644\u0633\u0627\u062a</em></header><div class="cw-list">'+(L.length?L.map(function(s){return cwCard(s,c,false)}).join(''):'<p class="cw-none">\u0644\u0627 \u062a\u0648\u062c\u062f \u0645\u0648\u0627\u0639\u064a\u062f</p>')+'</div></section>'});
+    return h+'</div>'}
+  function cardDay(vis,c){var today=todayCairo(),ws=wkStart(C.anchor),by=byDay(vis),h='<div class="cw-strip">';
+    for(var i=0;i<7;i++){var d=ymdAddDays(ws,i),n=(by[d]||[]).length;h+='<button type="button" class="cw-dp'+(d===C.anchor?' on':'')+(d===today?' is-today':'')+'" data-day="'+d+'"><small>'+AR_WEEKDAYS[ymdWeekday(d)]+'</small><b>'+(+d.slice(8))+'</b><i>'+(n||'')+'</i></button>'}
+    h+='</div><div class="cw-list cw-day">';var L=by[C.anchor]||[];
+    h+=L.length?L.map(function(s){return cwCard(s,c,true)}).join(''):'<p class="cw-none">\u0644\u0627 \u062a\u0648\u062c\u062f \u0645\u0648\u0627\u0639\u064a\u062f</p>';return h+'</div>'}
+  function cwBind(body,vis){body.querySelectorAll('.cw-card').forEach(function(b){b.onclick=function(){editSession(b.dataset.id)}});
+    body.querySelectorAll('.cw-dp').forEach(function(b){b.onclick=function(){C.anchor=b.dataset.day;draw()}})}
+  function cwCenter(body){requestAnimationFrame(function(){var sc=body.querySelector('.cw-scroll'),t=body.querySelector('.cw-col.is-today');if(!sc||!t)return;var a=sc.getBoundingClientRect(),b=t.getBoundingClientRect();sc.scrollLeft+=(b.left+b.width/2)-(a.left+a.width/2)})}
   function draw(){if(!C.built)build();if(!C.anchor)C.anchor=todayCairo();
     var all=list(),r=range(),body=document.getElementById('calBody');
     var vis=all.filter(function(s){return s.date>=r[0]&&s.date<=r[1]});
     var days=[];if(C.mode!=='month')for(var d=r[0];d<=r[1];d=ymdAddDays(d,1))days.push(d);
-    body.innerHTML=C.mode==='month'?monthGrid(vis):timeGrid(days,vis);body.className='cal-body m-'+C.mode;
+    var cfg=CFG(),cards=cfg.view!=='grid'&&C.mode!=='month';body.innerHTML=C.mode==='month'?monthGrid(vis):(cards?(C.mode==='day'?cardDay(vis,cfg):cardWeek(days,vis,cfg)):timeGrid(days,vis));body.className='cal-body m-'+C.mode+(cards?' cw-on':'');if(cards){body.style.cssText=cwVars(cfg);cwBind(body,vis);if(C.mode==='week')cwCenter(body)}else body.style.cssText='';
     document.getElementById('calendar-week-label').textContent=label();
     document.querySelectorAll('#tab-calendar [data-m]').forEach(function(b){b.classList.toggle('on',b.dataset.m===C.mode);b.setAttribute('aria-selected',b.dataset.m===C.mode)});
     document.getElementById('calDot').hidden=!(C.f.client||C.f.staff||C.f.status||C.f.type);
@@ -13418,6 +13474,7 @@ function plan(rows){
   COLS.forEach(function(k){var v=r[k[1]];o[k[0]]=v==null?'':String(v).trim();if(o[k[0]])any=true});
   if(!any)return;
   if(o.status){var st=STR[o.status]||STR[o.status.toLowerCase()];if(!st){err.push('سطر '+ln+': حالة غير معروفة "'+o.status+'" (المسموح: نشط / موقوف / مكتمل)');return}o.status=st}
+  if(o.phone)o.phone=window.suLatinDigits(o.phone);
   if(o.phone&&/^1\d{9}$/.test(o.phone))o.phone='0'+o.phone;
   if(o.branch&&!br[o.branch]){err.push('سطر '+ln+': فرع غير موجود "'+o.branch+'"');return}
   var bad=['dob','startDate','endDate'].filter(function(f){return o[f]&&!/^\d{4}-\d{2}-\d{2}$/.test(o[f])})[0];
@@ -13590,5 +13647,385 @@ html.su-dark .cn-link:hover{color:#a5b4fc;background:rgba(165,180,252,.12)}
   window.cnRelink = function () { cache.sig = ''; processRoot(document.body); };   // لو احتجت تعيد المسح يدوي
 })();
 </script>
+<script id="suAdvScript">
+/* ===== إعدادات متقدمة للثيم: خط/بولد + ألوان الشريطين + لون البروفيل + الجداول (عام + عمود عمود) ===== */
+(function () {
+  'use strict';
+  var TABLES = [['clients','العملاء','clients-tbody'],['sessions','سجل الجلسات','sessions-tbody'],['secretary','كشف الحضور اليومي','secretary-tbody'],['invoices','الفواتير','invoices-tbody'],['payments','المدفوعات','payments-tbody'],['purchases','المشتريات','purchases-tbody'],['staff','الأخصائيين','staff-tbody'],['users','المستخدمين','users-tbody']];
+  var HEX = /^#[0-9a-f]{6}$/i;
+  var ok = function (v) { return typeof v === 'string' && HEX.test(v); };
+  var lum = function (h) { var n = parseInt(h.slice(1), 16); return (0.299 * (n >> 16 & 255) + 0.587 * (n >> 8 & 255) + 0.114 * (n & 255)) / 255; };
+  var mix = function (h, p, w) { return 'color-mix(in srgb,' + h + ' ' + p + '%,' + (w ? '#fff' : '#000') + ')'; };
+  var esc = function (s) { return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); };
+  var clone = function (o) { return JSON.parse(JSON.stringify(o)); };
+  var LT = 'html:not(.su-dark) ';
+
+  function def() {
+    return { fontPct: 100, bold: 'default', sideColor: '', topColor: '', heroColor: '',
+      tbl: { zebra: 'default', zebraColor: '#f1f5f9', headBg: '', headText: '', chip: 'default', chipBg: '#eef2ff', chipText: '#3730a3', fontPx: 0, hover: '' }, cols: {},
+      icon: { size: 0, shadow: 'default', haloPx: 8, haloColor: '', flat: false },
+      cal: { view: 'cards', colW: 170, fs: 12, dens: 'comfy', radius: 16, showBadge: true, showBranch: true, showTher: true, hideEmpty: false, todayColor: '#06b6d4' } };
+  }
+  function norm(a) {
+    var d = def(); if (!a || typeof a !== 'object') return d;
+    if (+a.fontPct >= 70 && +a.fontPct <= 150) d.fontPct = +a.fontPct;
+    if (/^(default|light|none|all)$/.test(a.bold)) d.bold = a.bold;
+    ['sideColor', 'topColor', 'heroColor'].forEach(function (k) { if (ok(a[k])) d[k] = a[k]; });
+    var t = a.tbl || {};
+    if (/^(default|on|off)$/.test(t.zebra)) d.tbl.zebra = t.zebra;
+    if (/^(default|none|custom)$/.test(t.chip)) d.tbl.chip = t.chip;
+    ['zebraColor', 'chipBg', 'chipText'].forEach(function (k) { if (ok(t[k])) d.tbl[k] = t[k]; });
+    ['headBg', 'headText', 'hover'].forEach(function (k) { if (ok(t[k])) d.tbl[k] = t[k]; });
+    if (+t.fontPx >= 9 && +t.fontPx <= 22) d.tbl.fontPx = +t.fontPx;
+    if (a.cols && typeof a.cols === 'object') d.cols = clone(a.cols);
+    var ic = a.icon || {};
+    if (+ic.size === 0 || (+ic.size >= 14 && +ic.size <= 48)) d.icon.size = +ic.size || 0;
+    if (/^(default|none|halo)$/.test(ic.shadow)) d.icon.shadow = ic.shadow;
+    if (+ic.haloPx >= 2 && +ic.haloPx <= 30) d.icon.haloPx = +ic.haloPx;
+    if (ok(ic.haloColor)) d.icon.haloColor = ic.haloColor;
+    if (ic.flat === true) d.icon.flat = true;
+    var c = a.cal || {};
+    if (/^(cards|grid)$/.test(c.view)) d.cal.view = c.view;
+    if (/^(comfy|compact)$/.test(c.dens)) d.cal.dens = c.dens;
+    if (+c.colW >= 120 && +c.colW <= 280) d.cal.colW = +c.colW;
+    if (+c.fs >= 10 && +c.fs <= 17) d.cal.fs = +c.fs;
+    if (+c.radius >= 4 && +c.radius <= 30) d.cal.radius = +c.radius;
+    ['showBadge', 'showBranch', 'showTher', 'hideEmpty'].forEach(function (k) { if (typeof c[k] === 'boolean') d.cal[k] = c[k]; });
+    if (ok(c.todayColor)) d.cal.todayColor = c.todayColor;
+    return d;
+  }
+  function saved() { try { return norm(state.settings && state.settings.adv); } catch (e) { return def(); } }
+  function clean(a) {   // نشيل أي قيم افتراضية قبل التخزين
+    var o = {}, d = def();
+    if (a.fontPct !== 100) o.fontPct = a.fontPct;
+    if (a.bold !== 'default') o.bold = a.bold;
+    ['sideColor', 'topColor', 'heroColor'].forEach(function (k) { if (ok(a[k])) o[k] = a[k]; });
+    var t = {}; Object.keys(d.tbl).forEach(function (k) { if (a.tbl[k] !== d.tbl[k]) t[k] = a.tbl[k]; });
+    if (Object.keys(t).length) o.tbl = t;
+    var cols = {};
+    Object.keys(a.cols || {}).forEach(function (tk) { Object.keys(a.cols[tk]).forEach(function (lb) {
+      var c = a.cols[tk][lb], r = {}; Object.keys(c).forEach(function (f) { if (c[f] !== '' && c[f] != null) r[f] = c[f]; });
+      if (Object.keys(r).length) { (cols[tk] = cols[tk] || {})[lb] = r; } }); });
+    if (Object.keys(cols).length) o.cols = cols;
+    var ii = {}; Object.keys(d.icon).forEach(function (k) { if (a.icon[k] !== d.icon[k]) ii[k] = a.icon[k]; });
+    if (Object.keys(ii).length) o.icon = ii;
+    var cc = {}; Object.keys(d.cal).forEach(function (k) { if (a.cal[k] !== d.cal[k]) cc[k] = a.cal[k]; });
+    if (Object.keys(cc).length) o.cal = cc;
+    return o;
+  }
+
+  /* ---------- ربط الجداول + تعليم المربعات (chips) ---------- */
+  function heads(table) { return [].map.call(table.querySelectorAll('thead tr:first-child th'), function (th) { return th.textContent.replace(/\s+/g, ' ').trim(); }); }
+  function markTables() {
+    TABLES.forEach(function (t) { var tb = document.getElementById(t[2]), tbl = tb && tb.closest('table'); if (tbl) tbl.setAttribute('data-su-tbl', t[0]); });
+  }
+  function markPills() {
+    TABLES.forEach(function (t) {
+      var tb = document.getElementById(t[2]); if (!tb) return;
+      tb.querySelectorAll('td span, td b, td div.chip').forEach(function (el) {
+        if (el.classList.contains('su-pill') || el.closest('button') || el.classList.contains('ico-btn')) return;
+        if (!el.textContent.trim()) return;
+        var yes = el.classList.contains('chip') || el.classList.contains('pill');
+        if (!yes) { var cs = getComputedStyle(el); yes = (cs.backgroundColor !== 'rgba(0, 0, 0, 0)' && cs.backgroundColor !== 'transparent') || parseFloat(cs.borderTopWidth) > 0; }
+        if (yes) el.classList.add('su-pill');
+      });
+    });
+  }
+
+  /* ---------- بناء الـ CSS ---------- */
+  function build(a) {
+    var css = '', p = a.fontPct;
+    // 1) حجم الخط
+    if (p !== 100) {
+      css += 'html{font-size:' + (16 * p / 100) + 'px!important}';
+      [9, 10, 11, 12].forEach(function (n) { css += '.text-\\[' + n + 'px\\]{font-size:' + (n * p / 100).toFixed(2) + 'px!important}'; });
+      css += '#sideNav .side-tab{font-size:' + (13 * p / 100).toFixed(2) + 'px}#sideNav .side-group-title{font-size:' + (10 * p / 100).toFixed(2) + 'px}';
+      if (!a.tbl.fontPx) css += '.data-tbl,.data-tbl td,.data-tbl th{font-size:' + (12 * p / 100).toFixed(2) + 'px!important}.data-tbl .chip{font-size:' + (11 * p / 100).toFixed(2) + 'px}';
+    }
+    // 2) البولد
+    var BL = '.font-bold,.font-black,.font-extrabold,.font-semibold,.font-medium,b,strong,th,h1,h2,h3,h4,h5,h6,button,label,#sideNav .side-tab,.chip,.pill';
+    if (a.bold === 'none') css += 'html body ' + BL.split(',').join(',html body ') + '{font-weight:400!important}';
+    else if (a.bold === 'light') css += 'html body ' + BL.split(',').join(',html body ') + '{font-weight:600!important}';
+    else if (a.bold === 'all') css += 'html body,html body *:not(svg):not(path){font-weight:700!important}';
+    // 3) الشريط العلوي
+    if (ok(a.topColor)) {
+      css += 'html body #mainHeader{background:' + a.topColor + '!important}';
+      if (lum(a.topColor) > 0.6) css += 'html body #mainHeader,html body #mainHeader .text-white,html body #mainHeader [class*="text-indigo"],html body #mainHeader #headerCenterName{color:#0f172a!important}';
+    }
+    // 4) الشريط الجانبي
+    if (ok(a.sideColor)) {
+      css += 'html body #sideNav{background:' + a.sideColor + '!important}';
+      if (lum(a.sideColor) > 0.55) css += 'html body #sideNav .side-tab,html body #sideNav .side-label,html body #sideNav .side-group-title,html body #sideNav .side-collapse button,html body #sideNav .side-user *{color:#334155!important}'
+        + 'html body #sideNav .side-tab:hover{background:rgba(0,0,0,.06)!important}html body #sideNav .side-tab.active,html body #sideNav .side-tab.active .side-label{color:#fff!important}html body #sideNav .side-user{background:rgba(0,0,0,.05)!important}';
+    }
+    css += icoRules(a.icon, 'html body #sideNav');
+    // 5) لون خلفية البروفيل (الأخضر)
+    if (ok(a.heroColor)) {
+      var h = a.heroColor;
+      css += '.th-hero,.ma-head,#suProfile .sp-hero{background:linear-gradient(135deg,' + mix(h, 55, false) + ' 0%,' + mix(h, 80, false) + ' 55%,' + h + ' 100%)!important}'
+        + '.th-hero{box-shadow:0 10px 28px color-mix(in srgb,' + h + ' 35%,transparent)!important}'
+        + '#suProfile .sp-ini{background:linear-gradient(135deg,' + mix(h, 75, false) + ',' + h + ')!important}#suProfile .sp-cam{background:' + h + '!important}'
+        + LT + '#suProfile{--sp-on:' + mix(h, 80, false) + ';--sp-onbg:' + mix(h, 18, true) + '}';
+    }
+    // 6) الجداول — عام
+    var S = function (suffix) { return LT + 'table.data-tbl ' + suffix + ',' + LT + 'table[data-su-tbl] ' + suffix; };
+    var t = a.tbl;
+    if (t.zebra === 'off') css += S('tbody tr:nth-child(n)') + ',' + S('tbody tr:nth-child(n) td') + '{background:transparent!important}';
+    if (t.zebra === 'on') css += S('tbody tr:nth-child(even)') + ',' + S('tbody tr:nth-child(even) td') + '{background:' + t.zebraColor + '!important}' + S('tbody tr:nth-child(odd) td') + '{background:#fff!important}';
+    css += S('tbody tr:hover') + ',' + S('tbody tr:hover td') + '{background:' + (ok(t.hover) ? t.hover : '#eef2ff') + '!important}';
+    if (ok(t.headBg)) css += S('thead') + ',' + S('thead th') + '{background:' + t.headBg + '!important}';
+    if (ok(t.headText)) css += S('thead th') + '{color:' + t.headText + '!important}';
+    if (t.fontPx) css += S('th') + ',' + S('td') + '{font-size:' + t.fontPx + 'px!important}';
+    if (t.chip === 'none') css += LT + 'td .su-pill{background:transparent!important;border-color:transparent!important;box-shadow:none!important;padding-inline:0!important}';
+    if (t.chip === 'custom') css += LT + 'td .su-pill{background:' + t.chipBg + '!important;color:' + t.chipText + '!important;border-color:' + t.chipBg + '!important}';
+    // 7) الجداول — عمود عمود
+    Object.keys(a.cols || {}).forEach(function (tk) {
+      var tbl = document.querySelector('table[data-su-tbl="' + tk + '"]'); if (!tbl) return;
+      var hs = heads(tbl);
+      Object.keys(a.cols[tk]).forEach(function (lb) {
+        var i = hs.indexOf(lb) + 1; if (!i) return;
+        var c = a.cols[tk][lb], base = LT + 'table[data-su-tbl="' + tk + '"] ';
+        var td = base + 'tbody tr:nth-child(n) td:nth-child(' + i + ')', th = base + 'thead th:nth-child(' + i + ')';
+        var tdAll = td + ',' + td + ' span,' + td + ' div,' + td + ' a';
+        if (ok(c.bg)) css += td + '{background:' + c.bg + '!important}';
+        if (ok(c.color)) css += tdAll + '{color:' + c.color + '!important}';
+        if (c.bold === 'none') css += tdAll + '{font-weight:400!important}';
+        if (c.bold === 'bold') css += tdAll + '{font-weight:800!important}';
+        if (+c.px) css += tdAll + '{font-size:' + (+c.px) + 'px!important}';
+        if (/^(right|center|left)$/.test(c.align)) css += td + ',' + th + '{text-align:' + c.align + '!important}';
+        if (c.chip === 'none') css += td + ' .su-pill{background:transparent!important;border-color:transparent!important;box-shadow:none!important;padding-inline:0!important}';
+        if (c.chip === 'custom') css += td + ' .su-pill{background:' + (ok(c.chipBg) ? c.chipBg : '#eef2ff') + '!important;color:' + (ok(c.chipText) ? c.chipText : '#3730a3') + '!important;border-color:' + (ok(c.chipBg) ? c.chipBg : '#eef2ff') + '!important}';
+      });
+    });
+    return css;
+  }
+  function icoRules(i, sel) {
+    var css = '', S = i.size;
+    if (S) css += sel + ' .side-ico{width:' + Math.max(36, S + 10) + 'px!important;height:' + Math.max(36, S + 10) + 'px!important}'
+      + sel + ' .i3d{font-size:' + S + 'px!important;width:auto!important;height:auto!important;line-height:1!important}'
+      + sel + ' .i3d svg{width:' + (S + 3) + 'px!important;height:' + (S + 3) + 'px!important}'
+      + sel + ' .side-tab{min-height:' + (S + 16) + 'px!important;height:auto!important}';
+    if (i.shadow === 'none') css += sel + ' .i3d,' + sel + ' .side-tab:hover .i3d,' + sel + ' .side-tab.active .i3d{filter:none!important}';
+    if (i.shadow === 'halo') {
+      var c = ok(i.haloColor) ? i.haloColor : 'var(--g,#a5b4fc)', r = i.haloPx;
+      css += sel + ' .i3d,' + sel + ' .side-tab.active .i3d{filter:drop-shadow(0 0 ' + r + 'px ' + c + ') drop-shadow(0 0 ' + (r * 2) + 'px ' + c + ')!important}'
+        + sel + ' .side-tab:hover .i3d{filter:drop-shadow(0 0 ' + (r * 1.5) + 'px ' + c + ') drop-shadow(0 0 ' + (r * 3) + 'px ' + c + ')!important}';
+    }
+    if (i.flat) css += sel + ' .i3d,' + sel + ' .side-tab.active .i3d{transform:none!important}' + sel + ' .side-tab:hover .i3d{transform:translateY(-2px) scale(1.12)!important}';
+    return css;
+  }
+  function icoPrev(i, bg) {
+    var cols = ['#22d3ee', '#facc15', '#f87171', '#a78bfa', '#cbd5e1'], ems = ['📊', '⚡', '📅', '👥', '⚙️'];
+    return '<div class="su-ico-prev flex gap-5 items-center justify-center rounded-xl py-4 px-3 flex-wrap" style="background:' + (ok(bg) ? bg : '#1e1b4b') + '">' + ems.map(function (e, n) {
+      var c = ok(i.haloColor) ? i.haloColor : cols[n], f = i.shadow === 'none' ? 'none'
+        : i.shadow === 'halo' ? 'drop-shadow(0 0 ' + i.haloPx + 'px ' + c + ') drop-shadow(0 0 ' + (i.haloPx * 2) + 'px ' + c + ')'
+        : 'drop-shadow(1px 1px 0 rgba(0,0,0,.45)) drop-shadow(2px 2px 0 rgba(0,0,0,.35)) drop-shadow(3px 4px 3px rgba(0,0,0,.55)) drop-shadow(0 0 7px ' + cols[n] + ') drop-shadow(0 0 15px ' + cols[n] + ')';
+      return '<span style="display:inline-block;line-height:1;font-size:' + (i.size || 25) + 'px;filter:' + f + ';transform:' + (i.flat ? 'none' : 'perspective(240px) rotateX(14deg) rotateY(-16deg)') + '">' + e + '</span>'; }).join('') + '</div>';
+  }
+  function needPills(a) { if (a.tbl.chip !== 'default') return true; return Object.keys(a.cols || {}).some(function (k) { return Object.keys(a.cols[k]).some(function (l) { return a.cols[k][l].chip; }); }); }
+
+  /* ---------- التطبيق ---------- */
+  var obsDone = [], tmr = null;
+  function visibleForm() { var f = document.getElementById('settings-sub-theme'); return f && f.offsetParent !== null; }
+  function current() { return (window._advDraft && visibleForm()) ? window._advDraft : saved(); }
+  function apply(a) {
+    a = a || current();
+    markTables();
+    if (needPills(a)) markPills();
+    var el = document.getElementById('suAdvCss');
+    if (!el) { el = document.createElement('style'); el.id = 'suAdvCss'; }
+    var css = build(a); if (el.textContent !== css) el.textContent = css;
+    document.head.appendChild(el);                                   // آخر ستايل عشان يكسب على باقي الإعدادات
+    var u = document.getElementById('suUserCss'); if (u) document.head.appendChild(u);   // تفضيلات المستخدم الشخصية تفضل أقوى
+    try { if (ok(a.topColor)) { var m = document.querySelector('meta[name=theme-color]'); if (m) m.content = a.topColor; } } catch (e) {}
+    observe();
+    try { var sig = JSON.stringify(a.cal); if (sig !== calSig) { calSig = sig; if (window._suCal && document.getElementById('calBody') && window.renderCalendar) window.renderCalendar(); } } catch (e) {}
+  }
+  var calSig = null;
+  window.suCalCfg = function () { return current().cal; };
+  function observe() {
+    TABLES.forEach(function (t) {
+      var tb = document.getElementById(t[2]), tbl = tb && tb.closest('table'); if (!tbl || obsDone.indexOf(tbl) > -1) return;
+      obsDone.push(tbl); try { new MutationObserver(schedule).observe(tbl, { childList: true, subtree: true }); } catch (e) {}
+    });
+  }
+  function schedule() { clearTimeout(tmr); tmr = setTimeout(function () { try { apply(); } catch (e) {} }, 160); }
+
+  /* ---------- واجهة الإعدادات ---------- */
+  var sel = TABLES[0][0];
+  var CHIPS = [['', 'كما هو'], ['none', 'بدون مربع'], ['custom', 'مربع بلون']];
+  function tg(path) { return 'data-p="' + path + '"'; }
+  function cg(t, c, f) { return 'data-t="' + esc(t) + '" data-c="' + esc(c) + '" data-f="' + f + '"'; }
+  function seg(target, val, opts) {
+    return '<div class="flex flex-wrap gap-1.5">' + opts.map(function (o) { var on = String(val) === String(o[0]);
+      return '<button type="button" ' + target + ' data-v="' + esc(o[0]) + '" class="su-adv-seg px-3 py-1.5 rounded-lg border font-bold ' + (on ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50') + '">' + o[1] + '</button>'; }).join('') + '</div>';
+  }
+  function clr(target, val, label) {
+    return '<label class="flex items-center gap-2 font-bold text-slate-600"><span>' + label + '</span><input type="color" ' + target + ' value="' + (ok(val) ? val : '#ffffff') + '" class="w-10 h-8 rounded border cursor-pointer ' + (ok(val) ? '' : 'opacity-40') + '"><button type="button" ' + target + ' data-clr="1" class="text-[11px] font-bold text-slate-400 hover:text-rose-600">✕ إلغاء</button></label>';
+  }
+  function rng(path, label, val, min, max, step, unit) {
+    return '<div class="flex items-center gap-2"><span class="font-bold text-slate-700 whitespace-nowrap">' + label + ':</span><input type="range" min="' + min + '" max="' + max + '" step="' + step + '" value="' + val + '" ' + tg(path) + ' data-u="' + unit + '" class="flex-1 min-w-[120px] accent-indigo-600"><b id="suAdvV_' + path.replace(/\./g, '_') + '" class="w-14 text-center text-slate-900">' + val + unit + '</b></div>';
+  }
+  function tgl(path, label, on) {
+    return '<button type="button" ' + tg(path) + ' data-v="' + (!on) + '" class="su-adv-seg px-3 py-1.5 rounded-lg border font-bold ' + (on ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white text-slate-500 border-slate-300') + '">' + (on ? '✓ ' : '✕ ') + label + '</button>';
+  }
+  function sec(title, body) { return '<div class="space-y-3 border-t pt-5"><h3 class="font-extrabold text-slate-900 text-sm">' + title + '</h3>' + body + '</div>'; }
+  var SIDE_PRE = ['#1e1b4b', '#0f172a', '#14532d', '#7f1d1d', '#334155', '#ffffff', '#f1f5f9'];
+  var HERO_PRE = ['#0f766e', '#16a34a', '#2563eb', '#7c3aed', '#be123c', '#ea580c', '#334155'];
+  function preset(target, list) { return '<div class="flex gap-1.5 flex-wrap">' + list.map(function (c) { return '<button type="button" ' + target + ' data-v="' + c + '" class="su-adv-seg w-7 h-7 rounded-full border-2 border-slate-300 hover:scale-110 transition" style="background:' + c + '" title="' + c + '"></button>'; }).join('') + '</div>'; }
+
+  function colLabels(k) { var tb = document.querySelector('table[data-su-tbl="' + k + '"]'); return tb ? heads(tb).filter(Boolean) : []; }
+  function colCard(d, k, lb) {
+    var c = (d.cols[k] || {})[lb] || {}, T = function (f) { return cg(k, lb, f); };
+    var selx = function (f, opts, v) { return '<select ' + T(f) + ' class="border rounded-lg p-1.5 font-bold bg-white">' + opts.map(function (o) { return '<option value="' + o[0] + '"' + (String(v || '') === String(o[0]) ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select>'; };
+    return '<div class="rounded-xl border border-slate-200 bg-slate-50 p-3 space-y-2"><div class="flex items-center gap-2"><b class="text-slate-900">' + esc(lb) + '</b><button type="button" ' + T('reset') + ' class="mr-auto text-[11px] font-bold text-slate-400 hover:text-rose-600">↺ رجوع للافتراضي</button></div>'
+      + '<div class="grid grid-cols-2 md:grid-cols-4 gap-2 items-end">'
+      + '<label class="space-y-1"><span class="block text-slate-500 font-bold">المربع الخلفي</span>' + selx('chip', CHIPS, c.chip) + '</label>'
+      + '<label class="space-y-1"><span class="block text-slate-500 font-bold">البولد</span>' + selx('bold', [['', 'كما هو'], ['none', 'بدون بولد'], ['bold', 'بولد']], c.bold) + '</label>'
+      + '<label class="space-y-1"><span class="block text-slate-500 font-bold">حجم الخط</span>' + selx('px', [['', 'كما هو'], ['10', '10'], ['11', '11'], ['12', '12'], ['13', '13'], ['14', '14'], ['16', '16'], ['18', '18']], c.px) + '</label>'
+      + '<label class="space-y-1"><span class="block text-slate-500 font-bold">المحاذاة</span>' + selx('align', [['', 'كما هي'], ['right', 'يمين'], ['center', 'وسط'], ['left', 'يسار']], c.align) + '</label></div>'
+      + '<div class="flex flex-wrap gap-x-5 gap-y-2">' + clr(T('color'), c.color, 'لون الكلام') + clr(T('bg'), c.bg, 'لون خلفية العمود')
+      + (c.chip === 'custom' ? clr(T('chipBg'), c.chipBg, 'لون المربع') + clr(T('chipText'), c.chipText, 'لون كلام المربع') : '') + '</div></div>';
+  }
+  function calVars(c) { return '--cw-w:' + c.colW + 'px;--cw-fs:' + c.fs + 'px;--cw-r:' + c.radius + 'px;--cw-today:' + c.todayColor + ';--cw-pad:' + (c.dens === 'compact' ? '5px 7px' : '8px 10px'); }
+  function calPrev(c) {
+    var card = function (tm, bd, k, nm) { var sub = (c.showBranch ? 'البيطاش' : '') + (c.showBranch && c.showTher ? ' • ' : '') + (c.showTher ? 'الأخصائي' : '');
+      return '<div class="cw-card ' + k + '"><div class="cw-r1"><b class="cw-t">' + tm + '</b>' + (c.showBadge ? '<span class="cw-b ' + k + '">' + bd + '</span>' : '') + '</div><div class="cw-n">' + nm + '</div>' + (sub ? '<div class="cw-s">' + sub + '</div>' : '') + '</div>'; };
+    var col = function (nm, dt, n, today, cards) { return '<section class="cw-col' + (today ? ' is-today' : '') + '"><header><b>' + nm + (today ? ' • اليوم' : '') + '</b><small>' + dt + '</small><em>' + n + ' جلسات</em></header><div class="cw-list">' + cards + '</div></section>'; };
+    return '<div class="cw-prev" style="' + calVars(c) + '">' + col('الإثنين', '2026-10-19', 2, true, card('04:45 م', 'محجوزة', '', 'حمزة محمود') + card('05:30 م', 'اعتذار', 'warn', 'محمد عمرو'))
+      + col('الأحد', '2026-10-18', 2, false, card('04:00 م', 'حضور', 'ok', 'تميم لؤي') + card('06:15 م', 'غ. أخصائي', 'mute', 'جان الجليوس')) + '</div>';
+  }
+  function render() {
+    var box = document.getElementById('suAdvBox'); if (!box) return;
+    var d = window._advDraft || (window._advDraft = saved()), t = d.tbl, y = window.scrollY;
+    var labs = colLabels(sel);
+    box.innerHTML =
+      '<div class="rounded-xl p-3 bg-sky-50 border border-sky-200 text-sky-800 font-bold">✨ التغييرات هنا بتظهر قدامك فوراً (معاينة)، ولازم تدوس «حفظ وتطبيق» تحت عشان تتثبّت. ألوان الجداول بتشتغل في الوضع الفاتح بس.</div>'
+      + sec('🔤 حجم الخط والبولد (لكل السيستم)',
+        '<div class="flex items-center gap-3 flex-wrap"><span class="font-bold text-slate-700">حجم الخط:</span><input type="range" min="80" max="130" step="5" value="' + d.fontPct + '" ' + tg('fontPct') + ' data-u="%" class="flex-1 min-w-[160px] accent-indigo-600"><b id="suAdvV_fontPct" class="w-12 text-center text-slate-900">' + d.fontPct + '%</b><button type="button" ' + tg('fontPct') + ' data-v="100" class="su-adv-seg text-[11px] font-bold text-slate-400 hover:text-rose-600">↺ 100%</button></div>'
+        + '<div class="space-y-1"><span class="font-bold text-slate-700">البولد (الخط الغليظ):</span>' + seg(tg('bold'), d.bold, [['default', 'كما هو'], ['light', 'مخفّف'], ['none', 'بدون بولد خالص'], ['all', 'كله بولد']]) + '</div>'
+        + '<div class="text-[11px] font-bold text-slate-500">لو مستخدم غيّر حجم الخط من «👤 حسابي» اختياره الشخصي هو اللي بيمشي عنده.</div>')
+      + sec('🎛️ ألوان الشريطين',
+        '<div class="grid md:grid-cols-2 gap-5"><div class="space-y-2"><div class="font-bold text-slate-700">الشريط الجانبي</div>' + clr(tg('sideColor'), d.sideColor, 'اللون') + preset(tg('sideColor'), SIDE_PRE) + '</div>'
+        + '<div class="space-y-2"><div class="font-bold text-slate-700">الشريط العلوي</div>' + clr(tg('topColor'), d.topColor, 'اللون') + preset(tg('topColor'), SIDE_PRE) + '</div></div>'
+        + '<div class="text-[11px] font-bold text-slate-500">لو سبت اللون فاضي (✕ إلغاء) بيرجع للون النظام الأساسي. الكتابة بتتحوّل لغامق تلقائي لو اخترت لون فاتح.</div>')
+      + sec('🔷 أيقونات الشريط الجانبي',
+        '<div class="flex items-center gap-2 flex-wrap"><span class="font-bold text-slate-700">حجم الأيقونة:</span><input type="range" min="14" max="44" step="1" value="' + (d.icon.size || 25) + '" ' + tg('icon.size') + ' data-u="px" class="flex-1 min-w-[160px] accent-indigo-600"><b id="suAdvV_icon_size" class="w-16 text-center text-slate-900">' + (d.icon.size ? d.icon.size + 'px' : 'كما هو') + '</b><button type="button" ' + tg('icon.size') + ' data-v="0" class="su-adv-seg text-[11px] font-bold text-slate-400 hover:text-rose-600">↺ كما هو</button></div>'
+        + '<div class="space-y-1"><span class="font-bold text-slate-700">الشادو (الظل) حوالين الأيقونة:</span>' + seg(tg('icon.shadow'), d.icon.shadow, [['default', 'كما هو (ظل ثلاثي الأبعاد + توهج)'], ['none', 'شيله خالص'], ['halo', 'هالة حوالين الأيقونة بس']]) + '</div>'
+        + (d.icon.shadow === 'halo' ? '<div class="flex flex-wrap gap-x-6 gap-y-2 items-center">' + rng('icon.haloPx', 'قوة الهالة', d.icon.haloPx, 2, 30, 1, 'px') + clr(tg('icon.haloColor'), d.icon.haloColor, 'لون الهالة (فاضي = لون كل أيقونة)') + '</div>' : '')
+        + '<div>' + tgl('icon.flat', 'أيقونة مسطّحة (بدون ميلان 3D)', d.icon.flat) + '</div>'
+        + icoPrev(d.icon, d.sideColor))
+      + sec('🟢 لون خلفية البروفيل (الأخضر)',
+        '<div class="space-y-2">' + clr(tg('heroColor'), d.heroColor, 'اللون') + preset(tg('heroColor'), HERO_PRE)
+        + '<div class="text-[11px] font-bold text-slate-500">بيتطبق على الخلفية اللي ورا صورة الأخصائي في بروفيله، وبروفيل المستخدم (حسابي)، وهيدر صفحة مواعيدي — مع تدرّج تلقائي من نفس اللون.</div></div>')
+      + sec('📊 الجداول — إعدادات عامة (كل الجداول)',
+        '<div class="space-y-1"><span class="font-bold text-slate-700">شكل الصفوف:</span>' + seg(tg('tbl.zebra'), t.zebra, [['default', 'كما هو'], ['on', 'صف رمادي فاتح وصف أبيض'], ['off', 'سادة (بدون تقسيم)']]) + (t.zebra === 'on' ? '<div class="pt-1">' + clr(tg('tbl.zebraColor'), t.zebraColor, 'اللون الرمادي') + '</div>' : '') + '</div>'
+        + '<div class="space-y-1"><span class="font-bold text-slate-700">المربع الخلفي (زي مربع التشخيص والحالة):</span>' + seg(tg('tbl.chip'), t.chip, [['default', 'كما هو'], ['none', 'شيل المربع'], ['custom', 'غيّر لونه']]) + (t.chip === 'custom' ? '<div class="flex gap-5 flex-wrap pt-1">' + clr(tg('tbl.chipBg'), t.chipBg, 'لون المربع') + clr(tg('tbl.chipText'), t.chipText, 'لون الكلام') + '</div>' : '') + '</div>'
+        + '<div class="flex flex-wrap gap-x-6 gap-y-2">' + clr(tg('tbl.headBg'), t.headBg, 'خلفية عناوين الأعمدة') + clr(tg('tbl.headText'), t.headText, 'كلام العناوين') + clr(tg('tbl.hover'), t.hover, 'لون الصف عند المرور') + '</div>'
+        + '<div class="flex items-center gap-3"><span class="font-bold text-slate-700">حجم خط الجداول:</span><select ' + tg('tbl.fontPx') + ' class="border rounded-lg p-1.5 font-bold bg-white">' + [[0, 'تلقائي'], 10, 11, 12, 13, 14, 15, 16, 18].map(function (o) { var v = Array.isArray(o) ? o[0] : o, l = Array.isArray(o) ? o[1] : o; return '<option value="' + v + '"' + (+t.fontPx === +v ? ' selected' : '') + '>' + l + '</option>'; }).join('') + '</select></div>')
+      + sec('🧱 تخصيص الجداول عمود عمود',
+        '<div class="text-[11px] font-bold text-slate-500">اختار الجدول، وبعدين اظبط كل عمود لوحده (يغلب الإعدادات العامة اللي فوق). الأعمدة بتتعرف بعنوانها.</div>'
+        + '<div class="flex flex-wrap gap-1.5">' + TABLES.map(function (x) { var on = x[0] === sel; return '<button type="button" data-sel="' + x[0] + '" class="px-3 py-1.5 rounded-lg border font-bold ' + (on ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50') + '">' + x[1] + '</button>'; }).join('') + '</div>'
+        + (labs.length ? '<div class="grid gap-2">' + labs.map(function (lb) { return colCard(d, sel, lb); }).join('') + '</div>' : '<div class="rounded-xl p-3 bg-amber-50 border border-amber-200 text-amber-800 font-bold">الجدول ده مش متحمّل لسه — افتح القسم بتاعه مرة وارجع هنا.</div>'))
+      + sec('📅 الكاليندر على الموبايل',
+        '<div class="text-[11px] font-bold text-slate-500">بيتطبق على الأبليكيشن (الموبايل) — الكمبيوتر ماله دعوة. المعاينة تحت بتتغير فوراً.</div>'
+        + '<div class="space-y-1"><span class="font-bold text-slate-700">شكل العرض (يومي / أسبوعي):</span>' + seg(tg('cal.view'), d.cal.view, [['cards', 'كروت زي الكمبيوتر'], ['grid', 'جدول بالساعات (القديم)']]) + '</div>'
+        + '<div class="grid sm:grid-cols-2 gap-x-6 gap-y-3">'
+        + rng('cal.colW', 'عرض عمود اليوم', d.cal.colW, 130, 260, 10, 'px') + rng('cal.fs', 'حجم الخط في الكروت', d.cal.fs, 10, 16, 1, 'px') + '</div>'
+        + '<div class="grid sm:grid-cols-2 gap-x-6 gap-y-3"><div class="space-y-1"><span class="font-bold text-slate-700">كثافة الكروت:</span>' + seg(tg('cal.dens'), d.cal.dens, [['comfy', 'مريحة'], ['compact', 'مدمجة']]) + '</div>'
+        + '<div class="space-y-1"><span class="font-bold text-slate-700">استدارة الحواف:</span>' + seg(tg('cal.radius'), d.cal.radius, [[8, 'حادة'], [16, 'متوسطة'], [24, 'دائرية']]) + '</div></div>'
+        + '<div class="flex flex-wrap gap-x-6 gap-y-2">' + tgl('cal.showBadge', 'حالة الجلسة', d.cal.showBadge) + tgl('cal.showBranch', 'اسم الفرع', d.cal.showBranch) + tgl('cal.showTher', 'اسم الأخصائي', d.cal.showTher) + tgl('cal.hideEmpty', 'إخفاء الأيام الفاضية', d.cal.hideEmpty) + '</div>'
+        + clr(tg('cal.todayColor'), d.cal.todayColor, 'لون يوم النهارده')
+        + (d.cal.view === 'cards' ? '<div class="rounded-xl border border-dashed border-slate-300 bg-slate-50 overflow-hidden" dir="rtl">' + calPrev(d.cal) + '</div>' : ''))
+      + '<div class="flex justify-start"><button type="button" data-act="reset" class="text-[11px] font-bold text-slate-500 hover:text-rose-600">↺ رجّع كل الإعدادات المتقدمة للافتراضي</button></div>';
+    window.scrollTo(0, y);
+  }
+
+  function setTarget(el, v) {
+    var d = window._advDraft || (window._advDraft = saved());
+    if (el.dataset.t) {
+      var k = el.dataset.t, lb = el.dataset.c, f = el.dataset.f;
+      if (f === 'reset') { if (d.cols[k]) delete d.cols[k][lb]; return; }
+      d.cols[k] = d.cols[k] || {}; d.cols[k][lb] = d.cols[k][lb] || {}; d.cols[k][lb][f] = v;
+    } else {
+      var path = el.dataset.p.split('.'), o = d;
+      for (var i = 0; i < path.length - 1; i++) o = o[path[i]];
+      var key = path[path.length - 1], num = /^(fontPct|fontPx|colW|fs|radius|size|haloPx)$/.test(key), bool = /^(showBadge|showBranch|showTher|hideEmpty|flat)$/.test(key);
+      o[key] = num ? +v : (bool ? (v === true || v === 'true') : v);
+    }
+  }
+  function boot() {
+    var box = document.getElementById('suAdvBox'); if (!box || box._suBound) return; box._suBound = true;
+    box.addEventListener('click', function (e) {
+      var b = e.target.closest('button,[data-sel]'); if (!b || !box.contains(b)) return;
+      if (b.dataset.sel) { sel = b.dataset.sel; render(); return; }
+      if (b.dataset.act === 'reset') { if (confirm('ترجّع كل الإعدادات المتقدمة للافتراضي؟')) { window._advDraft = def(); apply(window._advDraft); render(); } return; }
+      if (b.dataset.clr) { setTarget(b, ''); apply(window._advDraft); render(); return; }
+      if (b.classList.contains('su-adv-seg') || b.dataset.f === 'reset') { setTarget(b, b.dataset.v); apply(window._advDraft); render(); }
+    });
+    box.addEventListener('input', function (e) {
+      var el = e.target; if (el.type === 'color') { setTarget(el, el.value); el.classList.remove('opacity-40'); apply(window._advDraft); }
+      else if (el.type === 'range') { setTarget(el, el.value); var s = document.getElementById('suAdvV_' + el.dataset.p.replace(/\./g, '_')); if (s) s.textContent = el.value + (el.dataset.u || ''); apply(window._advDraft); if (el.dataset.p === 'icon.size' || el.dataset.p === 'icon.haloPx') { var pv = box.querySelector('.su-ico-prev'); if (pv) pv.outerHTML = icoPrev(window._advDraft.icon, window._advDraft.sideColor); } }
+    });
+    box.addEventListener('change', function (e) {
+      var el = e.target; if (el.tagName === 'SELECT') { setTarget(el, el.value); apply(window._advDraft); render(); }
+    });
+  }
+  function open() { window._advDraft = saved(); boot(); render(); apply(window._advDraft); }
+
+  /* ---------- ربط مع باقي السيستم ---------- */
+  var _r = window.renderThemeSettingsForm;
+  if (typeof _r === 'function') window.renderThemeSettingsForm = function () { var r = _r.apply(this, arguments); try { open(); } catch (e) { console.warn('suAdv', e); } return r; };
+  var _s = window.saveThemeSettings;
+  if (typeof _s === 'function') window.saveThemeSettings = function () {
+    try { if (window._advDraft) { if (!state.settings) state.settings = {}; var c = clean(window._advDraft); if (Object.keys(c).length) state.settings.adv = c; else delete state.settings.adv; } } catch (e) { console.warn('suAdv save', e); }
+    return _s.apply(this, arguments);
+  };
+  var _a = window.applyThemeSystem;
+  if (typeof _a === 'function') window.applyThemeSystem = function () { var r = _a.apply(this, arguments); try { apply(); } catch (e) { console.warn('suAdv apply', e); } return r; };
+  window.suAdv = { apply: apply, open: open };
+  try { apply(); } catch (e) {}
+  setTimeout(function () { try { apply(); } catch (e) {} }, 1500);
+})();
+</script>
+
+<script id="suDigits">
+/* أرقام عربية (٠١٢٣) ← إنجليزية (0123) تلقائي في خانات التليفون والبحث + تصحيح الأرقام المسجّلة قبل كده */
+(function () {
+  'use strict';
+  var AR = '٠١٢٣٤٥٦٧٨٩', FA = '۰۱۲۳۴۵۶۷۸۹';
+  function lat(s) { return String(s).replace(/[٠-٩۰-۹]/g, function (c) { var i = AR.indexOf(c); return i < 0 ? FA.indexOf(c) : i; }); }
+  window.suLatinDigits = lat;
+  function isPhone(el) {
+    if (el.tagName !== 'INPUT' && el.tagName !== 'TEXTAREA') return false;
+    if (el.type === 'tel' || el.type === 'search' || el.inputMode === 'tel') return true;
+    return /phone|tel\b|mobile|whats|suCq|clientSearch|هاتف|تليفون|موبايل/i.test((el.id || '') + ' ' + (el.name || '') + ' ' + (el.placeholder || ''));
+  }
+  function fix(e) {
+    var el = e.target; if (!el || !el.value || !isPhone(el)) return;
+    var v = el.value, n = lat(v); if (v === n) return;
+    var a = null, b = null; try { a = el.selectionStart; b = el.selectionEnd; } catch (x) {}
+    el.value = n; try { if (a != null) el.setSelectionRange(a, b); } catch (x) {}
+  }
+  document.addEventListener('input', fix, true);
+  document.addEventListener('change', fix, true);
+
+  /* تصحيح الأرقام المسجّلة (للمدير بس، مرة واحدة لكل فتح) */
+  var done = false;
+  function migrate() {
+    if (done) return;
+    try {
+      if (typeof state === 'undefined' || !state || !currentUser || currentUser.role !== 'admin') return;
+      var changed = 0;
+      [state.clients, state.staff].forEach(function (list) { (list || []).forEach(function (o) { if (o && typeof o.phone === 'string') { var n = lat(o.phone); if (n !== o.phone) { o.phone = n; changed++; } } }); });
+      if (state.settings && typeof state.settings.centerPhone === 'string') { var c = lat(state.settings.centerPhone); if (c !== state.settings.centerPhone) { state.settings.centerPhone = c; changed++; } }
+      done = true;
+      if (changed) { saveState(); try { if (typeof showToast === 'function') showToast('🔢 اتصلّحت ' + changed + ' رقم تليفون لإنجليزي', 'green'); } catch (x) {} try { renderClientsTable(); } catch (x) {} }
+    } catch (e) {}
+  }
+  [3000, 7000, 15000].forEach(function (ms) { setTimeout(migrate, ms); });
+})();
+</script>
+
 </body>
 </html>
