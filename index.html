@@ -23,7 +23,8 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.78.0/dist/umd/supabase.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap');
-    * { font-family: 'Cairo', system-ui, -apple-system, sans-serif; }
+    :root { --su-font: 'Cairo', system-ui, -apple-system, sans-serif; }
+    * { font-family: var(--su-font); }
     .badge-att { background-color: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
     .badge-can { background-color: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
     .badge-exc { background-color: #fef9c3; color: #a16207; border: 1px solid #fef08a; }
@@ -771,7 +772,7 @@
 /* ===== Speak Up redesign layer (tokens) ===== */
 :root{--su-primary:#7e3ab8;--su-primary-600:#6b2fa3;--su-primary-50:#f3ebfa;--su-yellow:#f5b829;--su-green:#2fa36b;
 --su-bg:#f7f7fb;--su-surface:#fff;--su-text:#1f1b2e;--su-muted:#6b6880;--su-line:#ebe8f3;--su-radius:16px;--su-shadow:0 2px 10px rgba(60,30,100,.07);--su-nav-h:64px}
-@media (max-width:820px){body{background:var(--su-bg)!important;font-family:'Cairo',system-ui,sans-serif}
+@media (max-width:820px){body{background:var(--su-bg)!important;font-family:var(--su-font,'Cairo',system-ui,sans-serif)}
 #mainHeader{background:var(--su-primary)!important}
 #topNavWrap{background:rgba(0,0,0,.14)!important}
 #app{padding-bottom:calc(var(--su-nav-h) + 24px + env(safe-area-inset-bottom,0px))}}
@@ -1029,7 +1030,7 @@ html[dir=ltr] #mainHeader .flex.items-center.justify-between{flex-direction:row}
  #pinLock.pl-setup #plX{display:inline-block}
 
  html.su-menu-open,html.su-menu-open body{overflow:hidden}
- #suMenuPage{display:block;position:fixed;inset:0;z-index:58;background:var(--su-bg,#f7f7fb);color:var(--su-text,#1f1b2e);overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;transform:translateX(100%);visibility:hidden;transition:transform .22s ease,visibility 0s linear .22s;font-family:'Cairo',system-ui,sans-serif}
+ #suMenuPage{display:block;position:fixed;inset:0;z-index:58;background:var(--su-bg,#f7f7fb);color:var(--su-text,#1f1b2e);overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;transform:translateX(100%);visibility:hidden;transition:transform .22s ease,visibility 0s linear .22s;font-family:var(--su-font,'Cairo',system-ui,sans-serif)}
  html[dir=ltr] #suMenuPage{transform:translateX(-100%)}
  #suMenuPage.open{transform:none;visibility:visible;transition:transform .22s ease,visibility 0s}
  .sum-bar{position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:10px;padding:calc(env(safe-area-inset-top,0px) + 6px) 12px 6px;min-height:calc(56px + env(safe-area-inset-top,0px));background:var(--su-primary,#7e3ab8);color:#fff}
@@ -2392,6 +2393,25 @@ body.sidebar-collapsed #sideNav .side-gear{justify-content:center;padding:8px 0}
                   <span class="px-3 py-1 rounded-full font-black" style="background:var(--su-yellow,#f5b829);color:#3b2a00">انتظار</span>
                 </div>
               </div>
+            </div>
+
+            <!-- الخطوط -->
+            <div class="space-y-3 border-t pt-5">
+              <div class="flex items-center gap-2 flex-wrap">
+                <h3 class="font-extrabold text-slate-900 text-sm">🔤 الخطوط (عربي / إنجليزي)</h3>
+                <button type="button" onclick="fontPreset('appsheet')" class="mr-auto text-[11px] font-black px-3 py-1.5 rounded-lg bg-indigo-50 text-indigo-700 hover:bg-indigo-100">⭐ طبّق خطوط AppSheet</button>
+                <button type="button" onclick="fontPreset('default')" class="text-[11px] font-bold text-slate-500 hover:text-rose-600">↺ الافتراضي</button>
+              </div>
+              <div class="grid sm:grid-cols-2 gap-3">
+                <div><label class="block text-slate-700 font-bold mb-1">الخط العربي</label><select id="fontArSel" onchange="pickFont('fontAr',this.value)" class="w-full border rounded-lg p-2 font-bold"></select></div>
+                <div><label class="block text-slate-700 font-bold mb-1">الخط الإنجليزي والأرقام</label><select id="fontEnSel" onchange="pickFont('fontEn',this.value)" class="w-full border rounded-lg p-2 font-bold"></select></div>
+              </div>
+              <div class="rounded-xl border border-slate-200 bg-white p-4 space-y-1">
+                <div class="text-lg font-black text-slate-900">سبيك أب للتخاطب وتنمية المهارات</div>
+                <div class="text-sm font-bold text-slate-700">جلسة تخاطب — حضر — المستحق 1,550 ج.م — ١٢٣٤٥</div>
+                <div class="text-sm font-bold text-slate-700" dir="ltr">Speak Up Speech Therapy — Session 150 EGP — 0123456789</div>
+              </div>
+              <div class="text-[11px] font-bold text-slate-500">التغيير بيظهر فوراً على السيستم كله، ويتثبّت لما تضغط «حفظ». الخطوط بتتحمّل من Google Fonts (محتاجة إنترنت أول مرة).</div>
             </div>
 
             <!-- جدول الإيقونات -->
@@ -6271,7 +6291,7 @@ window.suMfaOpen=async function(){
       const sessionPrice = branchObj ? (branchObj.session_price || 0) : (client.sessionPrice || 0);
       
       return `
-<div id="invoice-printable" style="font-family:'Cairo',Arial,sans-serif;direction:rtl;max-width:700px;margin:0 auto;background:#fff;padding:32px 36px;border-radius:12px;border:1px solid #e2e8f0;">
+<div id="invoice-printable" style="font-family:var(--su-font,'Cairo',Arial,sans-serif);direction:rtl;max-width:700px;margin:0 auto;background:#fff;padding:32px 36px;border-radius:12px;border:1px solid #e2e8f0;">
   
   <!-- Header with Logo -->
   <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:3px solid ${cfg.primaryColor};padding-bottom:16px;margin-bottom:20px;">
@@ -6654,7 +6674,7 @@ window.suMfaOpen=async function(){
     m.id = 'sig-pad-modal';
     m.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;padding:16px;';
     m.innerHTML = `
-      <div style="background:#fff;border-radius:16px;width:100%;max-width:760px;padding:16px;direction:rtl;font-family:'Cairo',Arial,sans-serif;">
+      <div style="background:#fff;border-radius:16px;width:100%;max-width:760px;padding:16px;direction:rtl;font-family:var(--su-font,'Cairo',Arial,sans-serif);">
         <div style="font-weight:800;font-size:15px;margin-bottom:10px;">✍️ وقّع هنا بالقلم</div>
         <canvas id="sig-canvas" style="width:100%;height:300px;border:2px dashed #cbd5e1;border-radius:12px;touch-action:none;background:#fff;display:block;cursor:crosshair;"></canvas>
         <div style="display:flex;gap:8px;justify-content:flex-start;margin-top:12px;">
@@ -7782,6 +7802,73 @@ window.suMfaOpen=async function(){
     renderSecPalette(key, hex);
   }
 
+  // ===== الخطوط: عربي + إنجليزي (بتتخزن في state.settings.fontAr / fontEn) =====
+  // [key, الاسم, CSS family, Google Fonts spec]
+  const FONT_AR = [
+    ['cairo', 'Cairo (الافتراضي)', "'Cairo'", 'Cairo:wght@400;500;600;700;800;900'],
+    ['appsheet', '⭐ زي AppSheet (Segoe UI / خط النظام)', "'Segoe UI',Tahoma,'Noto Sans Arabic'", 'Noto Sans Arabic:wght@400;500;600;700;800;900'],
+    ['tajawal', 'Tajawal — تجوال (عصري خفيف)', "'Tajawal'", 'Tajawal:wght@400;500;700;800;900'],
+    ['noto-sans', 'Noto Sans Arabic — نوتو (محايد ومريح)', "'Noto Sans Arabic'", 'Noto Sans Arabic:wght@400;500;600;700;800;900'],
+    ['plex', 'IBM Plex Sans Arabic (رسمي ونظيف)', "'IBM Plex Sans Arabic'", 'IBM Plex Sans Arabic:wght@400;500;600;700'],
+    ['almarai', 'Almarai — المراعي (واضح وبسيط)', "'Almarai'", 'Almarai:wght@400;700;800'],
+    ['readex', 'Readex Pro (حديث ومتناسق مع الإنجليزي)', "'Readex Pro'", 'Readex Pro:wght@400;500;600;700'],
+    ['rubik', 'Rubik (دائري ناعم)', "'Rubik'", 'Rubik:wght@400;500;600;700;800;900'],
+    ['changa', 'Changa — شانجا (عريض وجريء)', "'Changa'", 'Changa:wght@400;500;600;700;800'],
+    ['kufi', 'Noto Kufi Arabic — كوفي (هندسي)', "'Noto Kufi Arabic'", 'Noto Kufi Arabic:wght@400;500;600;700;800;900'],
+    ['mada', 'Mada — مدى (خفيف)', "'Mada'", 'Mada:wght@400;500;600;700;900'],
+    ['elmessiri', 'El Messiri — المسيري (أنيق)', "'El Messiri'", 'El Messiri:wght@400;500;600;700'],
+    ['naskh', 'Noto Naskh Arabic — نسخ (كلاسيكي)', "'Noto Naskh Arabic'", 'Noto Naskh Arabic:wght@400;500;600;700'],
+    ['amiri', 'Amiri — أميري (نسخ تراثي)', "'Amiri'", 'Amiri:wght@400;700']
+  ];
+  const FONT_EN = [
+    ['same', 'نفس الخط العربي (الافتراضي)', null, null],
+    ['libre-franklin', '⭐ Libre Franklin (زي AppSheet)', "'Libre Franklin'", 'Libre Franklin:wght@400;500;600;700;800;900'],
+    ['roboto', 'Roboto', "'Roboto'", 'Roboto:wght@400;500;700;900'],
+    ['inter', 'Inter', "'Inter'", 'Inter:wght@400;500;600;700;800;900'],
+    ['poppins', 'Poppins', "'Poppins'", 'Poppins:wght@400;500;600;700;800;900'],
+    ['opensans', 'Open Sans', "'Open Sans'", 'Open Sans:wght@400;500;600;700;800'],
+    ['nunito', 'Nunito (ناعم ومريح للأطفال)', "'Nunito'", 'Nunito:wght@400;500;600;700;800;900'],
+    ['montserrat', 'Montserrat', "'Montserrat'", 'Montserrat:wght@400;500;600;700;800;900'],
+    ['lato', 'Lato', "'Lato'", 'Lato:wght@400;700;900'],
+    ['sourcesans', 'Source Sans 3', "'Source Sans 3'", 'Source Sans 3:wght@400;500;600;700;800;900'],
+    ['dmsans', 'DM Sans', "'DM Sans'", 'DM Sans:wght@400;500;600;700;800;900'],
+    ['worksans', 'Work Sans', "'Work Sans'", 'Work Sans:wght@400;500;600;700;800;900'],
+    ['jakarta', 'Plus Jakarta Sans', "'Plus Jakarta Sans'", 'Plus Jakarta Sans:wght@400;500;600;700;800'],
+    ['manrope', 'Manrope', "'Manrope'", 'Manrope:wght@400;500;600;700;800'],
+    ['system', 'خط النظام (Segoe UI / San Francisco)', "system-ui,'Segoe UI'", null]
+  ];
+  function suLoadFont(id, spec) {
+    let l = document.getElementById(id);
+    if (!spec) { if (l) l.remove(); return; }
+    const href = 'https://fonts.googleapis.com/css2?family=' + spec.replace(/ /g, '+') + '&display=swap';
+    if (l && l.href === href) return;
+    if (!l) { l = document.createElement('link'); l.id = id; l.rel = 'stylesheet'; document.head.appendChild(l); }
+    l.href = href;
+  }
+  function applyFonts(sOpt) {
+    const s = sOpt || (state && state.settings) || {};
+    const ar = FONT_AR.find(f => f[0] === (s.fontAr || 'cairo')) || FONT_AR[0];
+    const en = FONT_EN.find(f => f[0] === (s.fontEn || 'same')) || FONT_EN[0];
+    const parts = []; if (en[2]) parts.push(en[2]); parts.push(ar[2], 'system-ui', '-apple-system', 'sans-serif');
+    document.documentElement.style.setProperty('--su-font', parts.join(','));
+    suLoadFont('fontLinkAr', ar[3]); suLoadFont('fontLinkEn', en[3]);
+  }
+  window._fontPick = {};
+  function renderFontSettings() {
+    const a = document.getElementById('fontArSel'), e = document.getElementById('fontEnSel'); if (!a || !e) return;
+    a.innerHTML = FONT_AR.map(f => `<option value="${f[0]}">${f[1]}</option>`).join('');
+    e.innerHTML = FONT_EN.map(f => `<option value="${f[0]}">${f[1]}</option>`).join('');
+    a.value = window._fontPick.fontAr || 'cairo'; e.value = window._fontPick.fontEn || 'same';
+  }
+  function pickFont(key, val) {
+    window._fontPick[key] = val;
+    applyFonts(Object.assign({}, state.settings || {}, window._fontPick));
+  }
+  function fontPreset(name) {
+    window._fontPick = name === 'appsheet' ? { fontAr: 'appsheet', fontEn: 'libre-franklin' } : { fontAr: 'cairo', fontEn: 'same' };
+    renderFontSettings(); applyFonts(Object.assign({}, state.settings || {}, window._fontPick));
+  }
+
   // ===== جدول الإيقونات: تغيير أيقونات القوائم من مكتبة كبيرة (بتتخزن في state.settings.icons) =====
   const ICON_ITEMS = [
     ['dashboard', 'side-nav-dashboard', 'لوحة التحكم'], ['myappts', 'side-nav-myappts', 'مواعيدي'], ['followup', 'side-nav-followup', 'كراسة المتابعة'],
@@ -7866,6 +7953,7 @@ window.suMfaOpen=async function(){
   function renderThemeSettingsForm() {
     const s = state.settings || defaultSettings;
     window._iconPick = Object.assign({}, s.icons || {}); renderIconTable();
+    window._fontPick = { fontAr: s.fontAr || 'cairo', fontEn: s.fontEn || 'same' }; renderFontSettings();
     window._brandPick = s.brandColor || ''; renderBrandPalette(s.brandColor);
     window._secPick = { secondaryColor: s.secondaryColor || '', warnColor: s.warnColor || '' };
     renderSecPalette('secondaryColor', s.secondaryColor); renderSecPalette('warnColor', s.warnColor);
@@ -7876,6 +7964,7 @@ window.suMfaOpen=async function(){
     if (!state.settings) state.settings = JSON.parse(JSON.stringify(defaultSettings));
     state.settings.brandColor = window._brandPick || state.settings.brandColor || '';
     { const ic = {}; Object.keys(window._iconPick || {}).forEach(k => { if (window._iconPick[k]) ic[k] = window._iconPick[k]; }); if (Object.keys(ic).length) state.settings.icons = ic; else delete state.settings.icons; }
+    { const fp = window._fontPick || {}; if (fp.fontAr && fp.fontAr !== 'cairo') state.settings.fontAr = fp.fontAr; else delete state.settings.fontAr; if (fp.fontEn && fp.fontEn !== 'same') state.settings.fontEn = fp.fontEn; else delete state.settings.fontEn; }
     ['secondaryColor', 'warnColor'].forEach(k => { const v = (window._secPick || {})[k]; if (suHex(v)) state.settings[k] = v; else delete state.settings[k]; });
     saveState();
     applyThemeSystem();
@@ -8477,6 +8566,7 @@ Object.assign(I18N_EN, Object.assign({"قبل 24س": "before 24h", "اعتذار
     applyBrandTheme(s.brandColor);
     try { applySecondaryColors(s); } catch (e) {}
     try { applyIconOverrides(s); } catch (e) {}
+    try { applyFonts(s); } catch (e) {}
     const navStyle = s.navStyle || 'sidebar';
     // الشريط الجانبي يبدأ مصغّر (إعداد السيستم) — بس لو المستخدم ماغيّرش بإيده على الجهاز ده
     try { if (localStorage.getItem('SPEAK_UP_SIDEBAR_COLLAPSED') === null && s.sys && s.sys.sideCollapsed) document.body.classList.add('sidebar-collapsed'); } catch (e) {}
@@ -13389,8 +13479,8 @@ if(L==='en'){['alert','confirm','prompt'].forEach(function(k){var o=window[k];wi
 
 <!-- ===== أسماء العملاء قابلة للضغط في أي مكان → تفتح بروفيل العميل ===== -->
 <style>
-.cn-link{cursor:pointer;text-decoration:underline dotted;text-decoration-color:rgba(79,70,229,.55);text-underline-offset:4px;text-decoration-thickness:1.5px;border-radius:4px;transition:color .12s,background .12s}
-.cn-link:hover{color:var(--b600,#4f46e5);background:rgba(79,70,229,.08);text-decoration-style:solid}
+.cn-link{cursor:pointer;text-decoration:none;border-radius:4px;padding:0 2px;margin:0 -2px;transition:color .12s,background .12s}
+.cn-link:hover{color:var(--b600,#4f46e5);background:rgba(79,70,229,.12)}
 html.su-dark .cn-link:hover{color:#a5b4fc;background:rgba(165,180,252,.12)}
 </style>
 <script>
