@@ -10975,7 +10975,7 @@ Object.assign(I18N_EN, Object.assign({"قبل 24س": "before 24h", "اعتذار
 #suMenuFab svg{width:24px;height:24px}
 #suMenuFab.on{display:inline-flex}
 html.su-menu-open #suMenuFab,body.m-more-open #suMenuFab{display:none!important}
-@media (min-width:821px),print{#suMenuFab{display:none!important}}
+@media (min-width:1101px),print{#suMenuFab{display:none!important}}
 </style>
 <script>
 /* (1) اللوجو يظهر فورًا من النسخة المحفوظة على الجهاز، من غير ما يستنى تحميل الإعدادات من السحابة */
@@ -10995,8 +10995,10 @@ html.su-menu-open #suMenuFab,body.m-more-open #suMenuFab{display:none!important}
       f.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>';
       f.onclick=function(){if(window.suOpenMenu)window.suOpenMenu();else if(window.mToggleMore)window.mToggleMore()};
       document.body.appendChild(f)}
-    var small=window.matchMedia('(max-width:820px)').matches,logged=!!window._realRole;
-    f.classList.toggle('on',small&&logged&&!seen(document.getElementById('suMenuBtn')))
+    var small=window.innerWidth<=1100,logged=!!window._realRole;
+    var sn=document.getElementById('sideNav'),side=false;
+    if(sn&&window.innerWidth>820){var r=sn.getBoundingClientRect();side=r.width>40&&r.height>100&&sn.offsetParent!==null&&r.right>0&&r.left<window.innerWidth}   // الشريط الجانبي ظاهر فعلًا
+    f.classList.toggle('on',small&&logged&&!side&&!seen(document.getElementById('suMenuBtn')))
   }
   window.addEventListener('resize',fab);window.addEventListener('orientationchange',function(){setTimeout(fab,250)});
   setInterval(fab,1500);
