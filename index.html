@@ -10970,6 +10970,38 @@ Object.assign(I18N_EN, Object.assign({"قبل 24س": "before 24h", "اعتذار
   document.addEventListener('keydown',function(e){if(e.key==='Escape'&&window.mCloseMore)mCloseMore()});
 })();
 </script>
+<style id="su-fab-menu-css">
+#suMenuFab{display:none;position:fixed;z-index:44;top:calc(env(safe-area-inset-top,0px) + 68px);inset-inline-end:10px;width:46px;height:46px;border-radius:14px;border:0;background:var(--su-primary,#7c3aed);color:#fff;box-shadow:0 6px 18px rgba(0,0,0,.28);align-items:center;justify-content:center;cursor:pointer}
+#suMenuFab svg{width:24px;height:24px}
+#suMenuFab.on{display:inline-flex}
+html.su-menu-open #suMenuFab,body.m-more-open #suMenuFab{display:none!important}
+@media (min-width:821px),print{#suMenuFab{display:none!important}}
+</style>
+<script>
+/* (1) اللوجو يظهر فورًا من النسخة المحفوظة على الجهاز، من غير ما يستنى تحميل الإعدادات من السحابة */
+(function(){
+  function early(){var i=document.getElementById('headerLogoImg'),e=document.getElementById('headerLogoEmoji');
+    if(!i||i.getAttribute('src'))return;var u='';try{u=localStorage.getItem('SU_LOGO')||''}catch(x){}
+    u=u||window.SU_DEFAULT_LOGO||'';if(!u)return;i.src=u;i.classList.remove('hidden');if(e)e.classList.add('hidden')}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',early);else early();
+})();
+/* (2) زرار قايمة عايم: بيظهر بس لو زرار الهيدر مش ظاهر فعلًا على الشاشة (موبايل / تابلت رأسي) وبعد تسجيل الدخول */
+(function(){
+  function seen(el){if(!el)return false;var r=el.getBoundingClientRect(),c=getComputedStyle(el);
+    return r.width>0&&r.height>0&&r.left>=0&&r.right<=window.innerWidth+1&&r.top>=0&&r.bottom<=window.innerHeight&&c.display!=='none'&&c.visibility!=='hidden'}
+  function fab(){
+    var f=document.getElementById('suMenuFab');
+    if(!f){f=document.createElement('button');f.id='suMenuFab';f.type='button';f.setAttribute('aria-label','القائمة');
+      f.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>';
+      f.onclick=function(){if(window.suOpenMenu)window.suOpenMenu();else if(window.mToggleMore)window.mToggleMore()};
+      document.body.appendChild(f)}
+    var small=window.matchMedia('(max-width:820px)').matches,logged=!!window._realRole;
+    f.classList.toggle('on',small&&logged&&!seen(document.getElementById('suMenuBtn')))
+  }
+  window.addEventListener('resize',fab);window.addEventListener('orientationchange',function(){setTimeout(fab,250)});
+  setInterval(fab,1500);
+})();
+</script>
 <style id="su-cal-cards">
 .cw-on{max-height:none!important;overflow:visible!important}
 .cw-scroll{display:flex;gap:8px;overflow-x:auto;padding:8px 8px 14px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch}
