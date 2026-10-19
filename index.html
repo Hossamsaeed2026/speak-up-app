@@ -3538,6 +3538,173 @@ body.sidebar-collapsed #sideNav .side-gear{justify-content:center;padding:8px 0}
   </div>
 
   
+<style>
+.su-mfa-ov{position:fixed;inset:0;z-index:95;display:flex;align-items:center;justify-content:center;padding:14px;background:rgba(15,23,42,.72);backdrop-filter:blur(4px);direction:rtl}
+.su-mfa-card{background:#fff;color:#0f172a;border-radius:24px;max-width:420px;width:100%;max-height:92vh;overflow-y:auto;padding:22px;box-shadow:0 25px 60px rgba(0,0,0,.35);font-size:12px}
+.su-mfa-card h3{font-size:18px;font-weight:900;margin:0 0 6px}
+.su-mfa-card p{color:#475569;font-weight:600;line-height:1.7;margin:0 0 12px}
+.su-mfa-in{width:100%;border:2px solid #c7d2fe;border-radius:14px;padding:12px;font:900 24px/1 ui-monospace,monospace;letter-spacing:8px;text-align:center;direction:ltr;background:#f8fafc}
+.su-mfa-in.sm{font:700 13px/1.4 system-ui;letter-spacing:0;text-align:right;padding:10px}
+.su-mfa-b{display:block;width:100%;border:0;border-radius:14px;padding:12px;font-weight:900;font-size:13px;cursor:pointer;background:#4f46e5;color:#fff;margin-top:10px}
+.su-mfa-b.g{background:#f1f5f9;color:#334155}.su-mfa-b.r{background:#fee2e2;color:#b91c1c}.su-mfa-b:disabled{opacity:.5}
+.su-mfa-msg{min-height:18px;margin-top:8px;font-weight:800;text-align:center}.su-mfa-msg.e{color:#dc2626}.su-mfa-msg.o{color:#059669}
+.su-mfa-row{display:flex;align-items:center;gap:8px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:10px;margin-top:8px}
+.su-mfa-lnk{color:#4f46e5;font-weight:800;cursor:pointer;text-decoration:underline;display:inline-block;margin-top:10px}
+#idleWarn{position:fixed;inset:0;z-index:120;display:none;align-items:center;justify-content:center;background:rgba(15,23,42,.7);direction:rtl}
+</style>
+<script>
+(function(){
+/* ===== إعدادات الأمان (غيّر الأرقام هنا) ===== */
+var IDLE_MIN={admin:10,secretary:15,therapist:20,parent:30};   // دقائق الخمول قبل الخروج التلقائي (الأكبر صلاحية = الأقصر)
+var WARN_MS=60000;                                              // تنبيه قبل الخروج بدقيقة
+var REQUIRE={admin:true,secretary:true,therapist:true,parent:false}; // مين لازم يفعّل التحقق بخطوتين
+var GRACE_DAYS=7;                                               // مهلة التفعيل (يوم) قبل ما يبقى إلزامي من غير "لاحقًا"
+var MAX_TRIES=5;
+var EN={"🔐 التحقق بخطوتين":"🔐 Two-step verification","تأكيد":"Verify","رجوع":"Back","فقدت جهازي؟":"Lost your device?","فضّل متصل":"Stay signed in","لاحقًا":"Later","إغلاق":"Close","حذف":"Remove","➕ إضافة جهاز":"➕ Add a device","اسم الجهاز":"Device name","كود التطبيق (6 أرقام)":"App code (6 digits)","🔒 تم تسجيل خروجك تلقائيًا لعدم النشاط":"🔒 You were signed out due to inactivity","هتتسجل خروج بعد":"You will be signed out in","ثانية لعدم النشاط":"seconds due to inactivity","مفعّل ✅":"Enabled ✅","غير مفعّل":"Not enabled"};
+var L=function(){try{return localStorage.getItem('SU_LANG')||'ar'}catch(e){return'ar'}};
+var T=function(s){return L()==='en'&&EN[s]?EN[s]:s};
+var E=function(x){return String(x==null?'':x).replace(/[&<>"]/g,function(m){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]})};
+var $=function(i){return document.getElementById(i)};
+function msg(el,t,ok){if(!el)return;el.textContent=t||'';el.className='su-mfa-msg '+(t?(ok?'o':'e'):'')}
+
+/* ================= 1) الخروج التلقائي عند الخمول ================= */
+var LAST='SU_LAST_ACT',last=Date.now(),tm=0,outBusy=false;
+function idleMs(role){var m=IDLE_MIN[role]||15;try{var o=state.settings&&state.settings.security&&state.settings.security.idleMinutes;if(o&&+o[role]>0)m=+o[role]}catch(e){}return m*60000}
+function stamp(){var n=Date.now();last=n;try{localStorage.setItem(LAST,String(n))}catch(e){}}
+function act(){if($('idleWarn')&&$('idleWarn').style.display==='flex')return;var n=Date.now();if(n-tm<2000)return;tm=n;stamp()}
+['mousedown','mousemove','keydown','touchstart','touchmove','wheel','scroll','click'].forEach(function(ev){window.addEventListener(ev,act,{passive:true,capture:true})});
+function warn(sec){var w=$('idleWarn');if(!w){w=document.createElement('div');w.id='idleWarn';w.setAttribute('role','alertdialog');document.body.appendChild(w)}
+ w.innerHTML='<div class="su-mfa-card" style="text-align:center"><div style="font-size:42px">⏳</div><h3>'+T('هتتسجل خروج بعد')+' <span style="color:#dc2626">'+sec+'</span> '+T('ثانية لعدم النشاط')+'</h3><button class="su-mfa-b" id="idleStay">'+T('فضّل متصل')+'</button></div>';
+ w.style.display='flex';$('idleStay').onclick=function(){stamp();unwarn()}}
+function unwarn(){var w=$('idleWarn');if(w)w.style.display='none'}
+async function out(){outBusy=true;unwarn();
+ try{if(typeof cloudReady!=='undefined'&&cloudReady)await Promise.race([cloudPush(),new Promise(function(r){setTimeout(r,8000)})])}catch(e){}
+ var un=[];try{un=cloudKeys().filter(function(k){return canon(cloudLocal(k))!==cloudSynced[k]})}catch(e){}
+ try{if(sb)await sb.auth.signOut({scope:'local'})}catch(e){}
+ try{localStorage.removeItem('SPEAK_UP_CURRENT_USER');localStorage.removeItem('SPEAK_UP_PIN');
+  if(!un.length){localStorage.removeItem(STORAGE_KEY);localStorage.removeItem(CLOUD_META_KEY)}   // لو فيه تعديلات لسه ماترفعتش بنسيبها علشان ماتضيعش
+  sessionStorage.setItem('SU_IDLE_OUT',un.length?'2':'1')}catch(e){}
+ location.reload()}
+function check(){if(outBusy)return;var u;try{u=currentUser}catch(e){return}if(!u||!u.role)return;
+ var st=0;try{st=+localStorage.getItem(LAST)||0}catch(e){}if(st>last)last=st;
+ var lim=idleMs(u.role),idle=Date.now()-last;
+ if(idle>=lim){out();return}
+ if(idle>=lim-WARN_MS)warn(Math.max(1,Math.ceil((lim-idle)/1000)));else unwarn()}
+setInterval(check,1000);document.addEventListener('visibilitychange',check);window.addEventListener('focus',check);
+document.addEventListener('DOMContentLoaded',function(){try{var f=sessionStorage.getItem('SU_IDLE_OUT');if(f){sessionStorage.removeItem('SU_IDLE_OUT');setTimeout(function(){var s=$('loginStatus');if(s)s.textContent=T('🔒 تم تسجيل خروجك تلقائيًا لعدم النشاط')+(f==='2'?' — تعديلاتك غير المرفوعة اتحفظت وهتترفع بعد الدخول':'')},400)}}catch(e){}});
+
+/* ================= 2) التحقق بخطوتين (TOTP عن طريق Supabase MFA) ================= */
+async function AAL(){var r=await sb.auth.mfa.getAuthenticatorAssuranceLevel();if(r.error)throw r.error;return r.data}
+async function factors(){var r=await sb.auth.mfa.listFactors();if(r.error)throw r.error;return r.data}
+async function verifyCode(fid,code){var ch=await sb.auth.mfa.challenge({factorId:fid});if(ch.error)throw ch.error;var v=await sb.auth.mfa.verify({factorId:fid,challengeId:ch.data.id,code:code});if(v.error)throw v.error;return true}
+function errTxt(e){var m=(e&&e.message)||'';return /invalid|incorrect|expired/i.test(m)?'الكود غلط أو منتهي — اكتب الكود الحالي من التطبيق':/rate|too many/i.test(m)?'محاولات كتير — استنى دقيقة وجرّب تاني':/aal2|reauth/i.test(m)?'لازم تدخل بالتحقق بخطوتين الأول':m||'حصل خطأ'}
+
+/* --- الخطوة الثانية في تسجيل الدخول --- */
+window.suMfaGate=async function(){
+ if(!sb||!sb.auth||!sb.auth.mfa)return true;
+ var a;try{a=await AAL()}catch(e){console.warn('mfa aal',e);return true}
+ if(a.nextLevel==='aal2'&&a.currentLevel!=='aal2')return await challengeUI();
+ return true};
+function challengeUI(){return new Promise(async function(res){
+ var card=document.querySelector('#loginOverlay > div'),form=$('loginForm');
+ if(!card){res(true);return}
+ var fs=[];try{fs=(await factors()).totp||[]}catch(e){}
+ if(!fs.length){res(true);return}
+ var old=$('loginMfaBox');if(old)old.remove();
+ var box=document.createElement('div');box.id='loginMfaBox';box.className='space-y-3 text-xs';box.style.direction='rtl';
+ box.innerHTML='<h3 style="font-size:18px;font-weight:900;text-align:center">'+T('🔐 التحقق بخطوتين')+'</h3><p style="text-align:center;color:#475569;font-weight:600;line-height:1.7">افتح تطبيق المصادقة (Google أو Microsoft Authenticator) واكتب الكود المكوّن من 6 أرقام.</p>'
+  +(fs.length>1?'<select id="mfaFactor" class="su-mfa-in sm">'+fs.map(function(f){return'<option value="'+E(f.id)+'">'+E(f.friendly_name||'جهاز')+'</option>'}).join('')+'</select>':'')
+  +'<input id="mfaCode" class="su-mfa-in" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="one-time-code" placeholder="••••••" aria-label="'+T('كود التطبيق (6 أرقام)')+'">'
+  +'<div id="mfaMsg" class="su-mfa-msg"></div><button class="su-mfa-b" id="mfaGo">'+T('تأكيد')+'</button><button class="su-mfa-b g" id="mfaBack">'+T('رجوع')+'</button>'
+  +'<div style="text-align:center"><span class="su-mfa-lnk" id="mfaLost">'+T('فقدت جهازي؟')+'</span></div>'
+  +'<div id="mfaLostTxt" style="display:none;background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:10px;color:#92400e;font-weight:700;line-height:1.8">لو عندك جهاز احتياطي مسجّل اختاره من القائمة فوق. غير كده كلّم مدير النظام يعمل «إعادة ضبط التحقق بخطوتين» لحسابك، وهتفعّله من جديد عند الدخول الجاي. ولو إنت المدير وفقدت جهازك: شغّل ملف <b>security-2fa.sql</b> من Supabase SQL Editor (القسم الأخير).</div>';
+ if(form)form.style.display='none';card.appendChild(box);
+ var tries=0,busy=false,msgEl=$('mfaMsg'),inp=$('mfaCode');
+ function restore(){box.remove();if(form)form.style.display=''}
+ async function go(){if(busy)return;var code=(inp.value||'').replace(/\D/g,'');if(code.length!==6){msg(msgEl,'اكتب 6 أرقام');return}
+  busy=true;$('mfaGo').disabled=true;msg(msgEl,'⏳ جاري التحقق...',true);
+  try{await verifyCode(($('mfaFactor')?$('mfaFactor').value:fs[0].id),code);restore();res(true)}
+  catch(e){tries++;inp.value='';busy=false;$('mfaGo').disabled=false;
+   if(tries>=MAX_TRIES){try{await sb.auth.signOut({scope:'local'})}catch(x){}restore();try{showLoginError('محاولات تحقق غلط كتير — سجّل دخول من جديد')}catch(x){}res(false);return}
+   msg(msgEl,errTxt(e)+' ('+(MAX_TRIES-tries)+')');inp.focus()}}
+ $('mfaGo').onclick=go;inp.oninput=function(){inp.value=inp.value.replace(/\D/g,'').slice(0,6);if(inp.value.length===6)go()};
+ $('mfaBack').onclick=async function(){try{await sb.auth.signOut({scope:'local'})}catch(x){}restore();res(false)};
+ $('mfaLost').onclick=function(){var t=$('mfaLostTxt');t.style.display=t.style.display==='none'?'block':'none'};
+ setTimeout(function(){try{inp.focus()}catch(x){}},100)})}
+
+/* --- التفعيل الإلزامي بعد الدخول --- */
+window.suMfaEnsure=async function(role){
+ if(!REQUIRE[role]||!sb.auth.mfa)return true;
+ var f;try{f=await factors()}catch(e){console.warn(e);return true}
+ if((f.totp||[]).length)return true;
+ var key='SU_2FA_FIRST_'+((cloudUser&&cloudUser.id)||''),first=0;
+ try{first=+localStorage.getItem(key)||0;if(!first){first=Date.now();localStorage.setItem(key,String(first))}}catch(e){first=Date.now()}
+ var left=Math.ceil((first+GRACE_DAYS*864e5-Date.now())/864e5);
+ return await enrollUI({forced:true,left:left>0?left:0})};
+
+/* --- نافذة تفعيل جهاز (QR) --- */
+function enrollUI(o){o=o||{};return new Promise(async function(res){
+ var m=document.createElement('div');m.className='su-mfa-ov';m.id='mfaModal';document.body.appendChild(m);
+ var fid='',done=false;
+ function close(v){if(done)return;done=true;m.remove();res(v)}
+ m.innerHTML='<div class="su-mfa-card"><h3>'+T('🔐 التحقق بخطوتين')+'</h3><p>⏳ جاري التجهيز...</p></div>';
+ try{var all=(await factors()).all||[];for(var i=0;i<all.length;i++){if(all[i].status==='unverified'){try{await sb.auth.mfa.unenroll({factorId:all[i].id})}catch(x){}}}}catch(e){}
+ var nm=($('mfaDevName')||{}).value||'';
+ async function start(name){
+  var r=await sb.auth.mfa.enroll({factorType:'totp',friendlyName:(name||'موبايل')+' '+Math.random().toString(36).slice(2,6)});
+  if(r.error){
+   var unavailable=/disabled|not enabled|not supported/i.test(r.error.message||'');
+   m.innerHTML='<div class="su-mfa-card"><h3>'+T('🔐 التحقق بخطوتين')+'</h3><p style="color:#b91c1c">'+(unavailable?'التحقق بخطوتين مش مفعّل في Supabase. فعّله من: Authentication ← Sign In / Providers ← Multi-Factor ← TOTP (Enroll + Verify).':E(errTxt(r.error)))+'</p><button class="su-mfa-b g" id="mfaX">'+(o.forced?'متابعة بدون تفعيل':T('إغلاق'))+'</button></div>';
+   $('mfaX').onclick=function(){close(!!o.forced&&unavailable)};return}
+  fid=r.data.id;var t=r.data.totp;
+  m.innerHTML='<div class="su-mfa-card"><h3>'+T('🔐 التحقق بخطوتين')+'</h3>'
+   +(o.forced?'<p style="color:#b45309">'+(o.left>0?'التفعيل مطلوب لحسابك — باقي '+o.left+' يوم كمهلة.':'التفعيل إلزامي لحسابك علشان تكمّل.')+'</p>':'')
+   +'<p>١) نزّل تطبيق Google Authenticator أو Microsoft Authenticator.<br>٢) امسح الباركود، أو اكتب المفتاح يدويًا.<br>٣) اكتب الكود الظاهر في التطبيق.</p>'
+   +'<div style="text-align:center"><img src="'+E(t.qr_code)+'" alt="QR" style="width:190px;height:190px;margin:auto;background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:6px"></div>'
+   +'<div class="su-mfa-row" style="direction:ltr;justify-content:space-between"><code id="mfaSecret" style="font-weight:800;word-break:break-all">'+E(t.secret)+'</code><button class="su-mfa-b g" style="width:auto;margin:0;padding:6px 12px" id="mfaCopy">نسخ</button></div>'
+   +'<input id="mfaCode2" class="su-mfa-in" style="margin-top:12px" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="••••••">'
+   +'<div id="mfaMsg2" class="su-mfa-msg"></div><button class="su-mfa-b" id="mfaOk">'+T('تأكيد')+'</button>'
+   +((!o.forced||o.left>0)?'<button class="su-mfa-b g" id="mfaCancel">'+(o.forced?T('لاحقًا'):T('إغلاق'))+'</button>':'')+'</div>';
+  $('mfaCopy').onclick=function(){try{navigator.clipboard.writeText(t.secret);msg($('mfaMsg2'),'اتنسخ',true)}catch(x){}};
+  var c=$('mfaCode2'),busy=false;
+  async function ok(){if(busy)return;var code=c.value.replace(/\D/g,'');if(code.length!==6){msg($('mfaMsg2'),'اكتب 6 أرقام');return}
+   busy=true;msg($('mfaMsg2'),'⏳ جاري التحقق...',true);
+   try{await verifyCode(fid,code);try{showToast('✅ تم تفعيل التحقق بخطوتين — يفضّل تضيف جهاز احتياطي','green')}catch(x){}close(true)}
+   catch(e){busy=false;c.value='';msg($('mfaMsg2'),errTxt(e))}}
+  $('mfaOk').onclick=ok;c.oninput=function(){c.value=c.value.replace(/\D/g,'').slice(0,6);if(c.value.length===6)ok()};
+  if($('mfaCancel'))$('mfaCancel').onclick=async function(){try{await sb.auth.mfa.unenroll({factorId:fid})}catch(x){}close(!!o.forced)};
+  setTimeout(function(){c.focus()},100)}
+ if(o.forced&&false){}
+ await start(o.name)})}
+
+/* --- إدارة التحقق بخطوتين (من الإعدادات) --- */
+window.suMfaOpen=async function(){
+ if(!sb||!sb.auth||!sb.auth.mfa||!cloudUser){try{showToast('سجّل دخول الأول','amber')}catch(e){}return}
+ var old=$('mfaMgr');if(old)old.remove();
+ var m=document.createElement('div');m.className='su-mfa-ov';m.id='mfaMgr';document.body.appendChild(m);
+ async function paint(){
+  var fs=[];try{fs=(await factors()).totp||[]}catch(e){}
+  var isAdmin=false;try{isAdmin=currentUser&&currentUser.role==='admin'}catch(e){}
+  m.innerHTML='<div class="su-mfa-card"><h3>'+T('🔐 التحقق بخطوتين')+'</h3><p>الحالة: <b>'+(fs.length?T('مفعّل ✅'):T('غير مفعّل'))+'</b>. كل دخول بيطلب كود من تطبيق المصادقة بعد كلمة المرور. سجّل جهاز احتياطي لو فقدت الأول.</p>'
+   +fs.map(function(f){return'<div class="su-mfa-row"><span style="flex:1;font-weight:800">📱 '+E(f.friendly_name||'جهاز')+'<br><small style="color:#64748b">'+E((f.created_at||'').slice(0,10))+'</small></span><button class="su-mfa-b r" style="width:auto;margin:0;padding:6px 12px" data-rm="'+E(f.id)+'">'+T('حذف')+'</button></div>'}).join('')
+   +'<button class="su-mfa-b" id="mfaAdd">'+T('➕ إضافة جهاز')+'</button><div id="mfaMsg3" class="su-mfa-msg"></div>'
+   +(isAdmin?'<div style="border-top:1px dashed #cbd5e1;margin-top:12px;padding-top:12px"><b>🛠️ إعادة ضبط التحقق لموظف (فقد جهازه)</b><p style="margin-top:6px">بيمسح أجهزته وبيطلّعه من كل الجلسات، وهيفعّل جهاز جديد عند الدخول الجاي.</p><input id="mfaResetEmail" class="su-mfa-in sm" dir="ltr" placeholder="email@example.com"><button class="su-mfa-b r" id="mfaReset">إعادة الضبط</button></div>':'')
+   +'<button class="su-mfa-b g" id="mfaClose">'+T('إغلاق')+'</button></div>';
+  $('mfaClose').onclick=function(){m.remove()};
+  $('mfaAdd').onclick=async function(){await enrollUI({forced:false});paint()};
+  m.querySelectorAll('[data-rm]').forEach(function(b){b.onclick=async function(){
+   if(!confirm('تحذف الجهاز ده؟'))return;
+   var r=await sb.auth.mfa.unenroll({factorId:b.getAttribute('data-rm')});
+   if(r.error){msg($('mfaMsg3'),errTxt(r.error));return}paint()}});
+  if($('mfaReset'))$('mfaReset').onclick=async function(){var em=($('mfaResetEmail').value||'').trim().toLowerCase();
+   if(!em||em.indexOf('@')<1){msg($('mfaMsg3'),'اكتب الإيميل كامل');return}
+   if(!confirm('إعادة ضبط التحقق بخطوتين لـ '+em+'؟'))return;
+   var r=await sb.rpc('admin_reset_mfa',{p_email:em});
+   msg($('mfaMsg3'),r.error?(/function|does not exist/i.test(r.error.message||'')?'الدالة مش موجودة — شغّل security-2fa.sql':E(r.error.message)):'✅ تمت إعادة الضبط',!r.error)}};
+ paint()};
+})();
+</script>
+
 <script>
   // 1. Master Data from Google Sheets
   const sheetData = {
@@ -4093,8 +4260,11 @@ body.sidebar-collapsed #sideNav .side-gear{justify-content:center;padding:8px 0}
     if (k === 'users') v = (v || []).map(u => Object.assign({}, u, { password: '' }));
     return v === undefined ? null : v;
   }
+  // [SEC-RLS] الأخصائي مالوش صلاحية على الحسابات في قاعدة البيانات، فمانرفعهاش ولا نقارنها (وإلا هيظهر "فشل الرفع")
+  const SU_THERAPIST_DENY = ['payments', 'purchases'];
   function cloudKeys() {
-    return Object.keys(state).filter(k => typeof state[k] !== 'function' && state[k] !== undefined);
+    const deny = (window._realRole === 'therapist') ? SU_THERAPIST_DENY : [];
+    return Object.keys(state).filter(k => typeof state[k] !== 'function' && state[k] !== undefined && deny.indexOf(k) < 0);
   }
   function cloudIdOf(x) {
     if (!x || typeof x !== 'object') return null;
@@ -4286,6 +4456,13 @@ body.sidebar-collapsed #sideNav .side-gear{justify-content:center;padding:8px 0}
   }
 
   async function cloudStart(session) {
+    // [SEC-2FA] الخطوة التانية للتحقق قبل ما نحمّل أي بيانات
+    if (typeof suMfaGate === 'function') {
+      let okMfa = true;
+      try { okMfa = await suMfaGate(); } catch (e) { console.warn('mfa gate', e); }
+      if (!okMfa) { cloudUser = null; return false; }
+      try { const fr = await sb.auth.getSession(); if (fr && fr.data && fr.data.session) session = fr.data.session; } catch (e) {}
+    }
     cloudUser = session.user;
     suStage('2/3 جاري تحميل صلاحياتك...');
     const { data: prof, error } = await suTimeout(sb.from('profiles').select('*').eq('id', cloudUser.id).maybeSingle(), 25000, 'تحميل الصلاحيات');
@@ -4303,6 +4480,13 @@ body.sidebar-collapsed #sideNav .side-gear{justify-content:center;padding:8px 0}
       staffId: prof.staff_id || undefined, branch: 'all', active: true
     };
     window._realRole = prof.role;
+    if (prof.role === 'therapist') { state.payments = []; state.purchases = []; }   // [SEC-RLS] مسح أي نسخة قديمة من الحسابات على جهاز الأخصائي
+    // [SEC-2FA] تفعيل التحقق بخطوتين إلزامي للموظفين (بمهلة)
+    if (prof.role !== 'parent' && typeof suMfaEnsure === 'function') {
+      let okEnr = true;
+      try { okEnr = await suMfaEnsure(prof.role); } catch (e) { console.warn('mfa ensure', e); }
+      if (!okEnr) { try { await sb.auth.signOut({ scope: 'local' }); } catch (e) {} cloudUser = null; currentUser = null; window._realRole = null; return false; }
+    }
     if (prof.role === 'parent') return await parentStart(prof);
     cloudStatus('busy');
     let pulled;
@@ -12441,7 +12625,7 @@ html.su-dark #suProfile .sp-msg.ok{background:rgba(16,185,129,.16);color:#6ee7b7
       '<div class="sp-body">' +
       '<div class="sp-card"><div class="sp-h">✉️ الحساب</div><label class="sp-lb" style="margin-top:0">الإيميل (بتسجّل بيه الدخول)</label><input id="spEmail" type="email" dir="ltr" value="' + E(currentUser.email || '') + '" autocomplete="email">' +
       '<label class="sp-lb">كلمة المرور الحالية (للتأكيد)</label><input id="spPw" type="password" autocomplete="current-password" placeholder="••••••••">' +
-      '<div class="sp-row" style="margin-top:10px"><button type="button" class="sp-btn" id="spEmailBtn">حفظ الإيميل</button><button type="button" class="sp-btn g" onclick="changeMyPassword()">🔑 تغيير كلمة المرور</button></div><div id="spMsg" class="sp-msg"></div>' +
+      '<div class="sp-row" style="margin-top:10px"><button type="button" class="sp-btn" id="spEmailBtn">حفظ الإيميل</button><button type="button" class="sp-btn g" onclick="changeMyPassword()">🔑 تغيير كلمة المرور</button><button type="button" class="sp-btn g" onclick="suMfaOpen()">🔐 التحقق بخطوتين</button></div><div id="spMsg" class="sp-msg"></div>' +
       '<div class="sp-note">الإيميل الجديد بيتفعّل بعد ما تفتح رابط التأكيد اللي هيوصلك. الاسم والصلاحيات بيغيّرهم المدير.</div></div>' +
       '<div class="sp-card"><div class="sp-h">🎨 المظهر</div>' + seg('theme', themePref(), [['light', '☀️ فاتح'], ['dark', '🌙 غامق'], ['system', '📱 حسب الجهاز']]) +
       '<label class="sp-lb">حجم الخط</label>' + seg('fontScale', uPref('fontScale', g.fontScale || 'm'), [['s', 'صغير'], ['m', 'عادي'], ['l', 'كبير']]) +
