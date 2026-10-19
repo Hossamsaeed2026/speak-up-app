@@ -3557,7 +3557,7 @@ body.sidebar-collapsed #sideNav .side-gear{justify-content:center;padding:8px 0}
 /* ===== إعدادات الأمان (غيّر الأرقام هنا) ===== */
 var IDLE_MIN={admin:10,secretary:15,therapist:20,parent:30};   // دقائق الخمول قبل الخروج التلقائي (الأكبر صلاحية = الأقصر)
 var WARN_MS=60000;                                              // تنبيه قبل الخروج بدقيقة
-var REQUIRE={admin:true,secretary:true,therapist:true,parent:false}; // مين لازم يفعّل التحقق بخطوتين
+var REQUIRE={admin:false,secretary:false,therapist:false,parent:false}; // مين لازم يفعّل التحقق بخطوتين (اتقفل: التفعيل بقى اختياري من الإعدادات)
 var GRACE_DAYS=7;                                               // مهلة التفعيل (يوم) قبل ما يبقى إلزامي من غير "لاحقًا"
 var MAX_TRIES=5;
 var EN={"🔐 التحقق بخطوتين":"🔐 Two-step verification","تأكيد":"Verify","رجوع":"Back","فقدت جهازي؟":"Lost your device?","فضّل متصل":"Stay signed in","لاحقًا":"Later","إغلاق":"Close","حذف":"Remove","➕ إضافة جهاز":"➕ Add a device","اسم الجهاز":"Device name","كود التطبيق (6 أرقام)":"App code (6 digits)","🔒 تم تسجيل خروجك تلقائيًا لعدم النشاط":"🔒 You were signed out due to inactivity","هتتسجل خروج بعد":"You will be signed out in","ثانية لعدم النشاط":"seconds due to inactivity","مفعّل ✅":"Enabled ✅","غير مفعّل":"Not enabled"};
@@ -13384,6 +13384,120 @@ if(L==='en'){['alert','confirm','prompt'].forEach(function(k){var o=window[k];wi
     function onChange(){if(mq.matches===was){return}if(!timer){tries=0;timer=setInterval(go,2000);setTimeout(go,1000)}}
     if(mq.addEventListener)mq.addEventListener('change',onChange);else if(mq.addListener)mq.addListener(onChange);
   }catch(e){}
+})();
+</script>
+
+<!-- ===== أسماء العملاء قابلة للضغط في أي مكان → تفتح بروفيل العميل ===== -->
+<style>
+.cn-link{cursor:pointer;text-decoration:underline dotted;text-decoration-color:rgba(79,70,229,.55);text-underline-offset:4px;text-decoration-thickness:1.5px;border-radius:4px;transition:color .12s,background .12s}
+.cn-link:hover{color:var(--b600,#4f46e5);background:rgba(79,70,229,.08);text-decoration-style:solid}
+html.su-dark .cn-link:hover{color:#a5b4fc;background:rgba(165,180,252,.12)}
+</style>
+<script>
+(function () {
+  'use strict';
+  var MIN_LEN = 5;                                   // أقل طول لاسم عشان يتعامل كاسم عميل (يمنع التطابق الغلط مع كلمات قصيرة)
+  var SKIP_TAGS = { SCRIPT: 1, STYLE: 1, TEXTAREA: 1, INPUT: 1, SELECT: 1, OPTION: 1, BUTTON: 1, A: 1, LABEL: 1, NOSCRIPT: 1, TITLE: 1, CODE: 1, PRE: 1 };
+  var NOLINK_SEL = '.cn-link,[data-nolink],[contenteditable="true"],svg,#genConflictModal,#iconPickerModal,#clientModal,#sessionModal';
+  var AR = '\\u0600-\\u06FF\\u0750-\\u077FA-Za-z0-9';
+  var cache = { sig: '', rx: null, map: null };
+
+  function norm(s) { return String(s == null ? '' : s).replace(/\s+/g, ' ').trim(); }
+  function esc(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+
+  // بيبني (ويخزّن) regex لكل أسماء العملاء الفريدة — الأسماء المكررة بتتجاهل عشان ميفتحش الطفل الغلط
+  function build() {
+    var list = (typeof state !== 'undefined' && state && state.clients) || [];
+    var sig = list.length + ':' + list.reduce(function (a, c) { return a + (c && c.name ? c.name.length : 0); }, 0);
+    if (cache.sig === sig && cache.rx !== undefined) return cache;
+    var byName = {};
+    list.forEach(function (c) {
+      if (!c || !c.name || c.id == null) return;
+      var n = norm(c.name); if (n.length < MIN_LEN) return;
+      (byName[n] = byName[n] || []).push(String(c.id));
+    });
+    var map = {}, names = [];
+    Object.keys(byName).forEach(function (n) { if (byName[n].length === 1) { map[n] = byName[n][0]; names.push(n); } });
+    names.sort(function (a, b) { return b.length - a.length; });
+    var rx = names.length ? new RegExp('(?<![' + AR + '])(' + names.map(function (n) { return esc(n).replace(/ /g, '\\s+'); }).join('|') + ')(?![' + AR + '])', 'g') : null;
+    cache = { sig: sig, rx: rx, map: map };
+    return cache;
+  }
+
+  // دالة صافية بتقسّم النص: [{t:'نص'} , {n:'اسم', id:'123'} , ...]  (بتتختبر لوحدها)
+  function split(text, rx, map) {
+    var out = [], last = 0, m; rx.lastIndex = 0;
+    while ((m = rx.exec(text))) {
+      var id = map[norm(m[1])]; if (!id) continue;
+      if (m.index > last) out.push({ t: text.slice(last, m.index) });
+      out.push({ n: m[1], id: id }); last = m.index + m[1].length;
+    }
+    if (!out.length) return null;
+    if (last < text.length) out.push({ t: text.slice(last) });
+    return out;
+  }
+  window._cnSplit = split;
+
+  function canLink() {
+    try { if (typeof currentUser !== 'undefined' && currentUser && currentUser.role === 'parent') return false; } catch (e) {}
+    return typeof openClientProfile === 'function';
+  }
+  function skipNode(tn) {
+    var p = tn.parentNode; if (!p || p.nodeType !== 1) return true;
+    for (var e = p; e && e.nodeType === 1; e = e.parentNode) { if (SKIP_TAGS[e.tagName]) return true; }
+    if (p.closest && p.closest(NOLINK_SEL)) return true;
+    if (p.closest && p.closest('#clientProfileBody') && p.closest('h2')) return true;   // عنوان البروفيل نفسه
+    return false;
+  }
+  function processText(tn) {
+    var s = tn.nodeValue; if (!s || s.length < MIN_LEN) return;
+    var b = build(); if (!b.rx) return;
+    b.rx.lastIndex = 0; if (!b.rx.test(s)) return;
+    if (skipNode(tn)) return;
+    var parts = split(s, b.rx, b.map); if (!parts) return;
+    var frag = document.createDocumentFragment();
+    parts.forEach(function (x) {
+      if (x.t != null) frag.appendChild(document.createTextNode(x.t));
+      else { var sp = document.createElement('span'); sp.className = 'cn-link'; sp.dataset.cid = x.id; sp.title = 'افتح بروفيل العميل'; sp.textContent = x.n; frag.appendChild(sp); }
+    });
+    if (tn.parentNode) tn.parentNode.replaceChild(frag, tn);
+  }
+  function processRoot(root) {
+    if (!root || !canLink()) return;
+    if (root.nodeType === 3) { processText(root); return; }
+    if (root.nodeType !== 1 || SKIP_TAGS[root.tagName]) return;
+    if (root.closest && root.closest('.cn-link')) return;
+    var w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null), n, arr = [];
+    while ((n = w.nextNode())) arr.push(n);
+    arr.forEach(processText);
+  }
+
+  var pending = new Set(), timer = null;
+  function flush() {
+    timer = null; var roots = Array.from(pending); pending.clear();
+    obs.disconnect();
+    try { roots.forEach(function (r) { if (r.isConnected !== false) processRoot(r); }); } catch (e) { console.warn('cn-link', e); }
+    obs.observe(document.body, { childList: true, subtree: true, characterData: true });
+  }
+  var obs = new MutationObserver(function (muts) {
+    muts.forEach(function (m) {
+      if (m.type === 'characterData') { pending.add(m.target); return; }
+      m.addedNodes.forEach(function (n) { if (n.nodeType === 1 || n.nodeType === 3) pending.add(n); });
+    });
+    if (pending.size && !timer) timer = setTimeout(flush, 150);
+  });
+
+  // الضغط على الاسم → بروفيل العميل (capture عشان ياخد الأولوية على أي onclick للصف)
+  document.addEventListener('click', function (e) {
+    var el = e.target && e.target.closest && e.target.closest('.cn-link'); if (!el) return;
+    if (!canLink()) return;
+    e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
+    openClientProfile(el.dataset.cid);
+  }, true);
+
+  function start() { obs.observe(document.body, { childList: true, subtree: true, characterData: true }); setTimeout(function () { processRoot(document.body); }, 400); }
+  if (document.body) start(); else document.addEventListener('DOMContentLoaded', start);
+  window.cnRelink = function () { cache.sig = ''; processRoot(document.body); };   // لو احتجت تعيد المسح يدوي
 })();
 </script>
 </body>
