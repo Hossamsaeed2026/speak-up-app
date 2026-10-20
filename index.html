@@ -9636,8 +9636,26 @@ Object.assign(I18N_EN, Object.assign({"قبل 24س": "before 24h", "اعتذار
   function ppcSess(id) { _pcal.sheet = { t: 's', id }; ppcRedraw(); }
   function ppcClose() { _pcal.sheet = null; ppcRedraw(); }
   function ppcOpenDay(d) { _pcal.sheet = null; _pcal.anchor = d; _pcal.mode = 'day'; ppcRedraw(); }
+  /* المواعيد الثابتة للطفل — من الجدول الأسبوعي، ولو مش واصل لولي الأمر نستنتجها من الجلسات المتكررة (3 مرات+ في ±45 يوم) */
+  function ppFixedSlots(c, sess) {
+    var slots = ((c && c.weeklySchedule) || []).map(function (x) { return { day: x.day, time: x.time }; });
+    if (!slots.length) {
+      var today = todayCairo(), from = ymdAddDays(today, -45), to = ymdAddDays(today, 45), seen = {};
+      (sess || []).forEach(function (x) {
+        var d = String(x.date || '').replace(/\//g, '-');
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(d) || d < from || d > to || cpStatusKey(x.status) === 'TCA') return;
+        var wd = AR_WEEKDAYS[ymdWeekday(d)], k = wd + '|' + x.time;
+        (seen[k] = seen[k] || { day: wd, time: x.time, n: 0 }).n++;
+      });
+      Object.keys(seen).forEach(function (k) { if (seen[k].n >= 3) slots.push(seen[k]); });
+    }
+    var chips = suSlotsSorted({ weeklySchedule: slots }).map(function (x) {
+      return '<span class="bg-sky-50 border border-sky-200 text-sky-800 rounded-lg px-3 py-1 text-xs font-black whitespace-nowrap">' + actEsc(x.day) + ' | ' + actEsc(suTime12(x.time)) + '</span>';
+    }).join('');
+    return chips ? '<div class="bg-white rounded-2xl border p-4"><div class="font-black text-sm text-slate-800 mb-2">🗓️ المواعيد الثابتة لجلسات ' + actEsc(String((c && c.name) || '').trim().split(/\s+/)[0] || 'الطفل') + '</div><div class="flex flex-wrap gap-2">' + chips + '</div></div>' : '';
+  }
   function ppCalPage(sess, row) {
-    return `<div id="ppCalBox">${pcInner()}</div>
+    return `${ppFixedSlots(ppChild(), sess)}<div id="ppCalBox">${pcInner()}</div>
       <div class="bg-white rounded-2xl border p-4"><div class="font-black text-sm text-slate-800 mb-2">📋 جدول الجلسات (${sess.length})</div>${sess.map(row).join('') || '<div class="text-center text-slate-400 py-6">لا توجد جلسات</div>'}</div>`;
   }
 
@@ -11895,6 +11913,17 @@ function tdPickPhoto() {
 .ma-day small{font-size:10px;font-weight:900;background:#14b8a6;color:#fff;border-radius:999px;padding:0 7px}.ma-day.sel small{background:#fff;color:#0f766e}
 .ma-nav{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:8px}
 .ma-nav button{border:1px solid #cbd5e1;background:#fff;border-radius:10px;padding:5px 10px;font-weight:900;font-size:12px;cursor:pointer}
+.ma-seg{display:inline-flex;border:1px solid #cbd5e1;border-radius:12px;overflow:hidden}
+.ma-nav .ma-seg button{border:0;border-radius:0;padding:6px 16px;background:#fff;color:#475569}
+.ma-nav .ma-seg button.on{background:#0f766e;color:#fff}
+.ma-day small.c{font-size:9.5px;white-space:nowrap;padding:0 6px}
+.ma-week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+@media(max-width:760px){.ma-week{grid-template-columns:1fr}}
+.ma-wcol{border:1px solid #e2e8f0;border-radius:14px;padding:6px;background:#fff;min-height:70px}
+.ma-wcol.today{border:2px solid #0f766e}
+.ma-wh{width:100%;display:flex;align-items:center;justify-content:space-between;gap:4px;border:0;background:#f1f5f9;border-radius:10px;padding:5px 8px;font-size:11.5px;font-weight:900;color:#0f172a;cursor:pointer;margin-bottom:5px}
+.ma-wit{font-size:11.5px;padding:4px 6px;border-radius:8px;background:#f0fdfa;margin-bottom:3px;line-height:1.5;color:#0f172a}
+.ma-wit.x{background:#f8fafc;color:#94a3b8;text-decoration:line-through}
 /* ===== كراسة المتابعة (الأخصائي) ===== */
 .fu-filter{position:sticky;top:0;z-index:8;background:#f8fafc;padding:8px 0;display:flex;gap:8px;flex-wrap:wrap}
 .fu-filter input,.fu-filter select{border:1px solid #cbd5e1;border-radius:12px;padding:9px 12px;font-size:13px;font-weight:800;background:#fff;min-width:0}
@@ -11938,16 +11967,25 @@ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/sv
   function typing(host) { var a = document.activeElement; return !!(a && host && host.contains(a) && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)); }
 
   /* ================= مواعيدي ================= */
-  var MA = { ym: null, sel: null };
+  var MA = { ym: null, sel: null, view: 'month' };
   var MONTHS = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
   var WD_SAT = ['السبت', 'الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة'];
   window.maSet = function (k, v) { MA[k] = v; if (k === 'ym') { /* keep selection */ } renderMyAppts(); };
-  window.maMonth = function (d) {
-    var p = MA.ym.split('-').map(Number), dt = new Date(Date.UTC(p[0], p[1] - 1 + d, 1));
-    MA.ym = dt.getUTCFullYear() + '-' + String(dt.getUTCMonth() + 1).padStart(2, '0'); renderMyAppts();
+  window.maNav = function (dir) {
+    var t = todayCairo(), cur = MA.sel || t;
+    if (MA.view === 'day') MA.sel = ymdAddDays(cur, dir);
+    else if (MA.view === 'week') MA.sel = ymdAddDays(cur, 7 * dir);
+    else {
+      var p = (MA.ym || cur.slice(0, 7)).split('-').map(Number), dt = new Date(Date.UTC(p[0], p[1] - 1 + dir, 1));
+      MA.ym = dt.getUTCFullYear() + '-' + String(dt.getUTCMonth() + 1).padStart(2, '0');
+      MA.sel = MA.ym === t.slice(0, 7) ? t : MA.ym + '-01';
+    }
+    MA.ym = MA.sel.slice(0, 7); renderMyAppts();
   };
+  window.maMonth = function (d) { MA.view = 'month'; window.maNav(d); };
+  window.maView = function (v) { MA.view = v; if (!MA.sel) MA.sel = todayCairo(); MA.ym = MA.sel.slice(0, 7); renderMyAppts(); };
   window.maToday = function () { var t = todayCairo(); MA.ym = t.slice(0, 7); MA.sel = t; renderMyAppts(); };
-  window.maPick = function (d) { MA.sel = d; renderMyAppts(); };
+  window.maPick = function (d) { MA.sel = d; MA.ym = d.slice(0, 7); MA.view = 'day'; renderMyAppts(); };
   window.maOpenSession = function (id) { openSessionDetail(id); };
   window.maOpenBook = function (cid) { fuOpenChild(cid); };
 
@@ -11969,31 +12007,57 @@ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/sv
     }).join('');
     var todayBox = '<div class="ma-card"><div class="font-black text-sm text-slate-800" style="margin-bottom:8px">📌 جدول اليوم — ' + AR_WEEKDAYS[ymdWeekday(today)] + ' (' + tl.length + ' جلسة)</div>' +
       (tl.length ? '<div style="overflow-x:auto"><table class="ma-tbl"><thead><tr><th>الوقت</th><th>الطفل</th><th>النوع</th></tr></thead><tbody>' + tlRows + '</tbody></table></div>' : '<div class="text-slate-400 font-bold text-sm" style="padding:6px 0">مفيش جلسات النهارده</div>') + '</div>';
-    var rows = day.map(function (x) {
-      var c = client(x.clientId) || { name: '؟' }, isNx = x.id === nextId;
-      return '<tr class="' + (isNx ? 'nx' : '') + '"><td class="font-mono font-black">' + E(formatTime12(x.time)) + (isNx ? '<br><span class="ma-nx">⏭️ الجلسة القادمة</span>' : '') + '</td>' +
-        '<td><b>' + E(c.name) + '</b> <span class="font-mono text-slate-400 text-[11px]">#' + E(x.clientId) + '</span></td>' +
-        '<td>' + E(suTypeVal(x.type)) + '</td><td>' + E(getBranchName(c.branch || dashSessBranch(x))) + '</td>' +
-        '<td>' + statusBadgeHtml(x.status) + '</td>' +
-        '<td><div style="display:flex;gap:6px"><button class="ma-ab k" onclick="maOpenBook(\'' + E(x.clientId) + '\')" title="كراسة الطفل">📒</button><button class="ma-ab d" onclick="maOpenSession(\'' + E(x.id) + '\')" title="تفاصيل الجلسة">📂</button></div></td></tr>';
-    }).join('');
-    var sd = MA.sel.split('-').map(Number), wdName = AR_WEEKDAYS[ymdWeekday(MA.sel)];
-    // calendar
-    var p = MA.ym.split('-').map(Number), first = new Date(Date.UTC(p[0], p[1] - 1, 1)), dim = new Date(Date.UTC(p[0], p[1], 0)).getUTCDate();
-    var lead = (first.getUTCDay() + 1) % 7;   // السبت = 0
-    var cells = WD_SAT.map(function (w) { return '<div class="ma-wd">' + w + '</div>'; }).join('');
-    for (var i = 0; i < lead; i++) cells += '<div class="ma-day o"></div>';
-    for (var d = 1; d <= dim; d++) {
-      var ymd = MA.ym + '-' + String(d).padStart(2, '0'), n = (by[ymd] || []).length;
-      cells += '<button type="button" class="ma-day' + (n ? ' has' : '') + (ymd === today ? ' today' : '') + (ymd === MA.sel ? ' sel' : '') + '" onclick="maPick(\'' + ymd + '\')">' + d + (n ? '<small>' + n + '</small>' : '') + '</button>';
+    var view = MA.view || 'month';
+    var sortT = function (x, y) { return (tMin(x.time) == null ? 9999 : tMin(x.time)) - (tMin(y.time) == null ? 9999 : tMin(y.time)); };
+    var nCl = function (list) { var o = {}; list.forEach(function (x) { o[String(x.clientId)] = 1; }); return Object.keys(o).length; };
+    var mshort = function (ymd) { var q = ymd.split('-').map(Number); return q[2] + ' ' + MONTHS[q[1] - 1]; };
+    var wdName = AR_WEEKDAYS[ymdWeekday(MA.sel)], title = '', body = '';
+
+    if (view === 'day') {
+      title = wdName + ' ' + mshort(MA.sel) + ' ' + MA.sel.slice(0, 4);
+      var rows = day.map(function (x) {
+        var c = client(x.clientId) || { name: '؟' }, isNx = x.id === nextId;
+        return '<tr class="' + (isNx ? 'nx' : '') + '"><td class="font-mono font-black">' + E(formatTime12(x.time)) + (isNx ? '<br><span class="ma-nx">⏭️ الجلسة القادمة</span>' : '') + '</td>' +
+          '<td><b>' + E(c.name) + '</b> <span class="font-mono text-slate-400 text-[11px]">#' + E(x.clientId) + '</span></td>' +
+          '<td>' + E(suTypeVal(x.type)) + '</td><td>' + E(getBranchName(c.branch || dashSessBranch(x))) + '</td>' +
+          '<td>' + statusBadgeHtml(x.status) + '</td>' +
+          '<td><div style="display:flex;gap:6px"><button class="ma-ab k" onclick="maOpenBook(\'' + E(x.clientId) + '\')" title="كراسة الطفل">📒</button><button class="ma-ab d" onclick="maOpenSession(\'' + E(x.id) + '\')" title="تفاصيل الجلسة">📂</button></div></td></tr>';
+      }).join('');
+      body = '<div class="ma-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px"><span class="ma-chip">👥 ' + nCl(day) + ' عميل</span><span class="ma-chip">🗒️ ' + day.length + ' جلسة</span><span class="ma-chip g">✅ حضر ' + cnt.ATT + '</span><span class="ma-chip b">⏳ متبقي ' + cnt.SCH + '</span></div>' +
+        (day.length ? '<div style="overflow-x:auto"><table class="ma-tbl"><thead><tr><th>الوقت</th><th>الطفل</th><th>النوع</th><th>الفرع</th><th>الحالة</th><th></th></tr></thead><tbody>' + rows + '</tbody></table></div>' : '<div class="py-8 text-center text-slate-400 font-bold text-sm">لا توجد جلسات في هذا اليوم 🌿</div>');
+    } else if (view === 'week') {
+      var ws = ymdAddDays(MA.sel, -((ymdWeekday(MA.sel) + 1) % 7)), we = ymdAddDays(ws, 6), cols = '', tot = 0;
+      title = mshort(ws) + ' – ' + mshort(we) + ' ' + we.slice(0, 4);
+      for (var i = 0; i < 7; i++) {
+        var dd = ymdAddDays(ws, i), dl = (by[dd] || []).slice().sort(sortT); tot += dl.length;
+        var items = dl.map(function (x) {
+          var c2 = client(x.clientId) || { name: '؟' }, k = cpStatusKey(x.status);
+          return '<div class="ma-wit' + (k !== 'SCH' && k !== 'ATT' ? ' x' : '') + '"><b class="font-mono">' + E(suTime12(x.time)) + '</b> ' + E(c2.name) + (k === 'ATT' ? ' ✅' : '') + '</div>';
+        }).join('');
+        cols += '<div class="ma-wcol' + (dd === today ? ' today' : '') + '"><button type="button" class="ma-wh" onclick="maPick(\'' + dd + '\')"><span>' + WD_SAT[i] + ' ' + Number(dd.slice(8)) + '</span><span class="ma-chip">' + nCl(dl) + ' عميل</span></button>' + (items || '<div class="text-slate-300 text-[11px] text-center py-2">—</div>') + '</div>';
+      }
+      body = '<div class="ma-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px"><span class="ma-chip">🗒️ ' + tot + ' جلسة في الأسبوع</span></div><div class="ma-week">' + cols + '</div>';
+    } else {
+      var p = MA.ym.split('-').map(Number), first = new Date(Date.UTC(p[0], p[1] - 1, 1)), dim = new Date(Date.UTC(p[0], p[1], 0)).getUTCDate();
+      var lead = (first.getUTCDay() + 1) % 7, mTot = 0;   // السبت = 0
+      title = MONTHS[p[1] - 1] + ' ' + p[0];
+      var cells = WD_SAT.map(function (w) { return '<div class="ma-wd">' + w + '</div>'; }).join('');
+      for (var j = 0; j < lead; j++) cells += '<div class="ma-day o"></div>';
+      for (var d = 1; d <= dim; d++) {
+        var ymd = MA.ym + '-' + String(d).padStart(2, '0'), dl2 = by[ymd] || [], n = nCl(dl2); mTot += dl2.length;
+        cells += '<button type="button" class="ma-day' + (n ? ' has' : '') + (ymd === today ? ' today' : '') + (ymd === MA.sel ? ' sel' : '') + '" onclick="maPick(\'' + ymd + '\')">' + d + (n ? '<small class="c">' + n + ' عميل</small>' : '') + '</button>';
+      }
+      body = '<div class="ma-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px"><span class="ma-chip">🗒️ ' + mTot + ' جلسة في الشهر</span></div><div class="ma-cal">' + cells + '</div>';
     }
+
+    var lbl = { day: 'يوم', week: 'أسبوع', month: 'شهر' };
+    var seg = '<div class="ma-seg">' + ['day', 'week', 'month'].map(function (v) { return '<button type="button" class="' + (v === view ? 'on' : '') + '" onclick="maView(\'' + v + '\')">' + lbl[v] + '</button>'; }).join('') + '</div>';
+    var toolbar = '<div class="ma-nav" style="flex-wrap:wrap">' + seg + '<div style="display:flex;gap:6px;align-items:center;flex:1;justify-content:flex-end"><button onclick="maNav(-1)">▶ السابق</button><button onclick="maToday()">اليوم</button><button onclick="maNav(1)">التالي ◀</button></div></div>' +
+      '<div class="font-black text-slate-800 text-center" style="margin:6px 0 10px">' + E(title) + '</div>';
     el.innerHTML = '<div class="space-y-4">' +
-      '<div class="ma-head"><div style="font-size:34px">🗓️</div><div style="flex:1;min-width:160px"><h2>مواعيدي</h2><p>جلساتي وجدولي الشهري</p></div></div>' +
+      '<div class="ma-head"><div style="font-size:34px">🗓️</div><div style="flex:1;min-width:160px"><h2>مواعيدي</h2><p>جلساتي وجدولي</p></div></div>' +
       unlinkedBanner() + todayBox +
-      '<div class="ma-card"><div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px"><div class="font-black text-sm text-slate-800">' + (isToday ? '📅 جلسات اليوم' : '📅 جلسات يوم') + ' — ' + wdName + ' ' + E(MA.sel) + '</div>' +
-      '<div class="ma-chips" style="margin-right:auto"><span class="ma-chip">🗒️ ' + day.length + ' جلسة</span><span class="ma-chip g">✅ حضر ' + cnt.ATT + '</span><span class="ma-chip b">⏳ متبقي ' + cnt.SCH + '</span></div></div>' +
-      (day.length ? '<div style="overflow-x:auto"><table class="ma-tbl"><thead><tr><th>الوقت</th><th>الطفل</th><th>النوع</th><th>الفرع</th><th>الحالة</th><th></th></tr></thead><tbody>' + rows + '</tbody></table></div>' : '<div class="py-8 text-center text-slate-400 font-bold text-sm">لا توجد جلسات في هذا اليوم 🌿</div>') + '</div>' +
-      '<div class="ma-card"><div class="ma-nav"><button onclick="maMonth(-1)">▶ السابق</button><div class="font-black text-slate-800">' + MONTHS[p[1] - 1] + ' ' + p[0] + '</div><div style="display:flex;gap:6px"><button onclick="maToday()">اليوم</button><button onclick="maMonth(1)">التالي ◀</button></div></div><div class="ma-cal">' + cells + '</div></div></div>';
+      '<div class="ma-card">' + toolbar + body + '</div></div>';
   }
   window.renderMyAppts = renderMyAppts;
 
@@ -12844,6 +12908,9 @@ html.su-dark .ma-card{background:#1a1a1a;border:1px solid #363f4a}
 html.su-dark .ma-chip{background:#112a24;color:#bee7e4;border:1px solid #31786a}
 html.su-dark .ma-chip.g{background:#112a19;color:#b9e3c9;border-color:#2d6741}
 html.su-dark .ma-chip.b{background:#0d1b2d;color:#92a4d6;border-color:#244369}
+html.su-dark .ma-nav .ma-seg button{background:#1a1a1a;color:#cbd5e1}html.su-dark .ma-nav .ma-seg button.on{background:#0f766e;color:#fff}
+html.su-dark .ma-wcol{background:#1a1a1a;border-color:#363f4a}html.su-dark .ma-wh{background:#262b31;color:#e2e8f0}
+html.su-dark .ma-wit{background:#112a24;color:#e2e8f0}html.su-dark .ma-wit.x{background:#20242a;color:#7c8794}
 html.su-dark .ma-tbl th{background:#171e25;color:#c0c6cd}
 html.su-dark .ma-tbl td{border-bottom:1px solid #2e3944}
 html.su-dark .ma-tbl tr.nx{background:#112a24}
