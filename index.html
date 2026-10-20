@@ -4104,6 +4104,24 @@ window.suMfaOpen=async function(){
     if (h === 0) h = 12;
     return String(h).padStart(2, '0') + ':' + m + ' ' + suffix;
   }
+  /* 4:45 PM — الصيغة المختصرة لمواعيد الجلسات الثابتة */
+  function suTime12(t) {
+    var x = String(t == null ? '' : t), m = x.match(/(\d{1,2}):(\d{2})/);
+    if (!m) return x;
+    var h = parseInt(m[1], 10);
+    if (/م|PM/i.test(x) && h < 12) h += 12;
+    if (/ص|AM/i.test(x) && h === 12) h = 0;
+    return (h % 12 || 12) + ':' + m[2] + ' ' + (h >= 12 ? 'PM' : 'AM');
+  }
+  function suSlotsSorted(c) {
+    var ord = ['السبت', 'الاحد', 'الاثنين', 'الثلاثاء', 'الاربعاء', 'الخميس', 'الجمعة'];
+    var nrm = function (d) { return String(d || '').replace(/[إأآ]/g, 'ا').trim(); };
+    var mins = function (t) { var x = String(t || ''), m = x.match(/(\d{1,2}):(\d{2})/); if (!m) return 9999; var h = parseInt(m[1], 10); if (/م|PM/i.test(x) && h < 12) h += 12; if (/ص|AM/i.test(x) && h === 12) h = 0; return h * 60 + parseInt(m[2], 10); };
+    return ((c && c.weeklySchedule) || []).slice().sort(function (a, b) {
+      var da = ord.indexOf(nrm(a.day)), db = ord.indexOf(nrm(b.day));
+      return ((da < 0 ? 99 : da) - (db < 0 ? 99 : db)) || (mins(a.time) - mins(b.time));
+    });
+  }
 
   function getBranchName(branchIdOrName) {
     if (!branchIdOrName) return 'الفرع الرئيسي';
@@ -5525,6 +5543,7 @@ window.suMfaOpen=async function(){
     }
 
     const info = (label, v) => v ? `<div><span class="text-slate-400">${label}:</span> <b class="text-slate-700">${v}</b></div>` : '';
+    const fixedSlots = suSlotsSorted(c).map(s => `<span class="bg-white border border-indigo-200 text-indigo-800 rounded-lg px-3 py-1 text-xs font-black whitespace-nowrap">${escH(s.day)} | ${escH(suTime12(s.time))}</span>`).join('');
     body.innerHTML = `
       <div class="flex items-center justify-between gap-2 flex-wrap">
         <button onclick="closeClientProfile()" class="bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 font-black px-4 py-2 rounded-xl text-sm">&rarr; رجوع للعملاء</button>
@@ -5549,6 +5568,10 @@ window.suMfaOpen=async function(){
             ${info('العنوان', escH(c.address))}
             ${info('بداية المتابعة', escH(c.startDate))}
             ${info('نهاية المتابعة', escH(c.endDate))}
+          </div>
+          <div class="mt-3 pt-3 border-t border-indigo-100">
+            <div class="text-[11px] font-black text-slate-400 mb-1.5">🗓️ مواعيد الجلسات الثابتة</div>
+            ${fixedSlots ? `<div class="flex flex-wrap gap-2">${fixedSlots}</div>` : '<div class="text-xs text-slate-400">لم يتم تحديد مواعيد ثابتة بعد</div>'}
           </div>
         </div>
       </div>
@@ -9009,7 +9032,6 @@ Object.assign(I18N_EN, Object.assign({"قبل 24س": "before 24h", "اعتذار
     try { return window.matchMedia('(hover: hover) and (pointer: fine)').matches; } catch (e) { return true; }
   }
   async function backupToLaptop(forcePick) {
-    if (!bkIsDesktop()) { showToast('النسخة الاحتياطية من اللابتوب فقط', 'amber'); return; }
     if (!currentUser || currentUser.role !== 'admin') { showToast('النسخة الاحتياطية للمدير فقط', 'amber'); return; }
     const btn = document.getElementById('backupBtn'); if (btn) btn.disabled = true;
     try {
@@ -9069,7 +9091,7 @@ Object.assign(I18N_EN, Object.assign({"قبل 24س": "before 24h", "اعتذار
   }
 
   function updateBackupUI() {
-    const admin = !!(currentUser && currentUser.role === 'admin') && bkIsDesktop();
+    const admin = !!(currentUser && currentUser.role === 'admin');
     const b = document.getElementById('backupBtn'), pk = document.getElementById('backupPickBtn'), last = document.getElementById('excelLastSync'), tx = document.getElementById('backupBtnTxt');
     if (b) b.style.display = admin ? '' : 'none';
     if (pk) pk.style.display = (admin && BK.supported) ? '' : 'none';
@@ -11939,6 +11961,14 @@ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/sv
     var cnt = tdCount(day), nowM = cairoNowMin(), nextId = null;
     if (MA.sel === today) { var nx = day.filter(function (x) { return cpStatusKey(x.status) === 'SCH' && tMin(x.time) != null && tMin(x.time) >= nowM; })[0]; if (nx) nextId = nx.id; }
     var isToday = MA.sel === today;
+    var tl = (by[today] || []).slice().sort(function (a, b) { return (tMin(a.time) == null ? 9999 : tMin(a.time)) - (tMin(b.time) == null ? 9999 : tMin(b.time)); });
+    var tlNext = null; tl.forEach(function (x) { if (!tlNext && cpStatusKey(x.status) === 'SCH' && tMin(x.time) != null && tMin(x.time) >= nowM) tlNext = x.id; });
+    var tlRows = tl.map(function (x) {
+      var cc = client(x.clientId) || { name: '؟' }, nx = x.id === tlNext;
+      return '<tr class="' + (nx ? 'nx' : '') + '"><td class="font-mono font-black" style="white-space:nowrap">' + E(suTime12(x.time)) + '</td><td><b>' + E(cc.name) + '</b>' + (nx ? ' <span class="ma-nx">⏭️ القادمة</span>' : '') + '</td><td>' + E(suTypeVal(x.type)) + '</td></tr>';
+    }).join('');
+    var todayBox = '<div class="ma-card"><div class="font-black text-sm text-slate-800" style="margin-bottom:8px">📌 جدول اليوم — ' + AR_WEEKDAYS[ymdWeekday(today)] + ' (' + tl.length + ' جلسة)</div>' +
+      (tl.length ? '<div style="overflow-x:auto"><table class="ma-tbl"><thead><tr><th>الوقت</th><th>الطفل</th><th>النوع</th></tr></thead><tbody>' + tlRows + '</tbody></table></div>' : '<div class="text-slate-400 font-bold text-sm" style="padding:6px 0">مفيش جلسات النهارده</div>') + '</div>';
     var rows = day.map(function (x) {
       var c = client(x.clientId) || { name: '؟' }, isNx = x.id === nextId;
       return '<tr class="' + (isNx ? 'nx' : '') + '"><td class="font-mono font-black">' + E(formatTime12(x.time)) + (isNx ? '<br><span class="ma-nx">⏭️ الجلسة القادمة</span>' : '') + '</td>' +
@@ -11959,7 +11989,7 @@ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/sv
     }
     el.innerHTML = '<div class="space-y-4">' +
       '<div class="ma-head"><div style="font-size:34px">🗓️</div><div style="flex:1;min-width:160px"><h2>مواعيدي</h2><p>جلساتي وجدولي الشهري</p></div></div>' +
-      unlinkedBanner() +
+      unlinkedBanner() + todayBox +
       '<div class="ma-card"><div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px"><div class="font-black text-sm text-slate-800">' + (isToday ? '📅 جلسات اليوم' : '📅 جلسات يوم') + ' — ' + wdName + ' ' + E(MA.sel) + '</div>' +
       '<div class="ma-chips" style="margin-right:auto"><span class="ma-chip">🗒️ ' + day.length + ' جلسة</span><span class="ma-chip g">✅ حضر ' + cnt.ATT + '</span><span class="ma-chip b">⏳ متبقي ' + cnt.SCH + '</span></div></div>' +
       (day.length ? '<div style="overflow-x:auto"><table class="ma-tbl"><thead><tr><th>الوقت</th><th>الطفل</th><th>النوع</th><th>الفرع</th><th>الحالة</th><th></th></tr></thead><tbody>' + rows + '</tbody></table></div>' : '<div class="py-8 text-center text-slate-400 font-bold text-sm">لا توجد جلسات في هذا اليوم 🌿</div>') + '</div>' +
@@ -13786,9 +13816,6 @@ function show(upd,add,same,err){
   upd.forEach(function(x){x.ch.forEach(function(c){x.c[c.key]=c.key==='status'?STR[c.to]:c.to})});
   add.slice().reverse().forEach(function(o){state.clients.unshift({id:o.id,name:o.name,phone:o.phone,dob:o.dob,branch:o.branch,status:o.status||'Active',diagnosis:o.diagnosis,address:o.address,startDate:o.startDate,endDate:o.endDate,photoUrl:o.photoUrl,weeklySchedule:[]})});
   saveState();m.remove();showToast('✅ تم الحفظ: '+add.length+' جديد، '+upd.length+' معدّل','green')}}
-function inject(){var a=document.getElementById('backupPickBtn')||document.getElementById('backupBtn');if(!a||document.getElementById('clientsExpBtn'))return;
- [['clientsExpBtn','📤','تصدير العملاء (Excel)','clientsExport()'],['clientsImpBtn','📥','استيراد عملاء من Excel','clientsImportPick()']].reverse().forEach(function(b){var e=document.createElement('button');e.id=b[0];e.className='excel-btn';e.style.display='none';e.setAttribute('onclick',b[3]);e.innerHTML='<span>'+b[1]+'</span><span>'+b[2]+'</span>';a.after(e)})}
-setInterval(function(){try{inject();['clientsExpBtn','clientsImpBtn'].forEach(function(id){var e=document.getElementById(id);if(e)e.style.display=isAdmin()?'':'none'})}catch (x) { suLog('inject();[clientsExpBtn,clientsImpBtn].forEach(f', x); }},2000);
 })();
 </script>
 <style>#suLangBtn{position:absolute;top:12px;left:12px;right:auto;z-index:5;min-width:34px;height:24px;padding:0 8px;border:0;border-radius:99px;background:#7e3ab8;color:#fff;font:800 11px/24px system-ui,sans-serif;letter-spacing:.5px;box-shadow:0 2px 8px rgba(0,0,0,.25);cursor:pointer;opacity:.92}#suLangBtn:active{transform:scale(.94)}</style>
