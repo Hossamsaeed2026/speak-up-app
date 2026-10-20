@@ -1,12 +1,12 @@
 importScripts('push-sw.js?v=4');
-...
-const VERSION = 'v4';
+const VERSION = 'v5';
 const CACHE = 'speakup-' + VERSION;
 const SHELL = ['./', './index.html', './manifest.json',
   './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png'];
 
 self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));
+  // كل ملف لوحده: لو ملف ناقص ما يوقفش تثبيت الـ service worker كله
+  e.waitUntil(caches.open(CACHE).then((c) => Promise.all(SHELL.map((u) => c.add(u).catch(() => null)))).then(() => self.skipWaiting()));
 });
 
 self.addEventListener('activate', (e) => {
