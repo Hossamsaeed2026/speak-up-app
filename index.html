@@ -1304,6 +1304,7 @@ body.sidebar-collapsed #sideNav .side-gear{justify-content:center;padding:8px 0}
 .pp-bar-btn.on{color:#1e293b}
 .pp-bar-btn.on .pp-bar-ico{transform:translateY(-3px) scale(1.08);box-shadow:0 8px 16px rgba(15,23,42,.28)}
 .pp-bar-gap{flex:0 0 78px;width:78px}
+.pp-bar-sp{flex:1 1 0;min-width:0;pointer-events:none}
 
 /* embedded video */
 .pp-vcard{background:#0f172a;border-radius:20px;padding:10px;margin:10px 0;box-shadow:0 10px 24px rgba(15,23,42,.22);color:#fff}
@@ -3660,6 +3661,11 @@ function msg(el,t,ok){if(!el)return;el.textContent=t||'';el.className='su-mfa-ms
 /* ================= 1) الخروج التلقائي عند الخمول ================= */
 var LAST='SU_LAST_ACT',last=Date.now(),tm=0,outBusy=false;
 function idleMs(role){var m=IDLE_MIN[role]||15;try{var o=state.settings&&state.settings.security&&state.settings.security.idleMinutes;if(o&&+o[role]>0)m=+o[role]}catch (e) { suLog('var o=state.settings&&state.settings.security&&s', e); }return m*60000}
+/* [STAY] «افتح مباشرة»: إعداد شخصي على الجهاز ده بس (SU_STAY:<email>) — بيوقف الخروج التلقائي عند الخمول لصاحبه */
+function stayKey(u){try{u=u||currentUser;return u&&u.email?'SU_STAY:'+String(u.email).toLowerCase():''}catch(e){return ''}}
+function stayOn(u){try{var k=stayKey(u);return !!k&&localStorage.getItem(k)==='1'}catch(e){return false}}
+window.suStayGet=function(){return stayOn()};
+window.suStaySet=function(on){try{var k=stayKey();if(!k)return;if(on)localStorage.setItem(k,'1');else localStorage.removeItem(k);localStorage.setItem('SU_LAST_ACT',String(Date.now()));last=Date.now();unwarn()}catch(e){}};
 function stamp(){var n=Date.now();last=n;try{localStorage.setItem(LAST,String(n))}catch (e) { suLog('localStorage.setItem(LAST,String(n))', e,'debug'); }}
 function act(){if($('idleWarn')&&$('idleWarn').style.display==='flex')return;var n=Date.now();if(n-tm<2000)return;tm=n;stamp()}
 ['mousedown','mousemove','keydown','touchstart','touchmove','wheel','scroll','click'].forEach(function(ev){window.addEventListener(ev,act,{passive:true,capture:true})});
@@ -3675,7 +3681,7 @@ async function out(){outBusy=true;unwarn();
   if(!un.length){localStorage.removeItem(STORAGE_KEY);localStorage.removeItem(CLOUD_META_KEY)}   // لو فيه تعديلات لسه ماترفعتش بنسيبها علشان ماتضيعش
   sessionStorage.setItem('SU_IDLE_OUT',un.length?'2':'1')}catch (e) { suLog('localStorage.removeItem(SPEAK_UP_CURRENT_USER);l', e,'debug'); }
  location.reload()}
-function check(){if(outBusy)return;var u;try{u=currentUser}catch(e){return}if(!u||!u.role)return;
+function check(){if(outBusy)return;var u;try{u=currentUser}catch(e){return}if(!u||!u.role)return;if(stayOn(u)){unwarn();return}
  var st=0;try{st=+localStorage.getItem(LAST)||0}catch (e) { suLog('st=+localStorage.getItem(LAST)||0', e,'debug'); }if(st>last)last=st;
  var lim=idleMs(u.role),idle=Date.now()-last;
  if(idle>=lim){out();return}
@@ -10637,7 +10643,7 @@ Object.assign(I18N_EN, Object.assign({"قبل 24س": "before 24h", "اعتذار
           parts.push('<button type="button" class="pp-bar-btn' + on + '" data-id="' + id + '" onclick="mGo(\'' + id + '\')"><span class="pp-bar-ico' + fb + '" style="background:' + g + '">' + ico + '</span><span>' + short + '</span></button>');
         });
         // المدير فقط: الأقسام بتتاخد من «إعدادات التطبيق ← أقسام الشريط السفلي للأدمن» (لو فاضية بيرجع للافتراضي)، وبتحترم صلاحيات الأقسام
-        let half = 2;
+        let half = Math.ceil(parts.length / 2);
         const isAdm = !!(currentUser && currentUser.role === 'admin');
         document.body.classList.toggle('su-admin-dock', isAdm && !portalOn);
         if (isAdm) {
@@ -10668,7 +10674,9 @@ Object.assign(I18N_EN, Object.assign({"قبل 24س": "before 24h", "اعتذار
           });
           half = Math.ceil(parts.length / 2);
         }
-        const html = portalOn ? '' : '<div class="pp-bar-wrap"><div class="pp-bar-pos"><nav class="pp-bar">' + parts.slice(0, half).join('') + '<div class="pp-bar-gap"></div>' + parts.slice(half).join('') + '</nav><button type="button" class="pp-logo-btn" onclick="suMenuGo()" aria-label="القائمة"><img alt=""></button></div></div>';
+        const barL = parts.slice(0, half), barR = parts.slice(half);
+        while (barR.length < barL.length) barR.push('<span class="pp-bar-sp" aria-hidden="true"></span>');   // توازن الجانبين: اللوجو بيفضل في النص
+        const html = portalOn ? '' : '<div class="pp-bar-wrap"><div class="pp-bar-pos"><nav class="pp-bar">' + barL.join('') + '<div class="pp-bar-gap"></div>' + barR.join('') + '</nav><button type="button" class="pp-logo-btn" onclick="suMenuGo()" aria-label="القائمة"><img alt=""></button></div></div>';
         if (nav.dataset.sig !== html) { nav.innerHTML = html; nav.dataset.sig = html; }
         const lg = nav.querySelector('.pp-logo-btn img');
         if (lg) { let u = (isAdm && !portalOn && window.SU_DOCK_LOGO) ? window.SU_DOCK_LOGO : (window.SU_APP_LOGO || window.SU_HEADER_LOGO || ''); if (!u) { try { u = localStorage.getItem('SU_LOGO') || ''; } catch (e) { suLog('u = localStorage.getItem(SU_LOGO) || ;', e,'debug'); } } u = u || window.SU_DEFAULT_LOGO || 'icons/icon-192.png'; if (lg.dataset.u !== u) { lg.dataset.u = u; lg.src = u; } }
@@ -11917,6 +11925,27 @@ function tdPickPhoto() {
 .ma-nav .ma-seg button{border:0;border-radius:0;padding:6px 16px;background:#fff;color:#475569}
 .ma-nav .ma-seg button.on{background:#0f766e;color:#fff}
 .ma-day small.c{font-size:9.5px;white-space:nowrap;padding:0 6px}
+/* أحجام حسب الجهاز: موبايل / تابلت / شاشة عريضة */
+.ma-split{display:grid;grid-template-columns:minmax(0,1fr);gap:16px;align-items:start}
+.ma-split>.ma-card{min-width:0}
+.ma-today .ma-tbl{font-size:13px}.ma-today .ma-tbl td{padding:10px 8px}.ma-today .ma-tbl th{padding:9px 8px}
+@media(max-width:640px){
+ .ma-card{padding:10px;border-radius:16px}
+ .ma-today .ma-tbl{font-size:14px}.ma-today .ma-tbl td{padding:11px 8px}
+ .ma-cal{gap:3px}.ma-wd{font-size:9.5px;padding:2px 0}
+ .ma-day{min-height:42px;border-radius:9px;padding:3px 1px;gap:2px;font-size:12px}
+ .ma-day small{font-size:9px;padding:0 5px}.ma-day small.c{font-size:8.5px;padding:0 3px}
+ .ma-nav button{padding:5px 8px}.ma-nav .ma-seg button{padding:6px 11px}
+}
+@media(min-width:641px) and (max-width:1024px){
+ .ma-today{padding:18px;min-height:260px}
+ .ma-today .ma-tbl{font-size:15.5px}.ma-today .ma-tbl td{padding:16px 12px}.ma-today .ma-tbl th{padding:12px;font-size:14px}
+ .ma-today .ma-nx{font-size:11px;padding:3px 10px}
+}
+@media(min-width:980px){
+ .ma-split{grid-template-columns:minmax(320px,5fr) minmax(0,7fr);align-items:stretch}
+ .ma-today{min-height:0}
+}
 .ma-week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
 @media(max-width:760px){.ma-week{grid-template-columns:1fr}}
 .ma-wcol{border:1px solid #e2e8f0;border-radius:14px;padding:6px;background:#fff;min-height:70px}
@@ -11935,6 +11964,9 @@ function tdPickPhoto() {
 @media (max-width:820px){
 #mNav.th-nav{width:min(520px,calc(100% - 28px))!important;height:66px!important;padding:0 6px!important;gap:0!important;border-radius:26px!important;overflow:visible!important;align-items:center;justify-content:space-around;position:fixed!important;
 background:rgba(255,255,255,.97)!important;border:1px solid #99d5cf!important;box-shadow:0 12px 34px rgba(10,52,66,.28)!important;backdrop-filter:blur(14px)}
+/* [NAV-FIX] قاعدة su-nav5 (html body #mNav) كانت بتلغي التمركز (transform:none) وبتخلي الشريط display:block،
+   فشريط الأخصائي كان بيتزحلق يمين وأزراره تتبعثر. هنا بنثبّته في النص بخصوصية أعلى منها. */
+html body #mNav.th-nav{display:flex!important;position:fixed!important;left:50%!important;right:auto!important;bottom:calc(10px + env(safe-area-inset-bottom,0px))!important;transform:translateX(-50%)!important;margin:0!important;width:min(520px,calc(100% - 28px))!important;height:66px!important;padding:0 6px!important;gap:0!important;overflow:visible!important;align-items:center!important;justify-content:space-around!important;border-radius:26px!important}
 #mNav.th-nav::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:.11;background-size:120px 66px;
 background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='66' viewBox='0 0 120 66' fill='none' stroke='%230d6f68' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M0 40h22l4-9 6 20 5-15 4 4h20'/%3E%3Cpath d='M86 10v10M81 15h10'/%3E%3Cpath d='M104 44l5 5-5 5-5-5z'/%3E%3Ccircle cx='70' cy='54' r='3'/%3E%3Ccircle cx='108' cy='14' r='4'/%3E%3Cpath d='M12 8c4 0 7 3 7 7M12 8c-4 0-7 3-7 7'/%3E%3C/svg%3E")}
 #mNav.th-nav .th-nb{position:relative;z-index:1;flex:1 1 0;min-width:0;border:0;background:transparent;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10.5px;font-weight:900;color:#475569;padding:0;cursor:pointer;transition:transform .15s}
@@ -12005,7 +12037,7 @@ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/sv
       var cc = client(x.clientId) || { name: '؟' }, nx = x.id === tlNext;
       return '<tr class="' + (nx ? 'nx' : '') + '"><td class="font-mono font-black" style="white-space:nowrap">' + E(suTime12(x.time)) + '</td><td><b>' + E(cc.name) + '</b>' + (nx ? ' <span class="ma-nx">⏭️ القادمة</span>' : '') + '</td><td>' + E(suTypeVal(x.type)) + '</td></tr>';
     }).join('');
-    var todayBox = '<div class="ma-card"><div class="font-black text-sm text-slate-800" style="margin-bottom:8px">📌 جدول اليوم — ' + AR_WEEKDAYS[ymdWeekday(today)] + ' (' + tl.length + ' جلسة)</div>' +
+    var todayBox = '<div class="ma-card ma-today"><div class="font-black text-sm text-slate-800" style="margin-bottom:8px">📌 جدول اليوم — ' + AR_WEEKDAYS[ymdWeekday(today)] + ' (' + tl.length + ' جلسة)</div>' +
       (tl.length ? '<div style="overflow-x:auto"><table class="ma-tbl"><thead><tr><th>الوقت</th><th>الطفل</th><th>النوع</th></tr></thead><tbody>' + tlRows + '</tbody></table></div>' : '<div class="text-slate-400 font-bold text-sm" style="padding:6px 0">مفيش جلسات النهارده</div>') + '</div>';
     var view = MA.view || 'month';
     var sortT = function (x, y) { return (tMin(x.time) == null ? 9999 : tMin(x.time)) - (tMin(y.time) == null ? 9999 : tMin(y.time)); };
@@ -12056,8 +12088,8 @@ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/sv
       '<div class="font-black text-slate-800 text-center" style="margin:6px 0 10px">' + E(title) + '</div>';
     el.innerHTML = '<div class="space-y-4">' +
       '<div class="ma-head"><div style="font-size:34px">🗓️</div><div style="flex:1;min-width:160px"><h2>مواعيدي</h2><p>جلساتي وجدولي</p></div></div>' +
-      unlinkedBanner() + todayBox +
-      '<div class="ma-card">' + toolbar + body + '</div></div>';
+      unlinkedBanner() + '<div class="ma-split">' + todayBox +
+      '<div class="ma-card">' + toolbar + body + '</div></div></div>';
   }
   window.renderMyAppts = renderMyAppts;
 
@@ -13141,6 +13173,10 @@ html.su-dark #suProfile .sp-msg.ok{background:rgba(16,185,129,.16);color:#6ee7b7
     var acctCard = '<div class="sp-card"><div class="sp-h">🧰 الحساب والأمان</div>' +
       (isAdminReal ? '<label class="sp-lb" style="margin-top:0">عرض النظام بصلاحية</label><select id="spRoleSw" onchange="suProfileClose();setUserRole(this.value)">' + [['admin', '👑 المدير'], ['secretary', '⚡ السكرتارية'], ['therapist', '👩‍⚕️ الأخصائي'], ['parent', '👪 أب / أم']].map(function (o) { return '<option value="' + o[0] + '"' + (o[0] === role() ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select>' : '') +
       '<div class="sp-row" style="margin-top:10px"><button type="button" class="sp-btn g" onclick="window.suUpdate && suUpdate.check()">🔄 فحص التحديثات</button><button type="button" class="sp-btn r" onclick="suProfileClose();handleLogout()">🚪 تسجيل الخروج</button></div></div>';
+    var stayNow = window.suStayGet ? window.suStayGet() : false;
+    var stayCard = '<div class="sp-card"><div class="sp-h">🔐 الدخول عند فتح التطبيق</div>' +
+      '<div class="sp-seg"><button type="button" data-stay="0" class="' + (stayNow ? '' : 'on') + '">🔒 اطلب تسجيل الدخول بعد الخمول</button><button type="button" data-stay="1" class="' + (stayNow ? 'on' : '') + '">✅ افتح مباشرة</button></div>' +
+      '<div class="sp-note">«افتح مباشرة»: تسجّل الدخول مرة واحدة بس، وبعدها التطبيق بيفتح علطول من غير خروج تلقائي. الإعداد ده على الجهاز ده بس. استخدمه على موبايلك الشخصي بس، ومتستخدمهوش على جهاز بيستعمله غيرك. «كود الدخول السريع / البصمة» ليه إعداده لوحده.</div></div>';
     m.innerHTML = '<div class="sp-sheet" role="dialog" aria-label="حسابي">' +
       '<div class="sp-hero"><button type="button" class="sp-x" onclick="suProfileClose()" aria-label="إغلاق">✕</button>' +
       '<div class="sp-av" id="spAv" title="تغيير الصورة">' + (p ? '<img src="' + E(p) + '" alt="">' : '<img class="logo" src="' + E(logo) + '" alt="">') + '<span class="sp-cam">📷</span></div>' +
@@ -13160,7 +13196,7 @@ html.su-dark #suProfile .sp-msg.ok{background:rgba(16,185,129,.16);color:#6ee7b7
         '<label class="sp-lb">قفل التطبيق تلقائيًا بعد</label><select id="spLock">' + [[30, '30 ثانية'], [60, 'دقيقة'], [180, '3 دقايق'], [300, '5 دقايق'], [0, 'أبدًا']].map(function (o) { return '<option value="' + o[0] + '"' + (Number(lock) === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select>' +
         '<div class="sp-row" style="margin-top:10px"><button type="button" class="sp-btn g" id="spPin">🔢 كود الدخول السريع / البصمة</button><button type="button" class="sp-btn g" id="spLockNow">🔒 اقفل دلوقتي</button></div>' +
         '<div class="sp-note">القفل بيشتغل بس على الأجهزة اللي مفعّل عليها كود الدخول السريع.</div></div>' : '') +
-      acctCard + '</div><div class="sp-foot"><div class="sp-note" style="margin:0 0 8px">' + (staff ? '☁️ إعداداتك بتتحفظ على حسابك وبتتطبّق على أي جهاز تدخل منه.' : '📲 إعداداتك بتتحفظ على الجهاز ده.') + '</div>' +
+      stayCard + acctCard + '</div><div class="sp-foot"><div class="sp-note" style="margin:0 0 8px">' + (staff ? '☁️ إعداداتك بتتحفظ على حسابك وبتتطبّق على أي جهاز تدخل منه.' : '📲 إعداداتك بتتحفظ على الجهاز ده.') + '</div>' +
       '<div class="sp-row" style="justify-content:center"><button type="button" class="sp-btn r" id="spReset">↺ رجّع إعداداتي للافتراضي</button><button type="button" class="sp-btn g" onclick="suProfileClose()">تمام</button></div></div></div>';
   }
   window.suProfileOpen = function () {
@@ -13188,6 +13224,14 @@ html.su-dark #suProfile .sp-msg.ok{background:rgba(16,185,129,.16);color:#6ee7b7
     if (t.id === 'spPin') return (window.pinMenu ? (window.suProfileClose(), window.pinMenu()) : showToast('كود الدخول غير متاح هنا', 'amber'));
     if (t.id === 'spLockNow') return (window.pinLockNow ? (window.suProfileClose(), window.pinLockNow()) : 0);
     if (t.id === 'spReset') { if (!confirm('ترجّع كل إعداداتك الشخصية للافتراضي؟')) return; window.suPrefSet({ theme: null, fontScale: null, density: null, homeTab: null, bottomNav: null, autoLockSec: null }); try { localStorage.removeItem('SU_THEME'); } catch (x) { suLog('localStorage.removeItem(SU_THEME);', x,'debug'); } applyPrefs(true); render(); showToast('↺ اتّرجعت الإعدادات', 'green'); return; }
+    var sy = t.closest && t.closest('[data-stay]');
+    if (sy) {
+      var wantStay = sy.dataset.stay === '1';
+      if (wantStay && !window.suStayGet()) { if (!confirm('هتفضل مسجّل دخول على الجهاز ده من غير خروج تلقائي. تأكد إنه جهازك الشخصي. تكمّل؟')) return; }
+      window.suStaySet(wantStay);
+      showToast(wantStay ? '✅ التطبيق هيفتح مباشرة على الجهاز ده' : '🔒 هيطلب تسجيل الدخول بعد فترة الخمول', 'green');
+      render(); return;
+    }
     var b = t.closest('[data-sp]');
     if (b) { var k = b.dataset.sp, v = b.dataset.v, o = {}; o[k] = v; window.suPrefSet(o); render(); }
   }
