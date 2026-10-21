@@ -1381,12 +1381,20 @@ body.sidebar-collapsed #sideNav .side-gear{justify-content:center;padding:8px 0}
 @media (min-width:821px){.sul,#suClients,#suSet{display:none!important}}
 </style>
 <style id="suPerfCss">
+<<<<<<< Updated upstream
 /* [PERF] انتقال ناعم بين الصفحات (opacity فقط) + استجابة لمس فورية */
 .tab-content:not(.hidden){animation:suTabIn .16s ease-out both}
 #parentPortal.su-pp-in>*{animation:suTabIn .18s ease-out both}
 @keyframes suTabIn{from{opacity:0}to{opacity:1}}
 a,button,[role=button],[onclick],input,select,textarea,label,summary{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 @media (prefers-reduced-motion:reduce){.tab-content:not(.hidden),#parentPortal.su-pp-in>*{animation:none!important}}
+=======
+/* [PERF] انتقال خفيف لبوابة ولي الأمر (حركة بدون شفافية = مفيش وميض) + استجابة لمس فورية */
+#parentPortal.su-pp-in>*{animation:suTabIn .16s ease-out backwards}
+@keyframes suTabIn{from{transform:translateY(5px)}}
+a,button,[role=button],[onclick],input,select,textarea,label,summary{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+@media (prefers-reduced-motion:reduce){#parentPortal.su-pp-in>*{animation:none!important}}
+>>>>>>> Stashed changes
 </style>
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen">
