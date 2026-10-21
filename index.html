@@ -10538,6 +10538,7 @@ Object.assign(I18N_EN, Object.assign({"قبل 24س": "before 24h", "اعتذار
     qr: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h3M20 17v4"/></svg>',
     info: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>',
     shield: '<svg width="30" height="30" viewBox="0 0 24 24" fill="#16a34a" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.4 9.3 8 11 4.6-1.7 8-6 8-11V5z"/><path d="m8.5 12 2.5 2.5L16 9.5" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    wallet: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 7H5a2 2 0 0 1 0-4h13v4"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1"/><path d="M17 14h.01" stroke-width="3"/></svg>',
     chev: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>'
   };
   const PZ_CSS = `
@@ -10580,6 +10581,14 @@ Object.assign(I18N_EN, Object.assign({"قبل 24س": "before 24h", "اعتذار
 a.pz-val:hover{text-decoration:underline;color:#5b21b6}
 .pz-copy{flex:0 0 auto;width:40px;height:40px;border-radius:11px;border:0;background:#ede9fe;color:#6d28d9;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.15s}
 .pz-copy:hover{background:#ddd6fe}.pz-copy:active{transform:scale(.92)}
+.pz-wal{margin-top:16px;border:2px solid #34d399;border-radius:18px;background:linear-gradient(180deg,#ecfdf5,#f0fdf4);padding:12px}
+.pz-wal-h{display:flex;align-items:center;gap:10px}
+.pz-wal-i{width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,#059669,#10b981);color:#fff;display:flex;align-items:center;justify-content:center;flex:0 0 auto;box-shadow:0 4px 10px rgba(5,150,105,.35)}
+.pz-wal-t{font-weight:900;font-size:15px;color:#065f46;line-height:1.3}
+.pz-wal-s{font-size:11.5px;color:#047857;font-weight:700}
+.pz-wal .pz-field{background:#fff;border:1px solid #a7f3d0;margin-top:10px}
+.pz-wal .pz-field>svg{color:#059669}
+.pz-wal .pz-copy{background:#d1fae5;color:#047857}.pz-wal .pz-copy:hover{background:#a7f3d0}
 .pz-pay{display:flex;align-items:center;gap:10px;width:100%;margin-top:16px;border:0;border-radius:16px;padding:13px 18px;color:#fff;text-decoration:none;cursor:pointer;background:linear-gradient(120deg,#5b21b6,#7c3aed);box-shadow:0 8px 20px rgba(91,33,182,.35);transition:.15s;font-family:inherit}
 .pz-pay:hover{filter:brightness(1.08);transform:translateY(-1px)}
 .pz-pay .pz-wm{font-size:22px;text-align:right}
@@ -10629,8 +10638,10 @@ a.pz-val:hover{text-decoration:underline;color:#5b21b6}
       if (l.value) rows.push({ label: l.label || 'بيانات الدفع', text: l.value, kind: /^[\d+\s-]{8,}$/.test(l.value) ? 'phone' : (/@/.test(l.value) ? 'at' : 'link-text') });
       if (l.url) { if (!payUrl) payUrl = l.url; rows.push({ label: l.value ? 'أو من خلال الرابط المباشر' : (l.label || 'الرابط المباشر'), text: l.url, kind: 'link', url: l.url }); }
     });
-    const phone = (rows.find(r => r.kind === 'phone') || {}).text || '';
-    const fieldsHtml = rows.length ? rows.map(r => {
+    const isW = r => /محفظ|كاش|wallet|فودافون|اتصالات/i.test(r.label);
+    const phone = (rows.find(r => r.kind === 'phone' && !isW(r)) || rows.find(r => r.kind === 'phone') || {}).text || '';
+    const walletHtml = rows.filter(isW).map(r => `<div class="pz-wal"><div class="pz-wal-h"><div class="pz-wal-i">${PZ_ICO.wallet}</div><div><div class="pz-wal-t">${actEsc(r.label)}</div><div class="pz-wal-s">أو حوّل على المحفظة</div></div></div><div class="pz-field">${PZ_ICO.phone}<span class="pz-val">${actEsc(r.text)}</span><button type="button" class="pz-copy" data-v="${actEsc(r.text)}" data-m="تم نسخ رقم المحفظة" onclick="ppPayCopy(this.dataset.v,this.dataset.m)" aria-label="نسخ رقم المحفظة">${PZ_ICO.copy}</button></div></div>`).join('');
+    const fieldsHtml = rows.filter(r => !isW(r)).length ? rows.filter(r => !isW(r)).map(r => {
       const ico = r.kind === 'phone' ? PZ_ICO.phone : r.kind === 'link' ? PZ_ICO.link : PZ_ICO.at;
       const msg = r.kind === 'link' ? 'تم نسخ رابط الدفع' : r.kind === 'phone' ? 'تم نسخ رقم الدفع' : 'تم النسخ ✅';
       const val = r.kind === 'link' ? `<a class="pz-val pz-sm" href="${actEsc(r.url)}" target="_blank" rel="noopener noreferrer" title="${actEsc(r.text)}">${actEsc(r.text)}</a>` : `<span class="pz-val">${actEsc(r.text)}</span>`;
@@ -10646,7 +10657,7 @@ a.pz-val:hover{text-decoration:underline;color:#5b21b6}
       <div class="pz-amt"><div><small>${actEsc(c.name)} — فاتورة ${cpMonthLabel(ym)}</small><b>${cpMoney(rem)}</b></div><div class="pz-who" style="margin-inline-start:auto;font-size:12px;color:#7a76a8;font-weight:700">المبلغ المتبقي</div></div>
       <div class="pz-grid">
         <div class="pz-card pz-qr"><div class="pz-ch"><i>${PZ_ICO.qr}</i>أو امسح كود QR</div>${qr ? `<div class="pz-qrbox"><img src="${qr.src}" alt="كود QR للدفع عبر إنستاباي"></div>` : ''}<div class="pz-qrnote">افتح تطبيق إنستاباي<br>ثم امسح الكود للدفع مباشرة</div></div>
-        <div class="pz-card"><div class="pz-ch"><i>${PZ_ICO.card}</i>بيانات الدفع</div>${fieldsHtml}${payBtn}
+        <div class="pz-card"><div class="pz-ch"><i>${PZ_ICO.card}</i>بيانات الدفع</div>${fieldsHtml}${payBtn}${walletHtml}
           <button type="button" class="pz-wa" onclick="ppPayNotify('${cid}','${ym}')">${WA_SVG.replace('width="26" height="26"', 'width="19" height="19"')} حوّلت — بلّغ المركز بالدفع</button></div>
       </div>
       <div class="pz-steps"><div class="pz-ch" style="margin-bottom:8px"><i style="background:#fff">${PZ_ICO.info}</i>خطوات الدفع</div>
