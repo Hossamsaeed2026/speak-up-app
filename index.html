@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+<link rel="preconnect" href="https://dbqszalzzmxodqqhhdhi.supabase.co" crossorigin>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="preconnect" href="https://cdn.tailwindcss.com">
 <script>
 /* سجل الأخطاء: suLog(ctx, err, level) — بيحفظ آخر الأخطاء في الذاكرة + localStorage (SU_ERRLOG)،
    وبيبعت أخطاء level=error لجدول logs في Supabase لو موجود (لو الجدول مش موجود أو الإدخال اترفض بيقفل نفسه بهدوء). */
@@ -1376,6 +1379,14 @@ body.sidebar-collapsed #sideNav .side-gear{justify-content:center;padding:8px 0}
 <style id="su-wide-guard">
 /* شبكة أمان: قوائم الموبايل (.sul) ما تظهرش على العرض العريض (تابلت أفقي / كمبيوتر) */
 @media (min-width:821px){.sul,#suClients,#suSet{display:none!important}}
+</style>
+<style id="suPerfCss">
+/* [PERF] انتقال ناعم بين الصفحات (opacity فقط) + استجابة لمس فورية */
+.tab-content:not(.hidden){animation:suTabIn .16s ease-out both}
+#parentPortal.su-pp-in>*{animation:suTabIn .18s ease-out both}
+@keyframes suTabIn{from{opacity:0}to{opacity:1}}
+a,button,[role=button],[onclick],input,select,textarea,label,summary{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+@media (prefers-reduced-motion:reduce){.tab-content:not(.hidden),#parentPortal.su-pp-in>*{animation:none!important}}
 </style>
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen">
@@ -4255,7 +4266,7 @@ window.suMfaOpen=async function(){
     });
 
     const target = document.getElementById('tab-' + tabId);
-    if (target) target.classList.remove('hidden');
+    if (target) target.classList.remove('hidden'); try { if (window.__suFlushTab) window.__suFlushTab(tabId); } catch (e) {}
 
     document.querySelectorAll('.side-tab').forEach(el => el.classList.remove('active'));
     const sideBtn = document.getElementById('side-nav-' + tabId);
@@ -9708,7 +9719,16 @@ Object.assign(I18N_EN, Object.assign({"قبل 24س": "before 24h", "اعتذار
       <button onclick="ppSet('tab','perf')" class="pp-kc-cta">📊 الإحصائيات والتقييمات</button>
     </div>`;
   }
+  // [PERF] ولي الأمر: fade عند تغيير الصفحة/الطفل/الشيت فقط
+  var __ppKey = '';
   function renderParentPortal() {
+    var k = '';
+    try { k = [typeof _ppTab !== 'undefined' ? _ppTab : '', typeof _ppSub !== 'undefined' ? _ppSub : '', typeof _ppChild !== 'undefined' ? _ppChild : '', typeof _ppSheet !== 'undefined' ? _ppSheet : ''].join('|'); } catch (e) {}
+    var changed = __ppKey !== '' && k !== __ppKey; __ppKey = k;
+    __renderParentPortalRaw();
+    if (changed) { var el = document.getElementById('parentPortal'); if (el) { el.classList.remove('su-pp-in'); void el.offsetWidth; el.classList.add('su-pp-in'); setTimeout(function () { el.classList.remove('su-pp-in'); }, 260); } }
+  }
+  function __renderParentPortalRaw() {
     const el = document.getElementById('parentPortal'); if (!el) return;
     if (!currentUser || currentUser.role !== 'parent') { el.classList.add('hidden'); return; }
     el.classList.remove('hidden');
@@ -9918,7 +9938,37 @@ Object.assign(I18N_EN, Object.assign({"قبل 24س": "before 24h", "اعتذار
   }
   actLoadCustom().then(() => { try { if (document.getElementById('act-root')) renderActivities(); } catch (e) { suLog('if (document.getElementById(act-root)) renderAct', e); } });
 
+  // [PERF] refreshAll: تجميع النداءات في فريم واحد + رسم التاب الظاهر فوراً والباقي وقت الفراغ
+  var __raPending = false, __raGen = 0, __raQueue = [];
+  function __raRun(fn) { try { fn(); } catch (e) { try { suLog('refreshAll step', e); } catch (_) {} } }
+  function __raIdle(cb) { if (window.requestIdleCallback) window.requestIdleCallback(cb, { timeout: 400 }); else setTimeout(cb, 16); }
+  window.__suFlushTab = function (id) {
+    for (var i = 0; i < __raQueue.length; i++) if (__raQueue[i][0] === id) { var st = __raQueue.splice(i, 1)[0]; __raRun(st[1]); return; }
+  };
   function refreshAll() {
+    if (__raPending) return;
+    __raPending = true;
+    var go = function () { if (!__raPending) return; __raPending = false; __refreshAllStaged(); };
+    requestAnimationFrame(go); setTimeout(go, 120);
+  }
+  function __refreshAllStaged() {
+    var gen = ++__raGen, v = document.querySelector('.tab-content:not(.hidden)'), vis = v && v.id ? v.id.replace(/^tab-/, '') : '';
+    __raRun(renderParentPortal); __raRun(updateUserHeader); __raRun(applyPermissions);
+    var steps = [['dashboard', renderDashboard], ['clients', renderClientsTable], ['sessions', renderSessionsTable],
+      ['invoices', renderInvoices], ['payments', renderPaymentsTable], ['purchases', renderPurchasesTable],
+      ['staff', renderStaffAndBranches], ['secretary', loadSecretaryView], ['calendar', renderCalendar]];
+    __raQueue = [];
+    steps.forEach(function (st) { if (st[0] === vis) __raRun(st[1]); else __raQueue.push(st); });
+    __raRun(populateDropdowns);
+    var drain = function () {
+      if (gen !== __raGen) return;
+      var st = __raQueue.shift();
+      if (!st) { setTimeout(initAllResizableTables, 50); return; }
+      __raRun(st[1]); __raIdle(drain);
+    };
+    __raIdle(drain);
+  }
+  function __refreshAllNow() {
     try { renderParentPortal(); } catch (e) { console.warn(e); }
     updateUserHeader();
     applyPermissions();
@@ -10889,7 +10939,7 @@ a.pz-val:hover{text-decoration:underline;color:#5b21b6}
       const side = document.getElementById('sideNav');
       if (side) new MutationObserver(buildMobileNav).observe(side, { attributes: true, attributeFilter: ['class'], subtree: true });
       MQ.addEventListener && MQ.addEventListener('change', function () { mCloseMore(); buildMobileNav(); });
-      setTimeout(buildMobileNav, 600); setTimeout(buildMobileNav, 2000); setInterval(buildMobileNav, 2000);
+      setTimeout(buildMobileNav, 600); setTimeout(buildMobileNav, 2000); setInterval(function () { if (!document.hidden) buildMobileNav(); }, 2000);
       window.mRebuildNav = function () { const n = document.getElementById('mNav'); if (n) n.dataset.sig = ''; buildMobileNav(); };
     }
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
@@ -11256,6 +11306,10 @@ a.pz-val:hover{text-decoration:underline;color:#5b21b6}
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
   })();
 
+  // [PERF] الـ Service Worker بيفتح الصفحة من المخزن فوراً، ولو لقى نسخة أحدث في الخلفية بيبلّغنا هنا
+  if ('serviceWorker' in navigator) navigator.serviceWorker.addEventListener('message', function (ev) {
+    try { if (ev.data && ev.data.type === 'SU_UPDATE_AVAILABLE' && window.suUpdate) window.suUpdate.show(); } catch (e) { suLog('sw message', e); }
+  });
   // تثبيت التطبيق (PWA) - شغال بس على رابط https أو localhost
   if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
     window.addEventListener('load', function () {
@@ -11340,7 +11394,7 @@ a.pz-val:hover{text-decoration:underline;color:#5b21b6}
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',menu);else menu();
   /* الزرار بيتأكد من وجوده طول الوقت: بعد اللوجين، وبعد تدوير الشاشة، ولو الهيدر اتعاد رسمه */
-  window.addEventListener('resize',menu);window.addEventListener('orientationchange',function(){setTimeout(menu,200)});window.addEventListener('load',menu);setInterval(menu,1500);
+  window.addEventListener('resize',menu);window.addEventListener('orientationchange',function(){setTimeout(menu,200)});window.addEventListener('load',menu);setInterval(function(){if(!document.hidden)menu()},1500);
   document.addEventListener('keydown',function(e){if(e.key==='Escape'&&window.mCloseMore)mCloseMore()});
 })();
 </script>
@@ -14070,10 +14124,10 @@ function mk(){var b=document.getElementById('thpBack');
  if(!b){b=document.createElement('button');b.id='thpBack';b.type='button';b.onclick=function(){thpHome()};b.setAttribute('aria-label','الرئيسية');b.title='الرئيسية';b.textContent='🏠';b.style.display='none'}
  var h=document.getElementById('mainHeader');
  if(h&&b.parentNode!==h)h.appendChild(b);else if(!h&&!b.parentNode)document.body.appendChild(b)}
-mk();setInterval(mk,1500);window.addEventListener('resize',mk);
+mk();setInterval(function(){if(!document.hidden)mk()},1500);window.addEventListener('resize',mk);
 })();
 
-setInterval(function(){try{if(!currentUser||currentUser.role!=='therapist'){var e=el();if(e)e.classList.add('hidden');window._thpClassic=false;var bk=document.getElementById('thpBack');if(bk)bk.style.display='none';return}
+setInterval(function(){if(document.hidden)return;try{if(!currentUser||currentUser.role!=='therapist'){var e=el();if(e)e.classList.add('hidden');window._thpClassic=false;var bk=document.getElementById('thpBack');if(bk)bk.style.display='none';return}
  if(window._thpClassic){el().classList.add('hidden');return}
  var s=[currentUser.email,(state.sessions||[]).length,(state.clients||[]).length,(state.evaluations||[]).length,L()].join('|');
  var ae=document.activeElement;if(ae&&ae.closest&&ae.closest('#therapistPortal')&&ae.tagName!=='BUTTON')return;
@@ -14701,7 +14755,7 @@ body.su-admin-dock .pp-logo-btn img{padding:3px}
     new MutationObserver(soon).observe(document.documentElement,{attributes:true,attributeFilter:['class','style']});
     new MutationObserver(function(m){for(var i=0;i<m.length;i++){var n=m[i].target;var p=n.nodeType===1?n:n.parentNode;if(p&&p.id==='suSurfaceCss'||(m[i].addedNodes&&[].some.call(m[i].addedNodes,function(x){return x.id==='suSurfaceCss'}))){soon();return}}}).observe(document.head,{childList:true,subtree:true,characterData:true});
   }
-  function init(){watch();soon();setInterval(apply,1500)}
+  function init(){watch();soon();setInterval(function(){if(!document.hidden)apply()},1500)}
   window.suHdrContrast=soon;
   window.addEventListener('resize',soon);
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
