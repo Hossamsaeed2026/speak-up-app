@@ -2282,6 +2282,7 @@ body.su-md-dash main>#tab-dashboard{margin-top:0!important}
               <option value="B003">Online Egypt</option>
               <option value="B004">خاص Private</option>
             </select>
+            <button onclick="acOpen('invoices')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg text-xs font-black shadow transition whitespace-nowrap">📊 حسابات</button>
             <button onclick="resetInvoicesFilters()" class="text-slate-400 hover:text-rose-600 px-2 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1">
               ↺ تفريغ
             </button>
@@ -2333,6 +2334,7 @@ body.su-md-dash main>#tab-dashboard{margin-top:0!important}
               <span class="text-[11px] text-slate-500 font-bold">التاريخ:</span>
               <input type="date" id="paymentDateFilter" onchange="renderPaymentsTable()" class="bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs font-mono font-bold text-slate-700">
             </div>
+            <button onclick="acOpen('payments')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg text-xs font-black shadow transition whitespace-nowrap">📊 حسابات</button>
             <button onclick="resetPaymentsFilters()" class="text-slate-400 hover:text-rose-600 px-2 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1">
               ↺ تفريغ
             </button>
@@ -2420,6 +2422,7 @@ body.su-md-dash main>#tab-dashboard{margin-top:0!important}
             <button onclick="openNewPurchaseModal()" class="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-xl text-xs font-black shadow flex items-center gap-1.5 transition">
               <span>+ تسجيل فاتورة / مشتريات جديدة ➕</span>
             </button>
+            <button onclick="acOpen('purchases')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg text-xs font-black shadow transition whitespace-nowrap">📊 حسابات</button>
             <button onclick="printPurchasesLedger()" class="bg-indigo-800 hover:bg-indigo-700 text-white px-3 py-2 rounded-xl text-xs font-bold border border-indigo-600 flex items-center gap-1">
               <span>🖨️ طباعة الكشف</span>
             </button>
@@ -15614,5 +15617,226 @@ html.su-dark body .sul.cxp .cx-fb i{border-color:#17121f}
 }
 
 </style>
+
+<div id="acModal" class="fixed inset-0 bg-slate-900/60 z-[70] hidden flex items-center justify-center p-3">
+  <div class="bg-white rounded-3xl max-w-xl w-full p-4 shadow-2xl border border-slate-100 max-h-[92vh] overflow-y-auto space-y-3 text-xs">
+    <div class="flex justify-between items-center border-b pb-2">
+      <h3 id="acTitle" class="font-black text-slate-900 text-base">📊 حسابات</h3>
+      <button type="button" onclick="closeModal('acModal')" class="text-slate-400 font-bold text-xl hover:text-slate-600">&times;</button>
+    </div>
+
+    <div id="acMetricWrap" class="hidden">
+      <label class="block font-bold text-slate-700 mb-1">القيمة المراد تجميعها</label>
+      <select id="acMetric" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-bold">
+        <option value="totalNetDue">الصافي المستحق</option>
+        <option value="totalPaid">المسدد</option>
+        <option value="remainingBalance">المتبقي / الرصيد</option>
+        <option value="currentGrossDue">الإجمالي (Gross)</option>
+        <option value="totalPreviousCredit">الخصومات</option>
+      </select>
+    </div>
+
+    <div class="space-y-2">
+      <label class="block font-bold text-slate-700">📅 الفترة</label>
+      <select id="acPeriod" onchange="acPeriodChanged()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-bold">
+        <option value="month">شهر</option>
+        <option value="year">سنة</option>
+        <option value="range">من تاريخ إلى تاريخ</option>
+        <option value="all">كل الفترات</option>
+      </select>
+      <div id="acWrapMonth"><input type="month" id="acMonth" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-mono font-bold"></div>
+      <div id="acWrapYear" class="hidden"><input type="number" id="acYear" min="2020" max="2100" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-mono font-bold"></div>
+      <div id="acWrapRange" class="hidden grid grid-cols-2 gap-2">
+        <div><span class="text-[11px] text-slate-500 font-bold">من</span><input type="date" id="acFrom" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-2 py-2 font-mono font-bold"></div>
+        <div><span class="text-[11px] text-slate-500 font-bold">إلى</span><input type="date" id="acTo" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-2 py-2 font-mono font-bold"></div>
+      </div>
+      <div id="acInvNote" class="hidden text-[11px] text-amber-700 font-bold">ℹ️ الفواتير شهرية، فالفترة بتتحسب بالشهور الكاملة.</div>
+    </div>
+
+    <div class="space-y-2">
+      <div class="flex justify-between items-center">
+        <label class="font-bold text-slate-700">🔎 الفلاتر <span class="font-medium text-slate-400">(نفس الفلتر مرتين = أو، فلاتر مختلفة = و)</span></label>
+        <button type="button" onclick="acAddFilter()" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 font-black px-3 py-1.5 rounded-lg">+ فلتر</button>
+      </div>
+      <div id="acFilters" class="space-y-2"></div>
+    </div>
+
+    <div>
+      <label class="block font-bold text-slate-700 mb-1">🧮 تجميع حسب</label>
+      <select id="acGroup" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-bold"></select>
+    </div>
+
+    <button type="button" onclick="acRun()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-black py-2.5 rounded-xl shadow">احسب ✅</button>
+    <div id="acResult" class="space-y-2"></div>
+  </div>
+</div>
+<script>
+(function(){
+  var $=function(i){return document.getElementById(i)};
+  var AR=function(){return localStorage.getItem('SU_LANG')==='en'?'en-US':'ar-EG'};
+  var fmt=function(n){return (Math.round((+n||0)*100)/100).toLocaleString(AR())};
+  var AC={src:'payments'};
+  var FIELDS={
+    payments:[['client','العميل'],['branch','الفرع']],
+    invoices:[['client','العميل'],['branch','الفرع'],['status','حالة التحصيل']],
+    purchases:[['branch','الفرع'],['category','القسم'],['supplier','المورد'],['buyer','القائم بالشراء'],['item','الصنف']]
+  };
+  var GROUPS={
+    payments:[['none','بدون (إجمالي فقط)'],['month','الشهر'],['client','العميل'],['branch','الفرع']],
+    invoices:[['none','بدون (إجمالي فقط)'],['month','الشهر'],['client','العميل'],['branch','الفرع']],
+    purchases:[['none','بدون (إجمالي فقط)'],['month','الشهر'],['branch','الفرع'],['category','القسم'],['supplier','المورد'],['buyer','القائم بالشراء']]
+  };
+  var TITLES={payments:'💵 حسابات المدفوعات',invoices:'🧾 حسابات الفواتير',purchases:'🛒 حسابات المشتريات'};
+  var norm=function(d){return String(d==null?'':d).replace(/\//g,'-').slice(0,10)};
+  var uniq=function(a){return Array.from(new Set(a.filter(Boolean)))};
+  var clientName=function(id){var c=(state.clients||[]).find(function(x){return x.id===id});return c?c.name:'غير معروف'};
+
+  function selOpts(f){
+    if(f==='branch')return [].slice.call(document.querySelectorAll('#paymentBranchFilter option')).filter(function(o){return o.value!=='all'}).map(function(o){return [o.value,o.textContent.trim()]});
+    if(f==='category')return [].slice.call(document.querySelectorAll('#purchaseCategoryFilter option')).filter(function(o){return o.value!=='all'}).map(function(o){return [o.value,o.textContent.trim()]});
+    if(f==='status')return [['paid','🟢 مسددة بالكامل'],['unpaid','🔴 متبقي مستحق']];
+    return null;
+  }
+  function suggest(f){
+    var P=state.purchases||[];
+    if(f==='client')return (state.clients||[]).map(function(c){return c.name+' #'+c.id});
+    if(f==='supplier')return uniq(P.map(function(p){return p.supplier}));
+    if(f==='buyer')return uniq(P.map(function(p){return p.purchased_by}));
+    if(f==='item')return uniq(P.map(function(p){return p.item_name}));
+    return [];
+  }
+  var uid=0;
+  function valueCtl(f){
+    var o=selOpts(f);
+    if(o)return '<select class="ac-v w-full bg-slate-50 border border-slate-200 rounded-xl px-2 py-2 font-bold"><option value="">— اختر —</option>'+o.map(function(x){return '<option value="'+escH(x[0])+'">'+escH(x[1])+'</option>'}).join('')+'</select>';
+    var id='acdl'+(++uid);
+    return '<input class="ac-v w-full bg-slate-50 border border-slate-200 rounded-xl px-2 py-2 font-bold" list="'+id+'" placeholder="اكتب أو اختار..."><datalist id="'+id+'">'+suggest(f).map(function(s){return '<option value="'+escH(s)+'">'}).join('')+'</datalist>';
+  }
+  function rowHtml(f){
+    var fs=FIELDS[AC.src];
+    return '<div class="ac-row grid grid-cols-[110px_1fr_auto] gap-2 items-center"><select class="ac-f bg-slate-50 border border-slate-200 rounded-xl px-2 py-2 font-bold" onchange="acFieldChanged(this)">'
+      +fs.map(function(x){return '<option value="'+x[0]+'"'+(x[0]===f?' selected':'')+'>'+x[1]+'</option>'}).join('')+'</select>'
+      +'<div class="ac-vw">'+valueCtl(f)+'</div>'
+      +'<button type="button" onclick="this.closest(\'.ac-row\').remove()" class="text-rose-600 font-black px-2">✕</button></div>';
+  }
+  window.acFieldChanged=function(sel){sel.closest('.ac-row').querySelector('.ac-vw').innerHTML=valueCtl(sel.value)};
+  window.acAddFilter=function(){
+    var used=[].slice.call(document.querySelectorAll('#acFilters .ac-f')).map(function(s){return s.value});
+    var fs=FIELDS[AC.src].map(function(x){return x[0]});
+    var f=fs.filter(function(x){return used.indexOf(x)<0})[0]||fs[0];
+    $('acFilters').insertAdjacentHTML('beforeend',rowHtml(f));
+  };
+  window.acPeriodChanged=function(){
+    var p=$('acPeriod').value;
+    $('acWrapMonth').classList.toggle('hidden',p!=='month');
+    $('acWrapYear').classList.toggle('hidden',p!=='year');
+    $('acWrapRange').classList.toggle('hidden',p!=='range');
+  };
+  window.acOpen=function(src){
+    AC.src=src;
+    $('acTitle').textContent=TITLES[src];
+    $('acMetricWrap').classList.toggle('hidden',src!=='invoices');
+    $('acInvNote').classList.toggle('hidden',src!=='invoices');
+    $('acFilters').innerHTML='';
+    $('acResult').innerHTML='';
+    $('acGroup').innerHTML=GROUPS[src].map(function(g){return '<option value="'+g[0]+'">'+g[1]+'</option>'}).join('');
+    var t=(typeof todayCairo==='function'?todayCairo():new Date().toISOString().slice(0,10));
+    var im=$('invoiceMonthSelect');
+    $('acMonth').value=(src==='invoices'&&im&&im.value)?im.value:t.slice(0,7);
+    $('acYear').value=t.slice(0,4);
+    $('acFrom').value=t.slice(0,7)+'-01';
+    $('acTo').value=t;
+    acPeriodChanged();
+    openModal('acModal');
+  };
+
+  function period(){
+    var p=$('acPeriod').value,r={type:p};
+    if(p==='month'){var m=$('acMonth').value;r.test=function(d){return d.slice(0,7)===m};r.months=[m];r.label='شهر '+m}
+    else if(p==='year'){var y=$('acYear').value;r.test=function(d){return d.slice(0,4)===y};r.months=[];for(var i=1;i<=12;i++)r.months.push(y+'-'+(i<10?'0':'')+i);r.label='سنة '+y}
+    else if(p==='range'){var f=$('acFrom').value,t=$('acTo').value;r.test=function(d){return (!f||d>=f)&&(!t||d<=t)};r.months=[];
+      if(f&&t){var y0=+f.slice(0,4),m0=+f.slice(5,7),y1=+t.slice(0,4),m1=+t.slice(5,7);while(y0<y1||(y0===y1&&m0<=m1)){r.months.push(y0+'-'+(m0<10?'0':'')+m0);m0++;if(m0>12){m0=1;y0++}}}
+      r.label='من '+(f||'…')+' إلى '+(t||'…')}
+    else{r.test=function(){return true};r.months=null;r.label='كل الفترات'}
+    return r;
+  }
+
+  function records(per){
+    var out=[],src=AC.src;
+    if(src==='payments'){
+      (state.payments||[]).forEach(function(p){
+        var d=norm(p.date);if(!per.test(d))return;
+        out.push({date:d,month:d.slice(0,7),client:p.clientId,branch:p.branch,val:Number(p.amount)||0});
+      });
+    }else if(src==='purchases'){
+      (state.purchases||[]).forEach(function(p){
+        var d=norm(p.purchase_date);if(!per.test(d))return;
+        out.push({date:d,month:d.slice(0,7),branch:p.branch||p.branch_id,category:p.category,supplier:p.supplier,buyer:p.purchased_by,item:p.item_name,
+          val:(Number(p.quantity)||1)*(Number(p.unit_price)||0)});
+      });
+    }else{
+      var metric=$('acMetric').value,months=per.months;
+      if(!months){
+        months=uniq((state.sessions||[]).map(function(s){return norm(s.date).slice(0,7)}).concat((state.payments||[]).map(function(p){return norm(p.date).slice(0,7)}))).sort();
+      }
+      months.forEach(function(m){
+        (state.clients||[]).forEach(function(c){
+          if(!matchBranch(c.branch))return;
+          var inv=calculateClientInvoice(c.id,m);
+          if(!inv||(inv.currentSessionsCount===0&&inv.totalNetDue===0&&inv.totalPaid===0))return;
+          out.push({date:m+'-01',month:m,client:c.id,branch:c.branch,status:inv.isFullyPaid?'paid':'unpaid',val:Number(inv[metric])||0});
+        });
+      });
+    }
+    return out.filter(function(r){return matchBranch(r.branch)});
+  }
+
+  function readFilters(){
+    var by={};
+    [].slice.call(document.querySelectorAll('#acFilters .ac-row')).forEach(function(row){
+      var f=row.querySelector('.ac-f').value,v=(row.querySelector('.ac-v').value||'').trim();
+      if(!v)return;(by[f]=by[f]||[]).push(v);
+    });
+    return by;
+  }
+  function matches(r,by){
+    return Object.keys(by).every(function(f){
+      return by[f].some(function(v){
+        if(f==='client'){var i=v.lastIndexOf('#');if(i>=0)return r.client===v.slice(i+1).trim();return clientName(r.client).toLowerCase()===v.toLowerCase()}
+        if(f==='branch'||f==='category'||f==='status')return String(r[f]||'')===v;
+        return String(r[f]||'').toLowerCase().indexOf(v.toLowerCase())>=0;
+      });
+    });
+  }
+  function labelOf(g,r){
+    if(g==='month')return r.month;
+    if(g==='client')return clientName(r.client);
+    if(g==='branch')return getBranchName(r.branch);
+    return r[g]||'—';
+  }
+  var cardCls='bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-center';
+  window.acRun=function(){
+    try{
+      var per=period(),by=readFilters(),g=$('acGroup').value;
+      var rows=records(per).filter(function(r){return matches(r,by)});
+      var sum=rows.reduce(function(a,r){return a+r.val},0),n=rows.length;
+      var fl=Object.keys(by).map(function(f){var nm=FIELDS[AC.src].filter(function(x){return x[0]===f})[0][1];return nm+': '+by[f].join(' / ')});
+      var h='<div class="text-[11px] text-slate-500 font-bold">'+escH(per.label)+(fl.length?' • '+escH(fl.join(' • ')):'')+'</div>'
+        +'<div class="grid grid-cols-3 gap-2"><div class="'+cardCls+'"><div class="text-[11px] text-slate-500 font-bold">الإجمالي</div><div class="font-black text-indigo-700 text-base font-mono">'+fmt(sum)+'</div></div>'
+        +'<div class="'+cardCls+'"><div class="text-[11px] text-slate-500 font-bold">العدد</div><div class="font-black text-slate-800 text-base font-mono">'+n+'</div></div>'
+        +'<div class="'+cardCls+'"><div class="text-[11px] text-slate-500 font-bold">المتوسط</div><div class="font-black text-slate-800 text-base font-mono">'+fmt(n?sum/n:0)+'</div></div></div>';
+      if(g!=='none'&&n){
+        var m={};rows.forEach(function(r){var k=labelOf(g,r);(m[k]=m[k]||{s:0,c:0});m[k].s+=r.val;m[k].c++});
+        var ks=Object.keys(m).sort(g==='month'?undefined:function(a,b){return m[b].s-m[a].s});
+        h+='<div class="overflow-x-auto"><table class="w-full text-right"><thead class="bg-slate-100 font-bold"><tr><th class="p-2">'+escH(GROUPS[AC.src].filter(function(x){return x[0]===g})[0][1])+'</th><th class="p-2">العدد</th><th class="p-2">المجموع</th><th class="p-2">%</th></tr></thead><tbody>'
+          +ks.map(function(k){return '<tr class="border-b border-slate-100"><td class="p-2 font-bold">'+escH(k)+'</td><td class="p-2 font-mono">'+m[k].c+'</td><td class="p-2 font-mono font-black text-indigo-700">'+fmt(m[k].s)+'</td><td class="p-2 font-mono text-slate-500">'+(sum?Math.round(m[k].s/sum*100):0)+'%</td></tr>'}).join('')
+          +'</tbody></table></div>';
+      }
+      if(!n)h+='<div class="text-center text-slate-400 py-3">مفيش بيانات مطابقة للفلاتر دي.</div>';
+      $('acResult').innerHTML=h;
+    }catch(e){$('acResult').innerHTML='<div class="text-rose-600 font-bold">حصل خطأ: '+escH(e.message)+'</div>';if(window.suLog)suLog('acRun',e)}
+  };
+})();
+</script>
 </body>
 </html>
