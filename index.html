@@ -3861,7 +3861,7 @@ async function out(){outBusy=true;unwarn();
  try{if(typeof cloudReady!=='undefined'&&cloudReady)await Promise.race([cloudPush(),new Promise(function(r){setTimeout(r,8000)})])}catch (e) { suLog('if(typeof cloudReady!==undefined&&cloudReady)awa', e); }
  var un=[];try{un=cloudKeys().filter(function(k){return canon(cloudLocal(k))!==cloudSynced[k]})}catch (e) { suLog('un=cloudKeys().filter(function(k){return canon(c', e); }
  try{if(sb)await sb.auth.signOut({scope:'local'})}catch (e) { suLog('if(sb)await sb.auth.signOut({scope:local})', e); }
- try{localStorage.removeItem('SPEAK_UP_CURRENT_USER');localStorage.removeItem('SPEAK_UP_PIN');
+ try{localStorage.removeItem('SU_PROFILE_CACHE');localStorage.removeItem('SPEAK_UP_CURRENT_USER');localStorage.removeItem('SPEAK_UP_PIN');
   if(!un.length){localStorage.removeItem(STORAGE_KEY);localStorage.removeItem(CLOUD_META_KEY)}   // لو فيه تعديلات لسه ماترفعتش بنسيبها علشان ماتضيعش
   sessionStorage.setItem('SU_IDLE_OUT',un.length?'2':'1')}catch (e) { suLog('localStorage.removeItem(SPEAK_UP_CURRENT_USER);l', e,'debug'); }
  location.reload()}
@@ -4938,6 +4938,7 @@ window.suMfaOpen=async function(){
       window.addEventListener('pagehide', function () { try { cloudPush(); } catch (e) { suLog('cloudPush();', e); } });
       window.addEventListener('online', () => { cloudPush(); cloudTick(); });
     }
+    try { localStorage.setItem('SU_PROFILE_CACHE', JSON.stringify({ uid: cloudUser.id, u: currentUser })); } catch (e) {}
     return true;
   }
 
@@ -5005,9 +5006,37 @@ window.suMfaOpen=async function(){
     if (!sb) { showLoginError('مكتبة الاتصال مش متحملة. تأكد من النت وحدّث الصفحة.'); try { window.suAuthDone && window.suAuthDone(); } catch (e) {} return; }
     try {
       const { data } = await sb.auth.getSession();
-      if (data && data.session) await cloudStart(data.session);
+      if (data && data.session) {
+        let fast = false;
+        try { fast = await suFastOpen(data.session); } catch (e) { fast = false; }
+        if (fast) { try { window.suAuthDone && window.suAuthDone(); } catch (e) {} }
+        const ok = await cloudStart(data.session);
+        if (!ok && fast) {   // الجلسة طلعت مش صالحة: نرجّع شاشة الدخول
+          currentUser = null; cloudUser = null;
+          document.documentElement.classList.remove('su-auto');
+          const ov = document.getElementById('loginOverlay'); if (ov) ov.classList.remove('hidden');
+          try { updateUserHeader(); } catch (e) {}
+        }
+      }
     } catch (e) { console.warn('cloudInit', e); }
     try { window.suAuthDone && window.suAuthDone(); } catch (e) {}
+  }
+  // فتح سريع: جلسة موجودة + بيانات محفوظة على الجهاز + مفيش تحقق بخطوتين معلّق
+  async function suFastOpen(session) {
+    const raw = localStorage.getItem('SU_PROFILE_CACHE');
+    if (!raw || !localStorage.getItem(STORAGE_KEY)) return false;
+    const c = JSON.parse(raw);
+    if (!c || !c.u || c.uid !== session.user.id || c.u.role === 'parent') return false;
+    if (sb.auth && sb.auth.mfa) {
+      const a = await sb.auth.mfa.getAuthenticatorAssuranceLevel();
+      if (a && a.data && a.data.nextLevel === 'aal2' && a.data.currentLevel !== 'aal2') return false;
+    }
+    cloudUser = session.user; currentUser = c.u; window._realRole = c.u.role;
+    const ov = document.getElementById('loginOverlay'); if (ov) ov.classList.add('hidden');
+    setUserRole(currentUser.role); updateUserHeader();
+    try { applyThemeSystem(); } catch (e) {}
+    refreshAll();
+    return true;
   }
 
   // 5. User Header & Permissions
@@ -5049,7 +5078,7 @@ window.suMfaOpen=async function(){
     if (cloudReady && unsynced.length && !confirm('فيه تعديلات لسه ماترفعتش للسحابة. تخرج برضو وتخسرها؟')) return;
     try { if (sb) await sb.auth.signOut(); } catch (e) { suLog('if (sb) await sb.auth.signOut();', e); }
     cloudUser = null; cloudReady = false; currentUser = null; window._realRole = null;
-    try { localStorage.removeItem(STORAGE_KEY); localStorage.removeItem(CLOUD_META_KEY); localStorage.removeItem('SPEAK_UP_CURRENT_USER'); localStorage.removeItem('SPEAK_UP_PIN'); } catch (e) { suLog('localStorage.removeItem(STORAGE_KEY); localStora', e,'debug'); }
+    try { localStorage.removeItem('SU_PROFILE_CACHE'); localStorage.removeItem(STORAGE_KEY); localStorage.removeItem(CLOUD_META_KEY); localStorage.removeItem('SPEAK_UP_CURRENT_USER'); localStorage.removeItem('SPEAK_UP_PIN'); } catch (e) { suLog('localStorage.removeItem(STORAGE_KEY); localStora', e,'debug'); }
     location.reload();
   }
 
