@@ -827,6 +827,8 @@ window.suNavIco=function(k,sz){return '<svg viewBox="0 0 24 24" width="'+(sz||24
       #loginOverlay button[type=submit] { border-radius: 999px !important; min-height: 50px; }
     }
   </style>
+  <script>try{for(var _i=0;_i<localStorage.length;_i++){if(/^sb-.*-auth-token$/.test(localStorage.key(_i))){document.documentElement.classList.add('su-auto');break}}}catch(e){}</script>
+  <style>html.su-auto #loginOverlay{display:none!important}html.su-auto #suSplash{animation:none!important}</style>
   <script>try{var d=document.documentElement;if(localStorage.getItem('SPEAK_UP_PIN')&&window.crypto&&crypto.subtle){d.classList.add('pin-locked','has-pin')}}catch (e) { suLog('var d=document.documentElement;if(localStorage.g', e,'debug'); }</script>
 
 <style id="su-redesign">
@@ -3881,7 +3883,7 @@ function errTxt(e){var m=(e&&e.message)||'';return /invalid|incorrect|expired/i.
 window.suMfaGate=async function(){
  if(!sb||!sb.auth||!sb.auth.mfa)return true;
  var a;try{a=await AAL()}catch(e){console.warn('mfa aal',e);return true}
- if(a.nextLevel==='aal2'&&a.currentLevel!=='aal2')return await challengeUI();
+ if(a.nextLevel==='aal2'&&a.currentLevel!=='aal2'){try{window.suAuthDone&&window.suAuthDone(true)}catch(e){}return await challengeUI();}
  return true};
 function challengeUI(){return new Promise(async function(res){
  var card=document.querySelector('#loginOverlay > div'),form=$('loginForm');
@@ -5000,11 +5002,12 @@ window.suMfaOpen=async function(){
 
   async function cloudInit() {
     if (!sb) await ensureSb();
-    if (!sb) { showLoginError('مكتبة الاتصال مش متحملة. تأكد من النت وحدّث الصفحة.'); return; }
+    if (!sb) { showLoginError('مكتبة الاتصال مش متحملة. تأكد من النت وحدّث الصفحة.'); try { window.suAuthDone && window.suAuthDone(); } catch (e) {} return; }
     try {
       const { data } = await sb.auth.getSession();
       if (data && data.session) await cloudStart(data.session);
     } catch (e) { console.warn('cloudInit', e); }
+    try { window.suAuthDone && window.suAuthDone(); } catch (e) {}
   }
 
   // 5. User Header & Permissions
@@ -11703,9 +11706,15 @@ a.pz-val:hover{text-decoration:underline;color:#5b21b6}
   function hideSplash(){var e=document.getElementById('suSplash');if(e){e.classList.add('out');setTimeout(function(){e.remove&&e.remove()},700)}}
   var hasSession=false;try{for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(/^sb-.*-auth-token$/.test(k)){hasSession=true;break}}}catch (e) { suLog('for(var i=0;ilocalStorage.length;i++){var k=loca', e,'debug'); }
   var reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var delay=reduce?0:(hasSession?350:1100);
+  var delay=reduce?0:600;
   function go(){setTimeout(hideSplash,delay)}
-  if(document.readyState==='complete')go();else window.addEventListener('load',go);
+  window.suAuthDone=function(force){
+    var ov=document.getElementById('loginOverlay');
+    if(force||(ov&&!ov.classList.contains('hidden')))document.documentElement.classList.remove('su-auto');
+    hideSplash();
+  };
+  if(hasSession){setTimeout(function(){window.suAuthDone(false)},10000)}
+  else if(document.readyState==='complete')go();else window.addEventListener('load',go);
   function menu(){
     var row=document.querySelector('#mainHeader .flex.items-center.justify-between');
     if(!row||document.getElementById('suMenuBtn'))return;
