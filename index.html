@@ -1630,9 +1630,6 @@ body.su-md-dash main>#tab-dashboard{margin-top:0!important}
           <button onclick="switchTab('purchases')" id="nav-purchases" class="nav-tab px-3 py-2 rounded-lg font-medium transition flex items-center gap-1.5 text-indigo-200 hover:text-white hover:bg-indigo-800 whitespace-nowrap">
             <span>🛒</span> <span>المشتريات والمصروفات</span>
           </button>
-          <button onclick="switchTab('revenue')" id="nav-revenue" class="nav-tab px-3 py-2 rounded-lg font-medium transition flex items-center gap-1.5 text-indigo-200 hover:text-white hover:bg-indigo-800 whitespace-nowrap">
-            <span>💰</span> <span>الربح (Revenue)</span>
-          </button>
           <button onclick="switchTab('staff')" id="nav-staff" class="nav-tab px-3 py-2 rounded-lg font-medium transition flex items-center gap-1.5 text-indigo-200 hover:text-white hover:bg-indigo-800">
             👩‍⚕️ الأخصائيين والفروع (HR)
           </button>
@@ -1778,7 +1775,6 @@ body.su-md-dash main>#tab-dashboard{margin-top:0!important}
           <button class="side-tab" id="side-nav-invoices" onclick="switchTab('invoices')" title="الفواتير الشهرية"><span class="side-ico"><span class="i3d"><svg class="su-i" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg></span></span><span class="side-label">الفواتير الشهرية</span></button>
           <button class="side-tab" id="side-nav-payments" onclick="switchTab('payments')" title="المدفوعات وسندات القبض"><span class="side-ico"><span class="i3d"><svg class="su-i" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg></span></span><span class="side-label">المدفوعات</span></button>
           <button class="side-tab" id="side-nav-purchases" onclick="switchTab('purchases')" title="المشتريات والمصروفات"><span class="side-ico"><span class="i3d"><svg class="su-i" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg></span></span><span class="side-label">المشتريات والمصروفات</span></button>
-          <button class="side-tab" id="side-nav-revenue" onclick="switchTab('revenue')" title="الربح (Revenue)"><span class="side-ico"><span class="i3d"><svg class="su-i" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg></span></span><span class="side-label">الربح (Revenue)</span></button>
         </div>
         <div class="side-group" data-g="admin">
           <div class="side-group-title">الإدارة</div>
@@ -2497,33 +2493,6 @@ body.su-md-dash main>#tab-dashboard{margin-top:0!important}
           </div>
         </div>
       </section>
-
-      <!-- 8.6 Revenue / Profit Tab -->
-      <section id="tab-revenue" class="tab-content space-y-4 hidden">
-        <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 p-5 rounded-2xl text-white shadow-md">
-          <h2 class="text-lg font-black">💰 الربح (Revenue)</h2>
-          <p class="text-xs text-indigo-200 mt-1">الدخل المحصّل − المشتريات والمصروفات = الربح، وتحليل حسب المنطقة والسن والمشكلة</p>
-        </div>
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-xs p-4 space-y-3 text-xs">
-<div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-      <select id="rvPeriod" onchange="rvPeriodChanged()" class="bg-slate-50 border border-slate-200 rounded-xl px-2 py-2 font-bold">
-        <option value="month">شهر</option><option value="year">سنة</option><option value="range">من – إلى</option><option value="all">كل الفترات</option>
-      </select>
-      <div id="rvWm"><input type="month" id="rvMonth" onchange="rvGo()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-2 py-2 font-mono font-bold"></div>
-      <div id="rvWy" class="hidden"><input type="number" id="rvYear" min="2020" max="2100" onchange="rvGo()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-2 py-2 font-mono font-bold"></div>
-      <div id="rvWr" class="hidden col-span-2 grid grid-cols-2 gap-2"><input type="date" id="rvFrom" onchange="rvGo()" class="bg-slate-50 border border-slate-200 rounded-xl px-2 py-2 font-mono font-bold"><input type="date" id="rvTo" onchange="rvGo()" class="bg-slate-50 border border-slate-200 rounded-xl px-2 py-2 font-mono font-bold"></div>
-      <select id="rvBranch" onchange="rvGo()" class="bg-slate-50 border border-slate-200 rounded-xl px-2 py-2 font-bold"></select>
-    </div>
-    <div class="flex gap-1.5 flex-wrap">
-      <button id="rvT-trad" onclick="rvTab('trad')" class="rv-tab px-3 py-1.5 rounded-lg font-black border">📊 التقليدي</button>
-      <button id="rvT-area" onclick="rvTab('area')" class="rv-tab px-3 py-1.5 rounded-lg font-black border">📍 المنطقة السكنية</button>
-      <button id="rvT-age" onclick="rvTab('age')" class="rv-tab px-3 py-1.5 rounded-lg font-black border">👶 السن والمشكلة</button>
-    </div>
-    <div id="rvBody" class="space-y-3"></div>
-    <div id="rvDrill"></div>
-        </div>
-      </section>
-
 
       <!-- 9. System Settings Tab (General, Theme, Layout & Permissions) -->
       <section id="tab-settings" class="tab-content space-y-6 hidden">
@@ -4511,7 +4480,6 @@ window.suMfaOpen=async function(){
       invoices: '🧾 الفواتير الشهرية والتقارير (Billing)',
       payments: '💵 المدفوعات وسندات القبض النقدية',
       purchases: '🛒 سجل المشتريات والمصروفات التشغيلية',
-      revenue: '💰 الربح (Revenue)',
       staff: '👩‍⚕️ الأخصائيين وأسعار الفروع (HR)',
       settings: '⚙️ إعدادات النظام، الثيم، والصلاحيات'
     };
@@ -4521,7 +4489,6 @@ window.suMfaOpen=async function(){
     if (tabId === 'calendar') renderCalendar();
     if (tabId === 'secretary') loadSecretaryView();
     if (tabId === 'purchases') renderPurchasesTable();
-    if (tabId === 'revenue') { try { rvOpen(); } catch (e) { suLog('rvOpen', e); } }
     if (tabId === 'settings') switchSettingsSubTab('general');
     if (tabId.startsWith('custom_')) {
       const secId = tabId.replace('custom_', '');
@@ -4612,7 +4579,7 @@ window.suMfaOpen=async function(){
     return v === undefined ? null : v;
   }
   // [SEC-RLS] الأخصائي مالوش صلاحية على الحسابات في قاعدة البيانات، فمانرفعهاش ولا نقارنها (وإلا هيظهر "فشل الرفع")
-  const SU_THERAPIST_DENY = ['payments', 'purchases', 'revenue'];
+  const SU_THERAPIST_DENY = ['payments', 'purchases'];
   function cloudKeys() {
     const deny = (window._realRole === 'therapist') ? SU_THERAPIST_DENY : [];
     return Object.keys(state).filter(k => typeof state[k] !== 'function' && state[k] !== undefined && deny.indexOf(k) < 0);
@@ -5283,28 +5250,26 @@ window.suMfaOpen=async function(){
       invoices: 'nav-invoices',
       payments: 'nav-payments',
       purchases: 'nav-purchases',
-      revenue: 'nav-revenue',
       staff: 'nav-staff',
       settings: 'nav-settings',
       activities: 'nav-activities'
     };
 
     Object.keys(navMap).forEach(key => {
-      const pv = key === 'revenue' ? perms.purchases : perms[key];
       const btn = document.getElementById(navMap[key]);
       if (btn) {
-        if (pv === false) btn.classList.add('hidden');
+        if (perms[key] === false) btn.classList.add('hidden');
         else btn.classList.remove('hidden');
       }
       const sideBtn = document.getElementById('side-' + navMap[key]);
       if (sideBtn) {
-        if (pv === false) sideBtn.classList.add('hidden');
+        if (perms[key] === false) sideBtn.classList.add('hidden');
         else sideBtn.classList.remove('hidden');
       }
       // Also sync mega menu buttons
       const megaBtn = document.getElementById('mega-' + navMap[key]);
       if (megaBtn) {
-        if (pv === false) megaBtn.classList.add('hidden');
+        if (perms[key] === false) megaBtn.classList.add('hidden');
         else megaBtn.classList.remove('hidden');
       }
     });
@@ -10657,7 +10622,7 @@ Object.assign(I18N_EN, Object.assign({"قبل 24س": "before 24h", "اعتذار
   (function () {
     const _sw = switchTab;
     switchTab = function (tabId) {
-      if (isTherapist() && ['purchases', 'revenue', 'staff', 'settings', 'payments', 'invoices'].includes(tabId)) tabId = 'dashboard';
+      if (isTherapist() && ['purchases', 'staff', 'settings', 'payments', 'invoices'].includes(tabId)) tabId = 'dashboard';
       if (tabId === 'secretary') setSecretaryDateToday();
       _sw(tabId);
       if (tabId === 'myearn') renderMyEarnings();
@@ -12358,7 +12323,7 @@ if(window.matchMedia('(max-width:820px)').matches){
       file:P('<path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5M10 13h6M10 17h4"/>'),bag:P('<path d="M5 8h14l-1 12H6z"/><path d="M9 8V6a3 3 0 016 0v2"/>'),
       staff:P('<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 3-6 6.5-6s6.5 2.4 6.5 6M19 8v6M16 11h6"/>'),gear:P('<circle cx="12" cy="12" r="3.2"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/>'),
       cam:P('<path d="M4 8h3l1.5-2h7L17 8h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>'),out:P('<path d="M10 4H5v16h5M15 8l4 4-4 4M19 12H9"/>'),x:P('<path d="M6 6l12 12M18 6L6 18"/>'),dot:P('<circle cx="12" cy="12" r="3"/>')};
-    var M={dashboard:['home','p'],myappts:['cal','b'],followup:['clip','o'],secretary:['clip','g'],calendar:['cal','p'],myearn:['wallet','g'],clients:['users','g'],sessions:['cal','b'],activities:['bolt','o'],invoices:['file','p'],payments:['wallet','g'],purchases:['bag','o'],revenue:['wallet','o'],staff:['staff','b'],settings:['gear','b'],photos:['cam','p'],'side-quick-tools':['bolt','o']};
+    var M={dashboard:['home','p'],myappts:['cal','b'],followup:['clip','o'],secretary:['clip','g'],calendar:['cal','p'],myearn:['wallet','g'],clients:['users','g'],sessions:['cal','b'],activities:['bolt','o'],invoices:['file','p'],payments:['wallet','g'],purchases:['bag','o'],staff:['staff','b'],settings:['gear','b'],photos:['cam','p'],'side-quick-tools':['bolt','o']};
     function row(id,lb,on,key,fn){var m=M[key]||['dot','p'];return '<button type="button" class="sum-row sd-row'+(on?' on':'')+'" '+(fn?'data-fn="'+fn+'"':'data-b="'+esc(id)+'"')+'><span class="sd-ic c-'+m[1]+'">'+I[m[0]]+'</span><span class="sd-lb">'+esc(lb)+'</span><span class="sd-ch">'+CH+'</span></button>'}
     var h='<div class="sd-scrim" data-back></div><aside class="sd-panel"><div class="sd-head">'+(lg?'<img class="sd-logo" alt="" src="'+lg+'">':'<b class="sd-t">القائمة</b>')+'<button type="button" class="sd-x" data-back aria-label="إغلاق القائمة">'+I.x+'</button></div><div class="sd-body">';
     h+='<div class="sd-user"><div class="sd-hi">أهلاً <b>'+esc(nm)+'</b><small>'+esc(rl)+'</small></div><span class="sd-av">'+(ph?'<img alt="" src="'+esc(ph)+'">':esc(av||nm.charAt(0)))+'<i></i></span></div>';
@@ -14613,7 +14578,7 @@ window.thpSheet=function(v){F.sheet=v;sig='';render()};
 window.thpHome=function(){window._thpClassic=false;F.tab='home';sig='';var bk=document.getElementById('thpBack');if(bk)bk.style.display='none';var m=document.getElementById('thpMenu');if(m)m.remove();render()};
 window.thpGo=function(id){var m=document.getElementById('thpMenu');if(m)m.remove();if(id==='__prof'){thpProfile();return}if(id==='__home'){thpHome();return}window._thpClassic=true;el().classList.add('hidden');try{switchTab(id)}catch (x) { suLog('switchTab(id)', x); }var bk=document.getElementById('thpBack');if(bk){bk.textContent='🏠';bk.style.display='flex'}};
 window.thpMenu=function(){var old=document.getElementById('thpMenu');if(old){old.remove();return}
- var bad=['purchases','revenue','staff','settings','payments','invoices'],items=[['__prof','⚙️',T('الإعدادات والبروفايل')],['__home','🏠',T('الرئيسية')]],logo=window.SU_PARENT_LOGO||suGateLogoUrl();
+ var bad=['purchases','staff','settings','payments','invoices'],items=[['__prof','⚙️',T('الإعدادات والبروفايل')],['__home','🏠',T('الرئيسية')]],logo=window.SU_PARENT_LOGO||suGateLogoUrl();
  document.querySelectorAll('#sideNav .side-tab').forEach(function(b){var id=(b.id||'').replace('side-nav-','');if(!id||bad.indexOf(id)>=0)return;var cs=getComputedStyle(b);if(cs.display==='none'||b.hidden)return;var ic=b.querySelector('.i3d'),lb=b.querySelector('.side-label');items.push([id,ic?ic.textContent:'•',lb?lb.textContent.trim():id])});
  var m=document.createElement('div');m.id='thpMenu';m.style.cssText='position:fixed;inset:0;z-index:70;background:rgba(30,41,59,.35);backdrop-filter:blur(3px);display:flex;align-items:flex-end';m.onclick=function(ev){if(ev.target===m)m.remove()};
  var cols=['#ede9fe','#d1fae5','#ffe4e6','#e0f2fe','#fef3c7','#cffafe'];
@@ -15660,7 +15625,7 @@ html.su-dark body .sul.cxp .cx-fb i{border-color:#17121f}
   <div class="bg-white rounded-3xl max-w-xl w-full p-4 shadow-2xl border border-slate-100 max-h-[92vh] overflow-y-auto space-y-3 text-xs">
     <div class="flex justify-between items-center border-b pb-2">
       <h3 id="acTitle" class="font-black text-slate-900 text-base">📊 حسابات</h3>
-      <div class="flex items-center gap-2"><button type="button" onclick="closeModal('acModal');switchTab('revenue')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-xs font-black shadow">💰 الربح (Revenue)</button><button type="button" onclick="closeModal('acModal')" class="text-slate-400 font-bold text-xl hover:text-slate-600">&times;</button></div>
+      <div class="flex items-center gap-2"><button type="button" onclick="closeModal('acModal');rvOpen()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-xs font-black shadow">💰 الربح (Revenue)</button><button type="button" onclick="closeModal('acModal')" class="text-slate-400 font-bold text-xl hover:text-slate-600">&times;</button></div>
     </div>
 
     <div id="acMetricWrap" class="hidden">
@@ -15877,6 +15842,30 @@ html.su-dark body .sul.cxp .cx-fb i{border-color:#17121f}
 })();
 </script>
 
+<div id="rvModal" class="fixed inset-0 bg-slate-900/60 z-[70] hidden flex items-center justify-center p-2">
+  <div class="bg-white rounded-3xl max-w-4xl w-full p-4 shadow-2xl border border-slate-100 max-h-[94vh] overflow-y-auto space-y-3 text-xs">
+    <div class="flex justify-between items-center border-b pb-2">
+      <h3 class="font-black text-slate-900 text-base">💰 الربح (Revenue)</h3>
+      <button type="button" onclick="closeModal('rvModal')" class="text-slate-400 font-bold text-xl hover:text-slate-600">&times;</button>
+    </div>
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+      <select id="rvPeriod" onchange="rvPeriodChanged()" class="bg-slate-50 border border-slate-200 rounded-xl px-2 py-2 font-bold">
+        <option value="month">شهر</option><option value="year">سنة</option><option value="range">من – إلى</option><option value="all">كل الفترات</option>
+      </select>
+      <div id="rvWm"><input type="month" id="rvMonth" onchange="rvGo()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-2 py-2 font-mono font-bold"></div>
+      <div id="rvWy" class="hidden"><input type="number" id="rvYear" min="2020" max="2100" onchange="rvGo()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-2 py-2 font-mono font-bold"></div>
+      <div id="rvWr" class="hidden col-span-2 grid grid-cols-2 gap-2"><input type="date" id="rvFrom" onchange="rvGo()" class="bg-slate-50 border border-slate-200 rounded-xl px-2 py-2 font-mono font-bold"><input type="date" id="rvTo" onchange="rvGo()" class="bg-slate-50 border border-slate-200 rounded-xl px-2 py-2 font-mono font-bold"></div>
+      <select id="rvBranch" onchange="rvGo()" class="bg-slate-50 border border-slate-200 rounded-xl px-2 py-2 font-bold"></select>
+    </div>
+    <div class="flex gap-1.5 flex-wrap">
+      <button id="rvT-trad" onclick="rvTab('trad')" class="rv-tab px-3 py-1.5 rounded-lg font-black border">📊 التقليدي</button>
+      <button id="rvT-area" onclick="rvTab('area')" class="rv-tab px-3 py-1.5 rounded-lg font-black border">📍 المنطقة السكنية</button>
+      <button id="rvT-age" onclick="rvTab('age')" class="rv-tab px-3 py-1.5 rounded-lg font-black border">👶 السن والمشكلة</button>
+    </div>
+    <div id="rvBody" class="space-y-3"></div>
+    <div id="rvDrill"></div>
+  </div>
+</div>
 <script>
 (function(){
   var $=function(i){return document.getElementById(i)};
@@ -16004,11 +15993,11 @@ html.su-dark body .sul.cxp .cx-fb i{border-color:#17121f}
   window.rvPickMonth=function(m){$('rvPeriod').value='month';$('rvMonth').value=m;rvPeriodChanged()};
   window.rvSetBranch=function(b){$('rvBranch').value=b;render()};
   window.rvPeriodChanged=function(){var p=$('rvPeriod').value;$('rvWm').classList.toggle('hidden',p!=='month');$('rvWy').classList.toggle('hidden',p!=='year');$('rvWr').classList.toggle('hidden',p!=='range');RV.drill=null;render()};
-  window.rvOpen=function(){var _bv=$('rvBranch').value;
+  window.rvOpen=function(){
     var t=today();
     if(!$('rvMonth').value){$('rvMonth').value=t.slice(0,7);$('rvYear').value=t.slice(0,4);$('rvFrom').value=t.slice(0,7)+'-01';$('rvTo').value=t}
     $('rvBranch').innerHTML='<option value="all">كل الفروع</option>'+[].slice.call(document.querySelectorAll('#paymentBranchFilter option')).filter(function(o){return o.value!=='all'&&matchBranch(o.value)}).map(function(o){return '<option value="'+escH(o.value)+'">'+escH(o.textContent.trim())+'</option>'}).join('');
-    RV.drill=null;if(_bv&&$('rvBranch').querySelector('option[value="'+_bv+'"]'))$('rvBranch').value=_bv;rvPeriodChanged();
+    RV.drill=null;openModal('rvModal');rvPeriodChanged();
   };
 })();
 </script>
@@ -16069,5 +16058,86 @@ html body #mNav.th-nav .th-nb{height:48px!important;gap:1px!important;font-size:
 html body #mNav.th-nav .th-nbi{width:22px!important;height:22px!important}
 }
 </style>
+<style id="su-dark-app-fix">
+/* ===== Dark mode fix for the mobile APP layer (<=820px) =====
+   السبب: طبقة التطبيق بتعتمد على متغيرات --su-bg/--su-surface/--su-text/--su-line/--su-muted
+   وألوان #fff ثابتة، ومكانش ليها قيم للدارك مود (فالخلفية تفضل فاتحة والكلام فاتح).
+   لازم يفضل آخر ستايل في الصفحة. */
+html.su-dark{
+  --su-bg:#0b1220;--su-surface:#111a2e;--su-text:#e2e8f0;--su-muted:#94a3b8;--su-line:#2d3a52;
+  --su-primary-50:rgba(139,92,246,.20);--su-primary-100:rgba(139,92,246,.30);
+  --su-shadow:none;--su-nav-line:rgba(167,139,250,.22)
+}
+@media (max-width:820px){
+  html.su-dark body{background:var(--su-bg)!important;color:var(--su-text)}
+  html.su-dark body #app,html.su-dark body main{background-color:transparent!important}
+
+  /* نصوص على خلفية primary-50 (كانت بنفسجي غامق على غامق) */
+  html.su-dark body .cal-seg button.on,html.su-dark body .cal-more,html.su-dark body .cal-link,
+  html.su-dark body .sul-av,html.su-dark body .sum-av{color:#d9ccff}
+  html.su-dark body .cal-ev{color:#ece9f8}
+  html.su-dark body .cal-gut span,html.su-dark body .cal-cell.off{color:#7c8aa0}
+
+  /* شريط التنقل القديم #mNav */
+  html.su-dark body #mNav{background:#1a1a1a!important;border-color:var(--su-nav-line)!important}
+  html.su-dark body #mNav .mn-btn.active{background:rgba(139,92,246,.26)!important;color:#d9ccff!important}
+
+  /* قايمة العملاء */
+  html.su-dark body .sul-av,html.su-dark body #suClist .sul-av,html.su-dark body #suClist img.sul-av,
+  html.su-dark body #suClist .sul-row>img,html.su-dark body .sul.cxp .sul-av{background:#2a2540;color:#d9ccff}
+  html.su-dark body #suClist .sul-tx small,html.su-dark body #suClist .sul-ap,html.su-dark body #suClist .sul-ap-t small{color:#9a95b5}
+  html.su-dark body #suClist .sul-ap-t b{color:#cfc8f5}
+  html.su-dark body #suClist .sul-ch{color:#7c78a8}
+  html.su-dark body #suClist .sul-row:hover,html.su-dark body #suClist .sul-row:focus-visible{background:#1d1a2b}
+  html.su-dark body #suClist .sul-pill.p-active{background:rgba(34,197,94,.16);color:#4ade80}
+  html.su-dark body #suClist .sul-pill.p-stopped,html.su-dark body #suClist .sul-pill.p-ended{background:rgba(244,63,94,.18);color:#fb7185}
+  html.su-dark body #suClist .sul-pill.p-eval,html.su-dark body #suClist .sul-pill.p-wait{background:rgba(245,158,11,.18);color:#fbbf24}
+  html.su-dark body #suClist .sul-pill.p-new{background:rgba(56,189,248,.18);color:#38bdf8}
+  html.su-dark body .sul-row .ss-box{background:#0f172a;border-color:#334155}
+
+  /* الكاليندر: كروت الأسبوع */
+  html.su-dark body .cw-b{background:rgba(56,189,248,.16);color:#bae6fd}
+  html.su-dark body .cw-b.ok{background:rgba(47,163,107,.22);color:#86efac}
+  html.su-dark body .cw-b.warn{background:rgba(245,184,41,.20);color:#fde68a}
+  html.su-dark body .cw-b.mute{background:#243049;color:#94a3b8}
+
+  /* القايمة الجانبية (الدروار) — متغيراتها كانت بتتحط فاتحة */
+  html.su-dark body #suMenuPage{
+    --sd-bg:#141a2b;--sd-fg:#f1efff;--sd-fg2:rgba(226,232,240,.66);--sd-line:rgba(255,255,255,.12);
+    --sd-hov:rgba(255,255,255,.09);--sd-sh:rgba(0,0,0,.35);--sd-sh2:rgba(0,0,0,.35);--sd-psh:rgba(0,0,0,.55);
+    --sd-pb:rgba(255,255,255,.09);--sd-icbg:rgba(255,255,255,.12);--sd-icfg:#f5f3ff;--sd-actbg:rgba(139,92,246,.26);
+    --sd-actfg:#fff;--sd-acttile:rgba(139,92,246,.55);--sd-ch:rgba(255,255,255,.65);--sd-xbg:rgba(255,255,255,.14);
+    --sd-xfg:#fff;--sd-avbg:rgba(255,255,255,.14);--sd-avfg:#fff;--sd-outbg:rgba(255,99,132,.2);--sd-outfg:#ffc7d3;
+    --sd-logobg:#fff;--sd-logopad:.2em .55em
+  }
+  html.su-dark body #suMenuPage .sd-hi,html.su-dark body #suMenuPage .sd-hi b,html.su-dark body #suMenuPage .sd-lb{color:var(--sd-fg)}
+
+  /* داشبورد الموبايل (md-) */
+  html.su-dark body #suMDash{color:#e2e8f0}
+  html.su-dark body #suMDash .md-k,html.su-dark body #suMDash .md-card{background:#111a2e;border-color:#2d3a52;box-shadow:none}
+  html.su-dark body #suMDash .md-k.c1{background:#0f2230}html.su-dark body #suMDash .md-k.c2{background:#2a1d12}
+  html.su-dark body #suMDash .md-k.c3{background:#2b1520}html.su-dark body #suMDash .md-k.c4{background:#0f2a1e}
+  html.su-dark body #suMDash .md-k.c1 .md-ki{background:rgba(34,211,238,.18);color:#22d3ee}
+  html.su-dark body #suMDash .md-k.c2 .md-ki{background:rgba(251,146,60,.2);color:#fb923c}
+  html.su-dark body #suMDash .md-k.c3 .md-ki{background:rgba(251,113,133,.2);color:#fb7185}
+  html.su-dark body #suMDash .md-k.c3 .md-kn{color:#fb7185}
+  html.su-dark body #suMDash .md-k.c4 .md-ki{background:rgba(74,222,128,.2);color:#4ade80}
+  html.su-dark body #suMDash .md-k.c4 .md-kn{color:#4ade80}
+  html.su-dark body #suMDash .md-hi{color:#cbd5e1}
+  html.su-dark body #suMDash .md-hi b,html.su-dark body #suMDash .md-kn,html.su-dark body #suMDash .md-at b,html.su-dark body #suMDash .md-ar b{color:#f1f5f9}
+  html.su-dark body #suMDash .md-hi small,html.su-dark body #suMDash .md-kf,html.su-dark body #suMDash .md-at small{color:#94a3b8}
+  html.su-dark body #suMDash .md-kl{color:#cbd5e1}
+  html.su-dark body #suMDash .md-av{background:#2a2540;color:#d9ccff}
+  html.su-dark body #suMDash .md-av i{border-color:#0b1220}
+  html.su-dark body #suMDash .md-ar{background:#1a2438;color:#cbd5e1}
+  html.su-dark body #suMDash .md-chip.g{background:rgba(34,197,94,.18);color:#4ade80}
+  html.su-dark body #suMDash .md-chip.r{background:rgba(244,63,94,.18);color:#fb7185}
+  html.su-dark body #suMDash .md-chip.z{background:#243049;color:#94a3b8}
+  html.su-dark body #tab-dashboard.su-md-on>.px-4.py-3.flex,
+  html.su-dark body #tab-dashboard.su-md-on #dashCardSess,html.su-dark body #tab-dashboard.su-md-on #dashCardDiag,
+  html.su-dark body #tab-dashboard.su-md-on>.lg\:grid-cols-3>div{border-color:#2d3a52!important;box-shadow:none!important}
+}
+</style>
+
 </body>
 </html>
