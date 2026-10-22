@@ -84,10 +84,15 @@ more:'<path d="M6.2 3.6h10.4c1 0 1.8.5 2.3 1.2H5.4z" opacity=".7"/><path d="M3.2
 book:'<path d="M6.5 2.8h10.2A3.3 3.3 0 0120 6.1v11.8a3.3 3.3 0 01-3.3 3.3H6.5A2.5 2.5 0 014 18.7V5.3a2.5 2.5 0 012.5-2.5z"/><path d="M8.2 7.4h7M8.2 11h7M8.2 14.6h4" stroke="#fff" stroke-width="1.5" stroke-linecap="round" fill="none"/>'};
 B.acct=B.more;
 window.suNavIco=function(k,sz){return '<svg viewBox="0 0 24 24" width="'+(sz||24)+'" height="'+(sz||24)+'" fill="currentColor" aria-hidden="true">'+(B[k]||'')+'</svg>'};})();</script>
+<link rel="preconnect" href="https://dbqszalzzmxodqqhhdhi.supabase.co" crossorigin>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap">
 <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.78.0/dist/umd/supabase.js"></script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap');
     :root { --su-font: 'Cairo', system-ui, -apple-system, sans-serif; }
     * { font-family: var(--su-font); }
     .badge-att { background-color: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
@@ -4663,10 +4668,25 @@ window.suMfaOpen=async function(){
   }
   async function suFetch(k) {
     const sp = SU[k], out = [];
-    for (let from = 0; ; from += 1000) {
-      let q = sb.from(sp.t).select('*').is('deleted_at', null);
+    const page = (from, withCount) => {
+      let q = withCount ? sb.from(sp.t).select('*', { count: 'exact' }).is('deleted_at', null)
+                        : sb.from(sp.t).select('*').is('deleted_at', null);
       sp.ord.forEach(o => { q = q.order(o[0], { ascending: !!o[1] }); });
-      const r = await q.range(from, from + 999);
+      return q.range(from, from + 999);
+    };
+    const r0 = await page(0, true);                       // [FAST-LOGIN] الصفحة الأولى + العدد الكلي
+    if (r0.error) throw r0.error;
+    (r0.data || []).forEach(x => out.push(suFrom(k, x)));
+    if (!r0.data || r0.data.length < 1000) return out;
+    if (typeof r0.count === 'number' && r0.count > 1000) {   // باقي الصفحات مرة واحدة بالتوازي
+      const jobs = [];
+      for (let from = 1000; from < r0.count; from += 1000) jobs.push(page(from, false));
+      const rs = await Promise.all(jobs);
+      for (const r of rs) { if (r.error) throw r.error; (r.data || []).forEach(x => out.push(suFrom(k, x))); }
+      return out;
+    }
+    for (let from = 1000; ; from += 1000) {               // احتياطي: لو العدد مش متاح نكمّل بالدور
+      const r = await page(from, false);
       if (r.error) throw r.error;
       (r.data || []).forEach(x => out.push(suFrom(k, x)));
       if (!r.data || r.data.length < 1000) break;
@@ -4674,20 +4694,26 @@ window.suMfaOpen=async function(){
     return out;
   }
   // بديل الـ select من app_state: المفاتيح الستة من الجداول، والباقي من app_state زي ما كان
-  async function suSelect(need) {
+  async function suSelect(need, stamps) {
     const sk = need.filter(k => SU[k]), ok = need.filter(k => !SU[k]);
-    let data = [];
-    if (ok.length) { const r = await sb.from('app_state').select('key,data,updated_at').in('key', ok); if (r.error) throw r.error; data = r.data || []; }
+    const jobs = [];
+    if (ok.length) jobs.push((async () => { const r = await sb.from('app_state').select('key,data,updated_at').in('key', ok); if (r.error) throw r.error; return r.data || []; })());
     if (sk.length) {
-      const st = await sb.from('app_state').select('key,updated_at').in('key', sk);   // البصمة الأول وبعدها الداتا
-      if (st.error) throw st.error;
-      const deny = (window._realRole === 'therapist') ? SU_THERAPIST_DENY : [];
-      for (const m of (st.data || [])) {
-        if (deny.indexOf(m.key) >= 0) { cloudStamp[m.key] = Date.parse(m.updated_at) || 0; continue; }
-        data.push({ key: m.key, data: await suFetch(m.key), updated_at: m.updated_at });
+      let st = null;
+      if (stamps) st = sk.filter(k => stamps[k] != null).map(k => ({ key: k, updated_at: stamps[k] }));
+      if (!st || st.length !== sk.length) {   // مفيش بصمات جاهزة: نجيبها زي الأول
+        const r = await sb.from('app_state').select('key,updated_at').in('key', sk);
+        if (r.error) throw r.error;
+        st = r.data || [];
       }
+      const deny = (window._realRole === 'therapist') ? SU_THERAPIST_DENY : [];
+      st.forEach(m => {
+        if (deny.indexOf(m.key) >= 0) { cloudStamp[m.key] = Date.parse(m.updated_at) || 0; return; }
+        jobs.push(suFetch(m.key).then(d => [{ key: m.key, data: d, updated_at: m.updated_at }]));   // [FAST-LOGIN] كل الجداول مع بعض
+      });
     }
-    return { data, error: null };
+    const parts = await Promise.all(jobs);
+    return { data: [].concat.apply([], parts), error: null };
   }
   async function suTablePush(k) {
     const sp = SU[k];
@@ -4734,7 +4760,8 @@ window.suMfaOpen=async function(){
     let data, count;
     if (!Object.keys(cloudStamp).length) {
       // أول تحميل: نجيب البصمات بس، وننزّل كاملاً المفاتيح اللي اتغيرت فعلاً أو اللي مش موجودة على الجهاز
-      const meta0 = await sb.from('app_state').select('key,updated_at');
+      const meta0 = await (window.__suMetaPre || sb.from('app_state').select('key,updated_at'));
+      window.__suMetaPre = null;
       if (meta0.error) throw meta0.error;
       const saved = cloudMetaLoad();
       const need = [];
@@ -4750,7 +4777,8 @@ window.suMfaOpen=async function(){
       count = (meta0.data || []).length;
       data = [];
       if (need.length) {
-        const res = await suSelect(need);
+        const stampMap = {}; (meta0.data || []).forEach(m => { stampMap[m.key] = m.updated_at; });
+        const res = await suSelect(need, stampMap);
         if (res.error) throw res.error;
         data = res.data || [];
         data.forEach(r => { cloudStamp[r.key] = Date.parse(r.updated_at) || 0; });
@@ -4762,7 +4790,8 @@ window.suMfaOpen=async function(){
       count = (meta.data || []).length;
       const changedKeys = (meta.data || []).filter(m => m.key !== '__init' && (Date.parse(m.updated_at) || 0) !== cloudStamp[m.key]).map(m => m.key);
       if (!changedKeys.length) return { changed: false, count };
-      const res = await suSelect(changedKeys);
+      const stampMap2 = {}; (meta.data || []).forEach(m => { stampMap2[m.key] = m.updated_at; });
+      const res = await suSelect(changedKeys, stampMap2);
       if (res.error) throw res.error;
       data = res.data || [];
       data.forEach(r => { cloudStamp[r.key] = Date.parse(r.updated_at) || 0; });
@@ -4876,6 +4905,7 @@ window.suMfaOpen=async function(){
     }
     cloudUser = session.user;
     suStage('2/3 جاري تحميل صلاحياتك...');
+    try { const pre = Promise.resolve(sb.from('app_state').select('key,updated_at')); pre.then(function () {}, function () {}); window.__suMetaPre = pre; } catch (e) { window.__suMetaPre = null; }   // [FAST-LOGIN] نجيب البصمات مع الصلاحيات في نفس الوقت
     const { data: prof, error } = await suTimeout(sb.from('profiles').select('*').eq('id', cloudUser.id).maybeSingle(), 25000, 'تحميل الصلاحيات');
     if (error) { await sb.auth.signOut(); cloudUser = null; showLoginError('تعذر تحميل الصلاحيات: ' + (error.message || '')); return false; }
     if (error || !prof || !['admin', 'secretary', 'therapist', 'parent'].includes(prof.role)) {
