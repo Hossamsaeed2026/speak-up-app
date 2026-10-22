@@ -1373,6 +1373,76 @@ body.sidebar-collapsed #sideNav .side-gear{justify-content:center;padding:8px 0}
 /* شبكة أمان: قوائم الموبايل (.sul) ما تظهرش على العرض العريض (تابلت أفقي / كمبيوتر) */
 @media (min-width:821px){.sul,#suClients,#suSet{display:none!important}}
 </style>
+<style id="su-drawer-css">
+@media (max-width:820px){
+#suMenuPage{background:rgba(44,30,96,.30)!important;-webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px);overflow:hidden!important;transform:none!important;opacity:0;visibility:hidden;transition:opacity .2s,visibility 0s .2s!important}
+#suMenuPage.open{opacity:1;visibility:visible;transition:opacity .2s,visibility 0s!important}
+#suMenuPage .sd-scrim{position:absolute;inset:0}
+#suMenuPage .sd-panel{font-size:16px;position:absolute;top:calc(env(safe-area-inset-top,0px) + 10px);bottom:calc(env(safe-area-inset-bottom,0px) + 10px);right:8px;width:min(80vw,300px);display:flex;flex-direction:column;background:var(--sd-bg,#fff);border:1px solid var(--sd-pb,transparent);border-radius:1.6em;box-shadow:0 18px 50px var(--sd-psh,rgba(60,30,120,.28));transform:translateX(112%);transition:transform .26s cubic-bezier(.2,.8,.2,1);color:var(--sd-fg,#2a1f4d)}
+#suMenuPage.open .sd-panel{transform:none}
+html[dir=ltr] #suMenuPage .sd-panel{right:auto;left:8px;transform:translateX(-112%)}html[dir=ltr] #suMenuPage.open .sd-panel{transform:none}
+.sd-head{display:flex;align-items:center;justify-content:space-between;padding:.75em .9em .25em 1em}
+.sd-logo{max-height:3.2em;max-width:11em;width:auto;object-fit:contain;background:var(--sd-logobg,transparent);padding:var(--sd-logopad,0);border-radius:.8em;box-sizing:content-box}.sd-t{font-size:1.3em;font-weight:900;color:var(--sd-actfg,#6d28d9)}
+.sd-x{width:2.8em;height:2.8em;border:0;border-radius:.95em;background:var(--sd-xbg,#f0eafc);color:var(--sd-xfg,#5b2fc2);display:grid;place-items:center;cursor:pointer}.sd-x svg{width:1.35em;height:1.35em}
+.sd-body{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:.25em .8em .3em}
+.sd-user{display:flex;align-items:center;justify-content:space-between;gap:.7em;padding:.4em .5em .8em}
+.sd-hi{font-size:1.1em;color:var(--sd-fg,#3b2d6b);line-height:1.3;min-width:0}.sd-hi b{font-weight:900;color:var(--sd-fg,#1f1547)}.sd-hi small{display:block;font-size:.82em;color:var(--sd-fg2,#8d88aa);font-weight:600;margin-top:.1em}
+.sd-av{position:relative;flex:0 0 auto;width:4.4em;height:4.4em;border-radius:50%;background:var(--sd-avbg,#f0eafc);color:var(--sd-avfg,#6d28d9);display:grid;place-items:center;font-size:1.7em;font-weight:900}
+.sd-av{font-size:1em}.sd-av img{width:100%;height:100%;border-radius:50%;object-fit:cover}.sd-av i{position:absolute;left:.1em;bottom:.25em;width:.9em;height:.9em;border-radius:50%;background:#22c55e;border:.2em solid var(--sd-bg,#fff)}
+.sd-sec{padding-top:.5em;margin-top:.4em;border-top:1px solid var(--sd-line,#ebe7f7)}.sd-sec.first{border-top:0;margin-top:0;padding-top:0}
+.sd-sec>span{display:block;padding:.05em .5em .3em;font-size:.84em;font-weight:700;color:var(--sd-fg2,#8d88aa)}
+#suMenuPage .sd-row{display:flex;align-items:center;gap:.7em;width:100%;min-height:3.35em;padding:.15em .35em;margin:0 0 .05em;border:0!important;border-radius:1.1em;background:transparent!important;color:inherit;font:inherit;text-align:start;cursor:pointer;outline:none;transition:background .15s,box-shadow .15s}
+#suMenuPage .sd-row:hover,#suMenuPage .sd-row:active,#suMenuPage .sd-row:focus-visible{background:var(--sd-hov,#f6f2ff)!important;box-shadow:0 .3em .9em var(--sd-sh,rgba(109,40,217,.14))}
+.sd-ic{flex:0 0 2.7em;width:2.7em;height:2.7em;border-radius:.85em;display:grid;place-items:center;background:var(--sd-icbg,var(--tb));color:var(--sd-icfg,var(--tf))}.sd-ic svg{width:1.4em;height:1.4em}
+.c-p{--tb:#efe9fd;--tf:#6d28d9}.c-g{--tb:#e0f6ee;--tf:#0f9f76}.c-b{--tb:#e3f1fd;--tf:#2a86dd}.c-o{--tb:#fff0e0;--tf:#f08a1f}
+.sd-lb{flex:1;font-size:max(12px,.95em);font-weight:600;line-height:1.25}.sd-ch{color:var(--sd-ch,#6d4fd6);display:inline-flex}.sd-ch svg{width:1.1em;height:1.1em}
+#suMenuPage .sd-row.on{background:var(--sd-actbg,#ece4ff)!important}.sd-row.on .sd-lb{color:var(--sd-actfg,#6d28d9);font-weight:800}.sd-row.on .sd-ic{background:var(--sd-acttile,linear-gradient(145deg,#8b5cf6,#6d28d9));color:#fff;box-shadow:0 .35em .8em var(--sd-sh2,rgba(109,40,217,.3))}
+.sd-foot{padding:.3em .8em .75em}
+#suMenuPage .sd-out{display:flex;align-items:center;justify-content:center;gap:.7em;width:100%;height:3.1em;border:0;border-radius:1.1em;background:var(--sd-outbg,#fff0f3)!important;color:var(--sd-outfg,#e11d48);font:inherit;font-size:max(13px,1.02em);font-weight:800;cursor:pointer;flex-direction:row-reverse}
+.sd-out svg{width:1.4em;height:1.4em}
+}
+@media (prefers-reduced-motion:reduce){#suMenuPage .sd-panel{transition:none}}
+</style>
+<style id="su-mdash-css">
+#suMDash{display:none}
+@media (max-width:820px){
+#suMDash{display:block;font-size:14px;margin:-4px 0 12px;font-family:inherit;color:#1f1547}
+#suMDash:empty{display:none}
+#tab-dashboard.su-md-on>.md\:grid-cols-4,#tab-dashboard.su-md-on>.lg\:grid-cols-3>:first-child{display:none!important}
+.md-top{display:flex;align-items:center;gap:.8em;padding:.1em .2em .6em}
+.md-av{position:relative;flex:0 0 auto;width:3.5em;height:3.5em;border-radius:50%;background:#e9e2fb;color:#6d28d9;display:grid;place-items:center;font-size:1.3em;font-weight:900;order:2}
+.md-av img{width:100%;height:100%;border-radius:50%;object-fit:cover}.md-av i{position:absolute;left:.05em;bottom:.1em;width:.55em;height:.55em;border-radius:50%;background:#22c55e;border:.12em solid #f7f5ff}
+.md-hi{flex:1;font-size:1.1em;line-height:1.3;color:#2a2160;order:1}.md-hi b{font-weight:900;color:#1f1547}.md-hi small{display:block;font-size:.82em;color:#8b87aa;font-weight:600}
+.md-hero{position:relative;display:flex;align-items:center;justify-content:space-between;min-height:5.4em;padding:.7em 1em;border-radius:1.25em;background:linear-gradient(120deg,#6d3fe0,#5b2fc2 55%,#7c4df0);color:#fff;overflow:hidden;margin-bottom:.6em;box-shadow:0 .6em 1.4em rgba(91,47,194,.25)}
+.md-hero:before{content:"";position:absolute;right:-2em;top:-3em;width:12em;height:12em;border-radius:50%;background:rgba(255,255,255,.08)}
+.md-ht{position:relative;display:flex;flex-direction:column;gap:.1em}.md-ht small{font-size:.85em;opacity:.9}.md-ht b{font-size:1.25em;font-weight:900;line-height:1.25}.md-ht span{font-size:.85em;opacity:.92}
+.md-hart{position:relative;width:6.6em;height:5.2em;flex:0 0 auto}
+.md-grid{display:grid;grid-template-columns:1fr 1fr;gap:.6em;margin-bottom:.6em}
+.md-k{display:flex;align-items:flex-start;justify-content:space-between;gap:.4em;padding:.65em .7em .55em;border-radius:1.15em;background:#fff;border:1px solid #efecf8;box-shadow:0 .25em .8em rgba(60,30,120,.06);min-height:4.6em}
+.md-kt{flex:1;min-width:0}.md-kl{display:block;font-size:.82em;font-weight:700;color:#2a2160}.md-kn{display:block;font-size:1.95em;line-height:1.1;font-weight:900;color:#1f1547;margin:.05em 0 .15em}
+.md-kf{display:flex;align-items:center;justify-content:space-between;gap:.3em;font-size:.7em;color:#6b6890}
+.md-ki{flex:0 0 auto;width:2.9em;height:2.9em;border-radius:50%;display:grid;place-items:center}.md-ki svg{width:1.5em;height:1.5em}
+.c1{background:#f4fbff}.c1 .md-ki{background:#d9f1f5;color:#0f9aa5}.c2{background:#fff9f3}.c2 .md-ki{background:#ffe9d5;color:#f08a1f}
+.c3{background:#fff2f5}.c3 .md-ki{background:#ffdce4;color:#e11d48}.c3 .md-kn{color:#e11d48}.c4{background:#f2fbf6}.c4 .md-ki{background:#d6f3e5;color:#0f9f76}.c4 .md-kn{color:#0f9f76}
+.md-chip{display:inline-flex;align-items:center;gap:.1em;padding:.15em .5em;border-radius:.7em;font-weight:800;font-size:.95em}.md-chip b{font-size:1em}
+.md-chip.g{background:#dff5e8;color:#0f9f76}.md-chip.r{background:#ffe1e8;color:#e11d48}.md-chip.z{background:#eeeaf8;color:#6b6890}
+.md-card{background:#fff;border:1px solid #efecf8;border-radius:1.2em;padding:.65em .75em .6em;margin-bottom:.6em;box-shadow:0 .25em .8em rgba(60,30,120,.06)}
+.md-ch{display:flex;align-items:center;justify-content:space-between;margin-bottom:.4em}
+.md-ct{display:flex;align-items:center;gap:.6em}.md-ct b{font-size:1.02em;font-weight:900;color:#1f1547}
+.md-ic{width:2.3em;height:2.3em;border-radius:50%;background:#ece6fb;color:#6d28d9;display:grid;place-items:center}.md-ic svg{width:1.15em;height:1.15em}
+.md-pill{padding:.35em .8em;border-radius:.9em;background:#f1eefb;color:#4b4870;font-size:.72em;font-weight:700}
+.md-chart{direction:ltr;display:flex;gap:.3em;height:6.4em}
+.md-y{position:relative;width:1.6em;flex:0 0 auto;font-size:.66em;color:#6b6890}.md-y span{position:absolute;right:0;transform:translateY(50%);line-height:1}
+.md-area{position:relative;flex:1;display:flex;justify-content:space-around;align-items:flex-end;border-left:1px solid #e6e3f3;border-bottom:1px solid #e6e3f3}
+.md-gl{position:absolute;left:0;right:0;border-top:1px dashed #e6e3f3}
+.md-g{position:relative;display:flex;align-items:flex-end;gap:.16em;height:100%}.md-b{display:block;width:.8em;border-radius:.25em .25em 0 0;text-decoration:none}
+.md-xl{direction:ltr;display:flex;margin:.2em 0 0 1.9em;font-size:.66em;color:#4b4870}.md-xl span{flex:1;text-align:center}
+.md-leg{display:flex;flex-wrap:wrap;justify-content:space-between;gap:.2em .6em;font-size:.68em;color:#4b4870;padding:.5em .2em 0}.md-leg span{display:inline-flex;align-items:center;gap:.4em}.md-leg i{width:.9em;height:.9em;border-radius:50%;display:inline-block}
+.md-att{display:flex;align-items:center;gap:.9em}.md-donut{width:6.6em;height:6.6em;flex:0 0 auto}
+.md-al{flex:1;display:flex;flex-direction:column;gap:.4em}
+.md-ar{display:flex;align-items:center;gap:.6em;padding:.4em .8em;border-radius:.9em;background:#f4f2fb;font-size:.85em;color:#4b4870}.md-ar i{width:.9em;height:.9em;border-radius:50%;flex:0 0 auto}.md-ar span{flex:1}.md-ar b{font-weight:900;color:#1f1547;font-size:1.05em}
+}
+</style>
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen">
 <div id="suSplash" aria-hidden="true"><span class="orb o1"></span><span class="orb o2"></span><span class="orb o3"></span><div class="mark"><img src="icons/icon-192.png" alt="" onerror="this.style.display='none'"><b>Speak Up</b></div></div>
@@ -1643,6 +1713,7 @@ body.sidebar-collapsed #sideNav .side-gear{justify-content:center;padding:8px 0}
       <section id="tab-myearn" class="tab-content space-y-4 hidden"><div id="myEarnBody"></div></section>
 
       <section id="tab-dashboard" class="tab-content space-y-6">
+      <div id="suMDash"></div>
         <div id="therapistDash"></div>
         <div id="pbiBar" class="hidden flex flex-wrap items-center gap-2 bg-white border border-slate-200 rounded-2xl p-2 shadow-xs">
           <div class="flex rounded-xl overflow-hidden border text-xs font-black">
@@ -5060,7 +5131,8 @@ window.suMfaOpen=async function(){
   // 6. Section Rendering Functions
 
   // A. Dashboard
-  function renderDashboard() {
+  function renderDashboard() { __renderDashboardRaw(); try { if (typeof window.suMDashRender === 'function') window.suMDashRender(); } catch (e) { try { suLog('suMDash', e); } catch (_) {} } }
+  function __renderDashboardRaw() {
     const clients = state.clients.filter(c => matchBranch(c.branch));
     const activeClients = clients.filter(c => c.status === 'Active');
     const curYm = todayCairo().slice(0, 7);
@@ -11862,19 +11934,36 @@ if(window.matchMedia('(max-width:820px)').matches){
 
   /* ---------- menu page ---------- */
   function build(){
-    var nm=($('headerUserName')||{}).textContent||'',rl=($('headerUserRoleBadge')||{}).textContent||'',av=($('headerUserAvatar')||{}).textContent||'';
-    var h='<div class="sum-bar"><button type="button" class="sum-back" data-back aria-label="رجوع">'+BK+'</button><b>القائمة</b>'+((window.SU_APP_LOGO||window.SU_HEADER_LOGO)?'<img class="sum-logo" alt="" src="'+(window.SU_APP_LOGO||window.SU_HEADER_LOGO)+'">':'')+'</div><div class="sum-body">';
-    h+='<div class="sum-user"><span class="sum-av">'+esc(av.trim())+'</span><span class="sum-un"><b>'+esc(nm.trim())+'</b><small>'+esc(rl.trim())+'</small></span></div>';
-    h+='<div class="sum-card" style="margin-top:10px"><button type="button" class="sum-row" data-fn="suGearOpen"><span class="sum-ic">⚙️</span><span class="sum-lb">الإعدادات</span><span class="sum-ch">'+CH+'</span></button></div>';
+    var nm=(($('headerUserName')||{}).textContent||'').trim().replace(/^أ\.\s*/,''),av=(($('headerUserAvatar')||{}).textContent||'').trim(),role='',ph='';
+    try{role=currentUser&&currentUser.role}catch(e){}
+    try{ph=(typeof userPhoto==='function'&&currentUser)?userPhoto(currentUser):''}catch(e){}
+    var RL={admin:'مدير النظام 👑',secretary:'سكرتارية',therapist:'أخصائي',parent:'ولي أمر'};
+    var rl=RL[role]||(($('headerUserRoleBadge')||{}).textContent||'').trim(),lg=window.SU_APP_LOGO||window.SU_HEADER_LOGO||'';
+    var P=function(d){return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+d+'</svg>'};
+    var I={home:P('<path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/>'),users:P('<circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.5"/><path d="M17 14c2.5 0 4 1.8 4 4"/>'),
+      cal:P('<rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M8 3v4M16 3v4M3.5 10h17M9 15l2 2 4-4"/>'),clip:P('<rect x="5" y="4" width="14" height="17" rx="2.5"/><path d="M9 4h6v3H9zM9 12h6M9 16h4"/>'),
+      bolt:P('<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>'),wallet:P('<path d="M4 7a2 2 0 012-2h11v3"/><rect x="3" y="7" width="18" height="13" rx="3"/><path d="M16 13.5h2"/>'),
+      file:P('<path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5M10 13h6M10 17h4"/>'),bag:P('<path d="M5 8h14l-1 12H6z"/><path d="M9 8V6a3 3 0 016 0v2"/>'),
+      staff:P('<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 3-6 6.5-6s6.5 2.4 6.5 6M19 8v6M16 11h6"/>'),gear:P('<circle cx="12" cy="12" r="3.2"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/>'),
+      cam:P('<path d="M4 8h3l1.5-2h7L17 8h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>'),out:P('<path d="M10 4H5v16h5M15 8l4 4-4 4M19 12H9"/>'),x:P('<path d="M6 6l12 12M18 6L6 18"/>'),dot:P('<circle cx="12" cy="12" r="3"/>')};
+    var M={dashboard:['home','p'],myappts:['cal','b'],followup:['clip','o'],secretary:['clip','g'],calendar:['cal','p'],myearn:['wallet','g'],clients:['users','g'],sessions:['cal','b'],activities:['bolt','o'],invoices:['file','p'],payments:['wallet','g'],purchases:['bag','o'],staff:['staff','b'],settings:['gear','b'],photos:['cam','p'],'side-quick-tools':['bolt','o']};
+    function row(id,lb,on,key,fn){var m=M[key]||['dot','p'];return '<button type="button" class="sum-row sd-row'+(on?' on':'')+'" '+(fn?'data-fn="'+fn+'"':'data-b="'+esc(id)+'"')+'><span class="sd-ic c-'+m[1]+'">'+I[m[0]]+'</span><span class="sd-lb">'+esc(lb)+'</span><span class="sd-ch">'+CH+'</span></button>'}
+    var h='<div class="sd-scrim" data-back></div><aside class="sd-panel"><div class="sd-head">'+(lg?'<img class="sd-logo" alt="" src="'+lg+'">':'<b class="sd-t">القائمة</b>')+'<button type="button" class="sd-x" data-back aria-label="إغلاق القائمة">'+I.x+'</button></div><div class="sd-body">';
+    h+='<div class="sd-user"><div class="sd-hi">أهلاً <b>'+esc(nm)+'</b><small>'+esc(rl)+'</small></div><span class="sd-av">'+(ph?'<img alt="" src="'+esc(ph)+'">':esc(av||nm.charAt(0)))+'<i></i></span></div>';
+    var first=true;
     [].forEach.call(document.querySelectorAll('#sideNav .side-group'),function(g){
       var bs=[].filter.call(g.querySelectorAll('.side-tab'),vis);if(!bs.length)return;
-      var t=g.querySelector('.side-group-title');
-      h+='<div class="sum-sec">'+esc(t?t.textContent.trim():'أدوات')+'</div><div class="sum-card">';
-      bs.forEach(function(b){var ic=b.querySelector('.i3d'),lb=b.querySelector('.side-label');
-        h+='<button type="button" class="sum-row'+(b.classList.contains('active')?' on':'')+'" data-b="'+esc(b.id)+'"><span class="sum-ic">'+(ic?ic.innerHTML:'•')+'</span><span class="sum-lb">'+esc(lb?lb.textContent.trim():(b.title||b.id))+'</span><span class="sum-ch">'+CH+'</span></button>'});
+      var t=g.querySelector('.side-group-title'),tt=t?t.textContent.trim():'أدوات';if(tt==='الإدارة')tt='إدارة النظام';
+      h+='<div class="sd-sec'+(first?' first':'')+'">'+(first&&g.dataset.g==='main'?'':'<span>'+esc(tt)+'</span>');
+      first=false;
+      bs.forEach(function(b){var lb=b.querySelector('.side-label');h+=row(b.id,lb?lb.textContent.trim():(b.title||b.id),b.classList.contains('active'),b.id.replace('side-nav-',''))});
       h+='</div>'});
-    h+='</div>';
+    h+='<div class="sd-sec"><span>الدعم والمساعدة</span>'+row('','إعدادات حسابي',false,'settings','suGearOpen')+'</div>';
+    h+='</div><div class="sd-foot"><button type="button" class="sum-row sd-out" data-fn="handleLogout">'+I.out+'<span>تسجيل الخروج</span></button></div></aside>';
     page.innerHTML=h;
+    /* الأحجام كلها بـ em: بنصغّر الخط لحد ما كل الأقسام تظهر من غير سكرول */
+    var pn=page.querySelector('.sd-panel'),bd=page.querySelector('.sd-body');
+    if(pn&&bd){var f=16;pn.style.fontSize=f+'px';while(bd.scrollHeight>bd.clientHeight+1&&f>8.5){f-=.5;pn.style.fontSize=f+'px'}}
   }
   function openMenu(){
     if(menuOpen)return;build();page.scrollTop=0;page.classList.add('open');document.documentElement.classList.add('su-menu-open');menuOpen=true;
@@ -14451,6 +14540,12 @@ html.su-dark .cn-link:hover{color:#a5b4fc;background:rgba(165,180,252,.12)}
       if (lum(a.sideColor) > 0.55) css += 'html body #sideNav .side-tab,html body #sideNav .side-label,html body #sideNav .side-group-title,html body #sideNav .side-collapse button,html body #sideNav .side-user *{color:#334155!important}'
         + 'html body #sideNav .side-tab:hover{background:rgba(0,0,0,.06)!important}html body #sideNav .side-tab.active,html body #sideNav .side-tab.active .side-label{color:#fff!important}html body #sideNav .side-user{background:rgba(0,0,0,.05)!important}';
     }
+    // [SD] القائمة الجانبية على الموبايل بتتلوّن بنفس لون الشريط الجانبي، والغامق بيقلب الأيقونات والكلام لأبيض فاتح
+    if (ok(a.sideColor)) {
+      var sdv = '--sd-bg:' + a.sideColor;
+      if (lum(a.sideColor) <= 0.55) sdv += ';--sd-fg:#fff;--sd-fg2:rgba(255,255,255,.68);--sd-line:rgba(255,255,255,.15);--sd-hov:rgba(255,255,255,.11);--sd-sh:rgba(0,0,0,.32);--sd-sh2:rgba(0,0,0,.35);--sd-psh:rgba(0,0,0,.5);--sd-pb:rgba(255,255,255,.09);--sd-icbg:rgba(255,255,255,.13);--sd-icfg:#f5f3ff;--sd-actbg:rgba(255,255,255,.18);--sd-actfg:#fff;--sd-acttile:rgba(255,255,255,.26);--sd-ch:rgba(255,255,255,.72);--sd-xbg:rgba(255,255,255,.15);--sd-xfg:#fff;--sd-avbg:rgba(255,255,255,.16);--sd-avfg:#fff;--sd-outbg:rgba(255,99,132,.2);--sd-outfg:#ffc7d3;--sd-logobg:#fff;--sd-logopad:.2em .55em';
+      css += 'html body #suMenuPage{' + sdv + '}';
+    }
     css += icoRules(a.icon, 'html body #sideNav');
     // 5) لون خلفية البروفيل (الأخضر)
     if (ok(a.heroColor)) {
@@ -14563,7 +14658,7 @@ html.su-dark .cn-link:hover{color:#a5b4fc;background:rgba(165,180,252,.12)}
     return '<button type="button" ' + tg(path) + ' data-v="' + (!on) + '" class="su-adv-seg px-3 py-1.5 rounded-lg border font-bold ' + (on ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white text-slate-500 border-slate-300') + '">' + (on ? '✓ ' : '✕ ') + label + '</button>';
   }
   function sec(title, body) { return '<div class="space-y-3 border-t pt-5"><h3 class="font-extrabold text-slate-900 text-sm">' + title + '</h3>' + body + '</div>'; }
-  var SIDE_PRE = ['#1e1b4b', '#0f172a', '#14532d', '#7f1d1d', '#334155', '#ffffff', '#f1f5f9'];
+  var SIDE_PRE = ['#4c1d95', '#6d28d9', '#1e1b4b', '#0f172a', '#14532d', '#7f1d1d', '#334155', '#ffffff', '#f1f5f9'];
   var HERO_PRE = ['#0f766e', '#16a34a', '#2563eb', '#7c3aed', '#be123c', '#ea580c', '#334155'];
   function preset(target, list) { return '<div class="flex gap-1.5 flex-wrap">' + list.map(function (c) { return '<button type="button" ' + target + ' data-v="' + c + '" class="su-adv-seg w-7 h-7 rounded-full border-2 border-slate-300 hover:scale-110 transition" style="background:' + c + '" title="' + c + '"></button>'; }).join('') + '</div>'; }
 
@@ -14599,7 +14694,7 @@ html.su-dark .cn-link:hover{color:#a5b4fc;background:rgba(165,180,252,.12)}
         + '<div class="space-y-1"><span class="font-bold text-slate-700">البولد (الخط الغليظ):</span>' + seg(tg('bold'), d.bold, [['default', 'كما هو'], ['light', 'مخفّف'], ['none', 'بدون بولد خالص'], ['all', 'كله بولد']]) + '</div>'
         + '<div class="text-[11px] font-bold text-slate-500">لو مستخدم غيّر حجم الخط من «👤 حسابي» اختياره الشخصي هو اللي بيمشي عنده.</div>')
       + sec('🎛️ ألوان الشريطين',
-        '<div class="grid md:grid-cols-2 gap-5"><div class="space-y-2"><div class="font-bold text-slate-700">الشريط الجانبي</div>' + clr(tg('sideColor'), d.sideColor, 'اللون') + preset(tg('sideColor'), SIDE_PRE) + '</div>'
+        '<div class="grid md:grid-cols-2 gap-5"><div class="space-y-2"><div class="font-bold text-slate-700">الشريط / القائمة الجانبية <span class="text-[11px] font-normal text-slate-400">(لو اللون غامق الأيقونات والكلام بيبقوا أبيض تلقائي)</span></div>' + clr(tg('sideColor'), d.sideColor, 'اللون') + preset(tg('sideColor'), SIDE_PRE) + '</div>'
         + '<div class="space-y-2"><div class="font-bold text-slate-700">الشريط العلوي</div>' + clr(tg('topColor'), d.topColor, 'اللون') + preset(tg('topColor'), SIDE_PRE) + '</div></div>'
         + '<div class="text-[11px] font-bold text-slate-500">لو سبت اللون فاضي (✕ إلغاء) بيرجع للون النظام الأساسي. الكتابة بتتحوّل لغامق تلقائي لو اخترت لون فاتح.</div>')
       + sec('🔷 أيقونات الشريط الجانبي',
@@ -14916,5 +15011,95 @@ html.su-dark body #sideNav .side-collapse button{background:rgba(167,139,250,.12
 }
 
 </style>
+<script id="su-mdash">
+/* [MDASH] داشبورد الموبايل (مدير/سكرتارية): بيانات حقيقية من التطبيق، والباقي بيفضل تحته زي ما هو */
+(function () {
+  var MQ = window.matchMedia('(max-width:820px)');
+  var N = function (v) { return Number(v || 0).toLocaleString('en-US'); };
+  var E = function (s) { return typeof escH === 'function' ? escH(String(s == null ? '' : s)) : String(s == null ? '' : s).replace(/[&<>"']/g, ''); };
+  var day = function (d) { return String(d || '').replace(/\//g, '-').slice(0, 10); };
+  var ms = function (d) { return Date.parse(d + 'T12:00:00Z'); };
+  var prevYm = function (ym) { var y = +ym.slice(0, 4), m = +ym.slice(5, 7) - 1; if (m < 1) { y--; m = 12; } return y + '-' + String(m).padStart(2, '0'); };
+  var chip = function (d, goodUp, unit) {
+    if (d == null) return '';
+    var up = d > 0, good = d === 0 ? true : (up === goodUp), c = d === 0 ? 'z' : (good ? 'g' : 'r');
+    return '<span class="md-chip ' + c + '">' + (d === 0 ? '' : '<b>' + (up ? '↑' : '↓') + '</b>') + (d > 0 ? '+' : '') + N(d) + (unit || '') + '</span>';
+  };
+  function stats() {
+    var cur = todayCairo(), ym = cur.slice(0, 7), pm = prevYm(ym), yd = new Date(ms(cur) - 864e5).toISOString().slice(0, 10);
+    var clients = state.clients.filter(function (c) { return matchBranch(c.branch); });
+    var active = clients.filter(function (c) { return c.status === 'Active'; });
+    var sess = state.sessions.filter(function (s) { return matchBranch(dashSessBranch(s)); });
+    var pays = state.payments.filter(function (p) { return matchBranch(p.branch); });
+    var paidOf = function (cid, m) { return pays.reduce(function (a, p) { return a + (String(p.clientId) === String(cid) && (cpNormMonth(p.date) === m || cpNormMonth(p.month) === m) ? (+p.amount || 0) : 0); }, 0); };
+    var unpaid = function (m) { var n = 0; clients.forEach(function (c) { try { var i = calculateClientInvoice(c.id, m); if (i && i.totalNetDue - paidOf(c.id, m) > 0.5) n++; } catch (e) {} }); return n; };
+    var sum = function (m) { return pays.reduce(function (a, p) { return a + (cpNormMonth(p.date) === m || cpNormMonth(p.month) === m ? (+p.amount || 0) : 0); }, 0); };
+    var st = { students: active.length, newStu: clients.filter(function (c) { return cpNormMonth(c.startDate) === ym; }).length };
+    st.today = sess.filter(function (s) { return day(s.date) === cur; }).length;
+    st.dToday = st.today - sess.filter(function (s) { return day(s.date) === yd; }).length;
+    st.unpaid = unpaid(ym); st.dUnpaid = st.unpaid - unpaid(pm);
+    st.paid = sum(ym); var pp = sum(pm); st.pct = pp > 0 ? Math.round((st.paid - pp) / pp * 100) : null;
+    var W = [0, 1, 2, 3].map(function () { return { ev: 0, gr: 0, in: 0, ab: 0 }; });
+    var A = { att: 0, ab: 0, exc: 0 };
+    sess.forEach(function (s) {
+      var d = day(s.date), df = Math.floor((ms(cur) - ms(d)) / 864e5), ab = /^(CAN|SDE|TCA)$/.test(s.status);
+      if (df >= 0 && df <= 27 && s.status !== 'SCHEDULED') { var w = W[3 - Math.floor(df / 7)], ty = String(s.type || ''); if (ab) w.ab++; else if (/تقييم/.test(ty)) w.ev++; else if (/جماع/.test(ty)) w.gr++; else w.in++; }
+      if (cpNormMonth(s.date) === ym) { if (s.status === 'ATT') A.att++; else if (ab) A.ab++; else if (s.status === 'EXC') A.exc++; }
+    });
+    st.W = W; st.A = A; return st;
+  }
+  var I = {
+    users: '<path d="M9 11a3 3 0 100-6 3 3 0 000 6zM3 20c0-3.3 2.7-6 6-6s6 2.7 6 6M17 10a2.4 2.4 0 100-4.8M17 14c2.5 0 4 1.8 4 4.5"/>',
+    cal: '<rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M8 3v4M16 3v4M3.5 10h17M8.5 14h.01M12 14h.01M15.5 14h.01M8.5 17h.01M12 17h.01"/>',
+    wallet: '<path d="M4 7a2 2 0 012-2h11v3"/><rect x="3" y="7" width="18" height="13" rx="3"/><path d="M16 13.5h2"/>',
+    bars: '<path d="M6 20V11M12 20V5M18 20v-6"/>', day: '<rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M8 3v4M16 3v4M3.5 10h17"/>'
+  };
+  var ic = function (k, w) { return '<svg viewBox="0 0 24 24" width="' + (w || 24) + '" height="' + (w || 24) + '" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + I[k] + '</svg>'; };
+  function chart(W) {
+    var mx = 10; W.forEach(function (w) { mx = Math.max(mx, w.ev, w.gr, w.in, w.ab); }); mx = Math.ceil(mx / 10) * 10;
+    var cols = ['#22c55e', '#7c3aed', '#3b82f6', '#f59e0b'], k = ['ev', 'gr', 'in', 'ab'], y = '', g = '', x = '', t;
+    for (t = 0; t <= 4; t++) y += '<span style="bottom:' + (t * 25) + '%">' + (mx * t / 4) + '</span>';
+    for (t = 1; t <= 4; t++) g += '<i class="md-gl" style="bottom:' + (t * 25) + '%"></i>';
+    W.forEach(function (w, i) { g += '<div class="md-g">' + k.map(function (key, j) { return '<s class="md-b" style="height:' + (100 * w[key] / mx) + '%;background:' + cols[j] + '"></s>'; }).join('') + '</div>'; x += '<span>الأسبوع ' + (i + 1) + '</span>'; });
+    return '<div class="md-chart"><div class="md-y">' + y + '</div><div class="md-area">' + g + '</div></div><div class="md-xl">' + x + '</div>';
+  }
+  function donut(A) {
+    var tot = A.att + A.ab + A.exc, r = 52, C = 2 * Math.PI * r, off = 0, seg = '';
+    [[A.att, '#10b981'], [A.ab, '#f43f5e'], [A.exc, '#f59e0b']].forEach(function (x) { if (!x[0]) return; var l = C * x[0] / tot; seg += '<circle cx="70" cy="70" r="' + r + '" fill="none" stroke="' + x[1] + '" stroke-width="15" stroke-dasharray="' + l + ' ' + (C - l) + '" stroke-dashoffset="' + (-off) + '" transform="rotate(-90 70 70)"/>'; off += l; });
+    return '<svg class="md-donut" viewBox="0 0 140 140"><circle cx="70" cy="70" r="' + r + '" fill="none" stroke="#ece9f5" stroke-width="15"/>' + seg + '<text x="70" y="70" text-anchor="middle" font-size="26" font-weight="900" fill="#1f1547">' + (tot ? Math.round(A.att / tot * 100) : 0) + '%</text><text x="70" y="92" text-anchor="middle" font-size="11.5" fill="#3b3768">من ' + tot + ' جلسة</text></svg>';
+  }
+  window.suMDashRender = function () {
+    var el = document.getElementById('suMDash'); if (!el) return;
+    var role = ''; try { role = currentUser && currentUser.role; } catch (e) {}
+    var sec = document.getElementById('tab-dashboard');
+    if (!MQ.matches || (role !== 'admin' && role !== 'secretary')) { el.innerHTML = ''; if (sec && sec.classList) sec.classList.remove('su-md-on'); return; }
+    var s = stats(), nm = E(((document.getElementById('headerUserName') || {}).textContent || '').trim().replace(/^أ\.\s*/, '')), ph = '';
+    try { ph = userPhoto(currentUser) || ''; } catch (e) {}
+    var rl = role === 'admin' ? 'مدير النظام 👑' : 'سكرتارية';
+    var K = function (cls, ico, lb, num, sub, ch) { return '<div class="md-k ' + cls + '"><div class="md-kt"><span class="md-kl">' + lb + '</span><b class="md-kn">' + num + '</b><div class="md-kf"><span>' + sub + '</span>' + ch + '</div></div><span class="md-ki">' + ic(ico, 26) + '</span></div>'; };
+    var leg = [['#22c55e', 'تقييم'], ['#7c3aed', 'جلسة جماعية'], ['#3b82f6', 'جلسة فردية'], ['#f59e0b', 'غائب']].map(function (x) { return '<span><i style="background:' + x[0] + '"></i>' + x[1] + '</span>'; }).join('');
+    var row = function (c, lb, n) { return '<div class="md-ar"><i style="background:' + c + '"></i><span>' + lb + '</span><b>' + n + '</b></div>'; };
+    el.innerHTML = '<div class="md-top"><span class="md-av">' + (ph ? '<img alt="" src="' + E(ph) + '">' : E(nm.charAt(0))) + '<i></i></span><div class="md-hi">أهلاً <b>' + nm + '</b><small>' + rl + '</small></div></div>'
+      + '<div class="md-hero"><div class="md-ht"><small>مرحباً 👑</small><b>إليك نظرة سريعة</b><span>على أداء المركز اليوم</span></div><svg class="md-hart" viewBox="0 0 140 110" aria-hidden="true"><rect x="22" y="14" width="74" height="86" rx="10" fill="#fff" fill-opacity=".22"/><rect x="40" y="8" width="38" height="14" rx="6" fill="#fff" fill-opacity=".45"/><rect x="34" y="62" width="9" height="26" rx="2" fill="#fff" fill-opacity=".55"/><rect x="50" y="48" width="9" height="40" rx="2" fill="#fff" fill-opacity=".55"/><rect x="66" y="56" width="9" height="32" rx="2" fill="#fff" fill-opacity=".55"/><rect x="82" y="38" width="9" height="50" rx="2" fill="#fff" fill-opacity=".55"/><path d="M62 52l18-16 12 10 22-24" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M104 22h14v14" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>'
+      + '<div class="md-grid">' + K('c1', 'users', 'عدد الطلاب', N(s.students), 'هذا الشهر', chip(s.newStu, true))
+      + K('c2', 'cal', 'جلسات اليوم', N(s.today), 'عن أمس', chip(s.dToday, true))
+      + K('c3', 'wallet', 'فواتير غير مسددة', N(s.unpaid), 'من الشهر الماضي', chip(s.dUnpaid, false))
+      + K('c4', 'wallet', 'إجمالي التحصيل', N(s.paid), 'عن الشهر الماضي', chip(s.pct, true, '%')) + '</div>'
+      + '<div class="md-card"><div class="md-ch"><span class="md-ct"><b>إحصائيات الجلسات</b><span class="md-ic">' + ic('bars', 20) + '</span></span><span class="md-pill">آخر 4 أسابيع</span></div>' + chart(s.W) + '<div class="md-leg">' + leg + '</div></div>'
+      + '<div class="md-card"><div class="md-ch"><span class="md-ct"><b>نسبة الحضور هذا الشهر</b><span class="md-ic">' + ic('day', 20) + '</span></span></div><div class="md-att">' + donut(s.A) + '<div class="md-al">' + row('#10b981', 'حضر', s.A.att) + row('#f43f5e', 'غائب', s.A.ab) + row('#f59e0b', 'اعتذار', s.A.exc) + '</div></div></div>';
+  };
+  function fit() {
+    var el = document.getElementById('suMDash'); if (!el || !el.firstChild) return;
+    var nav = document.querySelector('#mNav .pp-bar'), base = el.getBoundingClientRect().top + (window.pageYOffset || 0), lim = window.innerHeight - 84;
+    if (nav) { var r = nav.getBoundingClientRect(); if (r.height > 0 && r.top > 0) lim = r.top - 12; }
+    var avail = lim - base - 4, f = 16; el.style.fontSize = f + 'px';
+    while (el.offsetHeight > avail && f > 8) { f -= .25; el.style.fontSize = f + 'px'; }
+  }
+  var _r = window.suMDashRender;
+  window.suMDashRender = function () { _r(); var sec = document.getElementById('tab-dashboard'), el = document.getElementById('suMDash'); if (sec && sec.classList && el) sec.classList.toggle('su-md-on', !!el.firstChild); if (window.requestAnimationFrame) { requestAnimationFrame(fit); setTimeout(fit, 250); } };
+  window.addEventListener('resize', function () { try { fit(); } catch (e) {} });
+  MQ.addEventListener && MQ.addEventListener('change', function () { try { window.suMDashRender(); } catch (e) {} });
+})();
+</script>
 </body>
 </html>
