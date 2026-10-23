@@ -5052,6 +5052,7 @@ window.suMfaOpen=async function(){
     state.evaluations = d.evaluations || [];
     state.notebooks = d.notebooks || {};
     state.avatars = d.avatars || [];
+    state.commResponses = d.commResponses || {};   // متابعة معالم التواصل
     state.feedingResponses = d.feedingResponses || {};   // متابعة مهارات الأكل والبلع
     if (d.settings && d.settings.permissions) state.settings = d.settings;
     const ids = (d.client_ids || []).map(String);
@@ -10212,11 +10213,12 @@ Object.assign(I18N_EN, Object.assign({"قبل 24س": "before 24h", "اعتذار
 
   // ---- Parent portal (child-centred view, no accounting) ----
   let _ppChild = null, _ppTab = 'home';
-  var _ppSub = 'sessions', _ppSheet = null;
+  var _ppSub = 'sessions', _ppSheet = null, _ppPerf = '';
   function ppSet(k, v) {
     if (k === 'child') _ppChild = v;
     else if (k === 'sub') _ppSub = v;
-    else { _ppTab = v; _ppSheet = null; }
+    else if (k === 'perf') _ppPerf = v;
+    else { _ppTab = v; _ppSheet = null; _ppPerf = ''; }
     renderParentPortal();
     if (k === 'tab') { const pe = document.getElementById('parentPortal'); if (pe) pe.scrollTop = 0; }
   }
@@ -10283,7 +10285,7 @@ Object.assign(I18N_EN, Object.assign({"قبل 24س": "before 24h", "اعتذار
     const badge = s => { const k = cpStatusKey(s.status), v = CP_STATUS[k]; return `<span class="text-[11px] font-black px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">${actEsc(v ? v[0] : k)}</span>`; };
     const row = s => `<div class="flex items-center gap-2 border-b py-2 text-xs"><b class="font-mono">${actEsc(s.date || '')}</b><span class="text-slate-500">${formatTime12(s.time)}</span><span class="text-slate-500">${actEsc(s.type || '')}</span><span class="text-slate-400">${actEsc(th(s))}</span><span class="mr-auto">${badge(s)}</span></div>`;
     const comments = sess.filter(s => (s.parentComment || '').trim());
-    const evals = (state.evaluations || []).concat(window.suFeedEvals ? window.suFeedEvals(c.id) : []).filter(e => String(e.clientId) === String(c.id) && e.parentVisible !== false).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+    const evals = (state.evaluations || []).concat(window.suFeedEvals ? window.suFeedEvals(c.id) : [], window.suCommEvals ? window.suCommEvals(c.id) : []).filter(e => String(e.clientId) === String(c.id) && e.parentVisible !== false).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
     const d = cpBuildData(c), cur = today.slice(0, 7);
     const curRow = d.rows.find(r => r.month === cur && r.inv);
     const curRem = curRow ? Math.max(0, curRow.inv.remainingBalance) : 0;
@@ -10339,14 +10341,23 @@ Object.assign(I18N_EN, Object.assign({"قبل 24س": "before 24h", "اعتذار
       let streak = 0; for (const s of sess) { const k = cpStatusKey(s.status); if (k === 'SCH' || k === 'TCA') continue; if (k === 'ATT') streak++; else break; }
       const commentsHtml = comments.length ? comments.slice(0, 12).map(s => `<div class="flex gap-3 items-start"><div class="w-9 h-9 shrink-0 rounded-full bg-cyan-100 text-cyan-800 font-black grid place-items-center text-sm">${actEsc((th(s) || 'أ').replace(/^أ\.\s*/, '').trim().charAt(0))}</div><div class="pp-bubble p-3 flex-1"><div class="text-[11px] font-black text-cyan-800 mb-1">${actEsc(th(s) || 'الأخصائي')} <span class="font-mono font-bold text-slate-400">· ${actEsc(s.date || '')}</span></div><div class="text-sm text-slate-800 leading-relaxed">${ppRich(s.parentComment)}</div></div></div>`).join('') : '<div class="text-center text-slate-400 text-sm py-6">لسه مفيش تعليقات من الأخصائي. أول ما يكتب تعليق بعد جلسة هيظهر هنا 💬</div>';
       const evHtml = evals.length ? evals.map(e => { const sc = Number(e.score), mx = Number(e.max) || 100, has = !isNaN(sc) && e.score !== '' && e.score != null, p = has ? Math.max(0, Math.min(100, Math.round(sc / mx * 100))) : 0, col = p >= 75 ? '#059669' : p >= 50 ? '#f59e0b' : '#e11d48';
-        return `<div class="rounded-2xl border p-4 bg-white pp-pop"><div class="flex items-center gap-2"><div class="text-2xl">${e.kind === 'test' ? '📝' : e.kind === 'feed' ? '🍽️' : '📊'}</div><div class="min-w-0"><div class="font-black text-sm text-slate-800 truncate">${actEsc(e.title || 'تقييم أداء')}</div><div class="text-[11px] text-slate-400 font-bold">${actEsc(e.date || '')}${e.therapistId ? ' · ' + actEsc(th({ therapistId: e.therapistId })) : ''}</div></div>${has ? `<div class="mr-auto font-mono font-black" style="color:${col}">${sc}<span class="text-slate-400 text-xs">/${mx}</span></div>` : ''}</div>${has ? `<div class="h-2 rounded-full bg-slate-100 mt-3 overflow-hidden"><div style="width:${p}%;background:${col}" class="h-full"></div></div>` : ''}${e.notes ? `<div class="text-xs text-slate-600 mt-3 leading-relaxed">${ppRich(e.notes)}</div>` : ''}</div>`; }).join('') : '<div class="rounded-2xl border border-dashed p-6 text-center text-slate-400 text-sm bg-white">لما الأخصائي يرسل تقييم أداء أو نتيجة اختبار هيظهر هنا ✨</div>';
-      body = `<div class="grid md:grid-cols-3 gap-3"><div class="bg-white rounded-2xl border p-4 flex items-center gap-4">${ring(rate, 84, 9, '#059669', '#e2e8f0', `<b class="text-lg text-slate-800">${rate}%</b>`)}<div><div class="font-black text-sm text-slate-800">نسبة الحضور</div><div class="text-[11px] text-slate-500 font-bold">${cnt.ATT} من ${done} جلسة</div>${streak >= 2 ? `<div class="mt-1 text-[11px] font-black text-amber-600">🔥 ${streak} جلسات حضور متتالية</div>` : ''}</div></div>
+        return `<div class="rounded-2xl border p-4 bg-white pp-pop"><div class="flex items-center gap-2"><div class="text-2xl">${e.kind === 'test' ? '📝' : e.kind === 'feed' ? '🍽️' : e.kind === 'comm' ? '🗣️' : '📊'}</div><div class="min-w-0"><div class="font-black text-sm text-slate-800 truncate">${actEsc(e.title || 'تقييم أداء')}</div><div class="text-[11px] text-slate-400 font-bold">${actEsc(e.date || '')}${e.therapistId ? ' · ' + actEsc(th({ therapistId: e.therapistId })) : ''}</div></div>${has ? `<div class="mr-auto font-mono font-black" style="color:${col}">${sc}<span class="text-slate-400 text-xs">/${mx}</span></div>` : ''}</div>${has ? `<div class="h-2 rounded-full bg-slate-100 mt-3 overflow-hidden"><div style="width:${p}%;background:${col}" class="h-full"></div></div>` : ''}${e.notes ? `<div class="text-xs text-slate-600 mt-3 leading-relaxed">${ppRich(e.notes)}</div>` : ''}</div>`; }).join('') : '<div class="rounded-2xl border border-dashed p-6 text-center text-slate-400 text-sm bg-white">لما الأخصائي يرسل تقييم أداء أو نتيجة اختبار هيظهر هنا ✨</div>';
+      const attHtml = `<div class="grid md:grid-cols-3 gap-3"><div class="bg-white rounded-2xl border p-4 flex items-center gap-4">${ring(rate, 84, 9, '#059669', '#e2e8f0', `<b class="text-lg text-slate-800">${rate}%</b>`)}<div><div class="font-black text-sm text-slate-800">نسبة الحضور</div><div class="text-[11px] text-slate-500 font-bold">${cnt.ATT} من ${done} جلسة</div>${streak >= 2 ? `<div class="mt-1 text-[11px] font-black text-amber-600">🔥 ${streak} جلسات حضور متتالية</div>` : ''}</div></div>
           <div class="pp-grid3 md:col-span-2">${kpi('✅', 'حضر', cnt.ATT, 'text-emerald-600')}${kpi('📨', 'اعتذار', cnt.EXC + cnt.SDE, 'text-amber-600')}${kpi('❌', 'غياب', cnt.CAN, 'text-rose-600')}</div></div>
-        <div class="bg-white rounded-2xl border p-4"><div class="font-black text-sm text-slate-800 mb-3">📅 الحضور شهرياً</div><div class="flex items-end gap-2">${bars}</div></div>
-        <div class="bg-white rounded-2xl border p-4 space-y-4"><div class="font-black text-sm text-slate-800">💬 تعليقات الأخصائي</div>${commentsHtml}</div>
-        <div class="space-y-3"><div class="font-black text-sm text-slate-800 px-1">📊 تقييمات الأداء والاختبارات</div>${evHtml}</div>`;
+        <div class="bg-white rounded-2xl border p-4"><div class="font-black text-sm text-slate-800 mb-3">📅 الحضور شهرياً</div><div class="flex items-end gap-2">${bars}</div></div>`;
+      const cmHtml = `<div class="bg-white rounded-2xl border p-4 space-y-4"><div class="font-black text-sm text-slate-800">💬 تعليقات الأخصائي</div>${commentsHtml}</div>`;
+      const evSection = `<div class="space-y-3"><div class="font-black text-sm text-slate-800 px-1">📊 تقييمات الأداء والاختبارات</div>${evHtml}</div>`;
+      const feedN = evals.filter(e => e.kind === 'feed').length, commN = evals.filter(e => e.kind === 'comm').length;
+      const folder = (id, grad, ico, title, sub, badge) => `<button onclick="ppSet('perf','${id}')" class="pp-folder pp-pop" style="--fg:${grad}"><span class="pp-folder-tab"></span><span class="pp-folder-in"><span class="pp-folder-ico">${ico}</span><span class="min-w-0 flex-1"><span class="pp-folder-t">${title}</span><span class="pp-folder-s">${sub}</span></span><span class="pp-folder-bd">${badge}</span><span class="pp-folder-go">‹</span></span></button>`;
+      const backBtn = (lbl, to) => `<button onclick="ppSet('perf','${to || ''}')" class="pp-folder-back">→ رجوع</button><div class="pp-folder-ttl">${lbl}</div>`;
+      if (_ppPerf === 'att') body = backBtn('📅 تقييم أداء الحضور') + attHtml;
+      else if (_ppPerf === 'feed') body = backBtn('🍽️ تقييم الأكل والبلع', 'eval') + (window.suFeedHtml ? window.suFeedHtml(c) : '');
+      else if (_ppPerf === 'comm') body = backBtn('🗣️ تقييم التواصل', 'eval') + (window.suCommHtml ? window.suCommHtml(c) : '');
+      else if (_ppPerf === 'eval') body = backBtn('📊 تقييم الأداء والاختبارات') + `<div class="pp-feedrow"><button onclick="ppSet('perf','feed')" class="pp-feedbtn">🍽️ تقييم الأكل والبلع${feedN ? ' <i>✓</i>' : ''}</button><button onclick="ppSet('perf','comm')" class="pp-feedbtn pp-commbtn">🗣️ تقييم التواصل${commN ? ' <i>✓</i>' : ''}</button></div><div class="space-y-3 mt-3">${evSection}${cmHtml}</div>`;
+      else body = `<div class="pp-folders">${folder('att', 'linear-gradient(145deg,#10b981,#0d9488)', '📅', 'تقييم أداء الحضور', `نسبة الحضور ${rate}% · ${cnt.ATT} من ${done} جلسة`, rate + '%')}${folder('eval', 'linear-gradient(145deg,#8b5cf6,#4f46e5)', '📊', 'تقييم الأداء والاختبارات', `${evals.length ? evals.length + ' تقييم' : 'لا توجد تقييمات بعد'}${(feedN || commN) ? ' · يشمل ' + [feedN ? 'الأكل والبلع 🍽️' : '', commN ? 'التواصل 🗣️' : ''].filter(Boolean).join(' و') : ' · الأكل والبلع والتواصل والاختبارات'}`, String(evals.length))}</div>`;
+
     } else if (_ppTab === 'book') {
-      const seg = `<div class="pp-seg"><button class="${_ppSub === 'sessions' ? 'on' : ''}" onclick="ppSet('sub','sessions')">📓 الكراسة</button><button class="${_ppSub === 'acts' ? 'on' : ''}" onclick="ppSet('sub','acts')">🧩 أنشطة المنزل${acts.length ? ' (' + acts.length + ')' : ''}</button><button class="${_ppSub === 'notes' ? 'on' : ''}" onclick="ppSet('sub','notes')">📝 مفكرتي</button><button class="${_ppSub === 'feed' ? 'on' : ''}" onclick="ppSet('sub','feed')">🍽️ الأكل والبلع</button></div>`;
+      const seg = `<div class="pp-seg"><button class="${_ppSub === 'sessions' ? 'on' : ''}" onclick="ppSet('sub','sessions')">📓 الكراسة</button><button class="${_ppSub === 'acts' ? 'on' : ''}" onclick="ppSet('sub','acts')">🧩 أنشطة المنزل${acts.length ? ' (' + acts.length + ')' : ''}</button><button class="${_ppSub === 'notes' ? 'on' : ''}" onclick="ppSet('sub','notes')">📝 مفكرتي</button></div>`;
       let inner = '';
       if (_ppSub === 'acts') inner = acts.length ? `<div class="grid sm:grid-cols-2 gap-3">${acts.map(a => caCard(c.id, a, false)).join('')}</div>` : '<div class="bg-white rounded-2xl border p-8 text-center text-slate-400">لم يتم تنزيل أنشطة منزلية بعد. سيظهر هنا ما يحدده الأخصائي.</div>';
       else if (_ppSub === 'notes') inner = ppNotesHtml(c);
@@ -14690,7 +14701,7 @@ function render(){var e=el();if(!e)return;
   else if(F.tab==='acct'){var cm=todayCairo().slice(0,7),ms=sess.filter(function(s){return cpNormMonth(s.date)===cm}),k=tdCount(ms),u=freshUser()||{},dn=k.ATT+k.CAN+k.EXC+k.SDE;
    var box=function(a,b,col){return'<div class="bg-white rounded-2xl p-3 text-center shadow-sm"><div class="text-2xl font-black '+col+'">'+a+'</div><div class="text-[11px] font-bold text-slate-500">'+b+'</div></div>'};
    sec='<div class="font-black text-sm mb-2">'+T('هذا الشهر')+'</div><div class="grid grid-cols-2 gap-2">'+box(k.ATT,T('حضر'),'text-emerald-600')+box(k.CAN+k.EXC+k.SDE,T('ملغية'),'text-rose-500')+box(k.SCH,T('محجوزة'),'text-sky-600')+box((dn?Math.round(k.ATT/dn*100):0)+'%',T('نسبة الحضور'),'text-teal-700')+'</div>'+(u.commissionPct!==''&&u.commissionPct!=null?'<div class="bg-white rounded-2xl p-3 mt-2 text-xs font-bold">'+T('نسبة العمولة')+': '+esc(u.commissionPct)+'%</div>':'')}
-  else{var ev=(state.evaluations||[]).concat(window.suFeedEvals?window.suFeedEvals(F.child):[]).filter(function(x){return String(x.clientId)===F.child}).sort(function(a,b){return (b.date||'').localeCompare(a.date||'')});
+  else{var ev=(state.evaluations||[]).concat(window.suFeedEvals?window.suFeedEvals(F.child):[],window.suCommEvals?window.suCommEvals(F.child):[]).filter(function(x){return String(x.clientId)===F.child}).sort(function(a,b){return (b.date||'').localeCompare(a.date||'')});
    sec=ev.length?ev.map(function(x){return'<div class="bg-white rounded-2xl p-3 mb-2 text-xs shadow-sm"><b class="font-mono">'+esc(x.date||'')+'</b><div class="text-slate-600 mt-1">'+esc(x.summary||x.notes||x.note||x.title||'')+'</div></div>'}).join(''):'<div class="text-center text-slate-400 font-bold p-8">'+T('لا توجد تقييمات')+'</div>'}
   var bb=function(id){return'<button onclick="thpSet(\'tab\',\''+id+'\')" class="pp-bar-btn'+(id===F.tab?' on':'')+'"><span class="pp-bar-ico" style="background:'+GR[id]+'">'+suNavIco(id,24)+'</span><span>'+T(BL[id])+'</span></button>'};
   h+=sec+'</div><div class="pp-bar-wrap"><div class="pp-bar-pos"><nav class="pp-bar">'+bb('perf')+bb('book')+'<div class="pp-bar-gap"></div>'+bb('cal')+bb('acct')+'</nav><button class="pp-logo-btn" onclick="thpMenu()" title="Menu"><img src="'+esc(window.SU_NAV_MASCOT||logo)+'" alt=""></button></div></div>';
@@ -16584,6 +16595,24 @@ html.su-dark{
 .fd-restx{font-size:12px;line-height:1.9;color:#6b6385;font-weight:700;margin-top:4px}
 .fd-resgo{margin-top:12px;width:100%;background:var(--rc,#6d3fd6);color:#fff;padding:11px;border-radius:12px;font-weight:900;font-size:13px}
 .fd-prog{font-size:13px;font-weight:800;color:#6b6385;text-align:center;line-height:1.9}
+.pp-folders{display:flex;flex-direction:column;gap:30px;padding:22px 2px 8px}
+.pp-folder{position:relative;display:block;width:100%;margin:0;padding:0;border:0;background:none;text-align:right;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .15s}
+.pp-folder:active{transform:scale(.98)}
+.pp-folder-tab{position:absolute;top:-18px;right:20px;width:44%;height:26px;border-radius:14px 14px 0 0;background:var(--fg);filter:brightness(.88)}
+.pp-folder-in{position:relative;overflow:hidden;display:flex;align-items:center;gap:14px;min-height:140px;padding:20px 18px;border-radius:10px 24px 24px 24px;background:var(--fg);color:#fff;box-shadow:0 12px 26px -10px rgba(30,20,80,.45)}
+.pp-folder-in::after{content:"";position:absolute;left:-30px;bottom:-40px;width:130px;height:130px;border-radius:50%;background:rgba(255,255,255,.14)}
+.pp-folder-ico{width:68px;height:68px;border-radius:20px;background:rgba(255,255,255,.22);display:grid;place-items:center;font-size:36px;flex-shrink:0;backdrop-filter:blur(2px)}
+.pp-folder-t{display:block;font-size:20px;font-weight:900;line-height:1.4}
+.pp-folder-s{display:block;font-size:12px;font-weight:700;opacity:.92;margin-top:4px;line-height:1.7}
+.pp-folder-bd{background:rgba(255,255,255,.25);border-radius:999px;padding:4px 12px;font-weight:900;font-size:14px;flex-shrink:0;position:relative;z-index:1}
+.pp-folder-go{font-size:28px;font-weight:900;opacity:.8;position:relative;z-index:1}
+.pp-folder-back{display:inline-block;margin-bottom:4px;padding:7px 14px;border-radius:999px;background:#fff;border:1px solid #e2e8f0;font-weight:900;font-size:12px;color:#475569}
+.pp-feedbtn{display:inline-flex;align-items:center;gap:6px;margin:2px 0 0;padding:7px 14px;border-radius:999px;background:#6d3fd6;color:#fff;font-weight:900;font-size:12px;box-shadow:0 4px 10px -4px rgba(109,63,214,.6)}
+.pp-feedbtn i{font-style:normal;background:#fff;color:#059669;border-radius:50%;width:16px;height:16px;display:grid;place-items:center;font-size:10px}
+.pp-feedrow{display:flex;flex-wrap:wrap;gap:8px}
+.pp-commbtn{background:#0d9488!important;box-shadow:0 4px 10px -4px rgba(13,148,136,.6)!important}
+.cm-en{display:inline-block;margin-right:6px;padding:2px 8px;border-radius:999px;background:#eef2ff;color:#4f46e5;font-size:10px;font-weight:800}
+.pp-folder-ttl{font-size:17px;font-weight:900;color:#1e293b;margin:8px 2px 4px}
 </style>
 <script id="su-feed-js">
 /* ===== متابعة مهارات الأكل والبلع (ولي الأمر) — مدمجة في كراسة المتابعة ===== */
@@ -16716,7 +16745,7 @@ html.su-dark{
         '<div><div class="fd-reslv">' + R.lv.icon + ' ' + esc(R.lv.label) + '</div><div class="fd-restx">' + R.c.consistent + ' مستمرة · ' + R.c.sometimes + ' أحيانًا · ' + R.c.not_observed + ' لم تُلاحظ' + (R.c.unsure ? ' · ' + R.c.unsure + ' غير متأكد' : '') + '</div></div></div>' +
         (R.rough ? '<div class="fd-restx">النتيجة تقريبية لأن عدد "غير متأكد" كبير.</div>' : '') +
         '<div class="fd-restx">✅ تمت إضافة هذه النتيجة إلى «تقييمات الأداء» ويراها الأخصائي. وهي للتوعية والمتابعة وليست تشخيصًا.</div>' +
-        '<button class="fd-resgo" onclick="ppSet(\'tab\',\'perf\')">عرض في تقييمات الأداء ←</button></div>';
+        '<button class="fd-resgo" onclick="ppSet(\'tab\',\'perf\');ppSet(\'perf\',\'eval\')">عرض في تقييمات الأداء ←</button></div>';
     } else {
       h += '<div class="fd-card fd-prog">📝 باقي <b>' + R.c.unset + '</b> مهارة في فئة ' + esc(b.label) + ' — أول ما تخلّصهم هتظهر النتيجة وتتضاف في تقييمات الأداء.</div>';
     }
@@ -16738,6 +16767,165 @@ html.su-dark{
     if (t.dataset.fdS) setStatus(cid, sid, t.dataset.fdS);
     else if (t.dataset.fdN) { var nf = card.querySelector('.fd-nf'); nf.classList.toggle('open'); _open[cid + ':' + sid] = nf.classList.contains('open'); }
     else if (t.dataset.fdSv) {
+      var cur = mine(cid)[sid], nf2 = card.querySelector('.fd-nf');
+      if (!cur) { toast('اختر حالة المهارة أولًا'); return; }
+      setStatus(cid, sid, cur.status, nf2.querySelector('input').value || null, nf2.querySelector('textarea').value.trim());
+    }
+  });
+})();
+</script>
+
+<script id="su-comm-js">
+/* ===== متابعة معالم التواصل (ولي الأمر) — مبنية على قائمة ASHA، بنفس فكرة الأكل والبلع ===== */
+(function () {
+  'use strict';
+  var MS = {"version": 1, "source": "ASHA Communication Milestones (صياغة عربية تثقيفية)", "groups": [{"id": "all", "label": "الكل"}, {"id": "listen", "label": "الاستماع والفهم"}, {"id": "speak", "label": "الكلام واللغة"}, {"id": "social", "label": "التفاعل الاجتماعي"}, {"id": "sounds", "label": "نطق الأصوات"}, {"id": "literacy", "label": "القراءة والكتابة المبكرة"}], "bands": [{"id": "c0", "label": "0-3 شهور", "source_label": "من الولادة إلى 3 أشهر", "min_months": 0, "max_months_exclusive": 4, "skills": [{"id": "c0_01", "order": 1, "group": "listen", "domain": "الاستماع والفهم", "text": "يستجيب للأصوات أو ينتبه إليها."}, {"id": "c0_02", "order": 2, "group": "social", "domain": "التفاعل الاجتماعي", "text": "يهدأ أو يبتسم عندما تتحدث معه."}, {"id": "c0_03", "order": 3, "group": "social", "domain": "التفاعل الاجتماعي", "text": "يتبادل معك إصدار الأصوات."}, {"id": "c0_04", "order": 4, "group": "speak", "domain": "الكلام واللغة", "text": "تختلف أصواته بحسب شعوره بالسعادة أو الانزعاج."}, {"id": "c0_05", "order": 5, "group": "speak", "domain": "الكلام واللغة", "text": "يصدر أصوات المناغاة مثل «أووو» و«آه» و«مممم»."}, {"id": "c0_06", "order": 6, "group": "social", "domain": "التفاعل الاجتماعي", "text": "يتعرف على الأشخاص المقربين وبعض الأشياء المألوفة."}, {"id": "c0_07", "order": 7, "group": "listen", "domain": "الاستماع والفهم", "text": "يلتفت أو ينظر نحو الأصوات أو الأشخاص الذين يتحدثون."}]}, {"id": "c1", "label": "4-6 شهور", "source_label": "من 4 إلى 6 أشهر", "min_months": 4, "max_months_exclusive": 7, "skills": [{"id": "c1_01", "order": 1, "group": "social", "domain": "التفاعل الاجتماعي", "text": "يقهقه ويضحك."}, {"id": "c1_02", "order": 2, "group": "social", "domain": "التفاعل الاجتماعي", "text": "يستجيب لتعبيرات الوجه."}, {"id": "c1_03", "order": 3, "group": "social", "domain": "التفاعل الاجتماعي", "text": "ينظر إلى الأشياء التي تثير اهتمامه ويتابعها بعينيه."}, {"id": "c1_04", "order": 4, "group": "listen", "domain": "الاستماع والفهم", "text": "يتفاعل مع الألعاب التي تصدر أصواتًا، مثل الأجراس أو الموسيقى."}, {"id": "c1_05", "order": 5, "group": "speak", "domain": "الكلام واللغة", "text": "يصدر أصواتًا أثناء اللعب أو عندما تكون أشياء في فمه."}, {"id": "c1_06", "order": 6, "group": "speak", "domain": "الكلام واللغة", "text": "يصدر أصوات حروف علة متنوعة، وقد يمزجها أحيانًا بصوت ساكن."}, {"id": "c1_07", "order": 7, "group": "speak", "domain": "الكلام واللغة", "text": "ينفخ شفتيه لإصدار صوت يشبه «بَررر»."}]}, {"id": "c2", "label": "7-9 شهور", "source_label": "من 7 إلى 9 أشهر", "min_months": 7, "max_months_exclusive": 10, "skills": [{"id": "c2_01", "order": 1, "group": "listen", "domain": "الاستماع والفهم", "text": "ينظر إليك عندما تنادي اسمه."}, {"id": "c2_02", "order": 2, "group": "listen", "domain": "الاستماع والفهم", "text": "يتوقف للحظة عندما تقول «لا»."}, {"id": "c2_03", "order": 3, "group": "speak", "domain": "الكلام واللغة", "text": "يناغي بسلاسل طويلة من الأصوات مثل «ماماماما» أو «بابابابا»."}, {"id": "c2_04", "order": 4, "group": "social", "domain": "التفاعل الاجتماعي", "text": "يبحث عن الأشخاص المقربين عندما يشعر بالانزعاج."}, {"id": "c2_05", "order": 5, "group": "social", "domain": "التفاعل الاجتماعي", "text": "يرفع ذراعيه ليُحمل."}, {"id": "c2_06", "order": 6, "group": "listen", "domain": "الاستماع والفهم", "text": "يتعرف على أسماء بعض الأشخاص والأشياء."}, {"id": "c2_07", "order": 7, "group": "social", "domain": "التفاعل الاجتماعي", "text": "يدفع الأشياء التي لا يريدها بعيدًا."}]}, {"id": "c3", "label": "10-12 شهر", "source_label": "من 10 إلى 12 شهرًا", "min_months": 10, "max_months_exclusive": 13, "skills": [{"id": "c3_01", "order": 1, "group": "social", "domain": "التفاعل الاجتماعي", "text": "يمد يده نحو الأشياء."}, {"id": "c3_02", "order": 2, "group": "social", "domain": "التفاعل الاجتماعي", "text": "يشير بإصبعه، ويلوح، ويُري الأشياء للآخرين أو يعطيها لهم."}, {"id": "c3_03", "order": 3, "group": "social", "domain": "التفاعل الاجتماعي", "text": "يقلد الإيماءات الاجتماعية ويبدأ بها، مثل إرسال القبلات أو لعبة الغميضة."}, {"id": "c3_04", "order": 4, "group": "speak", "domain": "الكلام واللغة", "text": "يحاول تقليد الأصوات التي تصدرها."}, {"id": "c3_05", "order": 5, "group": "social", "domain": "التفاعل الاجتماعي", "text": "يستمتع بالرقص."}, {"id": "c3_06", "order": 6, "group": "listen", "domain": "الاستماع والفهم", "text": "يستجيب لكلمات وعبارات بسيطة مثل «يلا باي باي» و«بص لماما»."}, {"id": "c3_07", "order": 7, "group": "speak", "domain": "الكلام واللغة", "text": "يقول كلمة أو كلمتين مثل «ماما» و«بابا» و«هاي» و«باي»."}]}, {"id": "c4", "label": "13-18 شهر", "source_label": "من 13 إلى 18 شهرًا", "min_months": 13, "max_months_exclusive": 19, "skills": [{"id": "c4_01", "order": 1, "group": "listen", "domain": "الاستماع والفهم", "text": "ينظر حوله عندما يُسأل أسئلة «أين؟»، مثل «أين بطانيتك؟»."}, {"id": "c4_02", "order": 2, "group": "listen", "domain": "الاستماع والفهم", "text": "يتبع تعليمات بسيطة مثل «هات الكرة» أو «تعال هنا» أو «وريني أنفك»."}, {"id": "c4_03", "order": 3, "group": "social", "domain": "التفاعل الاجتماعي", "text": "يشير ليطلب شيئًا أو يعلّق أو يحصل على معلومة."}, {"id": "c4_04", "order": 4, "group": "social", "domain": "التفاعل الاجتماعي", "text": "يهز رأسه للتعبير عن «لا» ويومئ للتعبير عن «نعم»."}, {"id": "c4_05", "order": 5, "group": "speak", "domain": "الكلام واللغة", "text": "يفهم ويستخدم كلمات لأشياء مألوفة وبعض الأفعال والأشخاص في حياته."}, {"id": "c4_06", "order": 6, "group": "listen", "domain": "الاستماع والفهم", "text": "يتعرف على جزء واحد أو أكثر من أجزاء الجسم."}, {"id": "c4_07", "order": 7, "group": "social", "domain": "التفاعل الاجتماعي", "text": "يستخدم الإيماءات عند الحماس أو المزاح، مثل التصفيق أو المصافحة بالكف أو عمل تعبيرات وجه مضحكة."}, {"id": "c4_08", "order": 8, "group": "speak", "domain": "الكلام واللغة", "text": "يمزج سلاسل طويلة من الأصوات والمقاطع والكلمات الحقيقية مع تنغيم يشبه الكلام."}]}, {"id": "c5", "label": "19-24 شهر", "source_label": "من 19 إلى 24 شهرًا", "min_months": 19, "max_months_exclusive": 25, "skills": [{"id": "c5_01", "order": 1, "group": "speak", "domain": "الكلام واللغة", "text": "يبدأ في جمع كلمتين أو أكثر معًا، مثل «مياه كمان» أو «عايز أخرج»."}]}, {"id": "c6", "label": "2-3 سنوات", "source_label": "من سنتين إلى 3 سنوات", "min_months": 25, "max_months_exclusive": 37, "skills": [{"id": "c6_01", "order": 1, "group": "speak", "domain": "الكلام واللغة", "text": "يستخدم تركيبات من الكلمات كثيرًا، وقد يكرر أحيانًا بعض الكلمات أو العبارات."}, {"id": "c6_02", "order": 2, "group": "social", "domain": "التفاعل الاجتماعي", "text": "يحاول جذب انتباهك بعبارات مثل «بص لي!»."}, {"id": "c6_03", "order": 3, "group": "speak", "domain": "الكلام واللغة", "text": "يقول اسمه عندما يُسأل عنه."}, {"id": "c6_04", "order": 4, "group": "speak", "domain": "الكلام واللغة", "text": "يستخدم بعض صيغ الجمع، مثل «طيور» أو «ألعاب»."}, {"id": "c6_05", "order": 5, "group": "speak", "domain": "الكلام واللغة", "text": "يستخدم أفعالًا تدل على الاستمرار، وقد يستخدم نهايات الماضي عند الحديث عن أحداث سابقة (في الإنجليزية).", "en": true}, {"id": "c6_06", "order": 6, "group": "speak", "domain": "الكلام واللغة", "text": "يذكر أسبابًا للأشياء والأحداث، مثل أنه يحتاج إلى معطف عندما يكون الجو باردًا."}, {"id": "c6_07", "order": 7, "group": "speak", "domain": "الكلام واللغة", "text": "يسأل «لماذا؟» و«كيف؟»."}, {"id": "c6_08", "order": 8, "group": "listen", "domain": "الاستماع والفهم", "text": "يجيب عن أسئلة مثل «ماذا تفعل عندما تشعر بالنعاس؟»."}, {"id": "c6_09", "order": 9, "group": "sounds", "domain": "نطق الأصوات", "text": "ينطق الأصوات p وb وm وh وw وd وn بشكل صحيح في الكلمات الإنجليزية.", "en": true}, {"id": "c6_10", "order": 10, "group": "sounds", "domain": "نطق الأصوات", "text": "ينطق معظم أصوات حروف العلة بشكل صحيح في الكلمات."}, {"id": "c6_11", "order": 11, "group": "sounds", "domain": "نطق الأصوات", "text": "يصبح كلامه أوضح، لكنه قد لا يكون مفهومًا دائمًا للأشخاص غير المألوفين به."}]}, {"id": "c7", "label": "3-4 سنوات", "source_label": "من 3 إلى 4 سنوات", "min_months": 37, "max_months_exclusive": 49, "skills": [{"id": "c7_01", "order": 1, "group": "speak", "domain": "الكلام واللغة", "text": "يقارن بين الأشياء باستخدام كلمات مثل أكبر أو أقصر."}, {"id": "c7_02", "order": 2, "group": "speak", "domain": "الكلام واللغة", "text": "يحكي قصة من كتاب أو فيديو."}, {"id": "c7_03", "order": 3, "group": "listen", "domain": "الاستماع والفهم", "text": "يفهم ويستخدم كلمات لتحديد المكان، مثل داخل وعلى وتحت."}, {"id": "c7_04", "order": 4, "group": "speak", "domain": "الكلام واللغة", "text": "يستخدم أدوات مثل a أو the عند الكلام (في الإنجليزية).", "en": true}, {"id": "c7_05", "order": 5, "group": "literacy", "domain": "القراءة والكتابة المبكرة", "text": "يتظاهر بالقراءة بمفرده أو مع الآخرين."}, {"id": "c7_06", "order": 6, "group": "literacy", "domain": "القراءة والكتابة المبكرة", "text": "يتعرف على العلامات والشعارات، مثل علامة STOP."}, {"id": "c7_07", "order": 7, "group": "literacy", "domain": "القراءة والكتابة المبكرة", "text": "يتظاهر بالكتابة أو تهجئة الكلمات، ويمكنه كتابة بعض الحروف."}, {"id": "c7_08", "order": 8, "group": "sounds", "domain": "نطق الأصوات", "text": "ينطق أصوات t وk وg وf وy ونهاية -ing في الكلمات الإنجليزية بشكل صحيح.", "en": true}, {"id": "c7_09", "order": 9, "group": "sounds", "domain": "نطق الأصوات", "text": "ينطق جميع المقاطع الصوتية في الكلمة."}, {"id": "c7_10", "order": 10, "group": "sounds", "domain": "نطق الأصوات", "text": "ينطق الأصوات في بداية الكلمات ووسطها ونهايتها."}, {"id": "c7_11", "order": 11, "group": "sounds", "domain": "نطق الأصوات", "text": "بحلول عمر 4 سنوات، يتحدث بسلاسة معظم الوقت دون تكرار الأصوات أو الكلمات أو العبارات."}, {"id": "c7_12", "order": 12, "group": "sounds", "domain": "نطق الأصوات", "text": "بحلول عمر 4 سنوات، يفهم الآخرون معظم كلامه، مع احتمال استمرار أخطاء في بعض الأصوات التي تتطور لاحقًا."}, {"id": "c7_13", "order": 13, "group": "sounds", "domain": "نطق الأصوات", "text": "بحلول عمر 4 سنوات، ينطق الأصوات في مجموعات الحروف الساكنة المتتابعة، وقد لا ينطق جميعها بدقة."}]}, {"id": "c8", "label": "4-5 سنوات", "source_label": "من 4 إلى 5 سنوات", "min_months": 49, "max_months_exclusive": 61, "skills": [{"id": "c8_01", "order": 1, "group": "speak", "domain": "الكلام واللغة", "text": "ينتج جملًا صحيحة نحويًا، وتصبح جمله أطول وأكثر تعقيدًا."}, {"id": "c8_02", "order": 2, "group": "speak", "domain": "الكلام واللغة", "text": "يحكي قصصًا تتضمن الشخصيات الرئيسية والمكان، ويربط الأفكار بكلمات مثل «و»."}, {"id": "c8_03", "order": 3, "group": "speak", "domain": "الكلام واللغة", "text": "يستخدم صيغة جمع شاذة واحدة على الأقل، مثل feet أو men في الإنجليزية.", "en": true}, {"id": "c8_04", "order": 4, "group": "listen", "domain": "الاستماع والفهم", "text": "يفهم ويستخدم كلمات المكان مثل خلف وبجانب وبين."}, {"id": "c8_05", "order": 5, "group": "speak", "domain": "الكلام واللغة", "text": "يستخدم كلمات الزمن مثل أمس وغدًا بشكل صحيح."}, {"id": "c8_06", "order": 6, "group": "listen", "domain": "الاستماع والفهم", "text": "يتبع تعليمات وقواعد بسيطة للعب الألعاب."}, {"id": "c8_07", "order": 7, "group": "literacy", "domain": "القراءة والكتابة المبكرة", "text": "يتعرف على مقدمة الكتاب وعنوانه."}, {"id": "c8_08", "order": 8, "group": "literacy", "domain": "القراءة والكتابة المبكرة", "text": "يتعرف على 10 حروف أو أكثر ويسميها، ويمكنه عادة كتابة اسمه."}, {"id": "c8_09", "order": 9, "group": "literacy", "domain": "القراءة والكتابة المبكرة", "text": "يقلد القراءة والكتابة من اليسار إلى اليمين في سياق اللغة الإنجليزية.", "en": true}, {"id": "c8_10", "order": 10, "group": "literacy", "domain": "القراءة والكتابة المبكرة", "text": "يدمج أجزاء الكلمات، مثل cup + cake، ويتعرف على بعض الكلمات المتشابهة في القافية مثل cat وhat.", "en": true}, {"id": "c8_11", "order": 11, "group": "sounds", "domain": "نطق الأصوات", "text": "ينطق معظم الأصوات الساكنة بشكل صحيح، ويكون كلامه مفهومًا أثناء المحادثة."}]}]};
+  var ST = { consistent: 'متحققة باستمرار', sometimes: 'تظهر أحيانًا', not_observed: 'لم تُلاحظ بعد', unsure: 'غير متأكد' };
+  var ICON = { consistent: '✓', sometimes: '◔', not_observed: '✕', unsure: '?' };
+  var _band = {}, _grp = 'all', _open = {};
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function toast(t) {
+    var e = document.getElementById('fdToast');
+    if (!e) { e = document.createElement('div'); e.id = 'fdToast'; e.className = 'fd-toast'; document.body.appendChild(e); }
+    e.textContent = t; e.style.display = 'block'; clearTimeout(toast.t); toast.t = setTimeout(function () { e.style.display = 'none'; }, 2800);
+  }
+  function ageMonths(c) {
+    var b = c && (c.birthDate || c.birth_date || c.dob || c.birthday); if (!b) return null;
+    var d = new Date(b); if (isNaN(d)) return null; var n = new Date();
+    return Math.max(0, (n.getFullYear() - d.getFullYear()) * 12 + n.getMonth() - d.getMonth() - (n.getDate() < d.getDate() ? 1 : 0));
+  }
+  function ageText(m) {
+    if (m == null) return ''; var y = Math.floor(m / 12), r = m % 12;
+    return (y ? (y === 1 ? 'سنة' : y === 2 ? 'سنتين' : y + ' سنوات') : '') + (y && r ? ' و' : '') + (r ? (r === 1 ? 'شهر' : r === 2 ? 'شهرين' : r + (r < 11 ? ' شهور' : ' شهر')) : (y ? '' : 'أقل من شهر'));
+  }
+  function bandFor(m) { if (m == null) return 0; var i = MS.bands.findIndex(function (b) { return m >= b.min_months && m < b.max_months_exclusive; }); return i < 0 ? MS.bands.length - 1 : i; }
+  function store() { if (typeof state === 'undefined' || !state) return {}; if (!state.commResponses || typeof state.commResponses !== 'object') state.commResponses = {}; return state.commResponses; }
+  function mine(cid) { var s = store(); return (s[cid] = s[cid] || {}); }
+  function core(b) { return b.skills.filter(function (s) { return !s.en; }); }   // بنود الإنجليزية اختيارية ومش داخلة في النتيجة
+
+  async function save(cid, sid, status, date, note) {
+    if (typeof sb === 'undefined' || !sb || !sb.functions) throw new Error('لا يوجد اتصال');
+    var res = await sb.functions.invoke('parent-data', { body: { action: 'comm_set', client_id: String(cid), skill_id: sid, status: status, date: date || '', note: note || '' } });
+    if (res.error) {
+      var msg = res.error.message || '';
+      try { var j = await res.error.context.json(); if (j && j.error) msg = j.error; } catch (e) { /* ignore */ }
+      throw new Error(msg || 'تعذر الحفظ');
+    }
+    if (!res.data || res.data.error) throw new Error((res.data && res.data.error) || 'تعذر الحفظ');
+  }
+
+  function calc(cid, b) {
+    var m = mine(cid), c = { consistent: 0, sometimes: 0, not_observed: 0, unsure: 0, unset: 0 }, last = '', miss = [];
+    core(b).forEach(function (s) {
+      var r = m[s.id];
+      if (r && ST[r.status]) { c[r.status]++; if (r.at && r.at > last) last = r.at; if (r.status === 'not_observed') miss.push(s.text); }
+      else c.unset++;
+    });
+    var total = core(b).length, known = c.consistent + c.sometimes + c.not_observed;
+    var complete = total > 0 && c.unset === 0 && known > 0;
+    var pct = known ? Math.round((c.consistent + c.sometimes * 0.5) / known * 100) : 0;
+    var lv;
+    if (c.not_observed >= 2 || pct < 60) lv = { k: 'warn', color: '#e11d48', label: 'يُفضّل مناقشة النتيجة مع الأخصائي', icon: '💬' };
+    else if (pct >= 80) lv = { k: 'good', color: '#059669', label: 'مهارات تواصل مناسبة لهذه المرحلة', icon: '🌟' };
+    else lv = { k: 'mid', color: '#f59e0b', label: 'تقدّم جيد ويحتاج متابعة', icon: '📈' };
+    var rough = known < Math.ceil(total / 2);
+    return { c: c, total: total, known: known, complete: complete, pct: pct, lv: lv, last: last, miss: miss, rough: rough };
+  }
+  function summaryText(b, r) {
+    var t = 'تسجيل ولي الأمر (التواصل) — ' + b.label + ': ' + r.c.consistent + ' متحققة باستمرار، ' + r.c.sometimes + ' تظهر أحيانًا، ' + r.c.not_observed + ' لم تُلاحظ' + (r.c.unsure ? '، ' + r.c.unsure + ' غير متأكد' : '') + '. التقدير: ' + r.lv.label + '.';
+    if (r.miss.length) t += ' المهارات التي لم تُلاحظ: ' + r.miss.slice(0, 5).join(' | ') + (r.miss.length > 5 ? ' ...' : '');
+    if (r.rough) t += ' (النتيجة تقريبية لكثرة "غير متأكد")';
+    return t + ' — للتوعية والمتابعة وليست تشخيصًا.';
+  }
+  window.suCommEvals = function (cid) {
+    var out = [];
+    try {
+      cid = String(cid);
+      MS.bands.forEach(function (b) {
+        var r = calc(cid, b); if (!r.complete) return;
+        var txt = summaryText(b, r);
+        out.push({ id: 'comm_' + b.id, clientId: cid, kind: 'comm', derived: true, parentVisible: true,
+          title: 'تقييم التواصل — ' + b.label, date: (r.last || new Date().toISOString()).slice(0, 10),
+          score: r.pct, max: 100, notes: txt, summary: txt });
+      });
+    } catch (e) { try { suLog('suCommEvals', e); } catch (_) {} }
+    return out;
+  };
+
+  async function setStatus(cid, sid, status, date, note) {
+    var m = mine(cid), old = m[sid];
+    var same = old && old.status === status && date === undefined && note === undefined;
+    var st = same ? 'clear' : status, prev = old ? Object.assign({}, old) : null;
+    if (st === 'clear') delete m[sid];
+    var bd = MS.bands[_band[cid]], was = bd ? calc(cid, bd).complete : false;
+    if (st !== 'clear') m[sid] = { status: st, date: date !== undefined ? date : ((old && old.date) || null), note: note !== undefined ? note : ((old && old.note) || ''), at: new Date().toISOString() };
+    var now = bd ? calc(cid, bd).complete : false;
+    rerender();
+    if (now && !was) {
+      toast('🎉 اكتمل تقييم التواصل — النتيجة اتضافت في تقييمات الأداء');
+      setTimeout(function () { var el = document.getElementById('cmResult'); if (el && el.scrollIntoView) el.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 120);
+    }
+    try { var x = m[sid]; await save(cid, sid, st, x && x.date, x && x.note); }
+    catch (e) { if (prev) m[sid] = prev; else delete m[sid]; rerender(); toast('تعذر الحفظ: ' + (e && e.message || '')); try { suLog('comm_set', e); } catch (_) {} }
+  }
+  function rerender() { try { renderParentPortal(); } catch (e) { try { suLog('comm rerender', e); } catch (_) {} } }
+
+  window.suCommHtml = function (c) {
+    if (!c) return '';
+    var cid = String(c.id), am = ageMonths(c);
+    if (_band[cid] == null) _band[cid] = bandFor(am);
+    var bi = _band[cid], b = MS.bands[bi], m = mine(cid), R = calc(cid, b);
+    var cnt = R.c, total = R.total, done = total - cnt.unset - cnt.unsure, pct = total ? Math.round((total - cnt.unset) / total * 100) : 0;
+    var groups = MS.groups.filter(function (g) { return g.id === 'all' || b.skills.some(function (s) { return s.group === g.id; }); });
+    var grp = groups.some(function (g) { return g.id === _grp; }) ? _grp : 'all';
+    var list = b.skills.filter(function (s) { return grp === 'all' || s.group === grp; });
+    var concern = cnt.not_observed >= 2;
+    var ph = ''; try { ph = clientPhoto(c) || ''; } catch (_) {}
+    var av = ph ? '<div class="fd-av"><img src="' + esc(ph) + '" alt="" onerror="this.remove()"></div>' : '<div class="fd-av">👶</div>';
+    var h = '<div class="fd">';
+    h += '<div class="fd-card fd-child">' + av + '<div><b>' + esc(c.name || 'الطفل') + '</b><span>' + esc(ageText(am)) + '</span></div></div>';
+    h += '<div class="fd-card fd-banner"><div style="font-size:28px">🗣️</div><div><b>تابع تطور تواصل طفلك خطوة بخطوة</b><span>السمع والكلام واللغة والتواصل. قائمة للتوعية والمتابعة وليست أداة تشخيصية.</span></div></div>';
+    h += '<div class="fd-tabs">' + MS.bands.map(function (x, i) { return '<button class="fd-tab' + (i === bi ? ' on' : '') + '" data-cm-b="' + i + '" data-cm-c="' + esc(cid) + '">' + esc(x.label) + '</button>'; }).join('') + '</div>';
+    h += '<div class="fd-card fd-sum"><div class="fd-ring" style="background:conic-gradient(#6d3fd6 ' + pct + '%,#ede6fb 0)"><div><span><b>' + pct + '%</b><small>نسبة اكتمال التسجيل</small></span></div></div>' +
+      '<div class="fd-sumr"><h2>ملخص المتابعة</h2><p>ⓘ يعكس هذا التقدم نسبة المهارات التي تم تسجيلها فقط.</p>' +
+      '<div class="fd-cnt"><div class="fd-cg"><b>' + cnt.consistent + '</b>متحققة</div><div class="fd-co"><b>' + cnt.sometimes + '</b>أحيانًا</div><div class="fd-cr"><b>' + cnt.not_observed + '</b>لم تُلاحظ</div><div class="fd-cx"><b>' + (cnt.unset + cnt.unsure) + '</b>لم أحدد</div></div></div></div>';
+    if (concern) h += '<div class="fd-card fd-alert">💬 فيه أكتر من مهارة لم تُلاحظ بعد. <b>ناقش هذه الملاحظات مع الأخصائي</b> في الجلسة القادمة.</div>';
+    h += '<div class="fd-chips">' + groups.map(function (g) { return '<button class="fd-chip' + (g.id === grp ? ' on' : '') + '" data-cm-g="' + esc(g.id) + '">' + esc(g.label) + '</button>'; }).join('') + '</div>';
+    h += list.map(function (s) {
+      var r = m[s.id] || {}, op = !!_open[cid + ':' + s.id], today = new Date().toISOString().slice(0, 10);
+      return '<div class="fd-card fd-sk" data-cm-id="' + esc(s.id) + '" data-cm-c="' + esc(cid) + '"><h3>' + esc(s.text) + '</h3><div class="fd-dm">' + esc(s.domain) + (s.en ? ' <span class="cm-en">🇬🇧 خاص بالإنجليزية — اختياري ولا يدخل في النتيجة</span>' : '') + '</div>' +
+        '<div class="fd-opts">' + Object.keys(ST).map(function (k) { return '<button class="fd-op' + (r.status === k ? ' on' : '') + '" data-cm-s="' + k + '"><i>' + ICON[k] + '</i>' + ST[k] + '</button>'; }).join('') + '</div>' +
+        '<button class="fd-addn" data-cm-n="1">✎ ' + ((r.note || r.date) ? 'تعديل الملاحظة' : 'إضافة ملاحظة') + ' +</button>' +
+        '<div class="fd-nf' + (op ? ' open' : '') + '"><input type="date" value="' + esc(r.date || '') + '" max="' + today + '"><textarea maxlength="500" placeholder="ملاحظتك (اختياري)">' + esc(r.note || '') + '</textarea><button class="fd-save" data-cm-sv="1">حفظ الملاحظة</button></div>' +
+        ((r.note || r.date) ? '<div class="fd-saved">' + (r.date ? '📅 ' + esc(r.date) + ' — ' : '') + esc(r.note || '') + '</div>' : '') + '</div>';
+    }).join('') || '<div class="fd-empty">لا توجد مهارات في هذا القسم</div>';
+    if (R.complete) {
+      h += '<div class="fd-card fd-res" id="cmResult" style="--rc:' + R.lv.color + '"><h2>🗣️ نتيجة تقييم التواصل — ' + esc(b.label) + '</h2><div class="fd-resrow">' +
+        '<div class="fd-resring" style="background:conic-gradient(' + R.lv.color + ' ' + R.pct + '%,#ede6fb 0)"><div>' + R.pct + '%</div></div>' +
+        '<div><div class="fd-reslv">' + R.lv.icon + ' ' + esc(R.lv.label) + '</div><div class="fd-restx">' + R.c.consistent + ' متحققة · ' + R.c.sometimes + ' أحيانًا · ' + R.c.not_observed + ' لم تُلاحظ' + (R.c.unsure ? ' · ' + R.c.unsure + ' غير متأكد' : '') + '</div></div></div>' +
+        (R.rough ? '<div class="fd-restx">النتيجة تقريبية لأن عدد "غير متأكد" كبير.</div>' : '') +
+        '<div class="fd-restx">✅ تمت إضافة هذه النتيجة إلى «تقييمات الأداء» ويراها الأخصائي. وهي للتوعية والمتابعة وليست تشخيصًا.</div>' +
+        '<button class="fd-resgo" onclick="ppSet(\'tab\',\'perf\');ppSet(\'perf\',\'eval\')">عرض في تقييمات الأداء ←</button></div>';
+    } else {
+      h += '<div class="fd-card fd-prog">📝 باقي <b>' + R.c.unset + '</b> مهارة في فئة ' + esc(b.label) + ' — أول ما تخلّصهم هتظهر النتيجة وتتضاف في تقييمات الأداء.</div>';
+    }
+    h += '<div class="fd-card fd-foot"><b>تنبيه مهم:</b> معالم ASHA ليست أداة فحص أو تشخيص. إذا لم يكتسب الطفل عدة مهارات ضمن فئته العمرية، أو توقف عن اكتساب مهارات جديدة، أو فقد مهارات سبق أن اكتسبها، فاستشر طبيب الأطفال أو أخصائي التخاطب واللغة والسمع.<br><br>' +
+      '<b>ملاحظة حول اللغة:</b> المعالم المنشورة من ASHA تستند إلى أبحاث عن الأطفال الذين يتعلمون الإنجليزية الأمريكية، وقد يختلف تسلسل بعض المهارات وأعمار ظهورها لدى الأطفال الذين يتحدثون لغات أخرى. لا تُفسَّر البنود الخاصة بأصوات الإنجليزية أو القراءة والكتابة كمعايير مباشرة للغة العربية. ' + (am != null && am > 60 ? 'القائمة تغطي حتى 5 سنوات.' : '') +
+      '<details><summary>المصدر</summary>ASHA — Communication Milestones: asha.org/public/developmental-milestones/communication-milestones</details></div>';
+    return h + '</div>';
+  };
+
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest && e.target.closest('[data-cm-b],[data-cm-g],[data-cm-s],[data-cm-n],[data-cm-sv]'); if (!t) return;
+    var host = t.closest('#parentPortal'); if (!host) return;
+    var card = t.closest('.fd-sk');
+    if (t.dataset.cmB != null) { _band[String(t.dataset.cmC)] = +t.dataset.cmB; _grp = 'all'; rerender(); return; }
+    if (t.dataset.cmG) { _grp = t.dataset.cmG; rerender(); return; }
+    if (!card) return;
+    var sid = card.dataset.cmId, cid = card.dataset.cmC;
+    if (t.dataset.cmS) setStatus(cid, sid, t.dataset.cmS);
+    else if (t.dataset.cmN) { var nf = card.querySelector('.fd-nf'); nf.classList.toggle('open'); _open[cid + ':' + sid] = nf.classList.contains('open'); }
+    else if (t.dataset.cmSv) {
       var cur = mine(cid)[sid], nf2 = card.querySelector('.fd-nf');
       if (!cur) { toast('اختر حالة المهارة أولًا'); return; }
       setStatus(cid, sid, cur.status, nf2.querySelector('input').value || null, nf2.querySelector('textarea').value.trim());
