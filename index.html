@@ -2739,6 +2739,16 @@ body.su-md-dash main>#tab-dashboard{margin-top:0!important}
               <span class="text-[11px] font-bold text-slate-500">بيتطبق ويتحفظ فورًا.</span>
             </div>
 
+            <h3 class="font-extrabold text-slate-900 text-sm border-b pb-3 pt-2">🖼️ تحويل الصور تلقائيًا (AI)</h3>
+            <label class="flex items-start gap-2 cursor-pointer font-bold text-slate-700">
+              <input type="checkbox" id="appAiPortrait" checked onchange="window.suAiPortraitSet&&suAiPortraitSet(this.checked)" class="w-4 h-4 mt-0.5 rounded text-indigo-600">
+              <span>أي صورة تترفع لطفل / سكرتارية / ولي أمر / أخصائي تتحول تلقائي لبورتريه بخلفية رمادي استوديو. التحويل بيتم على الجهاز نفسه، وأول مرة بيحتاج إنترنت لتحميل النموذج.</span>
+            </label>
+            <label class="flex items-start gap-2 cursor-pointer font-bold text-slate-700">
+              <input type="checkbox" id="appAiCloud" onchange="window.suAiCloudSet&&suAiCloudSet(this.checked)" class="w-4 h-4 mt-0.5 rounded text-indigo-600">
+              <span>☁️ تحسين توليدي بالذكاء الاصطناعي (زي ChatGPT: تنضيف وتظبيط الإضاءة والخلفية). <u>محتاج Edge Function اسمها portrait-ai متفعّلة</u> — الصورة بتتبعت لمزوّد الذكاء الاصطناعي، فاتأكد من موافقة أولياء الأمور. لو مش متاحة بيرجع للتحويل على الجهاز.</span>
+            </label>
+
             <h3 class="font-extrabold text-slate-900 text-sm border-b pb-3 pt-2">🖼️ الشريط العلوي في التطبيق</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div id="appLogoBlock"></div>
@@ -4291,7 +4301,8 @@ window.suMfaOpen=async function(){
   }
   // تصغير الصورة لمربع 320×320 JPEG (قص من المنتصف)
   function avResizeFile(file, size) {
-    size = Math.min(size || 192, 192);   // [EGRESS-FIX] 192px كفاية للدواير، وحجمها ~6KB بدل ~25KB
+    var reqSize = size || 192;
+    size = Math.min(reqSize, 192);   // [EGRESS-FIX] القص العادي 192px — البورتريه المحوّل أعلى (حتى 320)
     return new Promise((resolve, reject) => {
       if (!file || !/^image\//.test(file.type || '')) return reject(new Error('الملف مش صورة'));
       const fr = new FileReader();
@@ -4300,14 +4311,20 @@ window.suMfaOpen=async function(){
         const im = new Image();
         im.onerror = () => reject(new Error('الصورة تالفة أو صيغتها غير مدعومة'));
         im.onload = () => {
-          const s = Math.min(im.width, im.height);
-          const sx = (im.width - s) / 2, sy = (im.height - s) / 2;
-          const cv = document.createElement('canvas'); cv.width = cv.height = size;
-          const cx = cv.getContext('2d');
-          cx.fillStyle = '#fff'; cx.fillRect(0, 0, size, size);
-          cx.imageSmoothingQuality = 'high';
-          cx.drawImage(im, sx, sy, s, s, 0, 0, size, size);
-          { let o = cv.toDataURL('image/webp', 0.78); if (o.indexOf('data:image/webp') !== 0) o = cv.toDataURL('image/jpeg', 0.78); resolve(o); }
+          // الطريقة العادية (قص من المنتصف) — بتتستخدم لو التحويل التلقائي (AI) متقفّل أو فشل
+          const plain = () => {
+            const s = Math.min(im.width, im.height);
+            const sx = (im.width - s) / 2, sy = (im.height - s) / 2;
+            const cv = document.createElement('canvas'); cv.width = cv.height = size;
+            const cx = cv.getContext('2d');
+            cx.fillStyle = '#fff'; cx.fillRect(0, 0, size, size);
+            cx.imageSmoothingQuality = 'high';
+            cx.drawImage(im, sx, sy, s, s, 0, 0, size, size);
+            let o = cv.toDataURL('image/webp', 0.78); if (o.indexOf('data:image/webp') !== 0) o = cv.toDataURL('image/jpeg', 0.78); return o;
+          };
+          let ai = null;
+          try { ai = window.suAiPortrait ? window.suAiPortrait(im, Math.min(reqSize, 320)) : null; } catch (e) { ai = null; }
+          if (ai) ai.then(u => resolve(u || plain())).catch(() => resolve(plain())); else resolve(plain());
         };
         im.src = fr.result;
       };
@@ -16200,6 +16217,168 @@ html body #mNav.th-nav .th-nbi{width:22px!important;height:22px!important}
     };
   });
   try{ if(typeof applyPermissions==='function') applyPermissions(); }catch(e){}
+})();
+</script>
+<script id="su-ai-portrait">
+/* ===== تحويل الصور تلقائيًا لبورتريه (AI على الجهاز نفسه) =====
+   أي صورة تترفع (طفل / سكرتارية / ولي أمر / أخصائي / إدارة) بتعدّي هنا:
+   1) فصل الشخص عن الخلفية (MediaPipe Selfie Segmentation)
+   2) كشف الوش وضبط الكادر كبورتريه (صدر + راس) في مربع
+   3) خلفية رمادي فاتح استوديو بتدرّج خفيف
+   لو فشل أي حاجة (مفيش نت أول مرة مثلًا) بتتحفظ الصورة بالقص العادي. */
+(function () {
+  var VER = '0.10.14', BASE = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@' + VER;
+  var SEG_MODEL = 'https://storage.googleapis.com/mediapipe-models/image_segmenter/selfie_segmenter/float16/latest/selfie_segmenter.tflite';
+  var FACE_MODEL = 'https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite';
+  var BG_IN = '#b9b9bd', BG_OUT = '#a4a4a8';   // رمادي استوديو زي صورة المرجع
+  var libP = null, segP = null, faceP = null;
+
+  function enabled() { try { return !(state && state.settings && state.settings.aiAvatar === false); } catch (e) { return true; } }
+  function timeout(p, ms) { return new Promise(function (res, rej) { var t = setTimeout(function () { rej(new Error('timeout')); }, ms); p.then(function (v) { clearTimeout(t); res(v); }, function (e) { clearTimeout(t); rej(e); }); }); }
+  function lib() { if (!libP) { libP = import(BASE + '/vision_bundle.mjs'); libP.catch(function () { libP = null; }); } return libP; }
+  function fileset(m) { return m.FilesetResolver.forVisionTasks(BASE + '/wasm'); }
+  function getSeg() {
+    if (!segP) {
+      segP = lib().then(function (m) { return fileset(m).then(function (fs) {
+        return m.ImageSegmenter.createFromOptions(fs, { baseOptions: { modelAssetPath: SEG_MODEL }, runningMode: 'IMAGE', outputCategoryMask: true, outputConfidenceMasks: false });
+      }); });
+      segP.catch(function () { segP = null; });
+    }
+    return segP;
+  }
+  function getFace() {
+    if (!faceP) {
+      faceP = lib().then(function (m) { return fileset(m).then(function (fs) {
+        return m.FaceDetector.createFromOptions(fs, { baseOptions: { modelAssetPath: FACE_MODEL }, runningMode: 'IMAGE', minDetectionConfidence: 0.4 });
+      }); });
+      faceP.catch(function () { faceP = null; });
+    }
+    return faceP;
+  }
+  function cnv(w, h) { var c = document.createElement('canvas'); c.width = w; c.height = h; return c; }
+
+  async function portrait(im, size) {
+    var sc = Math.min(1, 640 / Math.max(im.width, im.height));
+    var w = Math.max(2, Math.round(im.width * sc)), h = Math.max(2, Math.round(im.height * sc));
+    var c0 = cnv(w, h), x0 = c0.getContext('2d');
+    x0.fillStyle = '#fff'; x0.fillRect(0, 0, w, h); x0.drawImage(im, 0, 0, w, h);
+
+    // 1) فصل الشخص
+    var seg = await getSeg();
+    var res = seg.segment(c0), mk = res.categoryMask, mw = mk.width, mh = mk.height, raw = mk.getAsUint8Array(), data = new Uint8Array(raw);
+    try { res.close(); } catch (e) {}
+    // تحديد أي قيمة هي "الشخص": المنتصف غالبًا شخص والحواف غالبًا خلفية
+    var cN = 0, cT = 0, bN = 0, bT = 0, x, y, i;
+    for (y = 0; y < mh; y += 2) for (x = 0; x < mw; x += 2) {
+      var v = data[y * mw + x] > 0 ? 1 : 0, inC = x > mw * .3 && x < mw * .7 && y > mh * .3 && y < mh * .75, inB = x < mw * .07 || x > mw * .93 || y < mh * .05;
+      if (inC) { cT++; cN += v; } if (inB) { bT++; bN += v; }
+    }
+    var fgIsNonZero = (cN / (cT || 1)) >= (bN / (bT || 1));
+    var mc = cnv(mw, mh), mx = mc.getContext('2d'), id = mx.createImageData(mw, mh), fg = 0;
+    var minX = mw, minY = mh, maxX = 0, maxY = 0;
+    for (y = 0; y < mh; y++) for (x = 0; x < mw; x++) {
+      i = y * mw + x; var isFg = (data[i] > 0) === fgIsNonZero;
+      if (isFg) { fg++; if (x < minX) minX = x; if (x > maxX) maxX = x; if (y < minY) minY = y; if (y > maxY) maxY = y; }
+      id.data[i * 4 + 3] = isFg ? 255 : 0;
+    }
+    var frac = fg / (mw * mh);
+    if (frac < 0.04 || frac > 0.985) return null;   // مفيش شخص واضح → نرجع للقص العادي
+    mx.putImageData(id, 0, 0);
+    // تنعيم الحواف
+    var cm = cnv(w, h), cmx = cm.getContext('2d');
+    try { cmx.filter = 'blur(1.6px)'; } catch (e) {}
+    cmx.drawImage(mc, 0, 0, w, h);
+    cmx.filter = 'none';
+    // الشخص بدون خلفية
+    var cp = cnv(w, h), px = cp.getContext('2d');
+    px.drawImage(c0, 0, 0);
+    px.globalCompositeOperation = 'destination-in'; px.drawImage(cm, 0, 0); px.globalCompositeOperation = 'source-over';
+
+    // 2) كادر البورتريه
+    var kx = w / mw, ky = h / mh, face = null;
+    try {
+      var fd = await getFace(), fr = fd.detect(c0), best = 0;
+      (fr.detections || []).forEach(function (d) { var b = d.boundingBox; if (b && b.width * b.height > best) { best = b.width * b.height; face = b; } });
+    } catch (e) { face = null; }
+    var s, sx, sy;
+    if (face) {
+      s = face.width * 2.6;
+      sx = face.originX + face.width / 2 - s / 2;
+      sy = face.originY + face.height / 2 - 0.42 * s;
+    } else {
+      var bw = (maxX - minX + 1) * kx, top = minY * ky, cx = (minX + maxX) / 2 * kx;
+      s = bw * 1.3; sx = cx - s / 2; sy = top - 0.10 * s;
+    }
+    s = Math.min(Math.max(s, Math.min(w, h) * 0.35), Math.min(w, h));
+    sx = Math.min(Math.max(sx, 0), w - s); sy = Math.min(Math.max(sy, 0), h - s);
+
+    // 3) خلفية استوديو رمادي فاتح + الشخص
+    size = Math.min(size || 192, 320);
+    var out = cnv(size, size), ox = out.getContext('2d');
+    var g = ox.createRadialGradient(size / 2, size * .42, size * .05, size / 2, size * .42, size * .78);
+    g.addColorStop(0, BG_IN); g.addColorStop(1, BG_OUT);
+    ox.fillStyle = g; ox.fillRect(0, 0, size, size);
+    ox.imageSmoothingQuality = 'high';
+    var k = size / s;
+    ox.setTransform(k, 0, 0, k, -sx * k, -sy * k);
+    ox.drawImage(cp, 0, 0);
+    ox.setTransform(1, 0, 0, 1, 0, 0);
+    var o = out.toDataURL('image/webp', 0.82); if (o.indexOf('data:image/webp') !== 0) o = out.toDataURL('image/jpeg', 0.84);
+    return o;
+  }
+
+  /* ☁️ وضع اختياري: تحسين توليدي (زي ChatGPT) عن طريق Supabase Edge Function اسمها portrait-ai */
+  function cloudOn() { try { return !!(state && state.settings && state.settings.aiAvatarCloud === true); } catch (e) { return false; } }
+  async function cloud(im, size) {
+    if (typeof sb === 'undefined' || !sb || !sb.functions) throw new Error('no-cloud');
+    var sc = Math.min(1, 1024 / Math.max(im.width, im.height));
+    var w = Math.max(2, Math.round(im.width * sc)), h = Math.max(2, Math.round(im.height * sc));
+    var c = cnv(w, h), x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, w, h); x.drawImage(im, 0, 0, w, h);
+    var r = await sb.functions.invoke('portrait-ai', { body: { image: c.toDataURL('image/jpeg', 0.9) } });
+    if (r.error || !r.data || !r.data.image) throw new Error((r.error && r.error.message) || (r.data && r.data.error) || 'cloud-fail');
+    return await new Promise(function (res, rej) {
+      var i2 = new Image();
+      i2.onload = function () {
+        var sz = Math.min(size || 192, 384), o = cnv(sz, sz), ox = o.getContext('2d'); ox.imageSmoothingQuality = 'high'; ox.drawImage(i2, 0, 0, sz, sz);
+        var u = o.toDataURL('image/webp', 0.84); if (u.indexOf('data:image/webp') !== 0) u = o.toDataURL('image/jpeg', 0.86); res(u);
+      };
+      i2.onerror = function () { rej(new Error('bad-img')); };
+      i2.src = r.data.image;
+    });
+  }
+  window.suAiCloudSet = function (on) {
+    if (!state.settings) state.settings = {};
+    if (on) state.settings.aiAvatarCloud = true; else delete state.settings.aiAvatarCloud;
+    try { saveState(); } catch (e) {}
+    try { showToast(on ? '☁️ التحسين السحابي شغّال (لو الـ Function متفعّلة)' : 'تم إيقاف التحسين السحابي', on ? 'green' : 'amber'); } catch (e) {}
+  };
+  window.suAiPortrait = function (im, size) {
+    if (!enabled()) return null;
+    var cl = cloudOn();
+    try { showToast(cl ? '⏳ جاري تحسين الصورة بالذكاء الاصطناعي…' : '⏳ جاري تحويل الصورة لبورتريه…', 'blue'); } catch (e) {}
+    var run = cl
+      ? timeout(cloud(im, size), 75000).catch(function (e) {
+          console.warn('suAiPortrait cloud', e);
+          try { showToast('⚠️ التحسين السحابي مش متاح — اتحوّلت الصورة على الجهاز', 'amber'); } catch (x) {}
+          return timeout(portrait(im, size), 40000);
+        })
+      : timeout(portrait(im, size), 40000);
+    return run.catch(function (e) {
+      console.warn('suAiPortrait', e);
+      try { showToast('⚠️ اتحفظت الصورة بدون تحويل (التحويل محتاج إنترنت أول مرة)', 'amber'); } catch (x) {}
+      return null;
+    });
+  };
+  window.suAiPortraitSet = function (on) {
+    if (!state.settings) state.settings = {};
+    if (on) delete state.settings.aiAvatar; else state.settings.aiAvatar = false;
+    try { saveState(); } catch (e) {}
+    try { showToast(on ? '✅ التحويل التلقائي للصور شغّال' : 'تم إيقاف التحويل التلقائي للصور', on ? 'green' : 'amber'); } catch (e) {}
+  };
+  function sync() { var c = document.getElementById('appAiPortrait'); if (c) c.checked = enabled(); var k = document.getElementById('appAiCloud'); if (k) k.checked = cloudOn(); }
+  var _sw = window.switchSettingsSubTab;
+  if (typeof _sw === 'function') window.switchSettingsSubTab = function () { var r = _sw.apply(this, arguments); try { sync(); } catch (e) {} return r; };
+  document.addEventListener('DOMContentLoaded', sync); setTimeout(sync, 1200);
 })();
 </script>
 <style id="su-th-compact">
