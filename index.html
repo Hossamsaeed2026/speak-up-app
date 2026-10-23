@@ -2154,6 +2154,25 @@ body.su-md-dash main>#tab-dashboard{margin-top:0!important}
               </div>
             </div>
 
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-slate-600 font-bold mb-1 text-[11px]">بداية الجلسات 🗓️ (من / إلى)</label>
+                <div class="flex items-center gap-1.5">
+                  <input type="date" id="clientStartFrom" onchange="renderClientsTable()" class="flex-1 min-w-0 bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs font-mono font-bold text-slate-700">
+                  <span class="text-slate-400 font-bold">→</span>
+                  <input type="date" id="clientStartTo" onchange="renderClientsTable()" class="flex-1 min-w-0 bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs font-mono font-bold text-slate-700">
+                </div>
+              </div>
+              <div>
+                <label class="block text-slate-600 font-bold mb-1 text-[11px]">تاريخ الميلاد 🎂 (من / إلى)</label>
+                <div class="flex items-center gap-1.5">
+                  <input type="date" id="clientDobFrom" onchange="renderClientsTable()" class="flex-1 min-w-0 bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs font-mono font-bold text-slate-700">
+                  <span class="text-slate-400 font-bold">→</span>
+                  <input type="date" id="clientDobTo" onchange="renderClientsTable()" class="flex-1 min-w-0 bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs font-mono font-bold text-slate-700">
+                </div>
+              </div>
+            </div>
+
             <!-- Active Filters Summary Counter -->
             <div class="flex items-center justify-between pt-2 text-[11px]">
               <div class="text-slate-500 font-bold">
@@ -2214,9 +2233,11 @@ body.su-md-dash main>#tab-dashboard{margin-top:0!important}
               <option value="B003">Online Egypt</option>
               <option value="B004">خاص Private</option>
             </select>
-            <div class="flex items-center gap-1">
-              <span class="text-[11px] text-slate-500 font-bold">التاريخ:</span>
+            <div class="flex items-center gap-1 flex-wrap">
+              <span class="text-[11px] text-slate-500 font-bold">من:</span>
               <input type="date" id="sessionDateFilter" onchange="renderSessionsTable()" class="bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs font-mono font-bold text-slate-700">
+              <span class="text-[11px] text-slate-500 font-bold">إلى:</span>
+              <input type="date" id="sessionDateTo" onchange="renderSessionsTable()" class="bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs font-mono font-bold text-slate-700">
             </div>
             <button onclick="resetSessionsFilters()" class="text-slate-400 hover:text-rose-600 px-2 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1">
               ↺ تفريغ
@@ -2262,13 +2283,21 @@ body.su-md-dash main>#tab-dashboard{margin-top:0!important}
               <span class="absolute inset-y-0 right-3 flex items-center text-slate-400 text-xs">🔍</span>
               <input type="text" id="invoiceSearchInput" onkeyup="renderInvoices()" placeholder="ابحث باسم العميل أو الكود..." class="w-full bg-slate-50 border border-slate-200 rounded-xl pr-8 pl-3 py-2 text-xs font-medium focus:ring-2 focus:ring-indigo-500 focus:bg-white transition">
             </div>
-            <div class="flex items-center gap-1.5">
-              <span class="font-bold text-xs text-slate-600">الشهر:</span>
+            <div class="flex items-center gap-1.5 flex-wrap">
+              <span class="font-bold text-xs text-slate-600">من شهر:</span>
               <select id="invoiceMonthSelect" onchange="renderInvoices()" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono font-bold text-indigo-950">
                 <option value="2026-10">2026 / 10 (أكتوبر الحالي)</option>
                 <option value="2026-11">2026 / 11 (نوفمبر)</option>
                 <option value="2026-09">2026 / 09 (سبتمبر)</option>
                 <option value="2026-08">2026 / 08 (أغسطس)</option>
+              </select>
+              <span class="font-bold text-xs text-slate-600">إلى شهر:</span>
+              <select id="invoiceMonthTo" onchange="renderInvoices()" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono font-bold text-indigo-950">
+                <option value="">نفس الشهر</option>
+                <option value="2026-08">2026 / 08 (أغسطس)</option>
+                <option value="2026-09">2026 / 09 (سبتمبر)</option>
+                <option value="2026-10">2026 / 10 (أكتوبر)</option>
+                <option value="2026-11">2026 / 11 (نوفمبر)</option>
               </select>
             </div>
             <select id="invoiceStatusFilter" onchange="renderInvoices()" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-700">
@@ -2331,9 +2360,11 @@ body.su-md-dash main>#tab-dashboard{margin-top:0!important}
               <option value="B003">Online Egypt</option>
               <option value="B004">خاص Private</option>
             </select>
-            <div class="flex items-center gap-1">
-              <span class="text-[11px] text-slate-500 font-bold">التاريخ:</span>
+            <div class="flex items-center gap-1 flex-wrap">
+              <span class="text-[11px] text-slate-500 font-bold">من:</span>
               <input type="date" id="paymentDateFilter" onchange="renderPaymentsTable()" class="bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs font-mono font-bold text-slate-700">
+              <span class="text-[11px] text-slate-500 font-bold">إلى:</span>
+              <input type="date" id="paymentDateTo" onchange="renderPaymentsTable()" class="bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs font-mono font-bold text-slate-700">
             </div>
             <button onclick="acOpen('payments')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg text-xs font-black shadow transition whitespace-nowrap">📊 حسابات</button>
             <button onclick="resetPaymentsFilters()" class="text-slate-400 hover:text-rose-600 px-2 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1">
@@ -2463,6 +2494,13 @@ body.su-md-dash main>#tab-dashboard{margin-top:0!important}
               <option value="Cleaning">نظافة ومطهرات</option>
               <option value="Other">أخرى</option>
             </select>
+          </div>
+          <div class="flex items-center gap-1 flex-wrap">
+            <span class="text-[11px] text-slate-500 font-bold">من:</span>
+            <input type="date" id="purchaseDateFilter" onchange="renderPurchasesTable()" class="bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs font-mono font-bold text-slate-700">
+            <span class="text-[11px] text-slate-500 font-bold">إلى:</span>
+            <input type="date" id="purchaseDateTo" onchange="renderPurchasesTable()" class="bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs font-mono font-bold text-slate-700">
+            <button onclick="resetPurchasesFilters()" class="text-slate-400 hover:text-rose-600 px-2 py-1.5 rounded-lg text-xs font-bold transition">↺ تفريغ</button>
           </div>
           <button onclick="acOpen('purchases')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg text-xs font-black shadow whitespace-nowrap">📊 حسابات</button><div class="text-xs text-slate-400 font-medium">💡 يتم تسجيل وتدقيق جميع المصروفات التشغيلية للمركز</div>
         </div>
@@ -5420,8 +5458,12 @@ window.suMfaOpen=async function(){
     const photoFilter = document.getElementById('clientPhotoFilter') ? document.getElementById('clientPhotoFilter').value : 'all';
     const schedStatusFilter = document.getElementById('clientScheduleStatusFilter') ? document.getElementById('clientScheduleStatusFilter').value : 'all';
 
+    const _gv = id => (document.getElementById(id) ? document.getElementById(id).value : '');
+    let stFrom = _gv('clientStartFrom'), stTo = _gv('clientStartTo'), dobFrom = _gv('clientDobFrom'), dobTo = _gv('clientDobTo');
+    if (stFrom && stTo && stFrom > stTo) { const _t = stFrom; stFrom = stTo; stTo = _t; }
+    if (dobFrom && dobTo && dobFrom > dobTo) { const _t = dobFrom; dobFrom = dobTo; dobTo = _t; }
     // Show indicator if advanced filter is active
-    const hasAdvActive = (diagFilter !== 'all' || dayFilter !== 'all' || photoFilter !== 'all' || schedStatusFilter !== 'all');
+    const hasAdvActive = (diagFilter !== 'all' || dayFilter !== 'all' || photoFilter !== 'all' || schedStatusFilter !== 'all' || stFrom || stTo || dobFrom || dobTo);
     const advBadge = document.getElementById('advFilterBadge');
     if (advBadge) {
       if (hasAdvActive) advBadge.classList.remove('hidden');
@@ -5468,6 +5510,21 @@ window.suMfaOpen=async function(){
       const hasSched = (c.weeklySchedule && c.weeklySchedule.length > 0);
       if (schedStatusFilter === 'has_schedule' && !hasSched) return false;
       if (schedStatusFilter === 'no_schedule' && hasSched) return false;
+
+      // 8. Advanced: بداية الجلسات (من / إلى)
+      if (stFrom || stTo) {
+        const sd = c.startDate || '';
+        if (!sd) return false;
+        if (stFrom && sd < stFrom) return false;
+        if (stTo && sd > stTo) return false;
+      }
+      // 9. Advanced: تاريخ الميلاد (من / إلى)
+      if (dobFrom || dobTo) {
+        const bd = c.dob || '';
+        if (!bd) return false;
+        if (dobFrom && bd < dobFrom) return false;
+        if (dobTo && bd > dobTo) return false;
+      }
 
       return true;
     });
@@ -6096,7 +6153,9 @@ window.suMfaOpen=async function(){
   function suFilteredSessions() {
     const filter = document.getElementById('sessionStatusFilter') ? document.getElementById('sessionStatusFilter').value : 'all';
     const branchFilter = document.getElementById('sessionBranchFilter') ? document.getElementById('sessionBranchFilter').value : 'all';
-    const dateFilter = document.getElementById('sessionDateFilter') ? document.getElementById('sessionDateFilter').value : '';
+    let dateFilter = document.getElementById('sessionDateFilter') ? document.getElementById('sessionDateFilter').value : '';
+    let dateTo = document.getElementById('sessionDateTo') ? document.getElementById('sessionDateTo').value : '';
+    if (dateFilter && dateTo && dateFilter > dateTo) { const _t = dateFilter; dateFilter = dateTo; dateTo = _t; }
     const searchInput = document.getElementById('sessionSearchInput');
     const search = searchInput ? searchInput.value.trim().toLowerCase() : '';
 
@@ -6105,7 +6164,8 @@ window.suMfaOpen=async function(){
       if (!matchBranch(s.branch)) return false;
       if (branchFilter !== 'all' && s.branch !== branchFilter) return false;
       if (filter !== 'all' && suStKey(s.status) !== filter) return false;
-      if (dateFilter && s.date !== dateFilter) return false;
+      if (dateFilter && s.date < dateFilter) return false;
+      if (dateTo && s.date > dateTo) return false;
       if (search) {
         const client = state.clients.find(c => c.id === s.clientId) || {};
         const therapist = state.staff.find(st => st.id === s.therapistId) || {};
@@ -6725,7 +6785,18 @@ window.suMfaOpen=async function(){
     const tbody = document.getElementById('invoices-tbody');
     if (!tbody) return;
     tbody.innerHTML = '';
-    const yearMonth = document.getElementById('invoiceMonthSelect') ? document.getElementById('invoiceMonthSelect').value : '2026-10';
+    let yearMonth = document.getElementById('invoiceMonthSelect') ? document.getElementById('invoiceMonthSelect').value : '2026-10';
+    let monthTo = document.getElementById('invoiceMonthTo') ? document.getElementById('invoiceMonthTo').value : '';
+    if (!monthTo) monthTo = yearMonth;
+    if (monthTo < yearMonth) { const _m = yearMonth; yearMonth = monthTo; monthTo = _m; }
+    const monthsList = [];
+    for (let _y = +yearMonth.slice(0, 4), _mo = +yearMonth.slice(5, 7), _g = 0; _g < 36; _g++) {
+      const _k = _y + '-' + String(_mo).padStart(2, '0');
+      monthsList.push(_k);
+      if (_k >= monthTo) break;
+      if (++_mo > 12) { _mo = 1; _y++; }
+    }
+    const multiMonths = monthsList.length > 1;
     const searchInput = document.getElementById('invoiceSearchInput');
     const search = searchInput ? searchInput.value.trim().toLowerCase() : '';
     const statusFilter = document.getElementById('invoiceStatusFilter') ? document.getElementById('invoiceStatusFilter').value : 'all';
@@ -6741,7 +6812,7 @@ window.suMfaOpen=async function(){
       return true;
     });
 
-    clientsList.forEach(client => {
+    clientsList.forEach(client => { monthsList.forEach(yearMonth => {
       const inv = calculateClientInvoice(client.id, yearMonth);
       if (!inv || (inv.currentSessionsCount === 0 && inv.totalNetDue === 0 && inv.totalPaid === 0)) return;
       if (statusFilter === 'paid' && !inv.isFullyPaid) return;
@@ -6758,7 +6829,7 @@ window.suMfaOpen=async function(){
 
       tr.innerHTML = `
         <td class="p-3">
-          <div class="font-extrabold text-slate-900">${escH(client.name)}</div>
+          <div class="font-extrabold text-slate-900">${escH(client.name)}${multiMonths ? ' <span class="bg-indigo-50 text-indigo-700 border border-indigo-200 px-1.5 py-0.5 rounded text-[10px] font-mono font-bold">' + yearMonth + '</span>' : ''}</div>
           <div class="text-[11px] text-slate-400 font-mono">#${client.id} &bull; ${client.phone ? phoneLink(client.phone) : ''}</div>
         </td>
         <td class="p-3"><span class="bg-slate-100 px-2 py-0.5 rounded font-bold text-xs">${escH(getBranchName(client.branch))}</span></td>
@@ -6781,7 +6852,7 @@ window.suMfaOpen=async function(){
         </td>
       `;
       tbody.appendChild(tr);
-    });
+    }); });
   }
 
   function printClientInvoice(clientId, yearMonth) {
@@ -7371,12 +7442,15 @@ window.suMfaOpen=async function(){
     const searchInput = document.getElementById('paymentSearchInput');
     const search = searchInput ? searchInput.value.trim().toLowerCase() : '';
     const branchFilter = document.getElementById('paymentBranchFilter') ? document.getElementById('paymentBranchFilter').value : 'all';
-    const dateFilter = document.getElementById('paymentDateFilter') ? document.getElementById('paymentDateFilter').value : '';
+    let dateFilter = document.getElementById('paymentDateFilter') ? document.getElementById('paymentDateFilter').value : '';
+    let dateTo = document.getElementById('paymentDateTo') ? document.getElementById('paymentDateTo').value : '';
+    if (dateFilter && dateTo && dateFilter > dateTo) { const _t = dateFilter; dateFilter = dateTo; dateTo = _t; }
 
     const list = state.payments.filter(p => {
       if (!matchBranch(p.branch)) return false;
       if (branchFilter !== 'all' && p.branch !== branchFilter) return false;
-      if (dateFilter && p.date !== dateFilter) return false;
+      if (dateFilter && (p.date || '') < dateFilter) return false;
+      if (dateTo && (p.date || '') > dateTo) return false;
       if (search) {
         const client = state.clients.find(c => c.id === p.clientId) || {};
         const q = `${p.id || ''} ${client.name || ''} ${p.notes || ''} ${p.month || ''}`.toLowerCase();
@@ -7455,13 +7529,16 @@ window.suMfaOpen=async function(){
     const catFilter = document.getElementById('purchaseCategoryFilter') ? document.getElementById('purchaseCategoryFilter').value : 'all';
 
     const branchFilter = document.getElementById('purchaseBranchFilter') ? document.getElementById('purchaseBranchFilter').value : 'all';
-    const dateFilter = document.getElementById('purchaseDateFilter') ? document.getElementById('purchaseDateFilter').value : '';
+    let dateFilter = document.getElementById('purchaseDateFilter') ? document.getElementById('purchaseDateFilter').value : '';
+    let dateTo = document.getElementById('purchaseDateTo') ? document.getElementById('purchaseDateTo').value : '';
+    if (dateFilter && dateTo && dateFilter > dateTo) { const _t = dateFilter; dateFilter = dateTo; dateTo = _t; }
 
     const filtered = list.filter(p => {
       if (!matchBranch(p.branch || p.branch_id)) return false;
       if (branchFilter !== 'all' && (p.branch || p.branch_id) !== branchFilter) return false;
       if (catFilter !== 'all' && (p.category !== catFilter)) return false;
-      if (dateFilter && p.purchase_date !== dateFilter) return false;
+      if (dateFilter && (p.purchase_date || '') < dateFilter) return false;
+      if (dateTo && (p.purchase_date || '') > dateTo) return false;
       if (search) {
         const q = `${p.item_name || ''} ${p.supplier || ''} ${p.purchase_number || ''} ${p.purchased_by || ''}`.toLowerCase();
         return q.includes(search);
@@ -10500,6 +10577,7 @@ Object.assign(I18N_EN, Object.assign({"قبل 24س": "before 24h", "اعتذار
     if (document.getElementById('clientScheduleDayFilter')) document.getElementById('clientScheduleDayFilter').value = 'all';
     if (document.getElementById('clientPhotoFilter')) document.getElementById('clientPhotoFilter').value = 'all';
     if (document.getElementById('clientScheduleStatusFilter')) document.getElementById('clientScheduleStatusFilter').value = 'all';
+    ['clientStartFrom','clientStartTo','clientDobFrom','clientDobTo'].forEach(function (i) { var e = document.getElementById(i); if (e) e.value = ''; });
     renderClientsTable();
   }
 
@@ -10508,6 +10586,7 @@ Object.assign(I18N_EN, Object.assign({"قبل 24س": "before 24h", "اعتذار
     if (document.getElementById('sessionStatusFilter')) document.getElementById('sessionStatusFilter').value = 'all';
     if (document.getElementById('sessionBranchFilter')) document.getElementById('sessionBranchFilter').value = 'all';
     if (document.getElementById('sessionDateFilter')) document.getElementById('sessionDateFilter').value = '';
+    if (document.getElementById('sessionDateTo')) document.getElementById('sessionDateTo').value = '';
     renderSessionsTable();
   }
 
@@ -10515,6 +10594,7 @@ Object.assign(I18N_EN, Object.assign({"قبل 24س": "before 24h", "اعتذار
     if (document.getElementById('invoiceSearchInput')) document.getElementById('invoiceSearchInput').value = '';
     if (document.getElementById('invoiceStatusFilter')) document.getElementById('invoiceStatusFilter').value = 'all';
     if (document.getElementById('invoiceBranchFilter')) document.getElementById('invoiceBranchFilter').value = 'all';
+    if (document.getElementById('invoiceMonthTo')) document.getElementById('invoiceMonthTo').value = '';
     renderInvoices();
   }
 
@@ -10522,6 +10602,7 @@ Object.assign(I18N_EN, Object.assign({"قبل 24س": "before 24h", "اعتذار
     if (document.getElementById('paymentSearchInput')) document.getElementById('paymentSearchInput').value = '';
     if (document.getElementById('paymentBranchFilter')) document.getElementById('paymentBranchFilter').value = 'all';
     if (document.getElementById('paymentDateFilter')) document.getElementById('paymentDateFilter').value = '';
+    if (document.getElementById('paymentDateTo')) document.getElementById('paymentDateTo').value = '';
     renderPaymentsTable();
   }
 
@@ -10530,6 +10611,7 @@ Object.assign(I18N_EN, Object.assign({"قبل 24س": "before 24h", "اعتذار
     if (document.getElementById('purchaseCategoryFilter')) document.getElementById('purchaseCategoryFilter').value = 'all';
     if (document.getElementById('purchaseBranchFilter')) document.getElementById('purchaseBranchFilter').value = 'all';
     if (document.getElementById('purchaseDateFilter')) document.getElementById('purchaseDateFilter').value = '';
+    if (document.getElementById('purchaseDateTo')) document.getElementById('purchaseDateTo').value = '';
     renderPurchasesTable();
   }
 
