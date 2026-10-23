@@ -10021,7 +10021,7 @@ Object.assign(I18N_EN, Object.assign({"قبل 24س": "before 24h", "اعتذار
     for (let d = r[0]; d <= r[1]; d = ymdAddDays(d, 1)) {
       const L = (by[d] || []).sort((a, b) => (pcMin(a.time) || 0) - (pcMin(b.time) || 0));
       h += `<div class="pc-cell mg-cell${pcParts(d).m !== cur ? ' off' : ''}${d === today ? ' is-today' : ''}" data-d="${d}" onclick="ppcDay(this.dataset.d)"><b>${+d.slice(8)}</b>`;
-      L.slice(0, 2).forEach(s => { const _cn = ((state.clients || []).find(z => String(z.id) === String(s.clientId)) || {}).name || ''; h += `<span class="mg-chip ${pcTone(s)}">${actEsc(formatTime12(s.time))} ${actEsc(_cn)}</span>`; });
+      L.slice(0, 2).forEach(s => { const _cn = ((state.clients || []).find(z => String(z.id) === String(s.clientId)) || {}).name || ''; h += `<span class="mg-chip ${pcTone(s)}"><span class="mg-t">${actEsc(formatTime12(s.time))}</span> <span class="mg-n">${actEsc(_cn)}</span></span>`; });
       if (L.length > 2) h += `<span class="mg-more">+${L.length - 2} جلسات</span>`;
       if (L.length) h += `<em class="mg-cnt ${pcTone(L[0])}">${L.length}</em>`;
       h += '</div>';
@@ -11910,7 +11910,7 @@ if(window.matchMedia('(max-width:820px)').matches){
     var h='<div class="cal-mg"><div class="cal-mh">'+[6,0,1,2,3,4,5].map(function(i){return '<span>'+AR_WEEKDAYS[i]+'</span>'}).join('')+'</div><div class="cal-mc">';
     for(var d=r[0];d<=r[1];d=ymdAddDays(d,1)){var L=(by[d]||[]).sort(function(a,b){return (tmin(a.time)||0)-(tmin(b.time)||0)});
       h+='<div class="cal-cell mg-cell'+(ymdParts(d).m!==cur?' off':'')+(d===today?' is-today':'')+'" data-d="'+d+'" tabindex="0"><b>'+(+d.slice(8))+'</b>';
-      L.slice(0,2).forEach(function(s){h+='<span class="cal-chip mg-chip '+tone(s)+'">'+esc(formatTime12(s.time))+' '+esc(cl(s).name)+'</span>'});
+      L.slice(0,2).forEach(function(s){h+='<span class="cal-chip mg-chip '+tone(s)+'"><span class="mg-t">'+esc(formatTime12(s.time))+'</span> <span class="mg-n">'+esc(cl(s).name)+'</span></span>'});
       if(L.length>2)h+='<span class="cal-more mg-more">+'+(L.length-2)+' '+T.more+'</span>';
       if(L.length)h+='<em class="cal-cnt mg-cnt '+tone(L[0])+'">'+L.length+'</em>';
       h+='</div>'}
@@ -12792,7 +12792,7 @@ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/sv
       var mgTone = function (x) { var k = cpStatusKey(x.status); return k === 'ATT' ? 'ok' : k === 'SDE' ? 'warn' : (k === 'CAN' || k === 'TCA' || k === 'EXC') ? 'mute' : ''; };
       for (var d = 1; d <= dim; d++) {
         var ymd = MA.ym + '-' + String(d).padStart(2, '0'), dl2 = (by[ymd] || []).slice().sort(sortT); mTot += dl2.length;
-        var chipsH = dl2.slice(0, 2).map(function (x) { var cx = client(x.clientId) || { name: '' }; return '<span class="mg-chip ' + mgTone(x) + '">' + E(suTime12(x.time)) + ' ' + E(cx.name) + '</span>'; }).join('');
+        var chipsH = dl2.slice(0, 2).map(function (x) { var cx = client(x.clientId) || { name: '' }; return '<span class="mg-chip ' + mgTone(x) + '"><span class="mg-t">' + E(suTime12(x.time)) + '</span> <span class="mg-n">' + E(cx.name) + '</span></span>'; }).join('');
         if (dl2.length > 2) chipsH += '<span class="mg-more">+' + (dl2.length - 2) + ' جلسات</span>';
         if (dl2.length) chipsH += '<em class="mg-cnt ' + mgTone(dl2[0]) + '">' + dl2.length + '</em>';
         cells += '<button type="button" class="ma-day mg-cell' + (dl2.length ? ' has' : '') + (ymd === today ? ' today is-today' : '') + (ymd === MA.sel ? ' sel' : '') + '" onclick="maPick(\'' + ymd + '\')"><b>' + d + '</b>' + chipsH + '</button>';
@@ -16087,17 +16087,13 @@ html body .mg-chip.warn{border-color:var(--su-yellow,#f5b829);background:#fff6df
 html body .mg-chip.mute{border-color:#b9b6c6;background:#f1f0f5;color:#6b6880}
 html body .mg-more{display:block;padding:0 4px;color:var(--su-primary,#7e3ab8);font-size:clamp(9.5px,1.45vw,12.5px);font-weight:800;white-space:nowrap}
 html body .mg-cnt.mg-cnt{display:none;font-style:normal}
-/* موبايل: نقطة + رقم */
+/* موبايل: نفس شكل التابلت بالظبط (وقت + اسم + "+N جلسات") بس بخط أصغر */
 @media (max-width:640px){
-  html body .mg-cell.mg-cell{min-height:56px;align-items:center;gap:2px;padding:4px 1px}
-  html body .mg-cell.mg-cell>b{align-self:center;min-width:22px;height:22px;font-size:12px}
-  html body .mg-chip,html body .mg-more{display:none}
-  html body .mg-cnt.mg-cnt{display:grid;place-items:center;box-sizing:border-box;min-width:24px;height:24px;padding:0 5px;border-radius:999px;margin:0;
-    background:var(--su-primary,#7e3ab8);color:#fff;font-size:12px;font-weight:800;line-height:1}
-  html body .mg-cnt.ok{background:var(--su-green,#2fa36b)}
-  html body .mg-cnt.warn{background:var(--su-yellow,#f5b829);color:#4a3500}
-  html body .mg-cnt.mute{background:#9a97ad}
-  html body .ma-cal .ma-wd,html body .cal-mh span,html body .pc-mh span{font-size:10px}
+  html body .mg-cell.mg-cell{min-height:78px;align-items:stretch;gap:2px;padding:3px 2px}
+  html body .mg-cell.mg-cell>b{align-self:flex-start;min-width:20px;height:20px;font-size:11px;padding:0 2px}
+  html body .mg-chip{padding:1px 2px;border-inline-start-width:2px;border-radius:3px;font-size:clamp(7px,2.15vw,9px);line-height:1.35;font-weight:500;letter-spacing:-.2px}
+  html body .mg-more{padding:0 2px;font-size:clamp(7.5px,2.2vw,9px)}
+  html body .ma-cal .ma-wd,html body .cal-mh span,html body .pc-mh span{font-size:9.5px;padding:5px 0}
 }
 /* دارك */
 html.su-dark body .ma-cal{border-color:var(--su-line)}
