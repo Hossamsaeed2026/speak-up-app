@@ -10283,7 +10283,7 @@ Object.assign(I18N_EN, Object.assign({"قبل 24س": "before 24h", "اعتذار
     const badge = s => { const k = cpStatusKey(s.status), v = CP_STATUS[k]; return `<span class="text-[11px] font-black px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">${actEsc(v ? v[0] : k)}</span>`; };
     const row = s => `<div class="flex items-center gap-2 border-b py-2 text-xs"><b class="font-mono">${actEsc(s.date || '')}</b><span class="text-slate-500">${formatTime12(s.time)}</span><span class="text-slate-500">${actEsc(s.type || '')}</span><span class="text-slate-400">${actEsc(th(s))}</span><span class="mr-auto">${badge(s)}</span></div>`;
     const comments = sess.filter(s => (s.parentComment || '').trim());
-    const evals = (state.evaluations || []).filter(e => String(e.clientId) === String(c.id) && e.parentVisible !== false).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+    const evals = (state.evaluations || []).concat(window.suFeedEvals ? window.suFeedEvals(c.id) : []).filter(e => String(e.clientId) === String(c.id) && e.parentVisible !== false).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
     const d = cpBuildData(c), cur = today.slice(0, 7);
     const curRow = d.rows.find(r => r.month === cur && r.inv);
     const curRem = curRow ? Math.max(0, curRow.inv.remainingBalance) : 0;
@@ -10339,7 +10339,7 @@ Object.assign(I18N_EN, Object.assign({"قبل 24س": "before 24h", "اعتذار
       let streak = 0; for (const s of sess) { const k = cpStatusKey(s.status); if (k === 'SCH' || k === 'TCA') continue; if (k === 'ATT') streak++; else break; }
       const commentsHtml = comments.length ? comments.slice(0, 12).map(s => `<div class="flex gap-3 items-start"><div class="w-9 h-9 shrink-0 rounded-full bg-cyan-100 text-cyan-800 font-black grid place-items-center text-sm">${actEsc((th(s) || 'أ').replace(/^أ\.\s*/, '').trim().charAt(0))}</div><div class="pp-bubble p-3 flex-1"><div class="text-[11px] font-black text-cyan-800 mb-1">${actEsc(th(s) || 'الأخصائي')} <span class="font-mono font-bold text-slate-400">· ${actEsc(s.date || '')}</span></div><div class="text-sm text-slate-800 leading-relaxed">${ppRich(s.parentComment)}</div></div></div>`).join('') : '<div class="text-center text-slate-400 text-sm py-6">لسه مفيش تعليقات من الأخصائي. أول ما يكتب تعليق بعد جلسة هيظهر هنا 💬</div>';
       const evHtml = evals.length ? evals.map(e => { const sc = Number(e.score), mx = Number(e.max) || 100, has = !isNaN(sc) && e.score !== '' && e.score != null, p = has ? Math.max(0, Math.min(100, Math.round(sc / mx * 100))) : 0, col = p >= 75 ? '#059669' : p >= 50 ? '#f59e0b' : '#e11d48';
-        return `<div class="rounded-2xl border p-4 bg-white pp-pop"><div class="flex items-center gap-2"><div class="text-2xl">${e.kind === 'test' ? '📝' : '📊'}</div><div class="min-w-0"><div class="font-black text-sm text-slate-800 truncate">${actEsc(e.title || 'تقييم أداء')}</div><div class="text-[11px] text-slate-400 font-bold">${actEsc(e.date || '')}${e.therapistId ? ' · ' + actEsc(th({ therapistId: e.therapistId })) : ''}</div></div>${has ? `<div class="mr-auto font-mono font-black" style="color:${col}">${sc}<span class="text-slate-400 text-xs">/${mx}</span></div>` : ''}</div>${has ? `<div class="h-2 rounded-full bg-slate-100 mt-3 overflow-hidden"><div style="width:${p}%;background:${col}" class="h-full"></div></div>` : ''}${e.notes ? `<div class="text-xs text-slate-600 mt-3 leading-relaxed">${ppRich(e.notes)}</div>` : ''}</div>`; }).join('') : '<div class="rounded-2xl border border-dashed p-6 text-center text-slate-400 text-sm bg-white">لما الأخصائي يرسل تقييم أداء أو نتيجة اختبار هيظهر هنا ✨</div>';
+        return `<div class="rounded-2xl border p-4 bg-white pp-pop"><div class="flex items-center gap-2"><div class="text-2xl">${e.kind === 'test' ? '📝' : e.kind === 'feed' ? '🍽️' : '📊'}</div><div class="min-w-0"><div class="font-black text-sm text-slate-800 truncate">${actEsc(e.title || 'تقييم أداء')}</div><div class="text-[11px] text-slate-400 font-bold">${actEsc(e.date || '')}${e.therapistId ? ' · ' + actEsc(th({ therapistId: e.therapistId })) : ''}</div></div>${has ? `<div class="mr-auto font-mono font-black" style="color:${col}">${sc}<span class="text-slate-400 text-xs">/${mx}</span></div>` : ''}</div>${has ? `<div class="h-2 rounded-full bg-slate-100 mt-3 overflow-hidden"><div style="width:${p}%;background:${col}" class="h-full"></div></div>` : ''}${e.notes ? `<div class="text-xs text-slate-600 mt-3 leading-relaxed">${ppRich(e.notes)}</div>` : ''}</div>`; }).join('') : '<div class="rounded-2xl border border-dashed p-6 text-center text-slate-400 text-sm bg-white">لما الأخصائي يرسل تقييم أداء أو نتيجة اختبار هيظهر هنا ✨</div>';
       body = `<div class="grid md:grid-cols-3 gap-3"><div class="bg-white rounded-2xl border p-4 flex items-center gap-4">${ring(rate, 84, 9, '#059669', '#e2e8f0', `<b class="text-lg text-slate-800">${rate}%</b>`)}<div><div class="font-black text-sm text-slate-800">نسبة الحضور</div><div class="text-[11px] text-slate-500 font-bold">${cnt.ATT} من ${done} جلسة</div>${streak >= 2 ? `<div class="mt-1 text-[11px] font-black text-amber-600">🔥 ${streak} جلسات حضور متتالية</div>` : ''}</div></div>
           <div class="pp-grid3 md:col-span-2">${kpi('✅', 'حضر', cnt.ATT, 'text-emerald-600')}${kpi('📨', 'اعتذار', cnt.EXC + cnt.SDE, 'text-amber-600')}${kpi('❌', 'غياب', cnt.CAN, 'text-rose-600')}</div></div>
         <div class="bg-white rounded-2xl border p-4"><div class="font-black text-sm text-slate-800 mb-3">📅 الحضور شهرياً</div><div class="flex items-end gap-2">${bars}</div></div>
@@ -14690,7 +14690,7 @@ function render(){var e=el();if(!e)return;
   else if(F.tab==='acct'){var cm=todayCairo().slice(0,7),ms=sess.filter(function(s){return cpNormMonth(s.date)===cm}),k=tdCount(ms),u=freshUser()||{},dn=k.ATT+k.CAN+k.EXC+k.SDE;
    var box=function(a,b,col){return'<div class="bg-white rounded-2xl p-3 text-center shadow-sm"><div class="text-2xl font-black '+col+'">'+a+'</div><div class="text-[11px] font-bold text-slate-500">'+b+'</div></div>'};
    sec='<div class="font-black text-sm mb-2">'+T('هذا الشهر')+'</div><div class="grid grid-cols-2 gap-2">'+box(k.ATT,T('حضر'),'text-emerald-600')+box(k.CAN+k.EXC+k.SDE,T('ملغية'),'text-rose-500')+box(k.SCH,T('محجوزة'),'text-sky-600')+box((dn?Math.round(k.ATT/dn*100):0)+'%',T('نسبة الحضور'),'text-teal-700')+'</div>'+(u.commissionPct!==''&&u.commissionPct!=null?'<div class="bg-white rounded-2xl p-3 mt-2 text-xs font-bold">'+T('نسبة العمولة')+': '+esc(u.commissionPct)+'%</div>':'')}
-  else{var ev=(state.evaluations||[]).filter(function(x){return String(x.clientId)===F.child}).sort(function(a,b){return (b.date||'').localeCompare(a.date||'')});
+  else{var ev=(state.evaluations||[]).concat(window.suFeedEvals?window.suFeedEvals(F.child):[]).filter(function(x){return String(x.clientId)===F.child}).sort(function(a,b){return (b.date||'').localeCompare(a.date||'')});
    sec=ev.length?ev.map(function(x){return'<div class="bg-white rounded-2xl p-3 mb-2 text-xs shadow-sm"><b class="font-mono">'+esc(x.date||'')+'</b><div class="text-slate-600 mt-1">'+esc(x.summary||x.notes||x.note||x.title||'')+'</div></div>'}).join(''):'<div class="text-center text-slate-400 font-bold p-8">'+T('لا توجد تقييمات')+'</div>'}
   var bb=function(id){return'<button onclick="thpSet(\'tab\',\''+id+'\')" class="pp-bar-btn'+(id===F.tab?' on':'')+'"><span class="pp-bar-ico" style="background:'+GR[id]+'">'+suNavIco(id,24)+'</span><span>'+T(BL[id])+'</span></button>'};
   h+=sec+'</div><div class="pp-bar-wrap"><div class="pp-bar-pos"><nav class="pp-bar">'+bb('perf')+bb('book')+'<div class="pp-bar-gap"></div>'+bb('cal')+bb('acct')+'</nav><button class="pp-logo-btn" onclick="thpMenu()" title="Menu"><img src="'+esc(window.SU_NAV_MASCOT||logo)+'" alt=""></button></div></div>';
@@ -16575,6 +16575,15 @@ html.su-dark{
 .fd-foot details{margin-top:6px}.fd-emg{color:#e5484d;font-weight:900}
 .fd-empty{text-align:center;color:#7c7592;padding:20px;font-weight:700}
 .fd-toast{position:fixed;bottom:110px;left:50%;transform:translateX(-50%);background:#222;color:#fff;padding:10px 18px;border-radius:999px;font-size:13px;font-weight:800;z-index:99999;display:none}
+.fd-res{border:2px solid var(--rc,#6d3fd6);background:#fff}
+.fd-res h2{font-size:16px;font-weight:900;margin:0 0 4px;color:#1e1636}
+.fd-resrow{display:flex;gap:14px;align-items:center}
+.fd-resring{width:86px;height:86px;border-radius:50%;display:grid;place-items:center;flex-shrink:0}
+.fd-resring>div{width:66px;height:66px;border-radius:50%;background:#fff;display:grid;place-items:center;font-size:20px;font-weight:900;color:var(--rc,#6d3fd6)}
+.fd-reslv{font-size:15px;font-weight:900;color:var(--rc,#6d3fd6)}
+.fd-restx{font-size:12px;line-height:1.9;color:#6b6385;font-weight:700;margin-top:4px}
+.fd-resgo{margin-top:12px;width:100%;background:var(--rc,#6d3fd6);color:#fff;padding:11px;border-radius:12px;font-weight:900;font-size:13px}
+.fd-prog{font-size:13px;font-weight:800;color:#6b6385;text-align:center;line-height:1.9}
 </style>
 <script id="su-feed-js">
 /* ===== متابعة مهارات الأكل والبلع (ولي الأمر) — مدمجة في كراسة المتابعة ===== */
@@ -16600,6 +16609,44 @@ html.su-dark{
     return (y ? (y === 1 ? 'سنة' : y === 2 ? 'سنتين' : y + ' سنوات') : '') + (y && r ? ' و' : '') + (r ? (r === 1 ? 'شهر' : r === 2 ? 'شهرين' : r + (r < 11 ? ' شهور' : ' شهر')) : (y ? '' : 'أقل من شهر'));
   }
   function bandFor(m) { if (m == null) return 0; var i = MS.bands.findIndex(function (b) { return m >= b.min_months && m < b.max_months_exclusive; }); return i < 0 ? MS.bands.length - 1 : i; }
+  function calc(cid, b) {
+    var m = mine(cid), c = { consistent: 0, sometimes: 0, not_observed: 0, unsure: 0, unset: 0 }, last = '', miss = [];
+    b.skills.forEach(function (s) {
+      var r = m[s.id];
+      if (r && ST[r.status]) { c[r.status]++; if (r.at && r.at > last) last = r.at; if (r.status === 'not_observed') miss.push(s.text); }
+      else c.unset++;
+    });
+    var total = b.skills.length, known = c.consistent + c.sometimes + c.not_observed;
+    var complete = total > 0 && c.unset === 0 && known > 0;
+    var pct = known ? Math.round((c.consistent + c.sometimes * 0.5) / known * 100) : 0;
+    var lv;
+    if (c.not_observed >= 2 || pct < 60) lv = { k: 'warn', color: '#e11d48', label: 'يُفضّل مناقشة النتيجة مع الأخصائي', icon: '💬' };
+    else if (pct >= 80) lv = { k: 'good', color: '#059669', label: 'مهارات مناسبة لهذه المرحلة', icon: '🌟' };
+    else lv = { k: 'mid', color: '#f59e0b', label: 'تقدّم جيد ويحتاج متابعة', icon: '📈' };
+    var rough = known < Math.ceil(total / 2);
+    return { c: c, total: total, known: known, complete: complete, pct: pct, lv: lv, last: last, miss: miss, rough: rough };
+  }
+  function summaryText(b, r) {
+    var t = 'تسجيل ولي الأمر — ' + b.label + ': ' + r.c.consistent + ' مستمرة، ' + r.c.sometimes + ' أحيانًا، ' + r.c.not_observed + ' لم تُلاحظ' + (r.c.unsure ? '، ' + r.c.unsure + ' غير متأكد' : '') + '. التقدير: ' + r.lv.label + '.';
+    if (r.miss.length) t += ' المهارات التي لم تُلاحظ: ' + r.miss.slice(0, 5).join(' | ') + (r.miss.length > 5 ? ' ...' : '');
+    if (r.rough) t += ' (النتيجة تقريبية لكثرة "غير متأكد")';
+    return t + ' — للتوعية والمتابعة وليست تشخيصًا.';
+  }
+  // تقييمات مشتقة من تسجيل الأكل والبلع: بتظهر ضمن "تقييمات الأداء" لولي الأمر وللأخصائي (من غير كتابة في evaluations)
+  window.suFeedEvals = function (cid) {
+    var out = [];
+    try {
+      cid = String(cid);
+      MS.bands.forEach(function (b) {
+        var r = calc(cid, b); if (!r.complete) return;
+        var txt = summaryText(b, r);
+        out.push({ id: 'feed_' + b.id, clientId: cid, kind: 'feed', derived: true, parentVisible: true,
+          title: 'تقييم الأكل والبلع — ' + b.label, date: (r.last || new Date().toISOString()).slice(0, 10),
+          score: r.pct, max: 100, notes: txt, summary: txt });
+      });
+    } catch (e) { try { suLog('suFeedEvals', e); } catch (_) {} }
+    return out;
+  };
   function store() { if (typeof state === 'undefined' || !state) return {}; if (!state.feedingResponses || typeof state.feedingResponses !== 'object') state.feedingResponses = {}; return state.feedingResponses; }
   function mine(cid) { var s = store(); return (s[cid] = s[cid] || {}); }
 
@@ -16618,8 +16665,14 @@ html.su-dark{
     var same = old && old.status === status && date === undefined && note === undefined;
     var st = same ? 'clear' : status, prev = old ? Object.assign({}, old) : null;
     if (st === 'clear') delete m[sid];
-    else m[sid] = { status: st, date: date !== undefined ? date : ((old && old.date) || null), note: note !== undefined ? note : ((old && old.note) || '') };
+    else var bd = MS.bands[_band[cid]], was = bd ? calc(cid, bd).complete : false;
+    m[sid] = { status: st, date: date !== undefined ? date : ((old && old.date) || null), note: note !== undefined ? note : ((old && old.note) || ''), at: new Date().toISOString() };
+    var now = bd ? calc(cid, bd).complete : false;
     rerender();
+    if (now && !was) {
+      toast('🎉 اكتمل التقييم — النتيجة اتضافت في تقييمات الأداء');
+      setTimeout(function () { var el = document.getElementById('fdResult'); if (el && el.scrollIntoView) el.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 120);
+    }
     try { var x = m[sid]; await save(cid, sid, st, x && x.date, x && x.note); }
     catch (e) { if (prev) m[sid] = prev; else delete m[sid]; rerender(); toast('تعذر الحفظ: ' + (e && e.message || '')); try { suLog('feeding_set', e); } catch (_) {} }
   }
@@ -16656,6 +16709,17 @@ html.su-dark{
         '<div class="fd-nf' + (op ? ' open' : '') + '"><input type="date" value="' + esc(r.date || '') + '" max="' + today + '"><textarea maxlength="500" placeholder="ملاحظتك (اختياري)">' + esc(r.note || '') + '</textarea><button class="fd-save" data-fd-sv="1">حفظ الملاحظة</button></div>' +
         ((r.note || r.date) ? '<div class="fd-saved">' + (r.date ? '📅 ' + esc(r.date) + ' — ' : '') + esc(r.note || '') + '</div>' : '') + '</div>';
     }).join('') || '<div class="fd-empty">لا توجد مهارات في هذا القسم</div>';
+    var R = calc(cid, b);
+    if (R.complete) {
+      h += '<div class="fd-card fd-res" id="fdResult" style="--rc:' + R.lv.color + '"><h2>🍽️ نتيجة تقييم الأكل والبلع — ' + esc(b.label) + '</h2><div class="fd-resrow">' +
+        '<div class="fd-resring" style="background:conic-gradient(' + R.lv.color + ' ' + R.pct + '%,#ede6fb 0)"><div>' + R.pct + '%</div></div>' +
+        '<div><div class="fd-reslv">' + R.lv.icon + ' ' + esc(R.lv.label) + '</div><div class="fd-restx">' + R.c.consistent + ' مستمرة · ' + R.c.sometimes + ' أحيانًا · ' + R.c.not_observed + ' لم تُلاحظ' + (R.c.unsure ? ' · ' + R.c.unsure + ' غير متأكد' : '') + '</div></div></div>' +
+        (R.rough ? '<div class="fd-restx">النتيجة تقريبية لأن عدد "غير متأكد" كبير.</div>' : '') +
+        '<div class="fd-restx">✅ تمت إضافة هذه النتيجة إلى «تقييمات الأداء» ويراها الأخصائي. وهي للتوعية والمتابعة وليست تشخيصًا.</div>' +
+        '<button class="fd-resgo" onclick="ppSet(\'tab\',\'perf\')">عرض في تقييمات الأداء ←</button></div>';
+    } else {
+      h += '<div class="fd-card fd-prog">📝 باقي <b>' + R.c.unset + '</b> مهارة في فئة ' + esc(b.label) + ' — أول ما تخلّصهم هتظهر النتيجة وتتضاف في تقييمات الأداء.</div>';
+    }
     h += '<div class="fd-card fd-ref">' + (b.reference_notes || []).map(function (n) { return '<b>معلومة مرجعية للاسترشاد فقط:</b> ' + esc(n.text) + '<br>'; }).join('') + 'يرجى اتباع إرشادات طبيب الأطفال في التغذية الفردية.</div>';
     h += '<div class="fd-card fd-foot">هذه القائمة مبنية على معالم ASHA للتوعية والمتابعة، وليست أداة تشخيص أو فحص طبي. سرعة النمو تختلف بين الأطفال، وعدم تحقق مهارة واحدة لا يعني وحده وجود اضطراب. ' + (am != null && am > 36 ? 'القائمة تغطي حتى 3 سنوات.' : '') +
       '<details><summary>متى أتواصل مع المختص؟</summary>إذا غابت عدة مهارات، أو توقف التقدم، أو فقد الطفل مهارة سبق اكتسابها، أو ظهرت صعوبات في الرضاعة أو الأكل أو البلع، تواصل مع طبيب الأطفال وأخصائي التخاطب/البلع.<br><span class="fd-emg">عند وجود صعوبة تنفس أو اختناق حالي، اطلب المساعدة الطبية الطارئة فورًا.</span></details>' +
