@@ -502,7 +502,7 @@ window.suNavIco=function(k,sz){return '<svg viewBox="0 0 24 24" width="'+(sz||24
     #sideNav .side-ico::after { display: none; }
     #side-nav-dashboard .side-ico { --g: #22d3ee; } #side-nav-secretary .side-ico { --g: #facc15; } #side-nav-calendar .side-ico { --g: #f87171; }
     #side-nav-clients .side-ico { --g: #a78bfa; } #side-nav-sessions .side-ico { --g: #60a5fa; } #side-nav-invoices .side-ico { --g: #e2e8f0; }
-    #side-nav-payments .side-ico { --g: #4ade80; } #side-nav-purchases .side-ico { --g: #fb923c; } #side-nav-staff .side-ico { --g: #2dd4bf; }
+    #side-nav-payments .side-ico { --g: #4ade80; } #side-nav-purchases .side-ico { --g: #fb923c; } #side-nav-profit .side-ico { --g: #facc15; } #side-nav-staff .side-ico { --g: #2dd4bf; }
     #side-nav-settings .side-ico { --g: #cbd5e1; } #side-quick-tools .side-ico { --g: #fb7185; } #side-nav-activities .side-ico { --g: #f472b6; }
     #sideNav .i3d { font-size: 25px; line-height: 1; display: block; position: relative;
       transform: perspective(240px) rotateX(14deg) rotateY(-16deg); transform-origin: 50% 60%;
@@ -1775,6 +1775,7 @@ body.su-md-dash main>#tab-dashboard{margin-top:0!important}
           <button class="side-tab" id="side-nav-invoices" onclick="switchTab('invoices')" title="الفواتير الشهرية"><span class="side-ico"><span class="i3d"><svg class="su-i" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg></span></span><span class="side-label">الفواتير الشهرية</span></button>
           <button class="side-tab" id="side-nav-payments" onclick="switchTab('payments')" title="المدفوعات وسندات القبض"><span class="side-ico"><span class="i3d"><svg class="su-i" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg></span></span><span class="side-label">المدفوعات</span></button>
           <button class="side-tab" id="side-nav-purchases" onclick="switchTab('purchases')" title="المشتريات والمصروفات"><span class="side-ico"><span class="i3d"><svg class="su-i" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg></span></span><span class="side-label">المشتريات والمصروفات</span></button>
+          <button class="side-tab" id="side-nav-profit" data-perm-only="profit" onclick="rvOpen()" title="جدول الأرباح"><span class="side-ico"><span class="i3d"><svg class="su-i" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></span></span><span class="side-label">جدول الأرباح</span></button>
         </div>
         <div class="side-group" data-g="admin">
           <div class="side-group-title">الإدارة</div>
@@ -2312,7 +2313,7 @@ body.su-md-dash main>#tab-dashboard{margin-top:0!important}
               <option value="B003">Online Egypt</option>
               <option value="B004">خاص Private</option>
             </select>
-            <button onclick="acOpen('invoices')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg text-xs font-black shadow transition whitespace-nowrap">📊 حسابات</button>
+            <button data-perm-only="accounts" onclick="acOpen('invoices')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg text-xs font-black shadow transition whitespace-nowrap">📊 حسابات</button>
             <button onclick="resetInvoicesFilters()" class="text-slate-400 hover:text-rose-600 px-2 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1">
               ↺ تفريغ
             </button>
@@ -2366,7 +2367,7 @@ body.su-md-dash main>#tab-dashboard{margin-top:0!important}
               <span class="text-[11px] text-slate-500 font-bold">إلى:</span>
               <input type="date" id="paymentDateTo" onchange="renderPaymentsTable()" class="bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs font-mono font-bold text-slate-700">
             </div>
-            <button onclick="acOpen('payments')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg text-xs font-black shadow transition whitespace-nowrap">📊 حسابات</button>
+            <button data-perm-only="accounts" onclick="acOpen('payments')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg text-xs font-black shadow transition whitespace-nowrap">📊 حسابات</button>
             <button onclick="resetPaymentsFilters()" class="text-slate-400 hover:text-rose-600 px-2 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1">
               ↺ تفريغ
             </button>
@@ -2454,7 +2455,7 @@ body.su-md-dash main>#tab-dashboard{margin-top:0!important}
             <button onclick="openNewPurchaseModal()" class="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-xl text-xs font-black shadow flex items-center gap-1.5 transition">
               <span>+ تسجيل فاتورة / مشتريات جديدة ➕</span>
             </button>
-            <button onclick="acOpen('purchases')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg text-xs font-black shadow transition whitespace-nowrap">📊 حسابات</button>
+            <button data-perm-only="accounts" onclick="acOpen('purchases')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg text-xs font-black shadow transition whitespace-nowrap">📊 حسابات</button>
             <button onclick="printPurchasesLedger()" class="bg-indigo-800 hover:bg-indigo-700 text-white px-3 py-2 rounded-xl text-xs font-bold border border-indigo-600 flex items-center gap-1">
               <span>🖨️ طباعة الكشف</span>
             </button>
@@ -2502,7 +2503,7 @@ body.su-md-dash main>#tab-dashboard{margin-top:0!important}
             <input type="date" id="purchaseDateTo" onchange="renderPurchasesTable()" class="bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs font-mono font-bold text-slate-700">
             <button onclick="resetPurchasesFilters()" class="text-slate-400 hover:text-rose-600 px-2 py-1.5 rounded-lg text-xs font-bold transition">↺ تفريغ</button>
           </div>
-          <button onclick="acOpen('purchases')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg text-xs font-black shadow whitespace-nowrap">📊 حسابات</button><div class="text-xs text-slate-400 font-medium">💡 يتم تسجيل وتدقيق جميع المصروفات التشغيلية للمركز</div>
+          <button data-perm-only="accounts" onclick="acOpen('purchases')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg text-xs font-black shadow whitespace-nowrap">📊 حسابات</button><div class="text-xs text-slate-400 font-medium">💡 يتم تسجيل وتدقيق جميع المصروفات التشغيلية للمركز</div>
         </div>
 
         <!-- Purchases Table -->
@@ -5275,9 +5276,19 @@ window.suMfaOpen=async function(){
     return settingsPerms[role] || defaultSettings.permissions[role] || defaultSettings.permissions.admin;
   }
 
+  // صلاحيات "أدمن فقط" افتراضيًا (accounts = زر الحسابات، profit = جدول الأرباح)
+  window.suPermOnly = function (key) {
+    if (typeof currentUser === 'undefined' || !currentUser) return false;
+    const pm = getUserEffectivePermissions(currentUser) || {};
+    return currentUser.role === 'admin' ? pm[key] !== false : pm[key] === true;
+  };
+
   function applyPermissions() {
     if (!currentUser) return;
     const perms = getUserEffectivePermissions(currentUser);
+    document.querySelectorAll('[data-perm-only]').forEach(el => {
+      el.classList.toggle('hidden', !window.suPermOnly(el.dataset.permOnly));
+    });
 
     const navMap = {
       dashboard: 'nav-dashboard',
@@ -8548,7 +8559,7 @@ window.suMfaOpen=async function(){
     ['dashboard', 'side-nav-dashboard', 'لوحة التحكم'], ['myappts', 'side-nav-myappts', 'مواعيدي'], ['followup', 'side-nav-followup', 'كراسة المتابعة'],
     ['secretary', 'side-nav-secretary', 'كشف الحضور اليومي'], ['calendar', 'side-nav-calendar', 'الكاليندر والمواعيد'], ['myearn', 'side-nav-myearn', 'حساباتي'],
     ['clients', 'side-nav-clients', 'العملاء'], ['sessions', 'side-nav-sessions', 'سجل الجلسات'], ['activities', 'side-nav-activities', 'الأنشطة'],
-    ['invoices', 'side-nav-invoices', 'الفواتير الشهرية'], ['payments', 'side-nav-payments', 'المدفوعات'], ['purchases', 'side-nav-purchases', 'المشتريات والمصروفات'],
+    ['invoices', 'side-nav-invoices', 'الفواتير الشهرية'], ['payments', 'side-nav-payments', 'المدفوعات'], ['purchases', 'side-nav-purchases', 'المشتريات والمصروفات'], ['profit', 'side-nav-profit', 'جدول الأرباح'],
     ['staff', 'side-nav-staff', 'الأخصائيين والفروع'], ['settings', 'side-nav-settings', 'الإعدادات والصلاحيات'], ['photos', 'side-nav-photos', 'إدارة الصور'],
     ['quicktools', 'side-quick-tools', 'أدوات سريعة']
   ];
@@ -8995,27 +9006,31 @@ window.suMfaOpen=async function(){
       { key: 'invoices', label: '🧾 الفواتير والتقارير الشهرية' },
       { key: 'payments', label: '💵 المدفوعات وسندات القبض النقدية' },
       { key: 'purchases', label: '🛒 سجل المشتريات والمصروفات' },
+      { key: 'accounts', label: '📊 زر الحسابات (فواتير / مدفوعات / مشتريات)' },
+      { key: 'profit', label: '💰 جدول الأرباح' },
       { key: 'staff', label: '👩‍⚕️ إدارة الأخصائيين وأسعار الفروع' },
       { key: 'settings', label: '⚙️ إعدادات النظام والصلاحيات' },
       { key: 'delete', label: '🗑️ صلاحية الحذف النهائي للعناصر' }
     ];
 
+    const adminOnlyKeys = ['accounts', 'profit'];
+    const chk = (r, k) => adminOnlyKeys.includes(k) ? (r === 'admin' ? !(perms.admin && perms.admin[k] === false) : !!(perms[r] && perms[r][k] === true)) : (r === 'parent' ? !!(perms.parent && perms.parent[k] === true) : !!(perms[r] && perms[r][k] !== false));
     modules.forEach(m => {
       const tr = document.createElement('tr');
       tr.className = 'hover:bg-slate-50 border-b border-slate-100 text-xs';
       tr.innerHTML = `
         <td class="p-3 font-bold text-slate-800 border-l">${escH(m.label)}</td>
         <td class="p-3 text-center border-l bg-indigo-50/50">
-          <input type="checkbox" id="perm-admin-${m.key}" ${perms.admin && perms.admin[m.key] !== false ? 'checked' : ''} class="w-4 h-4 text-indigo-600 rounded">
+          <input type="checkbox" id="perm-admin-${m.key}" ${chk('admin', m.key) ? 'checked' : ''} class="w-4 h-4 text-indigo-600 rounded">
         </td>
         <td class="p-3 text-center border-l bg-purple-50/50">
-          <input type="checkbox" id="perm-secretary-${m.key}" ${perms.secretary && perms.secretary[m.key] !== false ? 'checked' : ''} class="w-4 h-4 text-purple-600 rounded">
+          <input type="checkbox" id="perm-secretary-${m.key}" ${chk('secretary', m.key) ? 'checked' : ''} class="w-4 h-4 text-purple-600 rounded">
         </td>
         <td class="p-3 text-center border-l bg-cyan-50/50">
-          <input type="checkbox" id="perm-therapist-${m.key}" ${perms.therapist && perms.therapist[m.key] !== false ? 'checked' : ''} class="w-4 h-4 text-cyan-600 rounded">
+          <input type="checkbox" id="perm-therapist-${m.key}" ${chk('therapist', m.key) ? 'checked' : ''} class="w-4 h-4 text-cyan-600 rounded">
         </td>
         <td class="p-3 text-center bg-amber-50/60">
-          <input type="checkbox" id="perm-parent-${m.key}" ${perms.parent && perms.parent[m.key] === true ? 'checked' : ''} class="w-4 h-4 text-amber-600 rounded">
+          <input type="checkbox" id="perm-parent-${m.key}" ${chk('parent', m.key) ? 'checked' : ''} class="w-4 h-4 text-amber-600 rounded">
         </td>
       `;
       tbody.appendChild(tr);
@@ -9027,7 +9042,7 @@ window.suMfaOpen=async function(){
     if (!state.settings.permissions) state.settings.permissions = JSON.parse(JSON.stringify(defaultSettings.permissions));
     
     const roles = ['admin', 'secretary', 'therapist', 'parent'];
-    const modules = ['dashboard', 'secretary', 'calendar', 'clients', 'sessions', 'invoices', 'payments', 'purchases', 'staff', 'settings', 'delete'];
+    const modules = ['dashboard', 'secretary', 'calendar', 'clients', 'sessions', 'invoices', 'payments', 'purchases', 'accounts', 'profit', 'staff', 'settings', 'delete'];
 
     roles.forEach(r => {
       if (!state.settings.permissions[r]) state.settings.permissions[r] = {};
@@ -12405,7 +12420,7 @@ if(window.matchMedia('(max-width:820px)').matches){
       file:P('<path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5M10 13h6M10 17h4"/>'),bag:P('<path d="M5 8h14l-1 12H6z"/><path d="M9 8V6a3 3 0 016 0v2"/>'),
       staff:P('<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 3-6 6.5-6s6.5 2.4 6.5 6M19 8v6M16 11h6"/>'),gear:P('<circle cx="12" cy="12" r="3.2"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/>'),
       cam:P('<path d="M4 8h3l1.5-2h7L17 8h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>'),out:P('<path d="M10 4H5v16h5M15 8l4 4-4 4M19 12H9"/>'),x:P('<path d="M6 6l12 12M18 6L6 18"/>'),dot:P('<circle cx="12" cy="12" r="3"/>')};
-    var M={dashboard:['home','p'],myappts:['cal','b'],followup:['clip','o'],secretary:['clip','g'],calendar:['cal','p'],myearn:['wallet','g'],clients:['users','g'],sessions:['cal','b'],activities:['bolt','o'],invoices:['file','p'],payments:['wallet','g'],purchases:['bag','o'],staff:['staff','b'],settings:['gear','b'],photos:['cam','p'],'side-quick-tools':['bolt','o']};
+    var M={dashboard:['home','p'],myappts:['cal','b'],followup:['clip','o'],secretary:['clip','g'],calendar:['cal','p'],myearn:['wallet','g'],clients:['users','g'],sessions:['cal','b'],activities:['bolt','o'],invoices:['file','p'],payments:['wallet','g'],purchases:['bag','o'],profit:['wallet','o'],staff:['staff','b'],settings:['gear','b'],photos:['cam','p'],'side-quick-tools':['bolt','o']};
     function row(id,lb,on,key,fn){var m=M[key]||['dot','p'];return '<button type="button" class="sum-row sd-row'+(on?' on':'')+'" '+(fn?'data-fn="'+fn+'"':'data-b="'+esc(id)+'"')+'><span class="sd-ic c-'+m[1]+'">'+I[m[0]]+'</span><span class="sd-lb">'+esc(lb)+'</span><span class="sd-ch">'+CH+'</span></button>'}
     var h='<div class="sd-scrim" data-back></div><aside class="sd-panel"><div class="sd-head">'+(lg?'<img class="sd-logo" alt="" src="'+lg+'">':'<b class="sd-t">القائمة</b>')+'<button type="button" class="sd-x" data-back aria-label="إغلاق القائمة">'+I.x+'</button></div><div class="sd-body">';
     h+='<div class="sd-user"><div class="sd-hi">أهلاً <b>'+esc(nm)+'</b><small>'+esc(rl)+'</small></div><span class="sd-av">'+(ph?'<img alt="" src="'+esc(ph)+'">':esc(av||nm.charAt(0)))+'<i></i></span></div>';
@@ -16145,6 +16160,22 @@ html body #mNav.th-nav .th-nb{height:48px!important;gap:1px!important;font-size:
 html body #mNav.th-nav .th-nbi{width:22px!important;height:22px!important}
 }
 </style>
+<script id="su-admin-only-guard">
+/* حماية: "الحسابات" و"جدول الأرباح" للي معاه الصلاحية بس (الأدمن افتراضيًا) */
+(function(){
+  [['acOpen','accounts'],['rvOpen','profit']].forEach(function(p){
+    var f=window[p[0]]; if(typeof f!=='function')return;
+    window[p[0]]=function(){
+      if(typeof window.suPermOnly==='function' && !window.suPermOnly(p[1])){
+        try{showToast('🔒 مش مسموحلك تفتح الشاشة دي — للأدمن فقط','red')}catch(e){}
+        return;
+      }
+      return f.apply(this,arguments);
+    };
+  });
+  try{ if(typeof applyPermissions==='function') applyPermissions(); }catch(e){}
+})();
+</script>
 <style id="su-month-unify">
 /* ===== عرض الشهر الموحّد (أدمن/سكرتارية + أخصائي + ولي أمر) =====
    تابلت/عريض: شرايح (وقت + اسم) + "+N جلسات"  |  موبايل: نقطة فيها رقم الجلسات
