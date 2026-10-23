@@ -5052,6 +5052,7 @@ window.suMfaOpen=async function(){
     state.evaluations = d.evaluations || [];
     state.notebooks = d.notebooks || {};
     state.avatars = d.avatars || [];
+    state.feedingResponses = d.feedingResponses || {};   // متابعة مهارات الأكل والبلع
     if (d.settings && d.settings.permissions) state.settings = d.settings;
     const ids = (d.client_ids || []).map(String);
     state.users = [{ name: d.name || '', email: d.email || '', role: 'parent', clientIds: ids, password: '' }];
@@ -10345,10 +10346,11 @@ Object.assign(I18N_EN, Object.assign({"قبل 24س": "before 24h", "اعتذار
         <div class="bg-white rounded-2xl border p-4 space-y-4"><div class="font-black text-sm text-slate-800">💬 تعليقات الأخصائي</div>${commentsHtml}</div>
         <div class="space-y-3"><div class="font-black text-sm text-slate-800 px-1">📊 تقييمات الأداء والاختبارات</div>${evHtml}</div>`;
     } else if (_ppTab === 'book') {
-      const seg = `<div class="pp-seg"><button class="${_ppSub === 'sessions' ? 'on' : ''}" onclick="ppSet('sub','sessions')">📓 الكراسة</button><button class="${_ppSub === 'acts' ? 'on' : ''}" onclick="ppSet('sub','acts')">🧩 أنشطة المنزل${acts.length ? ' (' + acts.length + ')' : ''}</button><button class="${_ppSub === 'notes' ? 'on' : ''}" onclick="ppSet('sub','notes')">📝 مفكرتي</button></div>`;
+      const seg = `<div class="pp-seg"><button class="${_ppSub === 'sessions' ? 'on' : ''}" onclick="ppSet('sub','sessions')">📓 الكراسة</button><button class="${_ppSub === 'acts' ? 'on' : ''}" onclick="ppSet('sub','acts')">🧩 أنشطة المنزل${acts.length ? ' (' + acts.length + ')' : ''}</button><button class="${_ppSub === 'notes' ? 'on' : ''}" onclick="ppSet('sub','notes')">📝 مفكرتي</button><button class="${_ppSub === 'feed' ? 'on' : ''}" onclick="ppSet('sub','feed')">🍽️ الأكل والبلع</button></div>`;
       let inner = '';
       if (_ppSub === 'acts') inner = acts.length ? `<div class="grid sm:grid-cols-2 gap-3">${acts.map(a => caCard(c.id, a, false)).join('')}</div>` : '<div class="bg-white rounded-2xl border p-8 text-center text-slate-400">لم يتم تنزيل أنشطة منزلية بعد. سيظهر هنا ما يحدده الأخصائي.</div>';
       else if (_ppSub === 'notes') inner = ppNotesHtml(c);
+      else if (_ppSub === 'feed') inner = (window.suFeedHtml ? window.suFeedHtml(c) : '');
       else inner = nbParentHtml(c);
       body = seg + inner;
     } else if (_ppTab === 'cal') {
@@ -16530,6 +16532,155 @@ html.su-dark{
   html.su-dark body #tab-dashboard.su-md-on>.lg\:grid-cols-3>div{border-color:#2d3a52!important;box-shadow:none!important}
 }
 </style>
+
+<style id="su-feed-css">
+.fd{display:flex;flex-direction:column;gap:12px}
+.fd .fd-card{background:#fff;border:1px solid #e4dff1;border-radius:20px;padding:14px;box-shadow:0 1px 8px #0000000d}
+.fd-child{display:flex;align-items:center;gap:12px}
+.fd-av{width:54px;height:54px;border-radius:50%;background:#ede6fb;display:grid;place-items:center;font-size:24px;overflow:hidden;flex:none}
+.fd-av img{width:100%;height:100%;object-fit:cover}
+.fd-child b{display:block;font-size:16px;font-weight:900;color:#1e1636}.fd-child span{font-size:13px;color:#7c7592;font-weight:700}
+.fd-banner{background:#ede6fb;display:flex;gap:10px;align-items:center}
+.fd-banner b{display:block;font-size:14px;font-weight:900;color:#1e1636}.fd-banner span{font-size:12px;color:#6b6385;font-weight:700}
+.fd-tabs,.fd-chips{display:flex;gap:8px;overflow-x:auto;padding:2px 0 4px;scrollbar-width:none}
+.fd-tabs::-webkit-scrollbar,.fd-chips::-webkit-scrollbar{display:none}
+.fd-tab{flex:none;padding:9px 15px;border-radius:999px;background:#fff;border:1px solid #e4dff1;font-weight:800;font-size:13px;white-space:nowrap;color:#1e1636}
+.fd-tab.on{background:#6d3fd6;color:#fff;border-color:#6d3fd6}
+.fd-chip{flex:none;padding:7px 14px;border-radius:999px;background:#ede6fb;color:#6d3fd6;font-weight:800;font-size:13px;white-space:nowrap}
+.fd-chip.on{background:#6d3fd6;color:#fff}
+.fd-sum{display:flex;gap:14px;align-items:center}
+.fd-ring{width:100px;height:100px;border-radius:50%;flex:none;display:grid;place-items:center}
+.fd-ring div{width:78px;height:78px;border-radius:50%;background:#fff;display:grid;place-items:center;text-align:center;line-height:1.1}
+.fd-ring b{font-size:22px;color:#1e1636}.fd-ring small{font-size:9px;color:#7c7592;font-weight:800;display:block}
+.fd-sumr{flex:1;min-width:0}.fd-sumr h2{font-size:15px;font-weight:900;color:#1e1636}.fd-sumr p{font-size:11px;color:#7c7592;margin:2px 0 8px;font-weight:700}
+.fd-cnt{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}
+.fd-cnt div{border-radius:12px;padding:7px 1px;text-align:center;font-size:10px;font-weight:800}
+.fd-cnt b{display:block;font-size:18px}
+.fd-cg{background:#e3f7ee;color:#12a66f}.fd-co{background:#fff3dc;color:#c47f0a}.fd-cr{background:#fde8e8;color:#e5484d}.fd-cx{background:#efedf4;color:#7c7592}
+.fd-alert{background:#fff3dc;border:1px solid #f0a020!important;font-size:13px;line-height:1.7;font-weight:700;color:#5a3d05}
+.fd-sk h3{font-size:15px;line-height:1.6;font-weight:900;color:#1e1636}.fd-dm{font-size:11px;color:#7c7592;margin-bottom:10px;font-weight:700}
+.fd-opts{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.fd-op{padding:10px 6px;border-radius:14px;border:1.5px solid #e4dff1;font-size:13px;font-weight:800;display:flex;gap:7px;align-items:center;justify-content:center;background:#fff;color:#1e1636}
+.fd-op i{font-style:normal;width:21px;height:21px;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:12px}
+.fd-op[data-fd-s=consistent] i{background:#12a66f}.fd-op[data-fd-s=sometimes] i{background:#f0a020}.fd-op[data-fd-s=not_observed] i{background:#e5484d}.fd-op[data-fd-s=unsure] i{background:#9a94ad}
+.fd-op.on[data-fd-s=consistent]{border-color:#12a66f;background:#e3f7ee}.fd-op.on[data-fd-s=sometimes]{border-color:#f0a020;background:#fff3dc}
+.fd-op.on[data-fd-s=not_observed]{border-color:#e5484d;background:#fde8e8}.fd-op.on[data-fd-s=unsure]{border-color:#9a94ad;background:#efedf4}
+.fd-addn{margin-top:10px;width:100%;padding:10px;border-radius:14px;background:#ede6fb;color:#6d3fd6;font-weight:800;font-size:13px;text-align:right}
+.fd-nf{margin-top:8px;display:none;gap:8px;flex-direction:column}.fd-nf.open{display:flex}
+.fd-nf input,.fd-nf textarea{width:100%;padding:10px;border-radius:12px;border:1px solid #e4dff1;background:#faf9fd;color:#1e1636;font:inherit;font-size:14px}
+.fd-nf textarea{min-height:70px;resize:vertical}
+.fd-save{background:#6d3fd6;color:#fff;padding:10px;border-radius:12px;font-weight:900}
+.fd-saved{margin-top:8px;font-size:12px;color:#7c7592;font-weight:700}
+.fd-ref,.fd-foot{font-size:12px;line-height:1.9;color:#6b6385;font-weight:700}.fd-ref b{color:#1e1636}
+.fd-foot details{margin-top:6px}.fd-emg{color:#e5484d;font-weight:900}
+.fd-empty{text-align:center;color:#7c7592;padding:20px;font-weight:700}
+.fd-toast{position:fixed;bottom:110px;left:50%;transform:translateX(-50%);background:#222;color:#fff;padding:10px 18px;border-radius:999px;font-size:13px;font-weight:800;z-index:99999;display:none}
+</style>
+<script id="su-feed-js">
+/* ===== متابعة مهارات الأكل والبلع (ولي الأمر) — مدمجة في كراسة المتابعة ===== */
+(function () {
+  'use strict';
+  var MS = {"version":1,"source":"ASHA Feeding & Swallowing Milestones (صياغة عربية تثقيفية)","statuses":[{"id":"consistent","label":"مستمرة","color":"green"},{"id":"sometimes","label":"أحيانًا","color":"orange"},{"id":"not_observed","label":"لم تُلاحظ","color":"red"},{"id":"unsure","label":"غير متأكد","color":"gray"}],"unset_label":"لم أحدد","groups":[{"id":"all","label":"الكل"},{"id":"self_feeding","label":"الأكل الذاتي"},{"id":"chew_swallow","label":"المضغ والبلع"},{"id":"drinking","label":"الشرب"},{"id":"posture","label":"الوضعية والاستعداد"}],"bands":[{"id":"b0_3","label":"0-3 شهور","source_label":"من الولادة إلى 3 أشهر","min_months":0,"max_months_exclusive":4,"skills":[{"id":"b0_3_01","order":1,"domain":"التحكم في الرأس والاستعداد","group":"posture","text":"يرفع رأسه عند تقديم الدعم له."},{"id":"b0_3_02","order":2,"domain":"التحكم في الرأس والاستعداد","group":"posture","text":"يدير رأسه باتجاه الحلمة ويفتح فمه."},{"id":"b0_3_03","order":3,"domain":"المص والبلع","group":"chew_swallow","text":"يلتقم الحلمة."},{"id":"b0_3_04","order":4,"domain":"المص والبلع","group":"chew_swallow","text":"يمص ويبلع."}],"reference_notes":[{"text":"حليب الأم و/أو الحليب الصناعي المخصص للرضع."}]},{"id":"b4_6","label":"4-6 شهور","source_label":"من 4 إلى 6 أشهر","min_months":4,"max_months_exclusive":6,"skills":[{"id":"b4_6_01","order":1,"domain":"المشاركة والاستعداد","group":"posture","text":"يقرّب يديه من الثدي أو زجاجة الرضاعة."},{"id":"b4_6_02","order":2,"domain":"المشاركة والاستعداد","group":"posture","text":"يربت بيديه على الثدي أو زجاجة الرضاعة."},{"id":"b4_6_03","order":3,"domain":"المشاركة والاستعداد","group":"posture","text":"يقرّب يديه أو الألعاب إلى فمه."},{"id":"b4_6_04","order":4,"domain":"المشاركة والاستعداد","group":"posture","text":"يبدأ في الجلوس بوضعية مائلة أو مدعومة، وقد يمسك الثدي أو زجاجة الرضاعة أثناء الرضاعة."},{"id":"b4_6_05","order":5,"domain":"المشاركة والاستعداد","group":"posture","text":"يجلس في كرسي طعام مخصص للرضع مع دعم وأحزمة، مع إمكانية إمالة الكرسي."},{"id":"b4_6_06","order":6,"domain":"المضغ والبلع","group":"chew_swallow","text":"يفتح فمه لاستقبال الملعقة."},{"id":"b4_6_07","order":7,"domain":"المضغ والبلع","group":"chew_swallow","text":"يستخدم لسانه لتحريك الطعام إلى الجزء الخلفي من الفم استعدادًا للبلع."}],"reference_notes":[{"text":"حليب الأم و/أو الحليب الصناعي. قد تناسبه الحبوب المخصصة للرضع الممزوجة بالحليب والمهروسات الناعمة عند الاستعداد النمائي؛ يُرجى استشارة طبيب الأطفال بشأن الجاهزية واختيار الطعام."}]},{"id":"b6_9","label":"6-9 شهور","source_label":"من 6 إلى 9 أشهر","min_months":6,"max_months_exclusive":9,"skills":[{"id":"b6_9_01","order":1,"domain":"الوضعية والمشاركة","group":"posture","text":"يثبت رأسه عند الجلوس في وضع مستقيم."},{"id":"b6_9_02","order":2,"domain":"الوضعية والمشاركة","group":"posture","text":"يميل إلى الأمام لاستقبال الطعام."},{"id":"b6_9_03","order":3,"domain":"الوضعية والمشاركة","group":"posture","text":"يحتاج إلى دعم مناسب في كرسي الطعام حول الخصر والساقين، بما في ذلك مسند القدمين."},{"id":"b6_9_04","order":4,"domain":"الوضعية والمشاركة","group":"posture","text":"يمد يديه لالتقاط الألعاب والطعام."},{"id":"b6_9_05","order":5,"domain":"الأكل الذاتي","group":"self_feeding","text":"يلتقط الطعام بأصابعه."},{"id":"b6_9_06","order":6,"domain":"الأكل الذاتي","group":"self_feeding","text":"يقرّب الطعام إلى فمه بيديه ويبدأ في إطعام نفسه."},{"id":"b6_9_07","order":7,"domain":"الأكل الذاتي","group":"self_feeding","text":"يحاول الإمساك بالملعقة."},{"id":"b6_9_08","order":8,"domain":"المضغ والبلع","group":"chew_swallow","text":"يبدأ الشرب من الكوب؛ وقد يعض حافته أو الشفاطة، وقد ينسكب بعض السائل من فمه."},{"id":"b6_9_09","order":9,"domain":"المضغ والبلع","group":"chew_swallow","text":"يقل سيلان اللعاب."},{"id":"b6_9_10","order":10,"domain":"المضغ والبلع","group":"chew_swallow","text":"يحرك الطعام داخل فمه باستخدام لسانه."},{"id":"b6_9_11","order":11,"domain":"المضغ والبلع","group":"chew_swallow","text":"يمضغ بحركات عمودية للفك إلى أعلى وأسفل."}],"reference_notes":[{"text":"حليب الأم و/أو الحليب الصناعي، وقد تُقدّم كميات صغيرة من الماء عندما يكون ذلك مناسبًا. يمكن تقديم أطعمة لينة ذات قوام متدرج وأطعمة طرية قابلة للمضغ عند الاستعداد النمائي."}]},{"id":"b9_12","label":"9-12 شهر","source_label":"من 9 إلى 12 شهرًا","min_months":9,"max_months_exclusive":12,"skills":[{"id":"b9_12_01","order":1,"domain":"الأكل الذاتي والوضعية","group":"self_feeding","text":"يمسك زجاجة الرضاعة أو كوب الشرب ذي الغطاء بكلتا يديه."},{"id":"b9_12_02","order":2,"domain":"الأكل الذاتي والوضعية","group":"self_feeding","text":"يجلس مستقيمًا في كرسي الطعام مع قدر بسيط من المساعدة."},{"id":"b9_12_03","order":3,"domain":"الأكل الذاتي والوضعية","group":"self_feeding","text":"يمسك الملعقة أثناء الوجبة."},{"id":"b9_12_04","order":4,"domain":"الأكل الذاتي والوضعية","group":"self_feeding","text":"يأكل بنفسه باستخدام أصابعه."},{"id":"b9_12_05","order":5,"domain":"المضغ والبلع","group":"chew_swallow","text":"يأخذ قضمة صغيرة من قطعة طعام أكبر."},{"id":"b9_12_06","order":6,"domain":"المضغ والبلع","group":"chew_swallow","text":"يبدأ المضغ على جانبي الفم (المضغ الدوراني)."},{"id":"b9_12_07","order":7,"domain":"المضغ والبلع","group":"chew_swallow","text":"يغلق شفتيه أثناء البلع."}],"reference_notes":[{"text":"أطعمة لينة مقطعة إلى قطع صغيرة مناسبة، وحليب الأم و/أو الحليب الصناعي. قد تناسبه كميات صغيرة من الماء."}]},{"id":"b12_18","label":"12-18 شهر","source_label":"من 12 إلى 18 شهرًا","min_months":12,"max_months_exclusive":18,"skills":[{"id":"b12_18_01","order":1,"domain":"الوضعية والأكل الذاتي","group":"self_feeding","text":"يجلس في وضع مستقيم مع وضع قدميه على الأرض أو على سطح ثابت، مثل كرسي الطعام أو المقعد الداعم."},{"id":"b12_18_02","order":2,"domain":"الوضعية والأكل الذاتي","group":"self_feeding","text":"يطعم نفسه باستخدام أدوات الطعام أو أصابعه."},{"id":"b12_18_03","order":3,"domain":"الشرب","group":"drinking","text":"يشرب من كوب ذي غطاء دون مساعدة."},{"id":"b12_18_04","order":4,"domain":"الشرب","group":"drinking","text":"يستطيع الشرب من كوب مفتوح مع احتمال انسكاب بعض السائل."},{"id":"b12_18_05","order":5,"domain":"المضغ والبلع","group":"chew_swallow","text":"يستخدم لسانه لتحريك الطعام من جانب إلى آخر داخل الفم."},{"id":"b12_18_06","order":6,"domain":"الشرب","group":"drinking","text":"يشرب من الشفاطة دون مساعدة ودون انسكاب."}],"reference_notes":[{"text":"قد يتمكن من تناول أطعمة تجمع بين أكثر من قوام. تذكر ASHA حليب الأم والحليب البقري كامل الدسم المبستر والماء؛ ويجب اتباع إرشادات طبيب الأطفال بشأن تغذية الطفل."}]},{"id":"b18_24","label":"18-24 شهر","source_label":"من 18 إلى 24 شهرًا","min_months":18,"max_months_exclusive":24,"skills":[{"id":"b18_24_01","order":1,"domain":"الوضعية والأكل الذاتي","group":"self_feeding","text":"يجلس دون دعم."},{"id":"b18_24_02","order":2,"domain":"الوضعية والأكل الذاتي","group":"self_feeding","text":"يطعم نفسه باستخدام أصابعه أو أدوات الطعام."},{"id":"b18_24_03","order":3,"domain":"الشرب","group":"drinking","text":"يشرب من كوب صغير ممسكًا به بيديه مع انسكاب بسيط."},{"id":"b18_24_04","order":4,"domain":"المضغ والبلع","group":"chew_swallow","text":"يمضغ الطعام باستمرار على جانبي الفم."},{"id":"b18_24_05","order":5,"domain":"المضغ والبلع","group":"chew_swallow","text":"يحرك الطعام داخل فمه ويمضغه ويبلعه دون أن ينسكب من فمه."}],"reference_notes":[{"text":"يتعامل مع أطعمة تحتاج إلى مضغ أكبر، مثل صدر الدجاج، عند تحضيرها بشكل آمن. يجب على شخص بالغ تقطيع الأطعمة الصعبة إلى قطع صغيرة لتقليل خطر الاختناق. تذكر ASHA حليب الأم والحليب البقري كامل الدسم المبستر والماء."}]},{"id":"b24_36","label":"2-3 سنوات","source_label":"من سنتين إلى 3 سنوات","min_months":24,"max_months_exclusive":37,"skills":[{"id":"b24_36_01","order":1,"domain":"الأكل الذاتي","group":"self_feeding","text":"يأكل بنفسه باستخدام الشوكة والملعقة، مع استمرار استخدام الأصابع كثيرًا."},{"id":"b24_36_02","order":2,"domain":"الشرب","group":"drinking","text":"يشرب من كوب مفتوح دون انسكاب."},{"id":"b24_36_03","order":3,"domain":"المضغ والبلع","group":"chew_swallow","text":"يمضغ أنواعًا متنوعة من الطعام، بما فيها القوام الأكثر صلابة، دون تهوع أو اختناق."}],"reference_notes":[{"text":"قد يتمكن من تناول معظم الأطعمة المقرمشة أو الصلبة أو متعددة القوام عندما تكون آمنة ومناسبة لنموه. يجب تجنب مخاطر الاختناق مثل الفشار والنقانق والعنب الكامل، وتقطيع الأطعمة الصعبة إلى قطع صغيرة بواسطة شخص بالغ. تُتبع إرشادات طبيب الأطفال بشأن التغذية الفردية."}]}]};
+  var ST = { consistent: 'مستمرة', sometimes: 'أحيانًا', not_observed: 'لم تُلاحظ', unsure: 'غير متأكد' };
+  var ICON = { consistent: '✓', sometimes: '◔', not_observed: '✕', unsure: '?' };
+  var _band = {}, _grp = 'all', _open = {};   // الفئة لكل طفل، الفلتر، ملاحظات مفتوحة
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function toast(t) {
+    var e = document.getElementById('fdToast');
+    if (!e) { e = document.createElement('div'); e.id = 'fdToast'; e.className = 'fd-toast'; document.body.appendChild(e); }
+    e.textContent = t; e.style.display = 'block'; clearTimeout(toast.t); toast.t = setTimeout(function () { e.style.display = 'none'; }, 2800);
+  }
+  function ageMonths(c) {
+    var b = c && (c.birthDate || c.birth_date || c.dob || c.birthday); if (!b) return null;
+    var d = new Date(b); if (isNaN(d)) return null; var n = new Date();
+    return Math.max(0, (n.getFullYear() - d.getFullYear()) * 12 + n.getMonth() - d.getMonth() - (n.getDate() < d.getDate() ? 1 : 0));
+  }
+  function ageText(m) {
+    if (m == null) return ''; var y = Math.floor(m / 12), r = m % 12;
+    return (y ? (y === 1 ? 'سنة' : y === 2 ? 'سنتين' : y + ' سنوات') : '') + (y && r ? ' و' : '') + (r ? (r === 1 ? 'شهر' : r === 2 ? 'شهرين' : r + (r < 11 ? ' شهور' : ' شهر')) : (y ? '' : 'أقل من شهر'));
+  }
+  function bandFor(m) { if (m == null) return 0; var i = MS.bands.findIndex(function (b) { return m >= b.min_months && m < b.max_months_exclusive; }); return i < 0 ? MS.bands.length - 1 : i; }
+  function store() { if (typeof state === 'undefined' || !state) return {}; if (!state.feedingResponses || typeof state.feedingResponses !== 'object') state.feedingResponses = {}; return state.feedingResponses; }
+  function mine(cid) { var s = store(); return (s[cid] = s[cid] || {}); }
+
+  async function save(cid, sid, status, date, note) {
+    if (typeof sb === 'undefined' || !sb || !sb.functions) throw new Error('لا يوجد اتصال');
+    var res = await sb.functions.invoke('parent-data', { body: { action: 'feeding_set', client_id: String(cid), skill_id: sid, status: status, date: date || '', note: note || '' } });
+    if (res.error) {
+      var msg = res.error.message || '';
+      try { var j = await res.error.context.json(); if (j && j.error) msg = j.error; } catch (e) { /* ignore */ }
+      throw new Error(msg || 'تعذر الحفظ');
+    }
+    if (!res.data || res.data.error) throw new Error((res.data && res.data.error) || 'تعذر الحفظ');
+  }
+  async function setStatus(cid, sid, status, date, note) {
+    var m = mine(cid), old = m[sid];
+    var same = old && old.status === status && date === undefined && note === undefined;
+    var st = same ? 'clear' : status, prev = old ? Object.assign({}, old) : null;
+    if (st === 'clear') delete m[sid];
+    else m[sid] = { status: st, date: date !== undefined ? date : ((old && old.date) || null), note: note !== undefined ? note : ((old && old.note) || '') };
+    rerender();
+    try { var x = m[sid]; await save(cid, sid, st, x && x.date, x && x.note); }
+    catch (e) { if (prev) m[sid] = prev; else delete m[sid]; rerender(); toast('تعذر الحفظ: ' + (e && e.message || '')); try { suLog('feeding_set', e); } catch (_) {} }
+  }
+  function rerender() { try { renderParentPortal(); } catch (e) { try { suLog('feed rerender', e); } catch (_) {} } }
+
+  window.suFeedHtml = function (c) {
+    if (!c) return '';
+    var cid = String(c.id), am = ageMonths(c);
+    if (_band[cid] == null) _band[cid] = bandFor(am);
+    var bi = _band[cid], b = MS.bands[bi], m = mine(cid);
+    var cnt = { consistent: 0, sometimes: 0, not_observed: 0, unset: 0 };
+    b.skills.forEach(function (s) { var r = m[s.id]; if (r && ST[r.status] && r.status !== 'unsure') cnt[r.status]++; else cnt.unset++; });
+    var total = b.skills.length, done = total - cnt.unset, pct = total ? Math.round(done / total * 100) : 0;
+    var groups = MS.groups.filter(function (g) { return g.id === 'all' || b.skills.some(function (s) { return s.group === g.id; }); });
+    var grp = groups.some(function (g) { return g.id === _grp; }) ? _grp : 'all';
+    var list = b.skills.filter(function (s) { return grp === 'all' || s.group === grp; });
+    var concern = cnt.not_observed >= 2;
+    var ph = ''; try { ph = clientPhoto(c) || ''; } catch (_) {}
+    var av = ph ? '<div class="fd-av"><img src="' + esc(ph) + '" alt="" onerror="this.remove()"></div>' : '<div class="fd-av">👶</div>';
+    var h = '<div class="fd">';
+    h += '<div class="fd-card fd-child">' + av + '<div><b>' + esc(c.name || 'الطفل') + '</b><span>' + esc(ageText(am)) + '</span></div></div>';
+    h += '<div class="fd-card fd-banner"><div style="font-size:28px">💡</div><div><b>تابع تطور مهارات طفلك خطوة بخطوة</b><span>قائمة للتوعية والمتابعة وليست أداة تشخيصية.</span></div></div>';
+    h += '<div class="fd-tabs">' + MS.bands.map(function (x, i) { return '<button class="fd-tab' + (i === bi ? ' on' : '') + '" data-fd-b="' + i + '" data-fd-c="' + esc(cid) + '">' + esc(x.label) + '</button>'; }).join('') + '</div>';
+    h += '<div class="fd-card fd-sum"><div class="fd-ring" style="background:conic-gradient(#6d3fd6 ' + pct + '%,#ede6fb 0)"><div><span><b>' + pct + '%</b><small>نسبة اكتمال التسجيل</small></span></div></div>' +
+      '<div class="fd-sumr"><h2>ملخص المتابعة</h2><p>ⓘ يعكس هذا التقدم نسبة المهارات التي تم تسجيلها فقط.</p>' +
+      '<div class="fd-cnt"><div class="fd-cg"><b>' + cnt.consistent + '</b>مستمرة</div><div class="fd-co"><b>' + cnt.sometimes + '</b>أحيانًا</div><div class="fd-cr"><b>' + cnt.not_observed + '</b>لم تُلاحظ</div><div class="fd-cx"><b>' + cnt.unset + '</b>لم أحدد</div></div></div></div>';
+    if (concern) h += '<div class="fd-card fd-alert">💬 فيه أكتر من مهارة لم تُلاحظ بعد. <b>ناقش هذه الملاحظات مع الأخصائي</b> في الجلسة القادمة.</div>';
+    h += '<div class="fd-chips">' + groups.map(function (g) { return '<button class="fd-chip' + (g.id === grp ? ' on' : '') + '" data-fd-g="' + esc(g.id) + '">' + esc(g.label) + '</button>'; }).join('') + '</div>';
+    h += list.map(function (s) {
+      var r = m[s.id] || {}, op = !!_open[cid + ':' + s.id], today = new Date().toISOString().slice(0, 10);
+      return '<div class="fd-card fd-sk" data-fd-id="' + esc(s.id) + '" data-fd-c="' + esc(cid) + '"><h3>' + esc(s.text) + '</h3><div class="fd-dm">' + esc(s.domain) + '</div>' +
+        '<div class="fd-opts">' + Object.keys(ST).map(function (k) { return '<button class="fd-op' + (r.status === k ? ' on' : '') + '" data-fd-s="' + k + '"><i>' + ICON[k] + '</i>' + ST[k] + '</button>'; }).join('') + '</div>' +
+        '<button class="fd-addn" data-fd-n="1">✎ ' + ((r.note || r.date) ? 'تعديل الملاحظة' : 'إضافة ملاحظة') + ' +</button>' +
+        '<div class="fd-nf' + (op ? ' open' : '') + '"><input type="date" value="' + esc(r.date || '') + '" max="' + today + '"><textarea maxlength="500" placeholder="ملاحظتك (اختياري)">' + esc(r.note || '') + '</textarea><button class="fd-save" data-fd-sv="1">حفظ الملاحظة</button></div>' +
+        ((r.note || r.date) ? '<div class="fd-saved">' + (r.date ? '📅 ' + esc(r.date) + ' — ' : '') + esc(r.note || '') + '</div>' : '') + '</div>';
+    }).join('') || '<div class="fd-empty">لا توجد مهارات في هذا القسم</div>';
+    h += '<div class="fd-card fd-ref">' + (b.reference_notes || []).map(function (n) { return '<b>معلومة مرجعية للاسترشاد فقط:</b> ' + esc(n.text) + '<br>'; }).join('') + 'يرجى اتباع إرشادات طبيب الأطفال في التغذية الفردية.</div>';
+    h += '<div class="fd-card fd-foot">هذه القائمة مبنية على معالم ASHA للتوعية والمتابعة، وليست أداة تشخيص أو فحص طبي. سرعة النمو تختلف بين الأطفال، وعدم تحقق مهارة واحدة لا يعني وحده وجود اضطراب. ' + (am != null && am > 36 ? 'القائمة تغطي حتى 3 سنوات.' : '') +
+      '<details><summary>متى أتواصل مع المختص؟</summary>إذا غابت عدة مهارات، أو توقف التقدم، أو فقد الطفل مهارة سبق اكتسابها، أو ظهرت صعوبات في الرضاعة أو الأكل أو البلع، تواصل مع طبيب الأطفال وأخصائي التخاطب/البلع.<br><span class="fd-emg">عند وجود صعوبة تنفس أو اختناق حالي، اطلب المساعدة الطبية الطارئة فورًا.</span></details>' +
+      '<details><summary>المصدر</summary>ASHA — Feeding and Swallowing Milestones: asha.org/public/developmental-milestones</details></div>';
+    return h + '</div>';
+  };
+
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest && e.target.closest('[data-fd-b],[data-fd-g],[data-fd-s],[data-fd-n],[data-fd-sv]'); if (!t) return;
+    var host = t.closest('#parentPortal'); if (!host) return;
+    var card = t.closest('.fd-sk');
+    if (t.dataset.fdB != null) { _band[String(t.dataset.fdC)] = +t.dataset.fdB; _grp = 'all'; rerender(); return; }
+    if (t.dataset.fdG) { _grp = t.dataset.fdG; rerender(); return; }
+    if (!card) return;
+    var sid = card.dataset.fdId, cid = card.dataset.fdC;
+    if (t.dataset.fdS) setStatus(cid, sid, t.dataset.fdS);
+    else if (t.dataset.fdN) { var nf = card.querySelector('.fd-nf'); nf.classList.toggle('open'); _open[cid + ':' + sid] = nf.classList.contains('open'); }
+    else if (t.dataset.fdSv) {
+      var cur = mine(cid)[sid], nf2 = card.querySelector('.fd-nf');
+      if (!cur) { toast('اختر حالة المهارة أولًا'); return; }
+      setStatus(cid, sid, cur.status, nf2.querySelector('input').value || null, nf2.querySelector('textarea').value.trim());
+    }
+  });
+})();
+</script>
 
 </body>
 </html>
