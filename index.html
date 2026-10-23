@@ -2731,7 +2731,15 @@ body.su-md-dash main>#tab-dashboard{margin-top:0!important}
           <form onsubmit="saveAppSettings(event)" class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-6 text-xs">
             <div class="rounded-xl p-3 bg-sky-50 border border-sky-200 text-sky-800 font-bold">📱 إعدادات التطبيق — بتتطبق على شكل التطبيق (الموبايل والتابلت) على كل الأجهزة. تقدر تعدلها من أي جهاز. <u>دي القيم الافتراضية بس</u> — كل مستخدم يقدر يغيّر الخط والكثافة والصفحة الافتتاحية والشريط السفلي والقفل والثيم لنفسه من «👤 حسابي».</div>
 
-            <h3 class="font-extrabold text-slate-900 text-sm border-b pb-3">🖼️ الشريط العلوي في التطبيق</h3>
+            <h3 class="font-extrabold text-slate-900 text-sm border-b pb-3">💜 لون بانر "إليك نظرة سريعة" (داشبورد الموبايل)</h3>
+            <div class="flex items-center gap-3 flex-wrap">
+              <input type="color" id="appQuickColor" value="#5b2fc2" oninput="window.suAdv&&suAdv.setQuick(this.value)" class="w-12 h-9 rounded cursor-pointer border">
+              <div class="flex items-center gap-1.5"><button type="button" onclick="suAdv.setQuick('#5b2fc2')" class="w-7 h-7 rounded-full border-2 border-white shadow" style="background:#5b2fc2" title="#5b2fc2"></button><button type="button" onclick="suAdv.setQuick('#2563eb')" class="w-7 h-7 rounded-full border-2 border-white shadow" style="background:#2563eb" title="#2563eb"></button><button type="button" onclick="suAdv.setQuick('#0f766e')" class="w-7 h-7 rounded-full border-2 border-white shadow" style="background:#0f766e" title="#0f766e"></button><button type="button" onclick="suAdv.setQuick('#16a34a')" class="w-7 h-7 rounded-full border-2 border-white shadow" style="background:#16a34a" title="#16a34a"></button><button type="button" onclick="suAdv.setQuick('#be123c')" class="w-7 h-7 rounded-full border-2 border-white shadow" style="background:#be123c" title="#be123c"></button><button type="button" onclick="suAdv.setQuick('#ea580c')" class="w-7 h-7 rounded-full border-2 border-white shadow" style="background:#ea580c" title="#ea580c"></button><button type="button" onclick="suAdv.setQuick('#334155')" class="w-7 h-7 rounded-full border-2 border-white shadow" style="background:#334155" title="#334155"></button></div>
+              <button type="button" onclick="window.suAdv&&suAdv.setQuick('')" class="text-[11px] font-bold text-slate-500 hover:text-rose-600">↺ اللون الأصلي</button>
+              <span class="text-[11px] font-bold text-slate-500">بيتطبق ويتحفظ فورًا.</span>
+            </div>
+
+            <h3 class="font-extrabold text-slate-900 text-sm border-b pb-3 pt-2">🖼️ الشريط العلوي في التطبيق</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div id="appLogoBlock"></div>
               <div class="space-y-4">
@@ -10851,7 +10859,7 @@ Object.assign(I18N_EN, Object.assign({"قبل 24س": "before 24h", "اعتذار
 
   // ---------- therapist dashboard (performance — no money) ----------
   function tdKpi(ico, label, val, sub, color) {
-    return `<div class="bg-white rounded-2xl border border-slate-200 p-4 flex items-center gap-3 shadow-xs"><div class="w-12 h-12 rounded-xl grid place-items-center text-2xl" style="background:${color}22">${ico}</div><div><div class="text-[11px] text-slate-500 font-bold">${label}</div><div class="text-2xl font-black text-slate-900">${val}</div>${sub ? `<div class="text-[10px] text-slate-400 font-bold">${sub}</div>` : ''}</div></div>`;
+    return `<div class="th-kpi bg-white rounded-2xl border border-slate-200 p-4 flex items-center gap-3 shadow-xs"><div class="w-12 h-12 rounded-xl grid place-items-center text-2xl" style="background:${color}22">${ico}</div><div><div class="text-[11px] text-slate-500 font-bold">${label}</div><div class="text-2xl font-black text-slate-900">${val}</div>${sub ? `<div class="text-[10px] text-slate-400 font-bold">${sub}</div>` : ''}</div></div>`;
   }
   function renderTherapistDash() {
     const el = document.getElementById('therapistDash'); if (!el) return;
@@ -12674,8 +12682,7 @@ function tdHero(u, cur) {
   return '<div class="th-hero">' +
     '<div class="th-ph" onclick="tdPickPhoto()" title="تغيير صورتي"><img class="' + (logo ? 'logo' : '') + '" src="' + actEsc(src) + '" alt="" onerror="this.onerror=null;this.src=\'icons/icon-192.png\'"><span class="th-cam">📷</span></div>' +
     '<div class="th-hi">أهلًا ' + actEsc(u.name || '') + '</div>' +
-    '<div class="th-sb">أخصائي — لوحة أدائي · ' + cpMonthLabel(cur) + '</div>' +
-    '<div class="th-btns"><button type="button" class="th-b1" onclick="switchTab(\'secretary\')">⚡ كشف الحضور السريع</button><button type="button" class="th-b2" onclick="switchTab(\'myearn\')">💰 حساباتي</button></div></div>';
+    '<div class="th-sb">أخصائي — لوحة أدائي · ' + cpMonthLabel(cur) + '</div></div>';
 }
 function tdGate(ico, title, sub, tab, grad) {
   return '<button type="button" class="th-gate" style="background:' + grad + '" onclick="switchTab(\'' + tab + '\')"><span class="g-i">' + ico + '</span><span class="g-t">' + title + '</span><span class="g-s">' + sub + '</span></button>';
@@ -14922,7 +14929,7 @@ html.su-dark .cn-link:hover{color:#a5b4fc;background:rgba(165,180,252,.12)}
   var LT = 'html:not(.su-dark) ';
 
   function def() {
-    return { fontPct: 100, bold: 'default', sideColor: '', topColor: '', heroColor: '',
+    return { fontPct: 100, bold: 'default', sideColor: '', topColor: '', heroColor: '', quickColor: '',
       tbl: { zebra: 'default', zebraColor: '#f1f5f9', headBg: '', headText: '', chip: 'default', chipBg: '#eef2ff', chipText: '#3730a3', fontPx: 0, hover: '' }, cols: {},
       icon: { size: 0, shadow: 'default', haloPx: 8, haloColor: '', flat: false },
       cal: { view: 'cards', colW: 170, fs: 12, dens: 'comfy', radius: 16, showBadge: true, showBranch: true, showTher: true, hideEmpty: false, todayColor: '#06b6d4' } };
@@ -14931,7 +14938,7 @@ html.su-dark .cn-link:hover{color:#a5b4fc;background:rgba(165,180,252,.12)}
     var d = def(); if (!a || typeof a !== 'object') return d;
     if (+a.fontPct >= 70 && +a.fontPct <= 150) d.fontPct = +a.fontPct;
     if (/^(default|light|none|all)$/.test(a.bold)) d.bold = a.bold;
-    ['sideColor', 'topColor', 'heroColor'].forEach(function (k) { if (ok(a[k])) d[k] = a[k]; });
+    ['sideColor', 'topColor', 'heroColor', 'quickColor'].forEach(function (k) { if (ok(a[k])) d[k] = a[k]; });
     var t = a.tbl || {};
     if (/^(default|on|off)$/.test(t.zebra)) d.tbl.zebra = t.zebra;
     if (/^(default|none|custom)$/.test(t.chip)) d.tbl.chip = t.chip;
@@ -14960,7 +14967,7 @@ html.su-dark .cn-link:hover{color:#a5b4fc;background:rgba(165,180,252,.12)}
     var o = {}, d = def();
     if (a.fontPct !== 100) o.fontPct = a.fontPct;
     if (a.bold !== 'default') o.bold = a.bold;
-    ['sideColor', 'topColor', 'heroColor'].forEach(function (k) { if (ok(a[k])) o[k] = a[k]; });
+    ['sideColor', 'topColor', 'heroColor', 'quickColor'].forEach(function (k) { if (ok(a[k])) o[k] = a[k]; });
     var t = {}; Object.keys(d.tbl).forEach(function (k) { if (a.tbl[k] !== d.tbl[k]) t[k] = a.tbl[k]; });
     if (Object.keys(t).length) o.tbl = t;
     var cols = {};
@@ -15033,6 +15040,11 @@ html.su-dark .cn-link:hover{color:#a5b4fc;background:rgba(165,180,252,.12)}
         + '.th-hero{box-shadow:0 10px 28px color-mix(in srgb,' + h + ' 35%,transparent)!important}'
         + '#suProfile .sp-ini{background:linear-gradient(135deg,' + mix(h, 75, false) + ',' + h + ')!important}#suProfile .sp-cam{background:' + h + '!important}'
         + LT + '#suProfile{--sp-on:' + mix(h, 80, false) + ';--sp-onbg:' + mix(h, 18, true) + '}';
+    }
+    // 5b) لون بانر "إليك نظرة سريعة" في داشبورد الموبايل
+    if (ok(a.quickColor)) {
+      var q = a.quickColor;
+      css += 'html body .md-hero{background:linear-gradient(120deg,' + mix(q, 88, true) + ' 0%,' + q + ' 55%,' + mix(q, 80, false) + ' 100%)!important;box-shadow:0 .6em 1.4em color-mix(in srgb,' + q + ' 30%,transparent)!important}';
     }
     // 6) الجداول — عام
     var S = function (suffix) { return LT + 'table.data-tbl ' + suffix + ',' + LT + 'table[data-su-tbl] ' + suffix; };
@@ -15139,6 +15151,7 @@ html.su-dark .cn-link:hover{color:#a5b4fc;background:rgba(165,180,252,.12)}
   function sec(title, body) { return '<div class="space-y-3 border-t pt-5"><h3 class="font-extrabold text-slate-900 text-sm">' + title + '</h3>' + body + '</div>'; }
   var SIDE_PRE = ['#4c1d95', '#6d28d9', '#1e1b4b', '#0f172a', '#14532d', '#7f1d1d', '#334155', '#ffffff', '#f1f5f9'];
   var HERO_PRE = ['#0f766e', '#16a34a', '#2563eb', '#7c3aed', '#be123c', '#ea580c', '#334155'];
+  var QUICK_PRE = ['#5b2fc2', '#2563eb', '#0f766e', '#16a34a', '#be123c', '#ea580c', '#334155'];
   function preset(target, list) { return '<div class="flex gap-1.5 flex-wrap">' + list.map(function (c) { return '<button type="button" ' + target + ' data-v="' + c + '" class="su-adv-seg w-7 h-7 rounded-full border-2 border-slate-300 hover:scale-110 transition" style="background:' + c + '" title="' + c + '"></button>'; }).join('') + '</div>'; }
 
   function colLabels(k) { var tb = document.querySelector('table[data-su-tbl="' + k + '"]'); return tb ? heads(tb).filter(Boolean) : []; }
@@ -15172,10 +15185,11 @@ html.su-dark .cn-link:hover{color:#a5b4fc;background:rgba(165,180,252,.12)}
         '<div class="flex items-center gap-3 flex-wrap"><span class="font-bold text-slate-700">حجم الخط:</span><input type="range" min="80" max="130" step="5" value="' + d.fontPct + '" ' + tg('fontPct') + ' data-u="%" class="flex-1 min-w-[160px] accent-indigo-600"><b id="suAdvV_fontPct" class="w-12 text-center text-slate-900">' + d.fontPct + '%</b><button type="button" ' + tg('fontPct') + ' data-v="100" class="su-adv-seg text-[11px] font-bold text-slate-400 hover:text-rose-600">↺ 100%</button></div>'
         + '<div class="space-y-1"><span class="font-bold text-slate-700">البولد (الخط الغليظ):</span>' + seg(tg('bold'), d.bold, [['default', 'كما هو'], ['light', 'مخفّف'], ['none', 'بدون بولد خالص'], ['all', 'كله بولد']]) + '</div>'
         + '<div class="text-[11px] font-bold text-slate-500">لو مستخدم غيّر حجم الخط من «👤 حسابي» اختياره الشخصي هو اللي بيمشي عنده.</div>')
-      + sec('🎛️ ألوان الشريطين',
+      + sec('🎛️ ألوان الشريطين وبانر "إليك نظرة سريعة"',
         '<div class="grid md:grid-cols-2 gap-5"><div class="space-y-2"><div class="font-bold text-slate-700">الشريط / القائمة الجانبية <span class="text-[11px] font-normal text-slate-400">(لو اللون غامق الأيقونات والكلام بيبقوا أبيض تلقائي)</span></div>' + clr(tg('sideColor'), d.sideColor, 'اللون') + preset(tg('sideColor'), SIDE_PRE) + '</div>'
         + '<div class="space-y-2"><div class="font-bold text-slate-700">الشريط العلوي</div>' + clr(tg('topColor'), d.topColor, 'اللون') + preset(tg('topColor'), SIDE_PRE) + '</div></div>'
-        + '<div class="text-[11px] font-bold text-slate-500">لو سبت اللون فاضي (✕ إلغاء) بيرجع للون النظام الأساسي. الكتابة بتتحوّل لغامق تلقائي لو اخترت لون فاتح.</div>')
+        + '<div class="space-y-2 border-t pt-3"><div class="font-bold text-slate-700">💜 بانر "إليك نظرة سريعة" (أعلى داشبورد الموبايل)</div>' + clr(tg('quickColor'), d.quickColor, 'اللون') + preset(tg('quickColor'), QUICK_PRE) + '</div>'
+      + '<div class="text-[11px] font-bold text-slate-500">لو سبت اللون فاضي (✕ إلغاء) بيرجع للون النظام الأساسي. الكتابة بتتحوّل لغامق تلقائي لو اخترت لون فاتح.</div>')
       + sec('🔷 أيقونات الشريط الجانبي',
         '<div class="flex items-center gap-2 flex-wrap"><span class="font-bold text-slate-700">حجم الأيقونة:</span><input type="range" min="14" max="44" step="1" value="' + (d.icon.size || 25) + '" ' + tg('icon.size') + ' data-u="px" class="flex-1 min-w-[160px] accent-indigo-600"><b id="suAdvV_icon_size" class="w-16 text-center text-slate-900">' + (d.icon.size ? d.icon.size + 'px' : 'كما هو') + '</b><button type="button" ' + tg('icon.size') + ' data-v="0" class="su-adv-seg text-[11px] font-bold text-slate-400 hover:text-rose-600">↺ كما هو</button></div>'
         + '<div class="space-y-1"><span class="font-bold text-slate-700">الشادو (الظل) حوالين الأيقونة:</span>' + seg(tg('icon.shadow'), d.icon.shadow, [['default', 'كما هو (ظل ثلاثي الأبعاد + توهج)'], ['none', 'شيله خالص'], ['halo', 'هالة حوالين الأيقونة بس']]) + '</div>'
@@ -15238,7 +15252,19 @@ html.su-dark .cn-link:hover{color:#a5b4fc;background:rgba(165,180,252,.12)}
       var el = e.target; if (el.tagName === 'SELECT') { setTarget(el, el.value); apply(window._advDraft); render(); }
     });
   }
-  function open() { window._advDraft = saved(); boot(); render(); apply(window._advDraft); }
+  function syncQuick() { var i = document.getElementById('appQuickColor'); var d = window._advDraft; if (i) i.value = (d && ok(d.quickColor)) ? d.quickColor : '#5b2fc2'; }
+  function setQuick(v) {
+    var d = window._advDraft || (window._advDraft = saved());
+    d.quickColor = ok(v) ? v : '';
+    apply(d);
+    try {
+      if (!state.settings) state.settings = {};
+      var c = clean(d); if (Object.keys(c).length) state.settings.adv = c; else delete state.settings.adv;
+      saveState();
+    } catch (e) { console.warn('suAdv quick', e); }
+    render(); syncQuick();
+  }
+  function open() { window._advDraft = saved(); boot(); render(); apply(window._advDraft); syncQuick(); }
 
   /* ---------- ربط مع باقي السيستم ---------- */
   var _r = window.renderThemeSettingsForm;
@@ -15250,7 +15276,7 @@ html.su-dark .cn-link:hover{color:#a5b4fc;background:rgba(165,180,252,.12)}
   };
   var _a = window.applyThemeSystem;
   if (typeof _a === 'function') window.applyThemeSystem = function () { var r = _a.apply(this, arguments); try { apply(); } catch (e) { console.warn('suAdv apply', e); } return r; };
-  window.suAdv = { apply: apply, open: open };
+  window.suAdv = { apply: apply, open: open, setQuick: setQuick };
   try { apply(); } catch (e) { suLog('apply();', e); }
   setTimeout(function () { try { apply(); } catch (e) { suLog('apply();', e); } }, 1500);
 })();
@@ -16176,6 +16202,28 @@ html body #mNav.th-nav .th-nbi{width:22px!important;height:22px!important}
   try{ if(typeof applyPermissions==='function') applyPermissions(); }catch(e){}
 })();
 </script>
+<style id="su-th-compact">
+/* داشبورد الأخصائي: من غير عنوان "أهلاً.. لوحة التحكم" + حجم أصغر للكروت */
+body.role-therapist:has(#tab-dashboard:not(.hidden)) #mPageHead{display:none!important}
+#therapistDash>.space-y-5>*+*{margin-top:12px!important}
+#therapistDash .th-hero{padding:14px 12px;border-radius:20px}
+#therapistDash .th-ph{width:78px;height:78px;margin-bottom:6px}
+#therapistDash .th-cam{width:26px;height:26px;font-size:13px}
+#therapistDash .th-hi{font-size:18px}
+#therapistDash .th-sb{font-size:11px}
+#therapistDash .th-gates{gap:8px}
+#therapistDash .th-gate{padding:10px 8px;border-radius:16px;gap:2px;box-shadow:0 4px 10px rgba(15,23,42,.14)}
+#therapistDash .th-gate .g-i{font-size:22px}
+#therapistDash .th-gate .g-t{font-size:12.5px}
+#therapistDash .th-gate .g-s{font-size:9.5px}
+#therapistDash .th-kpi{padding:9px 11px!important;gap:9px!important;border-radius:14px!important}
+#therapistDash .th-kpi>div:first-child{width:34px!important;height:34px!important;font-size:17px!important;border-radius:10px!important;flex:none}
+#therapistDash .th-kpi .text-\[11px\]{font-size:10.5px!important}
+#therapistDash .th-kpi .text-2xl{font-size:18px!important;line-height:1.2!important}
+#therapistDash .th-kpi .text-\[10px\]{font-size:9.5px!important}
+#therapistDash .grid.grid-cols-2{gap:8px!important}
+#therapistDash .bg-white.rounded-2xl.border.p-4{padding:12px!important}
+</style>
 <style id="su-month-unify">
 /* ===== عرض الشهر الموحّد (أدمن/سكرتارية + أخصائي + ولي أمر) =====
    تابلت/عريض: شرايح (وقت + اسم) + "+N جلسات"  |  موبايل: نقطة فيها رقم الجلسات
