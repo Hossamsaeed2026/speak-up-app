@@ -2616,6 +2616,51 @@ body.su-md-dash main>#tab-dashboard{margin-top:0!important}
                 </select>
               </div>
               <div>
+                <label class="block text-slate-700 font-bold mb-1.5">المنطقة الزمنية 🕒</label>
+                <select id="settingTimeZone" class="w-full border rounded-xl p-2.5 font-bold">
+                  <option value="Africa/Cairo">القاهرة / الإسكندرية (مصر)</option>
+                  <option value="Asia/Riyadh">الرياض (السعودية)</option>
+                  <option value="Asia/Dubai">دبي (الإمارات)</option>
+                  <option value="Asia/Kuwait">الكويت</option>
+                  <option value="Asia/Qatar">قطر</option>
+                  <option value="Asia/Baghdad">بغداد</option>
+                  <option value="Asia/Amman">عمّان</option>
+                  <option value="Asia/Beirut">بيروت</option>
+                  <option value="Africa/Casablanca">الدار البيضاء</option>
+                  <option value="Africa/Tunis">تونس</option>
+                  <option value="Africa/Algiers">الجزائر</option>
+                  <option value="Europe/Istanbul">إسطنبول</option>
+                  <option value="Europe/London">لندن</option>
+                  <option value="America/New_York">نيويورك</option>
+                  <option value="UTC">UTC</option>
+                  <option value="device">حسب جهاز المستخدم</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-slate-700 font-bold mb-1.5">مزامنة الوقت ⏱️</label>
+                <select id="settingTimeSync" class="w-full border rounded-xl p-2.5 font-bold">
+                  <option value="auto">تلقائي أونلاين (موصى به)</option>
+                  <option value="manual">يدوي (ساعة الجهاز + تعديل)</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-slate-700 font-bold mb-1.5">تكرار المزامنة 🔄</label>
+                <select id="settingTimeEvery" class="w-full border rounded-xl p-2.5 font-bold">
+                  <option value="5">كل 5 دقايق</option>
+                  <option value="15">كل 15 دقيقة</option>
+                  <option value="30">كل 30 دقيقة</option>
+                  <option value="60">كل ساعة</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-slate-700 font-bold mb-1.5">تعديل يدوي بالدقايق <span class="font-medium text-slate-400">(للوضع اليدوي)</span></label>
+                <input type="number" id="settingTimeOffset" step="1" value="0" class="w-full border rounded-xl p-2.5 font-bold font-mono">
+              </div>
+              <div class="md:col-span-2 rounded-xl border bg-slate-50 p-3 flex flex-wrap items-center gap-3">
+                <div class="flex-1 min-w-[200px]"><div class="text-[11px] font-bold text-slate-500 mb-1">الوقت الحالي في النظام</div><div id="settingTimeLive" class="flex items-center gap-2 flex-wrap"></div></div>
+                <button type="button" onclick="suTimeSyncNow()" class="bg-indigo-600 text-white font-black text-xs px-4 py-2.5 rounded-xl">🔄 مزامنة الآن</button>
+              </div>
+              <div>
                 <label class="block text-slate-700 font-bold mb-1.5">تليفون المركز 📞 <span class="font-medium text-slate-400">(للفواتير)</span></label>
                 <input type="text" id="settingCenterPhone" inputmode="tel" class="w-full border rounded-xl p-2.5 font-bold font-mono">
               </div>
@@ -6577,8 +6622,14 @@ window.suMfaOpen=async function(){
   // ===== Cairo / Alexandria time (Africa/Cairo) =====
   var _clockOffsetMs = 0;       // difference between device clock and online clock
   var _clockOnline = false;     // true once verified against an online time service
+  function suTimeCfg() {
+    let t = {}; try { t = (state && state.settings && state.settings.time) || {}; } catch (e) { t = {}; }
+    return { tz: t.tz || 'Africa/Cairo', sync: t.sync === 'manual' ? 'manual' : 'auto', every: Number(t.every) || 30, off: Number(t.off) || 0 };
+  }
   function cairoParts(ms) {
-    const f = new Intl.DateTimeFormat('en-CA', { timeZone: 'Africa/Cairo', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+    const c = suTimeCfg(), opt = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
+    if (c.tz !== 'device') opt.timeZone = c.tz;
+    let f; try { f = new Intl.DateTimeFormat('en-CA', opt); } catch (e) { opt.timeZone = 'Africa/Cairo'; f = new Intl.DateTimeFormat('en-CA', opt); }
     const o = {};
     f.formatToParts(new Date(ms)).forEach(p => { o[p.type] = p.value; });
     if (o.hour === '24') o.hour = '00';
@@ -6603,27 +6654,50 @@ window.suMfaOpen=async function(){
   function updateCairoClockUI() {
     const el = document.getElementById('cairoClockBadge');
     if (!el) return;
-    const today = todayCairo();
-    el.innerHTML = `<span class="w-2 h-2 rounded-full ${_clockOnline ? 'bg-emerald-500' : 'bg-amber-400'} inline-block"></span> الإسكندرية: <b>${AR_WEEKDAYS[ymdWeekday(today)]} ${ymdArabic(today)}</b> &bull; ${cairoTimeLabel()} <span class="text-[10px] ${_clockOnline ? 'text-emerald-600' : 'text-amber-600'}">${_clockOnline ? '(متحقق أونلاين)' : '(ساعة الجهاز)'}</span>`;
+    const today = todayCairo(), tc = suTimeCfg(), place = tc.tz === 'Africa/Cairo' ? 'الإسكندرية' : (tc.tz === 'device' ? 'الجهاز' : tc.tz.split('/').pop().replace(/_/g, ' '));
+    el.innerHTML = `<span class="w-2 h-2 rounded-full ${_clockOnline ? 'bg-emerald-500' : 'bg-amber-400'} inline-block"></span> ${place}: <b>${AR_WEEKDAYS[ymdWeekday(today)]} ${ymdArabic(today)}</b> &bull; ${cairoTimeLabel()} <span class="text-[10px] ${_clockOnline ? 'text-emerald-600' : 'text-amber-600'}">${_clockOnline ? '(متحقق أونلاين)' : (tc.sync === 'manual' ? '(ضبط يدوي)' : '(ساعة الجهاز)')}</span>`;
   }
   async function syncCairoClock() {
-    try {
-      const ctrl = new AbortController();
-      const timer = setTimeout(() => ctrl.abort(), 4000);
-      const r = await fetch('https://worldtimeapi.org/api/timezone/Africa/Cairo', { signal: ctrl.signal, cache: 'no-store' });
-      clearTimeout(timer);
-      const j = await r.json();
-      const ts = Date.parse(j.datetime);
-      if (!isNaN(ts)) {
-        _clockOffsetMs = ts - Date.now();
-        _clockOnline = true;
+    const c = suTimeCfg();
+    if (c.sync === 'manual') { _clockOffsetMs = c.off * 60000; _clockOnline = false; }
+    else {
+      let got = false;
+      try {   // 1) خدمة وقت أونلاين (بنعوّض زمن الاتصال)
+        const ctrl = new AbortController(), timer = setTimeout(() => ctrl.abort(), 4000), t0 = Date.now();
+        const r = await fetch('https://worldtimeapi.org/api/timezone/Etc/UTC', { signal: ctrl.signal, cache: 'no-store' });
+        clearTimeout(timer);
+        const j = await r.json(), t1 = Date.now(), ts = Date.parse(j.datetime || j.utc_datetime);
+        if (!isNaN(ts)) { _clockOffsetMs = ts + (t1 - t0) / 2 - t1; got = true; }
+      } catch (e) { suLog('syncCairoClock worldtimeapi', e, 'debug'); }
+      if (!got) {   // 2) احتياطي: ساعة السيرفر اللي بيقدّم التطبيق (Date header)
+        try {
+          const t0 = Date.now(), r = await fetch(location.href.split('#')[0], { method: 'HEAD', cache: 'no-store' }), t1 = Date.now(), d = r.headers.get('date'), ts = d ? Date.parse(d) : NaN;
+          if (!isNaN(ts)) { _clockOffsetMs = ts + (t1 - t0) / 2 - t1; got = true; }
+        } catch (e) { suLog('syncCairoClock header', e, 'debug'); }
       }
-    } catch (e) { /* offline: keep device clock with Africa/Cairo timezone */ suLog('const ctrl = new AbortController(); const timer', e); }
+      _clockOnline = got;
+    }
     updateCairoClockUI();
+    try { suTimeLiveRender(); } catch (e) { suLog('suTimeLiveRender', e, 'debug'); }
     try { if (!document.getElementById('tab-calendar').classList.contains('hidden')) renderCalendar(); } catch (e) { suLog('if (!document.getElementById(tab-calendar).class', e); }
   }
+  function suTimeLiveRender() {
+    const el = document.getElementById('settingTimeLive'); if (!el) return;
+    const p = cairoParts(Date.now() + _clockOffsetMs), c = suTimeCfg();
+    el.innerHTML = `<span class="w-2.5 h-2.5 rounded-full inline-block ${_clockOnline ? 'bg-emerald-500' : 'bg-amber-400'}"></span> <b class="font-mono text-base">${p.year}-${p.month}-${p.day} ${p.hour}:${p.minute}:${p.second}</b> <span class="text-xs ${_clockOnline ? 'text-emerald-700' : 'text-amber-700'} font-bold">${_clockOnline ? 'متزامن أونلاين ✅' : (c.sync === 'manual' ? 'ضبط يدوي' : 'ساعة الجهاز (مفيش اتصال بخدمة الوقت)')}</span>`;
+  }
+  async function suTimeSyncNow() {
+    try { showToast('⏱️ جاري مزامنة الوقت...', 'green'); } catch (e) { suLog('suTimeSyncNow toast', e, 'debug'); }
+    await syncCairoClock();
+    try { showToast(_clockOnline ? '✅ الوقت متزامن أونلاين' : '⚠️ تعذّرت المزامنة — شغّال بساعة الجهاز', _clockOnline ? 'green' : 'amber'); } catch (e) { suLog('suTimeSyncNow toast2', e, 'debug'); }
+  }
+  let _clockT = null;
+  function suTimeResched() { clearTimeout(_clockT); _clockT = setTimeout(async () => { await syncCairoClock(); suTimeResched(); }, Math.max(1, suTimeCfg().every) * 60000); }
   setInterval(updateCairoClockUI, 30000);
-  setInterval(syncCairoClock, 30 * 60 * 1000);
+  setInterval(suTimeLiveRender, 1000);
+  suTimeResched();
+  window.addEventListener('online', () => { syncCairoClock(); });
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) syncCairoClock(); });
   setTimeout(syncCairoClock, 500);
 
   function goToCalendarToday() { calendarDateOffset = 0; renderCalendar(); }
@@ -8424,6 +8498,10 @@ window.suMfaOpen=async function(){
     if (document.getElementById('settingCenterName')) document.getElementById('settingCenterName').value = s.centerName || '';
     if (document.getElementById('settingLogoUrl')) document.getElementById('settingLogoUrl').value = s.logoUrl || '';
     if (document.getElementById('settingLanguage')) document.getElementById('settingLanguage').value = s.language || 'ar';
+    { const tc = suTimeCfg(), g = id => document.getElementById(id);
+      if (g('settingTimeZone')) g('settingTimeZone').value = tc.tz; if (g('settingTimeSync')) g('settingTimeSync').value = tc.sync;
+      if (g('settingTimeEvery')) g('settingTimeEvery').value = String(tc.every); if (g('settingTimeOffset')) g('settingTimeOffset').value = tc.off;
+      try { suTimeLiveRender(); } catch (e) { suLog('time live', e, 'debug'); } }
     if (document.getElementById('settingCenterPhone')) document.getElementById('settingCenterPhone').value = s.centerPhone || '';
     if (document.getElementById('settingCenterAddress')) document.getElementById('settingCenterAddress').value = s.centerAddress || '';
     if (document.getElementById('settingReceiptFooter')) document.getElementById('settingReceiptFooter').value = s.receiptFooter || '';
@@ -8448,6 +8526,9 @@ window.suMfaOpen=async function(){
     if (centerPhone !== undefined) state.settings.centerPhone = centerPhone;
     if (centerAddress !== undefined) state.settings.centerAddress = centerAddress;
     const prevLang = state.settings.language || 'ar';
+    if (document.getElementById('settingTimeZone')) {
+      state.settings.time = { tz: document.getElementById('settingTimeZone').value || 'Africa/Cairo', sync: document.getElementById('settingTimeSync').value === 'manual' ? 'manual' : 'auto', every: Number(document.getElementById('settingTimeEvery').value) || 30, off: parseInt(document.getElementById('settingTimeOffset').value, 10) || 0 };
+    }
     if (language) { state.settings.language = language; try{localStorage.setItem('SU_LANG',language)}catch (e) { suLog('localStorage.setItem(SU_LANG,language)', e,'debug'); } }
     if (receiptFooter !== undefined) state.settings.receiptFooter = receiptFooter;
     const pbiRaw = document.getElementById('settingPowerBiUrl') ? document.getElementById('settingPowerBiUrl').value.trim() : undefined;
@@ -8461,6 +8542,7 @@ window.suMfaOpen=async function(){
     }
     
     saveState();
+    try { syncCairoClock(); suTimeResched(); } catch (e) { suLog('apply time settings', e); }
     if (language && language !== prevLang) { showToast('🌐 جاري تغيير اللغة...', 'green'); setTimeout(() => location.reload(), 700); return; }
     
     // Update header immediately
@@ -9832,6 +9914,21 @@ Object.assign(I18N_EN, Object.assign({"قبل 24س": "before 24h", "اعتذار
     document.body.style.overflow = ''; _nb = null;
     try { if (_cpId !== null) renderClientProfile(); } catch (x) { suLog('if (_cpId !== null) renderClientProfile();', x); }
   }
+  // حذف كراسة مسجّلة (للأدمن فقط)
+  function nbDelEntry() {
+    if (!_nb || !(currentUser && currentUser.role === 'admin')) return;
+    const arr = nbAll()[_nb.cid] || [], i = arr.findIndex(x => x.id === _nb.e.id);
+    if (i < 0) return;
+    if (!confirm('حذف كراسة يوم ' + (_nb.e.date || '') + ' نهائيًا؟ هتختفي من عند الأخصائي وولي الأمر كمان.')) return;
+    clearTimeout(_nbT);
+    const eid = _nb.e.id;
+    arr.splice(i, 1); if (!arr.length) delete nbAll()[_nb.cid];
+    try { if (state.notebookTicks) Object.keys(state.notebookTicks).forEach(k => { if (k.indexOf(eid + ':') === 0) delete state.notebookTicks[k]; }); } catch (x) { suLog('nbDelEntry ticks', x); }
+    saveState();
+    try { showToast('🗑️ تم حذف الكراسة', 'green'); } catch (x) { suLog('nbDelEntry toast', x); }
+    nbClose();
+    try { refreshAll(); } catch (x) { suLog('nbDelEntry refresh', x); }
+  }
   function nbGo(date) { openNotebook(_nb.cid, date); }
   function nbSet(f, v) { _nb.e[f] = v; nbTouch(); if (f === 'date') { nbGo(v); } }
   function nbSetNo(v) { _nb.e.no = v ? Number(v) : null; nbTouch(); }
@@ -9935,7 +10032,7 @@ Object.assign(I18N_EN, Object.assign({"قبل 24س": "before 24h", "اعتذار
       <div class="nbe-bar">
         <label>📅 <input type="date" class="nb-in" value="${e.date}" onchange="nbSet('date',this.value)"><small>${wd}</small></label>
         <label>🔢 جلسة رقم <input type="number" min="1" class="nb-in" style="width:70px" value="${no}" oninput="nbSetNo(this.value)"></label>
-        <button class="nb-x nbe-x" onclick="nbClose()" title="إغلاق">×</button>
+        ${(currentUser && currentUser.role === 'admin' && (nbAll()[cid] || []).some(x => x.id === e.id)) ? '<button class="nb-x nbe-x" style="left:48px;background:#fee2e2;color:#be123c;font-size:15px" onclick="nbDelEntry()" title="حذف الكراسة">🗑️</button>' : ''}<button class="nb-x nbe-x" onclick="nbClose()" title="إغلاق">×</button>
       </div>
       <div class="nbp-page nbe-page"><div class="nbp-body"><span class="nbp-spiral"></span>
         <div class="nbp-top"><img src="${logo}" alt=""><div><div class="nbp-brand">كراسة المتابعة</div><div class="nbp-kid">👶 ${actEsc(c.name || '')}</div></div><div class="nbp-burst"><small>جلسة</small><b>${no}</b></div></div>
@@ -10353,7 +10450,22 @@ Object.assign(I18N_EN, Object.assign({"قبل 24س": "before 24h", "اعتذار
       if (_ppPerf === 'att') body = backBtn('📅 تقييم أداء الحضور') + attHtml;
       else if (_ppPerf === 'feed') body = backBtn('🍽️ تقييم الأكل والبلع', 'eval') + (window.suFeedHtml ? window.suFeedHtml(c) : '');
       else if (_ppPerf === 'comm') body = backBtn('🗣️ تقييم التواصل', 'eval') + (window.suCommHtml ? window.suCommHtml(c) : '');
-      else if (_ppPerf === 'eval') body = backBtn('📊 تقييم الأداء والاختبارات') + `<div class="pp-feedrow"><button onclick="ppSet('perf','feed')" class="pp-feedbtn">🍽️ تقييم الأكل والبلع${feedN ? ' <i>✓</i>' : ''}</button><button onclick="ppSet('perf','comm')" class="pp-feedbtn pp-commbtn">🗣️ تقييم التواصل${commN ? ' <i>✓</i>' : ''}</button></div><div class="space-y-3 mt-3">${evSection}${cmHtml}</div>`;
+      else if (_ppPerf === 'eval') {
+        const lvOf = p => p >= 80 ? ['#059669', 'مناسبة لهذه المرحلة', '🌟'] : p >= 60 ? ['#f59e0b', 'تقدّم جيد ويحتاج متابعة', '📈'] : ['#e11d48', 'يُفضّل مناقشتها مع الأخصائي', '💬'];
+        const pctOf = e => Math.max(0, Math.min(100, Math.round(Number(e.score) / (Number(e.max) || 100) * 100)));
+        const scored = evals.filter(e => e.score !== '' && e.score != null && !isNaN(Number(e.score)));
+        const latest = k => scored.filter(e => e.kind === k)[0];
+        const evLogo = actEsc(window.SU_PARENT_LOGO || suGateLogoUrl());
+        const hero = `<button type="button" onclick="ppEvChoose()" class="ev-hero pp-pop"><i class="ev-bub b1"></i><i class="ev-bub b2"></i><i class="ev-bub b3"></i><span class="ev-hero-logo"><img src="${evLogo}" alt=""></span><span class="ev-hero-tx"><b>قيّم طفلك</b><small>اختبر الأكل والشرب أو التواصل واللغة في دقائق</small></span><span class="ev-hero-go">ابدأ التقييم ‹</span></button>`;
+        const gauge = (k, ico, name, grad, go) => { const e = latest(k); if (!e) return `<div class="ev-g ev-g0"><div class="ev-gh" style="background:${grad}">${ico} ${name}</div><div class="ev-gb"><div class="ev-g0i">${ico}</div><small>لسه ما اتقيّمش</small><button type="button" onclick="ppSet('perf','${go}')" class="ev-g0b" style="background:${grad}">ابدأ الآن ‹</button></div></div>`; const p = pctOf(e), l = lvOf(p); return `<div class="ev-g pp-pop"><div class="ev-gh" style="background:${grad}">${ico} ${name}</div><div class="ev-gb">${ring(p, 96, 11, l[0], '#e2e8f0', `<b class="ev-gp" style="color:${l[0]}">${p}%</b>`)}<div class="ev-gl" style="color:${l[0]}">${l[2]} ${l[1]}</div><small>${actEsc(e.date || '')}</small></div></div>`; };
+        const gauges = `<div class="ev-gs">${gauge('feed', '🍽️', 'الأكل والشرب', 'linear-gradient(135deg,#8b5cf6,#6d3fd6)', 'feed')}${gauge('comm', '🗣️', 'التواصل واللغة', 'linear-gradient(135deg,#14b8a6,#0d9488)', 'comm')}</div>`;
+        const avg = scored.length ? Math.round(scored.reduce((a, e) => a + pctOf(e), 0) / scored.length) : 0;
+        const goodN = scored.filter(e => pctOf(e) >= 80).length;
+        const kpis = `<div class="pp-grid3">${kpi('📋', 'تقييمات', evals.length, 'text-violet-600')}${kpi('📊', 'متوسط النتائج', scored.length ? avg + '%' : '—', 'text-teal-600')}${kpi('🌟', 'نتائج مناسبة', goodN, 'text-emerald-600')}</div>`;
+        const tr = scored.slice(0, 8).reverse();
+        const trend = tr.length >= 2 ? `<div class="bg-white rounded-2xl border p-4"><div class="font-black text-sm text-slate-800 mb-3">📈 تطوّر النتائج</div><div class="flex items-end gap-2">${tr.map(e => { const p = pctOf(e), l = lvOf(p); return `<div class="flex flex-col items-center gap-1 flex-1"><div class="text-[10px] font-black" style="color:${l[0]}">${p}%</div><div class="w-full max-w-[34px] h-24 bg-slate-100 rounded-lg overflow-hidden flex flex-col-reverse"><div style="height:${p}%;background:${l[0]}" class="w-full"></div></div><div class="text-[13px]">${e.kind === 'feed' ? '🍽️' : e.kind === 'comm' ? '🗣️' : '📝'}</div><div class="text-[10px] text-slate-500 font-mono">${actEsc((e.date || '').slice(5))}</div></div>`; }).join('')}</div></div>` : '';
+        body = backBtn('📊 التقييمات') + hero + `<div class="space-y-3 mt-3">${gauges}${kpis}${trend}${evSection}${cmHtml}</div>`;
+      }
       else body = `<div class="pp-folders">${folder('att', 'linear-gradient(145deg,#10b981,#0d9488)', '📅', 'تقييم أداء الحضور', `نسبة الحضور ${rate}% · ${cnt.ATT} من ${done} جلسة`, rate + '%')}${folder('eval', 'linear-gradient(145deg,#8b5cf6,#4f46e5)', '📊', 'تقييم الأداء والاختبارات', `${evals.length ? evals.length + ' تقييم' : 'لا توجد تقييمات بعد'}${(feedN || commN) ? ' · يشمل ' + [feedN ? 'الأكل والبلع 🍽️' : '', commN ? 'التواصل 🗣️' : ''].filter(Boolean).join(' و') : ' · الأكل والبلع والتواصل والاختبارات'}`, String(evals.length))}</div>`;
 
     } else if (_ppTab === 'book') {
@@ -14665,7 +14777,10 @@ function controls(list){var d=F.date||todayCairo(),br=[];
  if(br.length)h+='<select onchange="thpSet(\'branch\',this.value)" class="'+chip+'bg-white/90 text-slate-700"><option value="">'+T('كل الفروع')+'</option>'+br.map(function(b){return'<option'+(b===F.branch?' selected':'')+'>'+esc(b)+'</option>'}).join('')+'</select>';
  h+='<label class="'+chip+(F.today?'bg-emerald-400 text-slate-900':'bg-white/90 text-slate-600')+' cursor-pointer"><input type="checkbox" class="hidden" '+(F.today?'checked ':'')+'onchange="thpSet(\'today\',this.checked)">📅 '+T('جلسات هذا اليوم فقط')+'</label>';
  return h}
-function render(){var e=el();if(!e)return;
+window.THP_HOME_SVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9.5a1 1 0 0 0 1 1H10v-6h4v6h3.5a1 1 0 0 0 1-1V10"/></svg>';
+function thpInit(){try{if(!currentUser||currentUser.role!=='therapist')return;var k=String(currentUser.email||currentUser.id||currentUser.name||'t');if(window._thpInit===k)return;window._thpInit=k;window._thpClassic=true;var e=el();if(e)e.classList.add('hidden');try{switchTab('dashboard')}catch (x) { suLog('thp init dashboard', x); }var bk=document.getElementById('thpBack');if(bk){bk.innerHTML=window.THP_HOME_SVG;bk.style.display='flex'}}catch (x) { suLog('thpInit', x); }}
+window.thpInit=thpInit;
+function render(){var e=el();if(!e)return;thpInit();
  if(!currentUser||currentUser.role!=='therapist'||sessionStorage.getItem('SU_TH_CLASSIC')||window._thpClassic){e.classList.add('hidden');return}
  e.classList.remove('hidden');
  var d=F.date||todayCairo(),list=kids();
@@ -14715,7 +14830,7 @@ window.thpProfile=function(){try{suProfileOpen();var m=document.getElementById('
 window.thpChild=function(){if(F.child){F.sheet='child';sig='';render()}};
 window.thpSheet=function(v){F.sheet=v;sig='';render()};
 window.thpHome=function(){window._thpClassic=false;F.tab='home';sig='';var bk=document.getElementById('thpBack');if(bk)bk.style.display='none';var m=document.getElementById('thpMenu');if(m)m.remove();render()};
-window.thpGo=function(id){var m=document.getElementById('thpMenu');if(m)m.remove();if(id==='__prof'){thpProfile();return}if(id==='__home'){thpHome();return}window._thpClassic=true;el().classList.add('hidden');try{switchTab(id)}catch (x) { suLog('switchTab(id)', x); }var bk=document.getElementById('thpBack');if(bk){bk.textContent='🏠';bk.style.display='flex'}};
+window.thpGo=function(id){var m=document.getElementById('thpMenu');if(m)m.remove();if(id==='__prof'){thpProfile();return}if(id==='__home'){thpHome();return}window._thpClassic=true;el().classList.add('hidden');try{switchTab(id)}catch (x) { suLog('switchTab(id)', x); }var bk=document.getElementById('thpBack');if(bk){bk.innerHTML=window.THP_HOME_SVG;bk.style.display='flex'}};
 window.thpMenu=function(){var old=document.getElementById('thpMenu');if(old){old.remove();return}
  var bad=['purchases','staff','settings','payments','invoices'],items=[['__prof','⚙️',T('الإعدادات والبروفايل')],['__home','🏠',T('الرئيسية')]],logo=window.SU_PARENT_LOGO||suGateLogoUrl();
  document.querySelectorAll('#sideNav .side-tab').forEach(function(b){var id=(b.id||'').replace('side-nav-','');if(!id||bad.indexOf(id)>=0)return;var cs=getComputedStyle(b);if(cs.display==='none'||b.hidden)return;var ic=b.querySelector('.i3d'),lb=b.querySelector('.side-label');items.push([id,ic?ic.textContent:'•',lb?lb.textContent.trim():id])});
@@ -14725,20 +14840,22 @@ window.thpMenu=function(){var old=document.getElementById('thpMenu');if(old){old
  document.body.appendChild(m);try{if(window.suApplyLang&&L()==='en')window.suApplyLang('en')}catch (x) { suLog('if(window.suApplyLang&&L()===en)window.suApplyLa', x); }};
 (function(){
 if(!document.getElementById('thpBackCss')){var st=document.createElement('style');st.id='thpBackCss';
-st.textContent='#thpBack{display:none;position:absolute;right:58px;left:auto;top:calc(env(safe-area-inset-top,0px) + 7px);z-index:6;width:40px;height:40px;border-radius:50%;border:0;padding:0;align-items:center;justify-content:center;font-size:20px;line-height:1;color:#fff;background:radial-gradient(circle at 30% 28%,#99f6e4,#0f766e 70%);box-shadow:0 4px 12px rgba(15,118,110,.45);cursor:pointer;flex:0 0 auto}'
+st.textContent='#thpBack{display:none;position:absolute;right:58px;left:auto;top:calc(env(safe-area-inset-top,0px) + 7px);z-index:6;width:40px;height:40px;border-radius:12px;border:0;padding:0;align-items:center;justify-content:center;line-height:1;color:#fff;background:rgba(255,255,255,.16);cursor:pointer;flex:0 0 auto}'
++'#thpBack:hover{background:rgba(255,255,255,.26)}#thpBack svg{width:22px;height:22px}'
 +'#thpBack:active{transform:scale(.92)}'
 +'body.m-more-open #thpBack{visibility:hidden}'
 +'@media (min-width:1101px){#thpBack{right:auto;left:14px;top:6px}}'
 +'@media (max-width:1100px){#mainHeader:has(#thpBack[style*="flex"]) .flex.items-center.justify-between{padding-right:106px!important}}';
 document.head.appendChild(st)}
 function mk(){var b=document.getElementById('thpBack');
- if(!b){b=document.createElement('button');b.id='thpBack';b.type='button';b.onclick=function(){thpHome()};b.setAttribute('aria-label','الرئيسية');b.title='الرئيسية';b.textContent='🏠';b.style.display='none'}
+ if(!b){b=document.createElement('button');b.id='thpBack';b.type='button';b.onclick=function(){thpHome()};b.setAttribute('aria-label','الرئيسية');b.title='الرئيسية';b.innerHTML=window.THP_HOME_SVG;b.style.display='none'}
  var h=document.getElementById('mainHeader');
  if(h&&b.parentNode!==h)h.appendChild(b);else if(!h&&!b.parentNode)document.body.appendChild(b)}
 mk();setInterval(mk,1500);window.addEventListener('resize',mk);
 })();
 
-setInterval(function(){try{if(!currentUser||currentUser.role!=='therapist'){var e=el();if(e)e.classList.add('hidden');window._thpClassic=false;var bk=document.getElementById('thpBack');if(bk)bk.style.display='none';return}
+setInterval(function(){try{if(!currentUser||currentUser.role!=='therapist'){var e=el();if(e)e.classList.add('hidden');window._thpClassic=false;window._thpInit='';var bk=document.getElementById('thpBack');if(bk)bk.style.display='none';return}
+ thpInit();
  if(window._thpClassic){el().classList.add('hidden');return}
  var s=[currentUser.email,(state.sessions||[]).length,(state.clients||[]).length,(state.evaluations||[]).length,L()].join('|');
  var ae=document.activeElement;if(ae&&ae.closest&&ae.closest('#therapistPortal')&&ae.tagName!=='BUTTON')return;
@@ -15476,7 +15593,8 @@ html.su-dark body .pp-logo-btn,html.su-dark body #mNav.th-nav .mn-logo{backgroun
     var key=fg;if(key===last&&document.getElementById('suHdrContrastCss'))return;last=key;
     var el=document.getElementById('suHdrContrastCss');
     if(!el){el=document.createElement('style');el.id='suHdrContrastCss';document.head.appendChild(el)}
-    el.textContent='html body #suMenuBtn{color:'+fg+'!important;background:'+bg+'!important;'+(lightBg?'box-shadow:inset 0 0 0 1px rgba(15,23,42,.14);':'')+'}'+
+    el.textContent='html body #thpBack{color:'+fg+'!important;background:'+bg+'!important;'+(lightBg?'box-shadow:inset 0 0 0 1px rgba(15,23,42,.14);':'')+'}'+'html body #thpBack:hover{background:'+bgh+'!important}'+
+                   'html body #suMenuBtn{color:'+fg+'!important;background:'+bg+'!important;'+(lightBg?'box-shadow:inset 0 0 0 1px rgba(15,23,42,.14);':'')+'}'+
                    'html body #suMenuBtn:hover{background:'+bgh+'!important}'+
                    'html body #mainHeader{--su-hdr-fg:'+fg+'}';
   }
@@ -16932,6 +17050,53 @@ html.su-dark{
     }
   });
 })();
+</script>
+
+<style id="ev-hero-css">
+.ev-hero{position:relative;overflow:hidden;display:flex;align-items:center;gap:12px;width:100%;margin:6px 0 0;padding:20px 16px;border-radius:26px;text-align:right;color:#fff;background:linear-gradient(135deg,#6d3fd6 0%,#7c3aed 45%,#0d9488 100%);box-shadow:0 14px 30px -10px rgba(109,63,214,.65);border:0;cursor:pointer;font-family:inherit}
+.ev-hero:active{transform:scale(.98)}
+.ev-bub{position:absolute;border-radius:50%;background:rgba(255,255,255,.14);pointer-events:none}
+.ev-bub.b1{width:120px;height:120px;left:-30px;top:-40px}.ev-bub.b2{width:70px;height:70px;left:90px;bottom:-30px}.ev-bub.b3{width:44px;height:44px;right:38%;top:-14px;background:rgba(255,255,255,.1)}
+.ev-hero-logo{position:relative;flex:0 0 auto;width:62px;height:62px;border-radius:20px;background:#fff;display:grid;place-items:center;box-shadow:0 6px 16px rgba(0,0,0,.2)}
+.ev-hero-logo img{width:46px;height:46px;object-fit:contain}
+.ev-hero-tx{position:relative;flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.ev-hero-tx b{font-size:26px;font-weight:900;line-height:1.1;text-shadow:0 2px 8px rgba(0,0,0,.2)}
+.ev-hero-tx small{font-size:12px;font-weight:700;opacity:.92;line-height:1.5}
+.ev-hero-go{position:relative;flex:0 0 auto;background:#fff;color:#6d3fd6;font-weight:900;font-size:12px;padding:9px 13px;border-radius:999px;box-shadow:0 4px 12px rgba(0,0,0,.18)}
+.ev-gs{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ev-g{background:#fff;border:1px solid #e2e8f0;border-radius:22px;overflow:hidden;box-shadow:0 6px 16px -8px rgba(30,41,59,.25)}
+.ev-gh{color:#fff;font-weight:900;font-size:13px;padding:9px 12px;text-align:center}
+.ev-gb{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 8px 12px;text-align:center}
+.ev-gp{font-size:20px;font-weight:900}
+.ev-gl{font-size:11px;font-weight:900;line-height:1.4}
+.ev-gb small{font-size:10px;font-weight:700;color:#94a3b8}
+.ev-g0i{font-size:38px;opacity:.5}
+.ev-g0b{color:#fff;font-weight:900;font-size:12px;padding:8px 14px;border-radius:999px;border:0}
+#evSheet{position:fixed;inset:0;z-index:99990;background:rgba(30,41,59,.45);backdrop-filter:blur(3px);display:flex;align-items:flex-end}
+#evSheet .evs{width:100%;max-width:520px;margin:0 auto;background:#fff;border-radius:30px 30px 0 0;padding:14px 16px calc(22px + env(safe-area-inset-bottom,0px));box-shadow:0 -12px 40px rgba(30,41,59,.3);animation:pppop .3s ease-out both}
+#evSheet .evs-grip{width:44px;height:5px;border-radius:9px;background:#cbd5e1;margin:0 auto 12px}
+#evSheet .evs-t{font-size:20px;font-weight:900;color:#1e293b;text-align:center}
+#evSheet .evs-s{font-size:12px;font-weight:700;color:#64748b;text-align:center;margin:4px 0 14px}
+#evSheet .evs-c{display:flex;align-items:center;gap:12px;width:100%;padding:16px;margin-top:10px;border-radius:22px;color:#fff;text-align:right;border:0;font-family:inherit;cursor:pointer;box-shadow:0 10px 22px -10px rgba(0,0,0,.4)}
+#evSheet .evs-c:active{transform:scale(.98)}
+#evSheet .evs-ci{font-size:34px;flex:0 0 auto;background:rgba(255,255,255,.2);width:56px;height:56px;border-radius:18px;display:grid;place-items:center}
+#evSheet .evs-c b{display:block;font-size:17px;font-weight:900}
+#evSheet .evs-c small{display:block;font-size:11px;font-weight:700;opacity:.92;margin-top:2px}
+#evSheet .evs-c em{font-style:normal;margin-right:auto;font-size:22px;font-weight:900}
+#evSheet .evs-x{display:block;width:100%;margin-top:12px;padding:10px;font-weight:900;font-size:13px;color:#64748b;background:#f1f5f9;border-radius:14px;border:0}
+</style>
+<script id="ev-hero-js">
+window.ppEvClose = function () { var o = document.getElementById('evSheet'); if (o) o.remove(); };
+window.ppEvChoose = function () {
+  window.ppEvClose();
+  var o = document.createElement('div'); o.id = 'evSheet';
+  o.onclick = function (e) { if (e.target === o) window.ppEvClose(); };
+  o.innerHTML = '<div class="evs"><div class="evs-grip"></div><div class="evs-t">قيّم طفلك</div><div class="evs-s">اختار نوع التقييم اللي عايز تبدأ بيه</div>'
+    + '<button type="button" class="evs-c" style="background:linear-gradient(135deg,#8b5cf6,#6d3fd6)" onclick="ppEvClose();ppSet(\'perf\',\'feed\')"><span class="evs-ci">🍽️</span><span><b>اختبر الأكل والشرب</b><small>مهارات الأكل والبلع حسب عمر طفلك</small></span><em>‹</em></button>'
+    + '<button type="button" class="evs-c" style="background:linear-gradient(135deg,#14b8a6,#0d9488)" onclick="ppEvClose();ppSet(\'perf\',\'comm\')"><span class="evs-ci">🗣️</span><span><b>اختبر التواصل واللغة</b><small>معالم التواصل والكلام حسب عمر طفلك</small></span><em>‹</em></button>'
+    + '<button type="button" class="evs-x" onclick="ppEvClose()">إلغاء</button></div>';
+  document.body.appendChild(o);
+};
 </script>
 
 </body>
