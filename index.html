@@ -156,7 +156,10 @@
 #parentPortal{--pph-bar:calc(62px + env(safe-area-inset-top,0px));--pph-bg-up:0px;--pph-content-up:0px}
 .pph-topbar.pp-homehead{height:var(--pph-bar)!important}
 .pph2::before{top:var(--pph-bar)!important;background-position:center top!important;background-size:cover!important}
-.pph2{padding-top:calc(var(--pph-bar) + max(min(36vw,173px),16.8dvh))!important}
+/* بداية كارت الطفل تحت المبنى مباشرة (بدون سكرول) — محسوبة على عرض الخلفية */
+.pph2{padding-top:calc(var(--pph-bar) + min(42.3vw,203px))!important}
+.pph2 .pph-hi,.pph2 .pph-sub{display:none!important}
+.pph2 .pph-kids{position:absolute;right:16px;left:auto;top:calc(var(--pph-bar) + min(42.3vw,203px) - 8px);transform:translateY(-100%);flex-direction:column;align-items:flex-start;flex-wrap:nowrap;gap:6px;margin:0;z-index:3}
 .pph-toplogo{width:auto!important;max-width:60vw!important;object-fit:contain!important}
 @media (min-width:520px){.pph-toplogo{height:56px}}
 
