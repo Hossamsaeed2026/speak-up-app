@@ -1,5 +1,5 @@
 importScripts('push-sw.js?v=4');
-const VERSION = 'v6';
+const VERSION = 'v7';
 const CACHE = 'speakup-' + VERSION;
 const SHELL = ['./index.html', './manifest.json', './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png'];
 // مكتبات خارجية بتتخزن من أول تثبيت عشان التطبيق يفتح كامل حتى أوفلاين
