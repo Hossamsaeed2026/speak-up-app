@@ -198,6 +198,56 @@
 .pph2 .pph-btn-solid{padding:7px 18px;font-size:13px}
 .pph2 .pph-act .pph-go{width:34px;height:34px}
 </style>
+<style id="pph5-css">
+/* ===== مرحلة التابلت: الصفحة تملا الشاشة (الموبايل زي ما هو) ===== */
+@media (min-width:700px) and (min-height:520px){
+  #parentPortal{--pph-hw:min(100vw,760px);--pph-P:calc(var(--pph-bar) + var(--pph-hw)*.4)}
+  /* الصفحة الرئيسية: عرض كامل + سكرول للعناصر لو زادت */
+  .pph2{max-width:none!important;width:100%!important;margin:0!important;box-sizing:border-box;height:100dvh!important;
+    overflow-x:hidden!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;
+    padding:var(--pph-P) clamp(20px,4vw,48px) calc(110px + env(safe-area-inset-bottom,0px))!important}
+  /* الخلفية: صورة الهيرو بحواف متلاشية فوق تدرّج بيملا العرض كله */
+  .pph2::before{position:absolute!important;top:var(--pph-bar)!important;left:0!important;right:0!important;bottom:auto!important;
+    width:var(--pph-hw)!important;margin:0 auto!important;height:calc(var(--pph-hw)*.62);
+    background:url("assets/parent-bg.webp?v=3") center top/100% auto no-repeat!important;
+    -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 12%,#000 88%,transparent 100%),linear-gradient(180deg,#000 0,#000 68%,transparent 100%);
+    -webkit-mask-composite:source-in;
+    mask-image:linear-gradient(90deg,transparent 0,#000 12%,#000 88%,transparent 100%),linear-gradient(180deg,#000 0,#000 68%,transparent 100%);
+    mask-composite:intersect}
+  /* من غير تصغير تلقائي */
+  .pph-fitbox{height:auto!important;overflow:visible!important}
+  .pph-fit{width:100%!important;transform:none!important;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:stretch}
+  .pph-fit>.pph-card,.pph-fit>.pph-sess{margin-bottom:0!important}
+  .pph-fit>.pph-tiles{grid-column:1/-1;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+  .pph-tile{min-height:104px;font-size:15px}
+  .pph2 .pph-pav{width:128px;height:128px}
+  .pph2 .pph-who .pph-name{font-size:24px}
+  .pph2 .pph-sess-t{font-size:18px}.pph2 .pph-sess-l{font-size:14px}
+  .pph2 .pph-act-img{flex:0 0 34%;max-width:170px;min-height:112px}
+  .pph2 .pph-act-t{font-size:17px}
+  .pph2 .pph-prog-t{font-size:18px}
+  /* أزرار الأطفال: صف عادي فوق الكروت */
+  .pph2 .pph-kids{position:static!important;transform:none!important;flex-direction:row!important;flex-wrap:wrap;max-width:none!important;margin:0 0 14px!important}
+  .pph2 .pph-kids button{max-width:220px}
+  /* الشريط السفلي أعرض */
+  #parentPortal .pp-bar-pos,#parentPortal .pp-bar{max-width:min(720px,calc(100vw - 32px))}
+  /* باقي صفحات الأهل (مواعيد/كراسة/أداء/حسابات) تملا العرض */
+  #parentPortal .pp-pagebody{max-width:none;padding-left:clamp(20px,4vw,48px);padding-right:clamp(20px,4vw,48px)}
+}
+/* تابلت بالعرض: تلات أعمدة متوازنة، والعناصر بتتسكرول عمودياً */
+@media (min-width:1100px) and (min-height:520px){
+  #parentPortal{--pph-hw:min(100vw,620px)}
+  .pph-fit{grid-template-columns:repeat(6,minmax(0,1fr))}
+  .pph-fit>.pph-who{grid-column:span 2;order:1}
+  .pph-fit>.pph-sess{grid-column:span 2;order:2}
+  .pph-fit>.pph-prog{grid-column:span 2;order:3}
+  .pph-fit>.pph-act{grid-column:span 3;order:4}
+  .pph-fit>.pph-tiles{grid-column:span 3;order:5;grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (min-width:700px) and (max-width:1099px) and (orientation:landscape) and (min-height:520px){
+  #parentPortal{--pph-hw:min(100vw,520px)}
+}
+</style>
 <script id="pph4-js">(function(){
 var raf=0;
 function bar(){var p=document.getElementById("parentPortal"),l=document.querySelector(".pph-toplogo");if(!p||!l)return;var h=parseInt(l.style.height,10)||56;p.style.setProperty("--pph-bar","calc("+Math.max(62,h+6)+"px + env(safe-area-inset-top,0px))")}
@@ -206,6 +256,7 @@ function fit(){
   var p=document.getElementById("parentPortal");if(!p)return;
   var box=p.querySelector(".pph-fitbox"),inner=p.querySelector(".pph-fit"),h2=p.querySelector(".pph2");
   if(!box||!inner||!h2)return;
+  if(window.matchMedia("(min-width:700px) and (min-height:520px)").matches){inner.style.width="";inner.style.transform="";h2.style.setProperty("--pph-s","1");return}
   var avail=box.clientHeight-6;if(avail<120)return;
   var s=1;
   for(var i=0;i<6;i++){
@@ -2457,7 +2508,7 @@ setTimeout(sched,300);setTimeout(sched,1000);sched();
           ${bs.length?`<div class="font-black text-xs text-slate-500 px-1 pt-2">🏢 فروعنا</div>`+bs.map(b=>`<div class="rounded-2xl border p-3 ${b.branch_id===c.branch?"bg-indigo-50 border-indigo-300":"bg-white"}"><div class="font-black text-sm text-slate-800">${actEsc(b.branch_name||"")}</div><div class="text-xs text-slate-500 font-bold mt-1">${actEsc(b.address||"")}</div></div>`).join(""):""}
         </div></div>`}function ppHomeV2(x){const c=x.c,nextS=x.nextS,rate=x.rate,done=x.done;const first2=String(c.name||"").trim().split(/\s+/).slice(0,2).join(" ");const ph=clientPhoto(c),ini=actEsc(String(c.name||"👶").trim().charAt(0));const av=cls=>`<span class="pph-av ${cls||""}"><b>${ini}</b>${ph?`<img src="${actEsc(ph)}" alt="" onerror="this.remove()">`:""}</span>`;const ageTxt=(()=>{const d=c.dob?new Date(c.dob):null;if(!d||isNaN(d))return"";const m=Math.floor((Date.now()-d.getTime())/26298e5),y=Math.floor(m/12);if(y<1)return m+" شهر";return y===1?"سنة":y===2?"سنتان":y<=10?y+" سنوات":y+" سنة"})();const SV=(p,w)=>`<svg viewBox="0 0 24 24" width="${w||24}" height="${w||24}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`;const CH='<span class="pph-go"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></span>';const _app=(state.settings&&state.settings.app)||{};const hdrLogo=_app.logoUrl||window.SU_HEADER_LOGO||"assets/logos/header.png";const hdrColor=/^#[0-9a-f]{3,8}$/i.test(String(_app.headerColor||""))?_app.headerColor:"";const hdrH=Math.max(26,Math.min(60,+_app.logoHeight||56));const hcStyle=(hdrColor?`--pph-hc:${hdrColor};`:"")+`--pph-bar:calc(${Math.max(62,hdrH+6)}px + env(safe-area-inset-top,0px))`;const firstName=c.name?String(c.name).trim().split(/\s+/)[0]:"";
     const topbar=`<header class="pph-topbar pp-homehead" style="${hcStyle}"><button class="pph-hamb" onclick="ppMenuOpen()" aria-label="القائمة">${SV('<path d="M4 7h16M4 12h16M4 17h16"/>',24)}</button><img class="pph-toplogo" style="height:${hdrH}px" src="${actEsc(hdrLogo)}" alt="Speak Up" onerror="this.onerror=null;this.src='icons/icon-192.png'"></header>`;
-    const profHtml=`<button class="pph-card pph-who" onclick="ppChildOpen()"><span class="pph-pav">${av("")}</span><span class="pph-who-t"><span class="pph-name">${actEsc(first2)}</span>${ageTxt?`<span class="pph-age">${actEsc(ageTxt)}</span>`:""}<span class="pph-pill">الملف الشخصي</span></span>${CH}</button>`;
+    const profHtml=`<button class="pph-card pph-who" onclick="ppChildOpen()"><span class="pph-pav">${av("")}</span><span class="pph-who-t"><span class="pph-name">أهلاً ${actEsc(first2)}</span>${ageTxt?`<span class="pph-age">${actEsc(ageTxt)}</span>`:""}<span class="pph-pill">الملف الشخصي</span></span>${CH}</button>`;
     let sessHtml;if(nextS){let dtxt="";try{const dt=String(nextS.date||"").replace(/\//g,"-");dtxt=(AR_WEEKDAYS[ymdWeekday(dt)]||"")+" "+ymdArabic(dt);dtxt=dtxt.replace(/[٠-٩]/g,d=>"٠١٢٣٤٥٦٧٨٩".indexOf(d))}catch(e){dtxt=nextS.date||""}const ty=(()=>{try{return suTypeVal(nextS.type)==="تقييم"?"جلسة تقييم":"جلسة تخاطب"}catch(e){return"جلسة تخاطب"}})();sessHtml=`<button class="pph-sess" onclick="ppSet('tab','cal')"><span class="pph-sess-ico">${SV('<rect x="3" y="4" width="18" height="17" rx="3"/><path d="M8 2v4M16 2v4M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 17h.01M12 17h.01"/>',28)}</span><span class="pph-sess-txt"><span class="pph-sess-t">أقرب جلسة</span><span class="pph-sess-l pph-sess-d">${actEsc(dtxt)}</span><span class="pph-sess-l pph-sess-tm"><b>${actEsc(formatTime12(nextS.time))}</b><i>•</i><em>${ty}</em></span></span><span class="pph-sess-side"><span class="pph-chip">مؤكدة</span>${CH}</span></button>`}else{sessHtml=`<button class="pph-sess" onclick="ppSet('tab','cal')"><span class="pph-sess-ico">${SV('<rect x="3" y="4" width="18" height="17" rx="3"/><path d="M8 2v4M16 2v4M3 10h18"/>',28)}</span><span class="pph-sess-txt"><span class="pph-sess-t">أقرب جلسة</span><span class="pph-sess-l">لا توجد جلسة قادمة حالياً</span></span><span class="pph-sess-side">${CH}</span></button>`}
     const a=(x.acts||[]).find(z=>!z.done)||null,n=a?caNode(a.key):null;const actHead=`<div class="pph-act-head"><span class="pph-act-ico">${SV('<path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',24)}</span><span class="pph-act-ht"><b>نشاط اليوم في المنزل</b><small>نشاط موصى به من الأخصائي</small></span></div>`;let actHtml;if(a&&n){const im=n.img&&ACT_IMG[n.img],steps=n.act&&n.act.steps&&n.act.steps.length||0,col=n.act&&n.act.color||"#7c3aed";actHtml=`<div class="pph-card pph-act">${actHead}<div class="pph-act-body"><div class="pph-act-img" style="${im?`background-image:url('${im}')`:`background:${col}22`}">${im?"":n.icon||"🧩"}</div><div class="pph-act-info"><div class="pph-act-t">${actEsc(n.ar)}</div><div class="pph-act-m">${steps?SV('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',15)+" "+steps+" خطوات":actEsc(n.act&&n.act.tag||"")}</div><button class="pph-btn pph-btn-solid" onclick="caView('${a.key}')">ابدأ النشاط</button></div>${CH.replace('pph-go','pph-go" onclick="caView(\''+a.key+'\')"')}</div></div>`}else{actHtml=`<div class="pph-card pph-act">${actHead}<div class="pph-act-body"><div class="pph-act-img">🧩</div><div class="pph-act-info"><div class="pph-act-m">${(x.acts||[]).length?"🎉 خلّصت كل الأنشطة المنزلية الحالية":"لا توجد أنشطة منزلية بعد — هيظهر هنا اللي يحدده الأخصائي"}</div><button class="pph-btn pph-btn-solid" onclick="ppSet('sub','acts');ppSet('tab','book')">فتح الأنشطة</button></div></div></div>`}
     const R=44,C=2*Math.PI*R,pct=done?Math.max(0,Math.min(100,rate)):0;const note=!done?"ابدأ الجلسات لنتابع التقدم معاً":rate>=85?"تقدم ممتاز في الالتزام بالجلسات":rate>=65?"تقدم جيد في الالتزام بالجلسات":"نحتاج نزوّد الالتزام بالجلسات";const progHtml=`<button class="pph-card pph-prog" onclick="ppSet('tab','perf')"><span class="pph-prog-ico">${SV('<path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/>',26)}</span><span class="pph-prog-txt"><span class="pph-prog-t">رحلة تطور ${actEsc(firstName)}</span><span class="pph-prog-s">${note}</span></span><span class="pph-ring"><svg width="84" height="84" viewBox="0 0 100 100"><circle cx="50" cy="50" r="${R}" fill="none" stroke="#d1fae5" stroke-width="10"/><circle cx="50" cy="50" r="${R}" fill="none" stroke="#10b981" stroke-width="10" stroke-linecap="round" stroke-dasharray="${(C*pct/100).toFixed(1)} ${C.toFixed(1)}"/></svg><b>${done?pct+"%":"—"}</b></span></button>`;
