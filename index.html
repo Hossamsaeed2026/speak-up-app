@@ -310,12 +310,17 @@ document.addEventListener("click",function(e){if(sw&&e.target.closest&&e.target.
 }
 </style>
 <style id="pph7-css">
-/* ===== موبايل: الخلفية ثابتة والعناصر بس هي اللي بتتحرك ===== */
+/* ===== موبايل: الخلفية ثابتة (البيت تحت الشريط + الأوراق تحت) والعناصر بس هي اللي بتتحرك ===== */
 @media (max-width:640px){
-  #parentPortal{--pph-P:calc(var(--pph-bar) + var(--pph-hw)*.33)}
+  #parentPortal{--pph-P:calc(var(--pph-bar) + var(--pph-hw)*.33);background:#f5f3ff!important}
   #parentPortal .pph.pph2{isolation:isolate;background:transparent!important}
-  #parentPortal .pph.pph2::before{content:""!important;position:fixed!important;top:0!important;left:0!important;right:0!important;bottom:0!important;width:auto!important;height:auto!important;margin:0!important;z-index:-1!important;pointer-events:none;
-    background:url("assets/parent-bg.webp?v=3") center center/cover no-repeat!important;-webkit-mask-image:none!important;mask-image:none!important}
+  #parentPortal .pph.pph2::before,#parentPortal .pph.pph2::after{content:""!important;position:fixed!important;left:0!important;right:0!important;width:auto!important;margin:0!important;z-index:-1!important;pointer-events:none;background-repeat:no-repeat!important}
+  #parentPortal .pph.pph2::before{top:var(--pph-bar)!important;bottom:auto!important;height:calc(100vw*.66)!important;
+    background-image:url("assets/parent-bg.webp?v=3")!important;background-size:100% auto!important;background-position:center top!important;
+    -webkit-mask-image:linear-gradient(180deg,#000 0,#000 72%,transparent 100%)!important;mask-image:linear-gradient(180deg,#000 0,#000 72%,transparent 100%)!important}
+  #parentPortal .pph.pph2::after{bottom:0!important;top:auto!important;height:calc(100vw*.6)!important;
+    background-image:url("assets/parent-bg.webp?v=3")!important;background-size:100% auto!important;background-position:center bottom!important;
+    -webkit-mask-image:linear-gradient(0deg,#000 0,#000 70%,transparent 100%)!important;mask-image:linear-gradient(0deg,#000 0,#000 70%,transparent 100%)!important}
 }
 </style>
 <script id="pph4-js">(function(){
