@@ -6,7 +6,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Speak Up: management PWA for a speech-therapy center (clients, sessions, payments, purchases, staff, branches, calendar, therapist dashboards, a parent portal). UI language is Egyptian Arabic, RTL by default (`<html lang="ar" dir="rtl">`); English is toggled at runtime via `localStorage.SU_LANG`. Code comments are also mostly in Arabic.
 
-There is **no build system, package manager, linter or test suite**. It is a static site: open `index.html` through any static server (e.g. `python3 -m http.server`) — a server is needed for the service worker. Tailwind (`cdn.tailwindcss.com/3.4.17`) and `@supabase/supabase-js@2.78.0` (UMD) are loaded from CDNs.
+There is **no build system or package manager**. It is a static site: open `index.html` through any static server (e.g. `python3 -m http.server`) — a server is needed for the service worker. Tailwind (`cdn.tailwindcss.com/3.4.17`) and `@supabase/supabase-js@2.78.0` (UMD) are loaded from CDNs.
+
+## Checks (`tests/`, no dependencies except Playwright for the smoke test; Node 22+)
+
+- `node tests/static-checks.mjs`: compiles every inline `<script>` in `index.html`, checks the `suSplash`/`</html>` markers the service worker needs, flags duplicate block ids, syntax-checks `supabase/functions/*/index.ts`, and fails on data files (`.sql`/`.csv`/`.xlsx`… outside `supabase/migrations/`) or any tracked text file with more than 10 distinct Egyptian mobile numbers (the repo is public).
+- `node tests/merge.test.mjs`: sync merge cases, run against `canon`/`cloudMerge*` and the notebooks patch extracted from `index.html` itself. Add a case here when you touch the merge.
+- `node tests/smoke.mjs`: serves the repo, opens `index.html` in Chromium at phone and desktop widths, and fails on any page error. The CDNs and Supabase may be unreachable from a sandbox; the page should still load cleanly.
+- `.github/workflows/checks.yml` runs all three on every push to `main` (including web uploads) and on pull requests.
 
 ## Files that matter
 
