@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+<!-- su-pop-hook --><script>window.__suPopHook=1;window.addEventListener("popstate",function(e){if(window.__suLayerPop&&window.__suLayerPop(e))e.stopImmediatePropagation()});</script>
+
 <script>(function(){var MAX_MEM=200,MAX_LS=60,MAX_REMOTE=30,sent=0,remoteOff=false,seen={},seenN=0,mem=[];window.SU_ERRORS=mem;function who(){try{var u=typeof currentUser!=="undefined"?currentUser:null;return u?{id:u.id||u.email||"",role:u.role||""}:{}}catch(_){return{}}}function persist(){try{localStorage.setItem("SU_ERRLOG",JSON.stringify(mem.slice(-MAX_LS)))}catch(_){}}function remote(rec){if(remoteOff||sent>=MAX_REMOTE)return;try{var c=typeof sb!=="undefined"?sb:null;if(!c||!c.from)return;sent++;Promise.resolve(c.from("logs").insert([{level:rec.level,context:rec.ctx,message:rec.msg,stack:rec.stack,user_ref:rec.user.id||null,user_role:rec.user.role||null,page:rec.page,created_at:rec.t}])).then(function(r){if(r&&r.error)remoteOff=true}).catch(function(){remoteOff=true})}catch(_){remoteOff=true}}window.suLog=function(ctx,err,level){try{var msg=err&&err.message?err.message:String(err==null?"":err);var key=ctx+"|"+msg,now=Date.now(),s=seen[key];if(s&&now-s<5e3)return;if(++seenN>500){seen={};seenN=0}seen[key]=now;var rec={t:(new Date).toISOString(),level:level||"error",ctx:String(ctx||""),msg:msg.slice(0,500),stack:err&&err.stack?String(err.stack).slice(0,1500):"",user:who(),page:String(location.hash||location.pathname||"").slice(0,120)};mem.push(rec);if(mem.length>MAX_MEM)mem.shift();persist();if(rec.level==="error")remote(rec);if(window.console&&console.warn)console.warn("[SU]",rec.level,rec.ctx,msg)}catch(_){}};window.suErrLogDownload=function(){try{var b=new Blob([JSON.stringify(mem,null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="speakup-errors-"+(new Date).toISOString().slice(0,10)+".json";a.click()}catch(_){}};window.addEventListener("error",function(e){if(e&&e.message)window.suLog("window.onerror "+String(e.filename||"").split("/").pop()+":"+e.lineno,e.error||e.message)});window.addEventListener("unhandledrejection",function(e){window.suLog("unhandledrejection",e&&e.reason)})})();</script>
 <script>try{if(localStorage.getItem("SU_LANG")==="en"){var _d=document.documentElement;_d.lang="en";_d.dir="ltr"}}catch(e){suLog("if(localStorage.getItem(SU_LANG)===en){var _d=do",e,"debug")}</script>
 <script>try{var _t=localStorage.getItem("SU_THEME")||"light";if(_t==="dark"||_t==="system"&&window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches)document.documentElement.classList.add("su-dark")}catch(e){suLog("var _t=localStorage.getItem(SU_THEME)||light;if(",e,"debug")}</script>
@@ -2847,5 +2849,627 @@ document.addEventListener("click",function(e){var i=e.target.closest&&e.target.c
 })();
 </script>
 
+<!-- su-reports:start -->
+<style id="su-reports-css">
+/* ===== تقارير الطفل (PDF) ===== */
+.rp-wrap{display:flex;flex-direction:column;gap:14px}
+.rp-up{border:1.5px dashed #c4b5fd;background:#faf7ff;border-radius:16px;padding:14px}
+.rp-up-h{font-weight:900;font-size:14px;color:#4c1d95;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.rp-drop{display:flex;align-items:center;gap:12px;padding:12px;border-radius:14px;background:#fff;border:1px solid #e9e3f7;cursor:pointer}
+.rp-drop:active{transform:scale(.99)}
+.rp-drop-ic{flex:none;width:44px;height:44px;border-radius:12px;background:#fee2e2;color:#dc2626;display:grid;place-items:center;font-size:11px;font-weight:900}
+.rp-drop-t{display:flex;flex-direction:column;min-width:0;gap:2px}
+.rp-drop-t b{font-size:13.5px;color:#1e1b4b;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rp-drop-t small{font-size:11.5px;color:#6b7280;font-weight:700}
+.rp-grid{display:grid;grid-template-columns:2fr 1.4fr 1fr;gap:10px;margin-top:10px}
+.rp-grid label{min-width:0;display:flex;flex-direction:column;gap:4px;font-size:11.5px;font-weight:800;color:#64748b}
+.rp-grid input,.rp-grid select{width:100%;max-width:100%;box-sizing:border-box;height:40px;font:inherit;font-size:13px;font-weight:700;color:#1e293b;border:1px solid #e2e8f0;border-radius:10px;padding:8px 10px;background:#fff;min-width:0}
+.rp-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px;flex-wrap:wrap}
+.rp-chk{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:800;color:#334155;cursor:pointer}
+.rp-chk input{width:18px;height:18px;accent-color:#7e3ab8}
+.rp-btn{border:0;border-radius:12px;padding:10px 18px;font:inherit;font-size:13px;font-weight:900;color:#fff;background:linear-gradient(135deg,#7e3ab8,#6b2fa3);box-shadow:0 6px 14px rgba(126,58,184,.25);cursor:pointer;display:inline-flex;align-items:center;gap:8px}
+.rp-btn[disabled]{opacity:.6;cursor:default}
+.rp-err{margin-top:8px;font-size:12px;font-weight:800;color:#be123c}
+.rp-spin{width:16px;height:16px;border-radius:50%;border:2.5px solid rgba(255,255,255,.4);border-top-color:#fff;animation:rp-spin .8s linear infinite;display:inline-block}
+.rp-spin.dk{border-color:#ddd6fe;border-top-color:#7e3ab8}
+@keyframes rp-spin{to{transform:rotate(360deg)}}
+.rp-list{display:flex;flex-direction:column;gap:10px}
+.rp-card{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid #ebe8f3;border-radius:16px;background:#fff}
+.rp-ic{flex:none;width:46px;height:54px;border-radius:10px;background:linear-gradient(160deg,#fef2f2,#fee2e2);border:1px solid #fecaca;color:#dc2626;display:grid;place-items:center;font-size:10.5px;font-weight:900;cursor:pointer}
+.rp-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;cursor:pointer;text-align:start}
+.rp-t{font-size:14px;font-weight:900;color:#1e1b4b;line-height:1.35;overflow-wrap:anywhere}
+.rp-m{font-size:11.5px;font-weight:700;color:#6b7280;display:flex;flex-wrap:wrap;gap:4px 10px}
+.rp-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:2px}
+.rp-tag{font-size:10.5px;font-weight:900;padding:2px 9px;border-radius:999px;background:#f1f5f9;color:#475569}
+.rp-tag.k{background:#ede9fe;color:#6d28d9}
+.rp-tag.on{background:#dcfce7;color:#047857}
+.rp-acts{flex:none;display:flex;flex-direction:column;gap:6px}
+.rp-a{border:1px solid #e2e8f0;background:#fff;border-radius:10px;padding:6px 10px;font:inherit;font-size:11.5px;font-weight:800;color:#334155;cursor:pointer;white-space:nowrap}
+.rp-a.open{background:#7e3ab8;border-color:#7e3ab8;color:#fff}
+.rp-a.del{color:#be123c}
+.rp-empty{padding:28px 10px;text-align:center;color:#94a3b8;font-size:13px;font-weight:700}
+.rp-empty b{display:block;font-size:30px;margin-bottom:6px}
+@media (max-width:640px){
+  .rp-grid{grid-template-columns:1fr 1fr}
+  .rp-grid label:first-child{grid-column:1/-1}
+  .rp-foot .rp-btn{width:100%;justify-content:center}
+  .rp-acts{flex-direction:row}
+  .rp-card{flex-wrap:wrap}
+  .rp-acts{width:100%;justify-content:flex-end}
+}
+
+/* عارض الـ PDF */
+.rpv{position:fixed;inset:0;z-index:100002;background:#3f3a4d;display:flex;flex-direction:column;direction:rtl}
+.rpv.hidden{display:none}
+.rpv-bar{flex:none;display:flex;align-items:center;gap:8px;padding:calc(8px + env(safe-area-inset-top,0px)) 10px 8px;background:#1f1b2e;color:#fff}
+.rpv-x{flex:none;width:40px;height:40px;border:0;border-radius:12px;background:rgba(255,255,255,.12);color:#fff;display:grid;place-items:center;cursor:pointer}
+.rpv-x svg,.rpv-tb svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.rpv-h{flex:1;min-width:0;display:flex;flex-direction:column}
+.rpv-h b{font-size:14px;font-weight:900;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rpv-h small{font-size:11px;font-weight:700;opacity:.7;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rpv-tools{flex:none;display:flex;align-items:center;gap:4px}
+.rpv-tb{width:38px;height:38px;border:0;border-radius:11px;background:rgba(255,255,255,.1);color:#fff;display:grid;place-items:center;cursor:pointer;font:inherit;font-weight:900}
+.rpv-z{min-width:44px;text-align:center;font-size:12px;font-weight:800;opacity:.85}
+.rpv-body{flex:1;overflow:auto;-webkit-overflow-scrolling:touch;direction:ltr;overscroll-behavior:contain}
+.rpv-in{display:flex;flex-direction:column;align-items:center;gap:12px;padding:12px;min-width:100%;width:max-content;box-sizing:border-box}
+.rpv-pg{background:#fff;box-shadow:0 4px 18px rgba(0,0,0,.35);border-radius:4px;overflow:hidden;position:relative}
+.rpv-pg canvas{display:block}
+.rpv-pg .rpv-n{position:absolute;bottom:6px;left:50%;transform:translateX(-50%);font-size:11px;font-weight:800;color:#94a3b8}
+.rpv-st{margin:auto;padding:40px 20px;text-align:center;color:#e9e5f5;font-size:14px;font-weight:800;display:flex;flex-direction:column;align-items:center;gap:12px;direction:rtl}
+.rpv-st .rp-btn{background:#fff;color:#4c1d95;box-shadow:none}
+@media (max-width:520px){.rpv-z{display:none}}
+
+/* قائمة التقارير لولي الأمر */
+.rpl{position:fixed;inset:0;z-index:100001;background:#f6f3fc;display:flex;flex-direction:column;direction:rtl}
+.rpl.hidden{display:none}
+.rpl-bar{flex:none;display:flex;align-items:center;gap:10px;padding:calc(10px + env(safe-area-inset-top,0px)) 14px 12px;background:var(--pph-hc,var(--su-primary,#7e3ab8));color:#fff}
+.rpl-bar .rpv-x{background:rgba(255,255,255,.18)}
+.rpl-h{flex:1;min-width:0}
+.rpl-h b{display:block;font-size:17px;font-weight:900}
+.rpl-h small{font-size:12px;font-weight:700;opacity:.85}
+.rpl-body{flex:1;overflow:auto;padding:14px 14px calc(24px + env(safe-area-inset-bottom,0px))}
+.rpl-body .rp-list{max-width:620px;margin:0 auto}
+
+html.su-dark .rp-up{background:#17142a;border-color:#4c3a7a}
+html.su-dark .rp-drop,html.su-dark .rp-card,html.su-dark .rp-a,html.su-dark .rp-grid input,html.su-dark .rp-grid select{background:#111a2e;border-color:#26324a;color:#e2e8f0}
+html.su-dark .rp-t,html.su-dark .rp-drop-t b,html.su-dark .rp-up-h{color:#e9e5ff}
+html.su-dark .rp-chk{color:#cbd5e1}
+html.su-dark .rpl{background:#0b1220}
+</style>
+<script id="su-reports">
+/* ===== تقارير الطفل (PDF) =====
+   - الأخصائي/السكرتارية/الأدمن: تاب «📄 التقارير» في ملف الطفل — رفع PDF + عرض + إظهار لولي الأمر + حذف
+   - ولي الأمر: «التقارير» في القائمة الجانبية — بيشوف التقارير اللي الأخصائي سمح بيها بس
+   - الملفات في Supabase Storage (bucket خاص: child-reports) والصلاحيات بـ RLS
+   - العرض جوه التطبيق بـ PDF.js (بيشتغل على أندرويد وآيفون والكمبيوتر) */
+(function () {
+  "use strict";
+  var BUCKET = "child-reports";
+  var PDFJS = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/";
+  var MAX = 20 * 1024 * 1024;
+  var KINDS = ["تقرير تقييم مبدئي", "تقرير متابعة شهري", "تقرير متابعة ربع سنوي", "تقرير ختامي", "خطة علاجية", "أخرى"];
+  var COLS = "id,client_id,title,kind,report_date,file_path,file_size,visible_to_parent,uploaded_by,uploader_name,created_at";
+
+  var cache = {}, errs = {}, inflight = {};
+  var up = { cid: null, file: null, title: "", kind: KINDS[1], date: "", parent: false, busy: false, err: "" };
+
+  var E = function (s) { s = s == null ? "" : String(s); return window.escH ? window.escH(s) : s.replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); };
+  var SV = function (p) { return '<svg viewBox="0 0 24 24" aria-hidden="true">' + p + "</svg>"; };
+  var IC = {
+    x: SV('<path d="M6 6l12 12M18 6L6 18"/>'),
+    back: SV('<path d="M9 6l6 6-6 6"/>'),
+    dl: SV('<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>'),
+    plus: SV('<path d="M12 6v12M6 12h12"/>'),
+    minus: SV('<path d="M6 12h12"/>')
+  };
+
+  function role() { try { return (currentUser && currentUser.role) || ""; } catch (e) { return ""; } }
+  function isStaff() { return /^(admin|secretary|therapist)$/.test(role()); }
+  function myId() { try { return (cloudUser && cloudUser.id) || ""; } catch (e) { return ""; } }
+  function myName() { try { return (currentUser && currentUser.name) || ""; } catch (e) { return ""; } }
+  function canManage(r) { return role() === "admin" || (isStaff() && r.uploaded_by === myId()); }
+  function today() { try { return todayCairo(); } catch (e) { return new Date().toISOString().slice(0, 10); } }
+  function toast(m, c) { try { showToast(m, c); } catch (e) { } }
+  function log(where, e) { try { suLog(where, e); } catch (x) { console.warn(where, e); } }
+  async function db() {
+    var s = typeof ensureSb === "function" ? await ensureSb() : (typeof sb !== "undefined" ? sb : null);
+    if (!s) throw new Error("مفيش اتصال بالسيرفر");
+    return s;
+  }
+  function uuid() {
+    if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+    var b = crypto.getRandomValues(new Uint8Array(16));
+    return Array.from(b, function (x) { return x.toString(16).padStart(2, "0"); }).join("");
+  }
+  function size(n) {
+    n = +n || 0;
+    if (n < 1024) return n + " B";
+    if (n < 1048576) return Math.round(n / 1024) + " KB";
+    return (n / 1048576).toFixed(1) + " MB";
+  }
+  function dateAr(d) {
+    if (!d) return "";
+    try { return new Intl.DateTimeFormat("ar-EG", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(String(d).slice(0, 10) + "T00:00:00Z")); } catch (e) { return d; }
+  }
+  function errMsg(e) {
+    var m = (e && (e.message || e.error_description || e.error)) || String(e || "");
+    if (/row-level security|not authorized|permission|403|Unauthorized/i.test(m)) return "مفيش صلاحية للعملية دي";
+    if (/exceeded|too large|413|size/i.test(m)) return "الملف أكبر من الحد المسموح (20 ميجا)";
+    if (/mime|type/i.test(m)) return "لازم الملف يكون PDF";
+    if (/Failed to fetch|NetworkError|network/i.test(m)) return "النت فاصل — جرّب تاني";
+    return m || "حصل خطأ";
+  }
+  function sortList(a) {
+    return a.sort(function (x, y) {
+      var dx = x.report_date || x.created_at.slice(0, 10), dy = y.report_date || y.created_at.slice(0, 10);
+      return dx < dy ? 1 : dx > dy ? -1 : (x.created_at < y.created_at ? 1 : -1);
+    });
+  }
+
+  async function load(cid, force) {
+    cid = String(cid);
+    if (!force && cache[cid]) return cache[cid];
+    if (inflight[cid]) return inflight[cid];
+    inflight[cid] = (async function () {
+      var s = await db();
+      var r = await s.from("su_reports").select(COLS).eq("client_id", cid).is("deleted_at", null);
+      if (r.error) throw r.error;
+      cache[cid] = sortList(r.data || []);
+      delete errs[cid];
+      return cache[cid];
+    })();
+    try { return await inflight[cid]; }
+    catch (e) { errs[cid] = errMsg(e); throw e; }
+    finally { delete inflight[cid]; }
+  }
+  function find(id) {
+    for (var k in cache) for (var i = 0; i < cache[k].length; i++) if (cache[k][i].id === id) return cache[k][i];
+    return null;
+  }
+
+  /* ---------- طبقات فوق بعض + زر الرجوع ---------- */
+  var layers = [];
+  function pushLayer(close) {
+    layers.push(close);
+    try { history.pushState(Object.assign({}, history.state || {}, { suRep: layers.length }), ""); } catch (e) { }
+  }
+  function popLayer() {
+    if (!layers.length) return;
+    if (history.state && history.state.suRep) history.back();
+    else layers.pop()();
+  }
+  // زر الرجوع: الـ listener ده متسجّل في أول الصفحة (su-pop-hook) عشان يشتغل قبل su-nav وبوابة ولي الأمر
+  window.__suLayerPop = function () {
+    if (!layers.length) return false;
+    layers.pop()();
+    return true;
+  };
+  if (!window.__suPopHook) window.addEventListener("popstate", function (e) { if (window.__suLayerPop()) e.stopImmediatePropagation(); }, true);
+
+  /* ---------- التاب في ملف الطفل ---------- */
+  function cardHtml(r, staff) {
+    var meta = [];
+    if (r.report_date) meta.push("📅 " + E(dateAr(r.report_date)));
+    if (staff && r.uploader_name) meta.push("👤 " + E(r.uploader_name));
+    if (r.file_size) meta.push(E(size(r.file_size)));
+    var tags = (r.kind ? '<span class="rp-tag k">' + E(r.kind) + "</span>" : "") +
+      (staff ? (r.visible_to_parent ? '<span class="rp-tag on">👁️ ظاهر لولي الأمر</span>' : '<span class="rp-tag">🔒 داخلي</span>') : "");
+    var acts = '<button type="button" class="rp-a open" data-rp="open" data-id="' + r.id + '">فتح</button>';
+    if (staff && canManage(r)) {
+      acts += '<button type="button" class="rp-a" data-rp="vis" data-id="' + r.id + '">' + (r.visible_to_parent ? "إخفاء عن ولي الأمر" : "إظهار لولي الأمر") + "</button>" +
+        '<button type="button" class="rp-a del" data-rp="del" data-id="' + r.id + '">حذف</button>';
+    }
+    return '<div class="rp-card"><span class="rp-ic" data-rp="open" data-id="' + r.id + '">PDF</span>' +
+      '<div class="rp-info" data-rp="open" data-id="' + r.id + '"><span class="rp-t">' + E(r.title) + '</span><span class="rp-m">' + meta.join("<span>·</span>") + "</span>" +
+      (tags ? '<span class="rp-tags">' + tags + "</span>" : "") + "</div>" +
+      '<div class="rp-acts">' + acts + "</div></div>";
+  }
+  function listHtml(cid, staff) {
+    var a = cache[cid];
+    if (!a) {
+      if (errs[cid]) return '<div class="rp-empty"><b>⚠️</b>' + E(errs[cid]) + '<div style="margin-top:12px"><button type="button" class="rp-btn" data-rp="retry">إعادة المحاولة</button></div></div>';
+      return '<div class="rp-empty"><span class="rp-spin dk"></span><div style="margin-top:8px">جاري تحميل التقارير…</div></div>';
+    }
+    if (!a.length) return '<div class="rp-empty"><b>📄</b>' + (staff ? "لسه مفيش تقارير للطفل ده" : "لسه مفيش تقارير متاحة") + "</div>";
+    return '<div class="rp-list">' + a.map(function (r) { return cardHtml(r, staff); }).join("") + "</div>";
+  }
+  function formHtml(cid) {
+    if (up.cid !== cid) up = { cid: cid, file: null, title: "", kind: KINDS[1], date: today(), parent: false, busy: false, err: "" };
+    var f = up.file;
+    return '<div class="rp-up"><div class="rp-up-h">📤 رفع تقرير جديد</div>' +
+      '<label class="rp-drop" for="rpFile"><span class="rp-drop-ic">PDF</span><span class="rp-drop-t"><b>' + (f ? E(f.name) : "اختار ملف PDF من جهازك") + "</b><small>" + (f ? E(size(f.size)) + " — اضغط لتغيير الملف" : "حد أقصى 20 ميجا") + "</small></span></label>" +
+      '<input type="file" id="rpFile" accept="application/pdf,.pdf" hidden>' +
+      '<div class="rp-grid"><label>عنوان التقرير<input id="rpTitle" maxlength="200" placeholder="مثال: تقرير متابعة شهر أكتوبر" value="' + E(up.title) + '"></label>' +
+      '<label>نوع التقرير<select id="rpKind">' + KINDS.map(function (k) { return "<option" + (k === up.kind ? " selected" : "") + ">" + E(k) + "</option>"; }).join("") + "</select></label>" +
+      '<label>تاريخ التقرير<input type="date" id="rpDate" value="' + E(up.date) + '"></label></div>' +
+      '<div class="rp-foot"><label class="rp-chk"><input type="checkbox" id="rpParent"' + (up.parent ? " checked" : "") + "> يظهر لولي الأمر في البوابة</label>" +
+      '<button type="button" class="rp-btn" data-rp="send"' + (up.busy ? " disabled" : "") + ">" + (up.busy ? '<span class="rp-spin"></span> جاري الرفع…' : "رفع التقرير") + "</button></div>" +
+      (up.err ? '<div class="rp-err">⚠️ ' + E(up.err) + "</div>" : "") + "</div>";
+  }
+  function curCid() { try { return _cpId == null ? null : String(_cpId); } catch (e) { return null; } }
+  function curTab() { try { return _cpTab; } catch (e) { return ""; } }
+
+  function renderTab() {
+    var el = document.getElementById("suRepTab"), cid = curCid();
+    if (!el || !cid) return;
+    el.innerHTML = '<div class="rp-wrap">' + (isStaff() ? formHtml(cid) : "") + listHtml(cid, isStaff()) + "</div>";
+    if (!cache[cid] && !errs[cid] && !inflight[cid]) load(cid).then(refresh, refresh);
+  }
+  function refresh() {
+    var cid = curCid();
+    var b = document.getElementById("cpRepTabBtn");
+    if (b && cid) b.textContent = "📄 التقارير" + (cache[cid] ? " (" + cache[cid].length + ")" : "");
+    if (curTab() === "reports") renderTab();
+    if (document.getElementById("suRepList") && !document.getElementById("suRepList").classList.contains("hidden")) renderParentList();
+  }
+
+  function decorate() {
+    var body = document.getElementById("clientProfileBody"), cid = curCid();
+    if (!body || !cid) return;
+    var cards = body.querySelectorAll(".cp-card");
+    var card = cards[cards.length - 1], bar = card && card.firstElementChild;
+    if (!bar || !bar.querySelector(".cp-tab")) return;
+    var btn = document.createElement("button");
+    btn.type = "button"; btn.id = "cpRepTabBtn"; btn.className = "cp-tab";
+    btn.textContent = "📄 التقارير" + (cache[cid] ? " (" + cache[cid].length + ")" : "");
+    btn.addEventListener("click", function () { cpSetTab("reports"); });
+    var first = bar.querySelector(".cp-tab");
+    if (first && first.nextSibling) bar.insertBefore(btn, first.nextSibling); else bar.appendChild(btn);
+    if (curTab() === "reports") {
+      bar.querySelectorAll(".cp-tab.active").forEach(function (b) { b.classList.remove("active"); });
+      btn.classList.add("active");
+      while (bar.nextSibling) card.removeChild(bar.nextSibling);
+      var host = document.createElement("div");
+      host.id = "suRepTab";
+      card.appendChild(host);
+      bindTab(host);
+      renderTab();
+    } else if (!cache[cid] && !inflight[cid] && !errs[cid]) {
+      load(cid).then(refresh, function () { });
+    }
+  }
+  function bindTab(host) {
+    host.addEventListener("change", function (e) {
+      var t = e.target;
+      if (t.id === "rpFile") pickFile(t.files && t.files[0]);
+      else if (t.id === "rpKind") up.kind = t.value;
+      else if (t.id === "rpDate") up.date = t.value;
+      else if (t.id === "rpParent") up.parent = t.checked;
+    });
+    host.addEventListener("input", function (e) { if (e.target.id === "rpTitle") up.title = e.target.value; });
+    host.addEventListener("click", onAction);
+  }
+  function onAction(e) {
+    var a = e.target.closest("[data-rp]");
+    if (!a) return;
+    var act = a.dataset.rp, id = a.dataset.id;
+    if (act === "open") { var r = find(id); if (r) openViewer(r); }
+    else if (act === "vis") toggleVis(id);
+    else if (act === "del") del(id);
+    else if (act === "send") send();
+    else if (act === "retry") {
+      var cid = a.closest("#suRepList") ? parentCid() : curCid();
+      if (cid) { delete errs[cid]; refresh(); load(cid, true).then(refresh, refresh); }
+    }
+  }
+
+  async function pickFile(f) {
+    up.err = "";
+    if (!f) return;
+    if (f.size > MAX) { up.file = null; up.err = "الملف أكبر من 20 ميجا"; return renderTab(); }
+    var ok = false;
+    try { ok = new TextDecoder().decode(await f.slice(0, 5).arrayBuffer()) === "%PDF-"; } catch (e) { ok = /\.pdf$/i.test(f.name); }
+    if (!ok) { up.file = null; up.err = "الملف ده مش PDF"; return renderTab(); }
+    up.file = f;
+    if (!up.title.trim()) up.title = f.name.replace(/\.pdf$/i, "").replace(/[_-]+/g, " ").trim().slice(0, 200);
+    renderTab();
+  }
+
+  async function send() {
+    var cid = up.cid || curCid();
+    if (!cid || up.busy) return;
+    if (!up.file) { up.err = "اختار ملف PDF الأول"; return renderTab(); }
+    var title = (up.title || "").trim() || up.file.name.replace(/\.pdf$/i, "");
+    up.busy = true; up.err = ""; renderTab();
+    var path = cid + "/" + uuid() + ".pdf", s;
+    try {
+      s = await db();
+      var u = await s.storage.from(BUCKET).upload(path, up.file, { contentType: "application/pdf", upsert: false, cacheControl: "3600" });
+      if (u.error) throw u.error;
+      var ins = await s.from("su_reports").insert({
+        client_id: cid, title: title.slice(0, 200), kind: up.kind || null, report_date: up.date || null,
+        file_path: path, file_size: up.file.size, visible_to_parent: !!up.parent,
+        uploaded_by: myId(), uploader_name: myName().slice(0, 120) || null
+      }).select(COLS).single();
+      if (ins.error) { s.storage.from(BUCKET).remove([path]).catch(function () { }); throw ins.error; }
+      cache[cid] = sortList([ins.data].concat(cache[cid] || []));
+      up = { cid: cid, file: null, title: "", kind: up.kind, date: today(), parent: up.parent, busy: false, err: "" };
+      toast("✅ تم رفع التقرير", "green");
+    } catch (e) {
+      log("su-reports upload", e);
+      up.busy = false; up.err = errMsg(e);
+    }
+    refresh();
+  }
+
+  async function toggleVis(id) {
+    var r = find(id); if (!r) return;
+    var v = !r.visible_to_parent;
+    try {
+      var s = await db();
+      var res = await s.from("su_reports").update({ visible_to_parent: v }).eq("id", id);
+      if (res.error) throw res.error;
+      r.visible_to_parent = v;
+      toast(v ? "👁️ التقرير بقى ظاهر لولي الأمر" : "🔒 التقرير اتخفى عن ولي الأمر", "green");
+      refresh();
+    } catch (e) { log("su-reports vis", e); toast(errMsg(e), "red"); }
+  }
+
+  async function del(id) {
+    var r = find(id); if (!r) return;
+    if (!confirm('حذف التقرير "' + r.title + '"؟\nمش هيظهر تاني لا للموظفين ولا لولي الأمر.')) return;
+    try {
+      var s = await db();
+      var res = await s.from("su_reports").update({ deleted_at: new Date().toISOString() }).eq("id", id);
+      if (res.error) throw res.error;
+      s.storage.from(BUCKET).remove([r.file_path]).catch(function (e) { log("su-reports remove file", e); });
+      cache[r.client_id] = (cache[r.client_id] || []).filter(function (x) { return x.id !== id; });
+      toast("🗑️ تم حذف التقرير", "green");
+      refresh();
+    } catch (e) { log("su-reports delete", e); toast(errMsg(e), "red"); }
+  }
+
+  /* ---------- عارض الـ PDF ---------- */
+  var pdfLib = null;
+  function loadPdfJs() {
+    if (pdfLib) return pdfLib;
+    pdfLib = new Promise(function (res, rej) {
+      if (window.pdfjsLib) return res(window.pdfjsLib);
+      var el = document.createElement("script");
+      el.src = PDFJS + "pdf.min.js";
+      el.onload = function () {
+        if (!window.pdfjsLib) return rej(new Error("PDF.js"));
+        window.pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS + "pdf.worker.min.js";
+        res(window.pdfjsLib);
+      };
+      el.onerror = function () { pdfLib = null; rej(new Error("تعذر تحميل عارض الـ PDF — اتأكد من النت")); };
+      document.head.appendChild(el);
+    });
+    return pdfLib;
+  }
+
+  var V = { el: null, doc: null, rep: null, blob: null, zoom: 1, token: 0, io: null, pages: [] };
+  function viewerEl() {
+    if (V.el) return V.el;
+    var d = document.createElement("div");
+    d.id = "suRepView"; d.className = "rpv hidden";
+    d.setAttribute("role", "dialog"); d.setAttribute("aria-modal", "true");
+    d.innerHTML = '<div class="rpv-bar"><button type="button" class="rpv-x" data-v="close" aria-label="رجوع">' + IC.back + "</button>" +
+      '<div class="rpv-h"><b id="rpvT"></b><small id="rpvS"></small></div>' +
+      '<div class="rpv-tools"><button type="button" class="rpv-tb" data-v="out" aria-label="تصغير">' + IC.minus + '</button><span class="rpv-z" id="rpvZ">100%</span>' +
+      '<button type="button" class="rpv-tb" data-v="in" aria-label="تكبير">' + IC.plus + "</button>" +
+      '<button type="button" class="rpv-tb" data-v="dl" aria-label="تحميل الملف">' + IC.dl + "</button></div></div>" +
+      '<div class="rpv-body" id="rpvBody"><div class="rpv-in" id="rpvIn"></div></div>';
+    d.addEventListener("click", function (e) {
+      var b = e.target.closest("[data-v]"); if (!b) return;
+      var a = b.dataset.v;
+      if (a === "close") popLayer();
+      else if (a === "in") setZoom(V.zoom * 1.25);
+      else if (a === "out") setZoom(V.zoom / 1.25);
+      else if (a === "dl") download();
+      else if (a === "retry" && V.rep) { var r = V.rep; resetDoc(); start(r); }
+    });
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !d.classList.contains("hidden") && layers.length) popLayer(); });
+    document.body.appendChild(d);
+    V.el = d;
+    return d;
+  }
+  function status(html) { document.getElementById("rpvIn").innerHTML = '<div class="rpv-st">' + html + "</div>"; }
+  function resetDoc() {
+    V.token++;
+    if (V.io) { V.io.disconnect(); V.io = null; }
+    if (V.doc) { try { V.doc.destroy(); } catch (e) { } V.doc = null; }
+    V.blob = null; V.pages = [];
+  }
+  function openViewer(r) {
+    var d = viewerEl();
+    V.rep = r; V.zoom = 1;
+    document.getElementById("rpvT").textContent = r.title;
+    document.getElementById("rpvS").textContent = [r.kind, dateAr(r.report_date)].filter(Boolean).join(" · ");
+    document.getElementById("rpvZ").textContent = "100%";
+    d.classList.remove("hidden");
+    pushLayer(closeViewer);
+    start(r);
+  }
+  function closeViewer() {
+    resetDoc();
+    if (V.el) { V.el.classList.add("hidden"); document.getElementById("rpvIn").innerHTML = ""; }
+    V.rep = null;
+  }
+  async function start(r) {
+    var t = ++V.token;
+    status('<span class="rp-spin"></span>جاري فتح التقرير…');
+    try {
+      var s = await db();
+      var got = await Promise.all([
+        loadPdfJs(),
+        s.storage.from(BUCKET).download(r.file_path).then(function (x) { if (x.error) throw x.error; return x.data; })
+      ]);
+      if (t !== V.token) return;
+      V.blob = got[1];
+      var data = new Uint8Array(await got[1].arrayBuffer());
+      var doc = await got[0].getDocument({ data: data, cMapUrl: PDFJS + "cmaps/", cMapPacked: true, standardFontDataUrl: PDFJS + "standard_fonts/" }).promise;
+      if (t !== V.token) { doc.destroy(); return; }
+      V.doc = doc;
+      var p1 = await doc.getPage(1), vp = p1.getViewport({ scale: 1 });
+      if (t !== V.token) return;
+      document.getElementById("rpvS").textContent = [r.kind, dateAr(r.report_date), doc.numPages + (doc.numPages === 1 ? " صفحة" : " صفحات")].filter(Boolean).join(" · ");
+      buildPages(doc.numPages, vp.height / vp.width);
+    } catch (e) {
+      if (t !== V.token) return;
+      log("su-reports view", e);
+      status("⚠️ " + E(errMsg(e)) + '<button type="button" class="rp-btn" data-v="retry">إعادة المحاولة</button>');
+    }
+  }
+  function baseWidth() { return Math.max(240, Math.min(900, document.getElementById("rpvBody").clientWidth - 24)); }
+  function buildPages(n, ratio) {
+    var inEl = document.getElementById("rpvIn"), w = Math.round(baseWidth() * V.zoom);
+    inEl.innerHTML = "";
+    V.pages = [];
+    V.io = new IntersectionObserver(function (ents) {
+      ents.forEach(function (en) { if (en.isIntersecting) renderPage(en.target); });
+    }, { root: document.getElementById("rpvBody"), rootMargin: "800px 0px" });
+    for (var i = 1; i <= n; i++) {
+      var pg = document.createElement("div");
+      pg.className = "rpv-pg"; pg.dataset.n = i; pg.dataset.ratio = ratio;
+      pg.style.width = w + "px"; pg.style.height = Math.round(w * ratio) + "px";
+      pg.innerHTML = '<span class="rpv-n">' + i + "</span>";
+      inEl.appendChild(pg); V.pages.push(pg); V.io.observe(pg);
+    }
+  }
+  async function renderPage(pg) {
+    var key = String(V.zoom), t = V.token;
+    if (!V.doc || pg.dataset.r === key || pg.dataset.busy === key) return;
+    pg.dataset.busy = key;
+    try {
+      var page = await V.doc.getPage(+pg.dataset.n);
+      if (t !== V.token || String(V.zoom) !== key) return;
+      var vp1 = page.getViewport({ scale: 1 });
+      var cssW = Math.round(baseWidth() * V.zoom), sc = cssW / vp1.width;
+      var dpr = Math.min(window.devicePixelRatio || 1, 2);
+      var area = cssW * dpr * cssW * (vp1.height / vp1.width) * dpr;
+      if (area > 14e6) dpr = Math.max(1, dpr * Math.sqrt(14e6 / area));
+      var vp = page.getViewport({ scale: sc * dpr });
+      var c = document.createElement("canvas");
+      c.width = Math.floor(vp.width); c.height = Math.floor(vp.height);
+      c.style.width = cssW + "px"; c.style.height = Math.round(vp1.height * sc) + "px";
+      await page.render({ canvasContext: c.getContext("2d"), viewport: vp }).promise;
+      if (t !== V.token || String(V.zoom) !== key) return;
+      pg.innerHTML = ""; pg.appendChild(c);
+      pg.style.width = c.style.width; pg.style.height = c.style.height;
+      pg.dataset.r = key;
+    } catch (e) { log("su-reports page", e); }
+    finally { if (pg.dataset.busy === key) delete pg.dataset.busy; }
+  }
+  function setZoom(z) {
+    z = Math.max(0.5, Math.min(3, Math.round(z * 100) / 100));
+    if (!V.doc || z === V.zoom) return;
+    var body = document.getElementById("rpvBody");
+    var rel = body.scrollHeight ? body.scrollTop / body.scrollHeight : 0;
+    V.zoom = z;
+    document.getElementById("rpvZ").textContent = Math.round(z * 100) + "%";
+    var w = Math.round(baseWidth() * z);
+    V.pages.forEach(function (pg) {
+      var c = pg.querySelector("canvas");
+      pg.style.width = w + "px"; pg.style.height = Math.round(w * (+pg.dataset.ratio)) + "px";
+      if (c) { c.style.width = "100%"; c.style.height = "100%"; }
+      delete pg.dataset.r;
+      V.io.unobserve(pg); V.io.observe(pg);
+    });
+    body.scrollTop = rel * body.scrollHeight;
+  }
+  function download() {
+    if (!V.blob || !V.rep) return;
+    var name = (V.rep.title || "report").replace(/[\\/:*?"<>|]+/g, " ").trim() + ".pdf";
+    try {
+      var f = new File([V.blob], name, { type: "application/pdf" });
+      if (navigator.canShare && navigator.canShare({ files: [f] }) && /Android|iPhone|iPad/i.test(navigator.userAgent)) {
+        navigator.share({ files: [f], title: V.rep.title }).catch(function () { });
+        return;
+      }
+    } catch (e) { }
+    var u = URL.createObjectURL(V.blob), a = document.createElement("a");
+    a.href = u; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(u); }, 60e3);
+  }
+
+  /* ---------- بوابة ولي الأمر ---------- */
+  function parentCid() { try { return _ppChild == null ? null : String(_ppChild); } catch (e) { return null; } }
+  function parentListEl() {
+    var d = document.getElementById("suRepList");
+    if (d) return d;
+    d = document.createElement("div");
+    d.id = "suRepList"; d.className = "rpl hidden";
+    d.setAttribute("role", "dialog"); d.setAttribute("aria-modal", "true");
+    d.innerHTML = '<div class="rpl-bar"><button type="button" class="rpv-x" data-rpl="close" aria-label="رجوع">' + IC.back + '</button><div class="rpl-h"><b>التقارير</b><small id="rplSub"></small></div></div><div class="rpl-body" id="rplBody"></div>';
+    d.addEventListener("click", function (e) {
+      if (e.target.closest("[data-rpl=close]")) { popLayer(); return; }
+      onAction(e);
+    });
+    document.body.appendChild(d);
+    return d;
+  }
+  function renderParentList() {
+    var cid = parentCid(), body = document.getElementById("rplBody");
+    if (!body) return;
+    var c = null;
+    try { c = (state.clients || []).find(function (k) { return String(k.id) === cid; }); } catch (e) { }
+    document.getElementById("rplSub").textContent = c ? c.name : "";
+    if (!cid) { body.innerHTML = '<div class="rp-empty">اختار الطفل الأول</div>'; return; }
+    body.innerHTML = listHtml(cid, false);
+    if (!cache[cid] && !errs[cid] && !inflight[cid]) load(cid, true).then(refresh, refresh);
+  }
+  function openParentList() {
+    var d = parentListEl(), cid = parentCid();
+    if (cid) { delete cache[cid]; delete errs[cid]; }
+    try { var hc = getComputedStyle(document.querySelector(".pph-topbar") || document.body).getPropertyValue("--pph-hc"); if (hc) d.style.setProperty("--pph-hc", hc.trim()); } catch (e) { }
+    d.classList.remove("hidden");
+    renderParentList();
+    pushLayer(function () { d.classList.add("hidden"); });
+  }
+  window.suReportsOpenParent = openParentList;
+
+  function hookDrawer() {
+    var _open = window.ppMenuOpen;
+    if (typeof _open !== "function" || _open.__rep) return;
+    var w = function () {
+      var r = _open.apply(this, arguments);
+      try {
+        var d = document.getElementById("ppDrawer");
+        if (d && !d.__rep) {
+          d.__rep = true;
+          d.addEventListener("click", function (e) {
+            if (!e.target.closest('.sd-row[data-act="reports"]')) return;
+            e.stopPropagation();
+            var dr = history.state && history.state.dr;
+            ppDrawerClose();
+            var done = false, go = function () { if (done) return; done = true; window.removeEventListener("popstate", go); setTimeout(openParentList, 0); };
+            if (dr) { window.addEventListener("popstate", go); setTimeout(go, 450); } else setTimeout(go, 160);
+          }, true);
+        }
+        var ref = d && d.querySelector('.sd-row[data-act="book"]');
+        if (ref && !d.querySelector('.sd-row[data-act="reports"]')) {
+          var row = ref.cloneNode(true);
+          row.dataset.act = "reports"; row.classList.remove("on");
+          var ic = row.querySelector(".sd-ic");
+          if (ic) { ic.className = "sd-ic c-b"; ic.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg>'; }
+          var lb = row.querySelector(".sd-lb"); if (lb) lb.textContent = "التقارير";
+          ref.parentNode.insertBefore(row, ref.nextSibling);
+        }
+      } catch (e) { log("su-reports drawer", e); }
+      return r;
+    };
+    w.__rep = true;
+    window.ppMenuOpen = w;
+  }
+
+  /* ---------- ربط بملف الطفل ---------- */
+  function hookProfile() {
+    var _r = window.renderClientProfile;
+    if (typeof _r !== "function" || _r.__rep) return;
+    var w = function () {
+      var out = _r.apply(this, arguments);
+      try { decorate(); } catch (e) { log("su-reports decorate", e); }
+      return out;
+    };
+    w.__rep = true;
+    window.renderClientProfile = w;
+  }
+  hookProfile();
+  hookDrawer();
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", function () { hookProfile(); hookDrawer(); });
+})();
+</script>
+<!-- su-reports:end -->
 </body>
 </html>
