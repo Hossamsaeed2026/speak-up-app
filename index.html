@@ -2849,6 +2849,7 @@ document.addEventListener("click",function(e){var i=e.target.closest&&e.target.c
 })();
 </script>
 
+
 <!-- su-reports:start -->
 <style id="su-reports-css">
 /* ===== تقارير الطفل (PDF) ===== */
@@ -3106,9 +3107,12 @@ html.su-dark .rpl{background:#0b1220}
   function decorate() {
     var body = document.getElementById("clientProfileBody"), cid = curCid();
     if (!body || !cid) return;
-    var cards = body.querySelectorAll(".cp-card");
-    var card = cards[cards.length - 1], bar = card && card.firstElementChild;
-    if (!bar || !bar.querySelector(".cp-tab")) return;
+    // شريط التابات = أب أول زرار .cp-tab (مش آخر .cp-card — كروت الجدول الأسبوعي نفسها .cp-card)
+    var anyTab = body.querySelector('.cp-tab[onclick*="cpSetTab"]') || body.querySelector(".cp-tab");
+    var bar = anyTab && anyTab.parentElement, card = bar && bar.parentElement;
+    if (!bar || !card) return;
+    var old = document.getElementById("cpRepTabBtn");
+    if (old && bar.contains(old)) old.remove();
     var btn = document.createElement("button");
     btn.type = "button"; btn.id = "cpRepTabBtn"; btn.className = "cp-tab";
     btn.textContent = "📄 التقارير" + (cache[cid] ? " (" + cache[cid].length + ")" : "");
