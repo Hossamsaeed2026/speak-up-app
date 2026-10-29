@@ -3747,14 +3747,30 @@ html.su-dark .rpl{background:#0b1220}
     const m=getPreviousMonth(todayCairo().slice(0,7)),flag="SU_INVARCH:"+m;
     try{if(localStorage.getItem(flag))return}catch(e){}
     busy=true;
-    try{
-      const ex=await sb.from(T).select("id").eq("month",m);if(ex.error)throw ex.error;
-      const have=new Set((ex.data||[]).map(r=>r.id)),rows=[];
-      (state.clients||[]).forEach(c=>{const id=m+":"+c.id;if(have.has(id))return;const inv=calculateClientInvoice(c.id,m);
-        if(!inv||inv.currentSessionsCount===0&&inv.totalNetDue===0&&inv.totalPaid===0)return;rows.push({id:id,month:m,client_id:String(c.id),data:snap(inv)})});
-      for(let i=0;i<rows.length;i+=100){const r=await sb.from(T).upsert(rows.slice(i,i+100),{onConflict:"id",ignoreDuplicates:true});if(r.error)throw r.error}
-      try{localStorage.setItem(flag,new Date().toISOString())}catch(e){}
-    }catch(e){off=true;suLog("invArchive",e)}finally{busy=false}
+    try{await saveMonth(m);try{localStorage.setItem(flag,new Date().toISOString())}catch(e){}}
+    catch(e){off=true;suLog("invArchive",e)}finally{busy=false}
+  }
+  // بيحفظ فواتير شهر واحد (اللي مش محفوظ بس) وبيرجّع عدد النسخ الجديدة
+  async function saveMonth(m){
+    const ex=await sb.from(T).select("id").eq("month",m);if(ex.error)throw ex.error;
+    const have=new Set((ex.data||[]).map(r=>r.id)),rows=[];
+    (state.clients||[]).forEach(c=>{const id=m+":"+c.id;if(have.has(id))return;const inv=calculateClientInvoice(c.id,m);
+      if(!inv||inv.currentSessionsCount===0&&inv.totalNetDue===0&&inv.totalPaid===0)return;rows.push({id:id,month:m,client_id:String(c.id),data:snap(inv)})});
+    for(let i=0;i<rows.length;i+=100){const r=await sb.from(T).upsert(rows.slice(i,i+100),{onConflict:"id",ignoreDuplicates:true});if(r.error)throw r.error}
+    return rows.length;
+  }
+  // للإدارة: حفظ نسخ كل الشهور اللي فاتت مرة واحدة (بالبيانات الحالية)
+  async function saveOld(btn,after){
+    const cur=todayCairo().slice(0,7),ms=new Set;
+    (state.sessions||[]).forEach(x=>{const m=normYmd(x.date).slice(0,7);if(m&&m<cur)ms.add(m)});
+    (state.payments||[]).forEach(x=>{const m=normYmd(x.date||"").slice(0,7);if(m&&m<cur)ms.add(m)});
+    const list=[...ms].sort();
+    if(!list.length){showToast("مفيش شهور قديمة فيها بيانات","amber");return}
+    if(!confirm(`هيتحفظ نسخة من فواتير ${list.length} شهر (من ${cpMonthLabel(list[0])} لحد ${cpMonthLabel(list[list.length-1])}).\nالنسخ دي هتتحسب بالبيانات الموجودة دلوقتي، والفواتير اللي اتحفظت قبل كده مش هتتغير.\nتكمّل؟`))return;
+    btn.disabled=true;let n=0;
+    try{for(const m of list){btn.textContent="⏳ "+cpMonthLabel(m)+"…";n+=await saveMonth(m)}showToast(`✅ اتحفظ ${n} فاتورة من ${list.length} شهر`,"green")}
+    catch(e){suLog("invArchive old",e);showToast("⚠️ حصل خطأ في الحفظ — جرّب تاني","red")}
+    finally{btn.disabled=false;btn.textContent="📥 حفظ فواتير الشهور اللي فاتت";after()}
   }
   setTimeout(auto,20e3);setInterval(auto,60e3);
 
@@ -3763,6 +3779,7 @@ html.su-dark .rpl{background:#0b1220}
     if(!ready()){showToast("الأرشيف محتاج اتصال بالسحابة","amber");return}
     const o=sheet(`<div class="su-sheet-t">🗄️ أرشيف الفواتير</div><div class="sia-n">بتتحفظ نسخة ثابتة من كل الفواتير أول كل شهر عن الشهر اللي فات</div><div data-b><div class="sia-n">جاري التحميل…</div></div>`);
     const box=o.querySelector("[data-b]");
+    if((window._realRole||(currentUser&&currentUser.role))==="admin"){const ob=document.createElement("button");ob.type="button";ob.textContent="📥 حفظ فواتير الشهور اللي فاتت";ob.onclick=()=>saveOld(ob,()=>suInvArchiveOpen());box.parentNode.insertBefore(ob,box.nextSibling)}
     const ms=await sb.from(T).select("month");
     if(ms.error){box.innerHTML=`<div class="sia-n">⚠️ الأرشيف مش متاح دلوقتي.</div>`;suLog("invArchive list",ms.error);return}
     const months=[...new Set((ms.data||[]).map(r=>r.month))].sort().reverse();
