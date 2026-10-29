@@ -1,0 +1,29 @@
+name: checks
+
+# بيشتغل مع كل رفع على main (حتى الرفع من "Add files via upload") ومع كل Pull Request.
+# لو فشل، GitHub بيبعت إيميل وبيظهر ❌ جنب الـ commit.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Static checks (syntax, service worker, edge functions, no client data)
+        run: node tests/static-checks.mjs
+      - name: Sync merge tests
+        run: node tests/merge.test.mjs
+      - name: Install Chromium
+        run: npm install --no-save --no-package-lock playwright@1.49.1 && npx playwright install --with-deps chromium
+      - name: Smoke test (page opens without JavaScript errors)
+        run: node tests/smoke.mjs

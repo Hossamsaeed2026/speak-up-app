@@ -6,7 +6,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Speak Up: management PWA for a speech-therapy center (clients, sessions, payments, purchases, staff, branches, calendar, therapist dashboards, a parent portal). UI language is Egyptian Arabic, RTL by default (`<html lang="ar" dir="rtl">`); English is toggled at runtime via `localStorage.SU_LANG`. Code comments are also mostly in Arabic.
 
-There is **no build system, package manager, linter or test suite**. It is a static site: open `index.html` through any static server (e.g. `python3 -m http.server`) — a server is needed for the service worker. Tailwind (`cdn.tailwindcss.com/3.4.17`) and `@supabase/supabase-js@2.78.0` (UMD) are loaded from CDNs.
+There is **no build system or package manager**. It is a static site: open `index.html` through any static server (e.g. `python3 -m http.server`) — a server is needed for the service worker. Tailwind (`cdn.tailwindcss.com/3.4.17`) and `@supabase/supabase-js@2.78.0` (UMD) are loaded from CDNs.
+
+## Checks (`tests/`, no dependencies except Playwright for the smoke test; Node 22+)
+
+- `node tests/static-checks.mjs`: compiles every inline `<script>` in `index.html`, checks the `suSplash`/`</html>` markers the service worker needs, flags duplicate block ids, syntax-checks `supabase/functions/*/index.ts`, and fails on data files (`.sql`/`.csv`/`.xlsx`… outside `supabase/migrations/`) or any tracked text file with more than 10 distinct Egyptian mobile numbers (the repo is public).
+- `node tests/merge.test.mjs`: sync merge cases, run against `canon`/`cloudMerge*` and the notebooks patch extracted from `index.html` itself. Add a case here when you touch the merge.
+- `node tests/smoke.mjs`: serves the repo, opens `index.html` in Chromium at phone and desktop widths, and fails on any page error. The CDNs and Supabase may be unreachable from a sandbox; the page should still load cleanly.
+- `.github/workflows/checks.yml` runs all three on every push to `main` (including web uploads) and on pull requests.
 
 ## Files that matter
 
@@ -15,7 +22,7 @@ There is **no build system, package manager, linter or test suite**. It is a sta
 - `push-sw.js` — Web Push display + notification click handling.
 - `supabase/functions/admin-users/index.ts` — Deno edge function (admin-only create/update/delete of auth users; verifies caller's `profiles.role === 'admin'` with the service-role key). Deploy with `supabase functions deploy admin-users`. `parent-data` (the parent portal's only data source), `push-notify` and `push-reminders` are also in `supabase/functions/`. The app also invokes a `portrait-ai` function whose source is not in this repo.
 - `manifest.json`, `icons/`, `assets/` (logos, backgrounds, `assets/act/*.jpg` activity images).
-- Not part of the running app: `index_مرحلة4.html` (older "phase 4" snapshot, identical to the `index.html` inside `speak-up-app-phase7.zip`), the `*.zip` phase archives and the brand-board PNG. Edit `index.html`, not the snapshots.
+- Not part of the running app: the brand-board PNG. (Old snapshots — `index_مرحلة4.html` and the phase `.zip` archives — were removed; they are still in git history.)
 
 ## index.html architecture
 
@@ -47,4 +54,4 @@ Later blocks often override or monkey-patch functions and styles defined earlier
 
 The GitHub repo is **public**: never commit client data, exports, DB dumps or backups. When a Supabase MCP connection is available, use it to inspect policies and functions before assuming the server enforces what the UI does.
 
-The repo history is GitHub web uploads ("Add files via upload") of the whole `index.html`; there is no CI. Verify changes by loading the page in a browser (Playwright/Chromium is available in cloud sessions) and checking the console — a syntax error in any inline `<script>` block silently disables that whole feature.
+Most of the repo history is GitHub web uploads ("Add files via upload") of the whole `index.html`. Run the checks above before pushing, and verify changes by loading the page in a browser (Playwright/Chromium is available in cloud sessions) and checking the console — a syntax error in any inline `<script>` block silently disables that whole feature.
