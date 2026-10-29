@@ -16,6 +16,7 @@ const hash = (s: unknown): string => {
 };
 const ymd = (d: unknown) => String(d ?? '').replace(/\//g, '-');
 const first = (n: unknown) => String(n ?? '').trim().split(/\s+/)[0] || 'الطفل';
+const isAssess = (t: unknown) => /assess|تقييم/i.test(String(t ?? ''));
 const fmtDay = (d: string) => {
   try { const x = new Date(ymd(d) + 'T12:00:00Z'); return isNaN(+x) ? d : x.toLocaleDateString('ar-EG', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC' }); } catch { return d; }
 };
@@ -58,7 +59,7 @@ export function computeFp(key: string, data: any): any {
     const today = cairoToday();
     for (const s of Array.isArray(data) ? data : []) {
       const d = ymd(s.date);
-      if (d >= today) ss[s.id] = [String(s.clientId), String(s.therapistId), d, s.time || ''];
+      if (d >= today) ss[s.id] = [String(s.clientId), String(s.therapistId), d, s.time || '', isAssess(s.type) ? 'A' : ''];
       if (String(s.parentComment ?? '').trim()) pc[s.id] = [String(s.clientId), hash(s.parentComment), String(s.parentComment).trim().slice(0, 90)];
     }
     return { ss, pc };
@@ -131,7 +132,12 @@ export function diffKey(key: string, O: any, N: any, ctx: Ctx, skip: Set<string>
       const added: any[] = [];
       for (const id of Object.keys(N.ss)) {
         const s = N.ss[id]; if (s[1] !== tid) continue; const p = O.ss[id];
-        if (!p || p[1] !== tid) { if (!skip.has(tid + ':' + s[0])) added.push(s); continue; }
+        if (!p || p[1] !== tid) {
+          // جلسة التقييم ليها إشعار لوحدها (حتى لو الحالة جديدة) عشان الأخصائي يعرف إن عنده تقييم في اليوم ده
+          if (s[4] === 'A') { out.push({ users, tag: 'asmt:' + id, title: '🩺 تقييم جديد: ' + nm(s[0]), body: fmtDay(s[2]) + ' الساعة ' + fmtT(s[3]) + ' — اتحجز في جدولك' }); continue; }
+          if (!skip.has(tid + ':' + s[0])) added.push(s);
+          continue;
+        }
         if (p[2] !== s[2] || p[3] !== s[3]) out.push({ users, tag: 'mv:' + id, title: 'تعديل موعد جلسة: ' + nm(s[0]), body: 'من ' + fmtDay(p[2]) + ' ' + fmtT(p[3]) + ' إلى ' + fmtDay(s[2]) + ' ' + fmtT(s[3]) });
       }
       if (added.length) {

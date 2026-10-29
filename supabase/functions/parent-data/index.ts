@@ -37,6 +37,9 @@ Deno.serve(async (req) => {
     const admin = createClient(url, service);
     const { data: me } = await admin.from('profiles').select('role, name, email, client_ids').eq('id', u.user.id).maybeSingle();
     if (me?.role !== 'parent') return json({ error: 'الدالة دي لأولياء الأمور فقط' }, 403);
+    // su_role() بجلسة ولي الأمر نفسه بترجع null لو مفعّل التحقق بخطوتين ومادخلش بيه
+    const { data: myRole } = await caller.rpc('su_role');
+    if (myRole !== 'parent') return json({ error: 'لازم تدخل بالتحقق بخطوتين الأول' }, 403);
 
     const ids = new Set<string>((me.client_ids ?? []).map((x: unknown) => String(x)));
 
