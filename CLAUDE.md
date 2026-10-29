@@ -48,6 +48,7 @@ Later blocks often override or monkey-patch functions and styles defined earlier
   - `parent` — no staff UI. `parentStart()` loads only their children (via `su_user_clients` / the `parent-data` edge function) into the parent portal.
   - UI gating is not security: every rule has to be enforced in RLS or the edge functions as well.
   - Two-step verification (TOTP): the app's `REQUIRE` map (next to `GRACE_DAYS`) sets which roles must enroll; currently only `admin`. On the server, `my_role()`/`su_role()` return `null` for a user who has a verified factor but a session below `aal2` (`su_mfa_ok()`), so every policy and `admin-users` (which checks `su_role` through the caller's own session) require the second step once it's enabled.
+- **Session statuses** (`CP_STATUS`, `cpStatusKey`): `ATT` حضر (full price), `SDE` غياب بدون عذر (half), `EXC` غياب بعذر and `TCA` إلغاء من المركز (free), `CAN` ملغية (not billed, not in attendance rates or therapist earnings; only counted), `SCHEDULED`. A rescheduled session (`su-move-js`) keeps its original row as `CAN` with `movedTo` (+ `movedPrevStatus` for undo) so month generation doesn't recreate it, and the make-up session carries `movedFrom`; fields outside `SU[k].m` sync through the `extra` jsonb column.
 - **Per-user prefs and UI flags** live in localStorage under `SU_*` keys (`SU_UPREF:*`, `SU_THEME`, `SU_LOGO`, `SU_ERRLOG`, …). Errors are routed through `suLog(...)`.
 - Supabase RPCs used: `push_register`, `push_unregister`, `admin_reset_mfa`.
 
