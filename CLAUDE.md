@@ -22,7 +22,7 @@ There is **no build system or package manager**. It is a static site: open `inde
 - `push-sw.js` — Web Push display + notification click handling.
 - `supabase/functions/admin-users/index.ts` — Deno edge function (admin-only create/update/delete of auth users; verifies caller's `profiles.role === 'admin'` with the service-role key). Deploy with `supabase functions deploy admin-users`. `parent-data` (the parent portal's only data source), `push-notify` and `push-reminders` are also in `supabase/functions/`. The app also invokes a `portrait-ai` function whose source is not in this repo.
 - `manifest.json`, `icons/`, `assets/` (logos, backgrounds, `assets/act/*.jpg` activity images).
-- Not part of the running app: `index_مرحلة4.html` (older "phase 4" snapshot, identical to the `index.html` inside `speak-up-app-phase7.zip`), the `*.zip` phase archives and the brand-board PNG. Edit `index.html`, not the snapshots.
+- Not part of the running app: the brand-board PNG. (Old snapshots — `index_مرحلة4.html` and the phase `.zip` archives — were removed; they are still in git history.)
 
 ## index.html architecture
 
@@ -54,4 +54,4 @@ Later blocks often override or monkey-patch functions and styles defined earlier
 
 The GitHub repo is **public**: never commit client data, exports, DB dumps or backups. When a Supabase MCP connection is available, use it to inspect policies and functions before assuming the server enforces what the UI does.
 
-The repo history is GitHub web uploads ("Add files via upload") of the whole `index.html`; there is no CI. Verify changes by loading the page in a browser (Playwright/Chromium is available in cloud sessions) and checking the console — a syntax error in any inline `<script>` block silently disables that whole feature.
+Most of the repo history is GitHub web uploads ("Add files via upload") of the whole `index.html`. Run the checks above before pushing, and verify changes by loading the page in a browser (Playwright/Chromium is available in cloud sessions) and checking the console — a syntax error in any inline `<script>` block silently disables that whole feature.
