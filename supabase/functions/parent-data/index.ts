@@ -16,6 +16,7 @@ function corsFor(req: Request) {
   };
 }
 
+// القراية دايماً من app_state_full: الكراسات والتسجيلات ممكن تكون متقسّمة لكل طفل في su_child_blobs، والكتابة على app_state بتتقسّم تاني بالـ trigger
 const KEYS = ['clients', 'sessions', 'payments', 'staff', 'branches', 'clientActivities', 'settings', 'evaluations', 'notebooks', 'notebookTicks', 'avatars', 'feedingResponses', 'commResponses'];
 
 Deno.serve(async (req) => {
@@ -47,7 +48,7 @@ Deno.serve(async (req) => {
       const cid = String(body.client_id ?? ''), eid = String(body.entry_id ?? ''), iid = String(body.item_id ?? '');
       if (!ids.has(cid)) return json({ error: 'مش مسموح' }, 403);
 
-      const { data: rows } = await admin.from('app_state').select('key,data').in('key', ['notebooks', 'notebookTicks']);
+      const { data: rows } = await admin.from('app_state_full').select('key,data').in('key', ['notebooks', 'notebookTicks']);
       const mm: Record<string, any> = {};
       (rows ?? []).forEach((r: any) => { mm[r.key] = r.data; });
 
@@ -82,7 +83,7 @@ Deno.serve(async (req) => {
       }
       const note = String(body.note ?? '').trim().slice(0, 500);
 
-      const { data: frow } = await admin.from('app_state').select('data').eq('key', 'feedingResponses').maybeSingle();
+      const { data: frow } = await admin.from('app_state_full').select('data').eq('key', 'feedingResponses').maybeSingle();
       const all: Record<string, any> = (frow?.data && typeof frow.data === 'object' && !Array.isArray(frow.data)) ? { ...frow.data } : {};
       const mineR: Record<string, any> = (all[cid] && typeof all[cid] === 'object') ? { ...all[cid] } : {};
       if (status === 'clear') delete mineR[sid];
@@ -114,7 +115,7 @@ Deno.serve(async (req) => {
       }
       const note = String(body.note ?? '').trim().slice(0, 500);
 
-      const { data: crow } = await admin.from('app_state').select('data').eq('key', 'commResponses').maybeSingle();
+      const { data: crow } = await admin.from('app_state_full').select('data').eq('key', 'commResponses').maybeSingle();
       const allC: Record<string, any> = (crow?.data && typeof crow.data === 'object' && !Array.isArray(crow.data)) ? { ...crow.data } : {};
       const mineC: Record<string, any> = (allC[cid] && typeof allC[cid] === 'object') ? { ...allC[cid] } : {};
       if (status === 'clear') delete mineC[sid];

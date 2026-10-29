@@ -39,6 +39,11 @@ for (const s of ['suSplash', '</html>']) {
   if (!html.includes(s)) fail(`index.html: لازم يفضل فيه "${s}" (service-worker.js بيرفض يخزّن الصفحة من غيره)`);
 }
 
+// البيانات بتتقري من app_state_v (فيها الفلترة حسب الأطفال المسموحين)، مش من app_state مباشرة
+for (const m of html.matchAll(/from\(["']app_state["']\)\.select\(["']([^"']*)["']/g)) {
+  if (/\bdata\b|\*/.test(m[1])) fail(`index.html (سطر ${lineOf(m.index)}): قراية "${m[1]}" من app_state — استخدم app_state_v`);
+}
+
 const ids = {};
 for (const m of html.matchAll(/<(script|style)\s[^>]*\bid=["']([^"']+)/gi)) ids[m[2]] = (ids[m[2]] || 0) + 1;
 for (const [id, c] of Object.entries(ids)) if (c > 1) fail(`index.html: الـ id "${id}" متكرر ${c} مرات`);
