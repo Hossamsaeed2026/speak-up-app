@@ -1,4 +1,4 @@
--- (لسه ماتطبقتش: بتتشغل من SQL Editor بعد موافقة صاحب المشروع)
+-- (اتطبّق على المشروع في 2026-10-29)
 -- تنظيف: مسح الجداول القديمة اللي التطبيق مابقاش بيستخدمها، والنسخ الاحتياطية المؤقتة من أكتوبر.
 -- التطبيق بيستخدم بس: app_state (+ app_state_v / app_state_full)، su_*، su_blobs، su_child_blobs،
 -- su_user_clients، su_reports، profiles، logs، push_*.
