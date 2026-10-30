@@ -18,11 +18,11 @@ There is **no build system or package manager**. It is a static site: open `inde
 
 ## Files that matter
 
-- `index.html` (~1.6 MB, ~2.9k lines) — the entire app: all CSS, HTML and JS inline. Some lines are hundreds of KB (line ~2612 holds the core app logic; base64 images live in others), so **never read the file whole** — use `grep -n`/`grep -o` with a narrow pattern and `cut -c` to slice lines, and make edits with exact unique strings.
+- `index.html` (~1.5 MB, ~3k lines) — the entire app: all CSS, HTML and JS inline. Some lines are hundreds of KB (line ~2612 holds the core app logic; base64 images live in others), so **never read the file whole** — use `grep -n`/`grep -o` with a narrow pattern and `cut -c` to slice lines, and make edits with exact unique strings.
 - `service-worker.js` — cache-first app shell + CDN libs, background refresh of `index.html` that posts `SU_UPDATE_AVAILABLE` to the page when it changed. It refuses to cache a fetched shell lacking `suSplash` or `</html>`, so keep both in `index.html`. Supabase hosts are never cached. Bump `VERSION` when changing cached-asset behavior; the `importScripts('push-sw.js?v=N')` query string must be bumped when `push-sw.js` changes.
 - `push-sw.js` — Web Push display + notification click handling.
 - `supabase/functions/admin-users/index.ts` — Deno edge function (admin-only create/update/delete of auth users; verifies caller's `profiles.role === 'admin'` with the service-role key). Deploy with `supabase functions deploy admin-users`. `parent-data` (the parent portal's only data source), `push-notify` and `push-reminders` are also in `supabase/functions/`. The app also invokes a `portrait-ai` function whose source is not in this repo.
-- `manifest.json`, `icons/`, `assets/` (logos, backgrounds, `assets/act/*.jpg` activity images).
+- `manifest.json`, `icons/`, `assets/` (logos, backgrounds, `assets/act/*.jpg` activity images). `assets/brand/` holds the built-in logos and the payment QR that used to be base64 inside `index.html` (`window.SU_*_LOGO`, `SU_NAV_MASCOT`, `PP_PAY_QR` point at them with absolute URLs so printed/PDF invoices still resolve them); they are in the service worker's `SHELL` list, so add any new built-in image there too.
 - Not part of the running app: the brand-board PNG. (Old snapshots — `index_مرحلة4.html` and the phase `.zip` archives — were removed; they are still in git history.)
 
 ## index.html architecture
