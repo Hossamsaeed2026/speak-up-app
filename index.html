@@ -3890,5 +3890,62 @@ html body #mainHeader #headerLogoEmoji{display:none!important}</style>
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",apply);else apply();
 })();
 </script>
+<style id="su-perm-fix-css">/* القائمة الجانبية على الكمبيوتر كانت بتظهر البنود المقفولة بالصلاحيات (.hidden كانت شغالة على الموبايل بس) */
+html body #sideNav .side-tab.hidden,html body #sideNav .side-tab.su-perm-hid{display:none!important}
+#permissions-matrix-tbody input[disabled]{opacity:.45;cursor:not-allowed}
+#permissions-matrix-tbody td.su-lock{position:relative}
+#permissions-matrix-tbody td.su-lock::after{content:"🔒";font-size:9px;position:absolute;top:4px;left:4px;opacity:.6}</style>
+<script id="su-perm-fix-js">
+// الصلاحيات: مصفوفة الصلاحيات هي اللي بتحدد الصفحات فعلاً (القائمة + فتح الصفحة)، والإعدادات للأدمن بس
+(function(){
+  // قيم ثابتة مهما اتعلّم في المصفوفة (السيستم كده كده بيفرضها، فالمصفوفة لازم تقول الحقيقة)
+  const LOCK={
+    admin:{settings:true},
+    secretary:{settings:false,activities:false,followup:false},
+    therapist:{dashboard:true,secretary:true,payments:false,invoices:false,purchases:false,staff:false,settings:false,accounts:false,profit:false}
+  };
+  const EXTRA=[{key:"followup",label:"📒 كراسة المتابعة"},{key:"photos",label:"🖼️ إدارة الصور"},{key:"myappts",label:"🗓️ مواعيدي"},{key:"myearn",label:"💼 حساباتي"}];
+  const ROLES=["admin","secretary","therapist","parent"];
+  const _gep=getUserEffectivePermissions;
+  getUserEffectivePermissions=function(u){const p=Object.assign({},_gep.apply(this,arguments)||{});const L=u&&LOCK[u.role];if(L)Object.assign(p,L);return p};
+  // التاب ← مفتاح الصلاحية
+  const TABKEY={dashboard:"dashboard",secretary:"secretary",calendar:"calendar",clients:"clients",sessions:"sessions",activities:"activities",invoices:"invoices",payments:"payments",purchases:"purchases",staff:"staff",settings:"settings",followup:"followup",photos:"photos",myappts:"myappts",myearn:"myearn"};
+  const _ap=applyPermissions;
+  applyPermissions=function(){const r=_ap.apply(this,arguments);try{if(currentUser){const pm=getUserEffectivePermissions(currentUser);EXTRA.forEach(x=>{const b=document.getElementById("side-nav-"+x.key);if(b)b.classList.toggle("su-perm-hid",pm[x.key]===false)});document.querySelectorAll("#sideNav .side-group").forEach(g=>{g.style.display=g.querySelector(".side-tab:not(.hidden):not(.su-perm-hid)")?"":"none"})}}catch(e){suLog("su-perm-fix applyPermissions",e)}return r};
+  function blocked(id){try{const rr=window._realRole||(currentUser&&currentUser.role);if(!currentUser||rr==="admin"||rr==="parent")return false;const k=TABKEY[id];return!!k&&getUserEffectivePermissions(currentUser)[k]===false}catch(e){return false}}
+  const _sw=window.switchTab;
+  window.switchTab=function(id){
+    if(blocked(id)){
+      try{showToast("🔒 الصفحة دي مقفولة لصلاحيتك","red")}catch(e){}
+      // لو مفيش صفحة مفتوحة أصلاً (أول ما يدخل) نفتح أول صفحة مسموحة
+      if(!document.querySelector(".tab-content:not(.hidden)")){const ok=["secretary","calendar","clients","sessions","dashboard","myappts"].find(t=>!blocked(t)&&document.getElementById("tab-"+t));if(ok)return _sw.call(this,ok)}
+      return;
+    }
+    return _sw.apply(this,arguments)};
+  // المصفوفة: صفوف للصفحات اللي كانت ناقصة + الخانات المقفولة
+  function chk(perms,r,k){return r==="parent"?!!(perms.parent&&perms.parent[k]===true):!!(perms[r]&&perms[r][k]!==false)}
+  const _rpm=renderPermissionsMatrix;
+  renderPermissionsMatrix=function(){const r=_rpm.apply(this,arguments);try{
+    const tb=document.getElementById("permissions-matrix-tbody");if(!tb)return r;
+    const perms=state.settings&&state.settings.permissions||defaultSettings.permissions;
+    const CLS={admin:"border-l bg-indigo-50/50",secretary:"border-l bg-purple-50/50",therapist:"border-l bg-cyan-50/50",parent:"bg-amber-50/60"};
+    EXTRA.forEach(m=>{if(document.getElementById("perm-admin-"+m.key))return;const tr=document.createElement("tr");tr.className="hover:bg-slate-50 border-b border-slate-100 text-xs";
+      tr.innerHTML='<td class="p-3 font-bold text-slate-800 border-l">'+escH(m.label)+'</td>'+ROLES.map(rl=>'<td class="p-3 text-center '+CLS[rl]+'"><input type="checkbox" id="perm-'+rl+'-'+m.key+'" '+(chk(perms,rl,m.key)?"checked":"")+' class="w-4 h-4 rounded"></td>').join("");
+      const del=document.getElementById("perm-admin-delete");const before=del&&del.closest("tr");if(before)tb.insertBefore(tr,before);else tb.appendChild(tr)});
+    Object.keys(LOCK).forEach(rl=>Object.keys(LOCK[rl]).forEach(k=>{const el=document.getElementById("perm-"+rl+"-"+k);if(!el)return;el.checked=LOCK[rl][k];el.disabled=true;const td=el.closest("td");if(td){td.classList.add("su-lock");td.title=rl==="admin"?"الأدمن دايمًا ليه الإعدادات (عشان ماتقفلش على نفسك)":k==="settings"?"الإعدادات والصلاحيات للأدمن بس":rl==="secretary"?"مقفولة للسكرتارية دايمًا (بيانات الأطفال العلاجية)":"ثابتة للأخصائي في السيستم"}}));
+    // صف «الإعدادات»: الأولياء كمان مالهمش
+    const pe=document.getElementById("perm-parent-settings");if(pe){pe.checked=false;pe.disabled=true}
+  }catch(e){suLog("su-perm-fix renderPermissionsMatrix",e)}return r};
+  const _spm=savePermissionsMatrix;
+  savePermissionsMatrix=function(){try{
+    if(!state.settings.permissions)state.settings.permissions=JSON.parse(JSON.stringify(defaultSettings.permissions));
+    ROLES.forEach(rl=>{const P=state.settings.permissions[rl]=state.settings.permissions[rl]||{};
+      ["activities"].concat(EXTRA.map(x=>x.key)).forEach(k=>{const el=document.getElementById("perm-"+rl+"-"+k);if(el)P[k]=el.checked});
+      if(LOCK[rl])Object.assign(P,LOCK[rl]);if(rl==="parent")P.settings=false});
+  }catch(e){suLog("su-perm-fix savePermissionsMatrix",e)}
+  const r=_spm.apply(this,arguments);try{Object.keys(LOCK).forEach(rl=>Object.assign(state.settings.permissions[rl],LOCK[rl]))}catch(e){}return r};
+  try{if(currentUser)applyPermissions()}catch(e){}
+})();
+</script>
 </body>
 </html>
