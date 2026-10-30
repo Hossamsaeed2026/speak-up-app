@@ -23,6 +23,10 @@ jobs:
         run: node tests/static-checks.mjs
       - name: Sync merge tests
         run: node tests/merge.test.mjs
+      - name: Tailwind CSS is up to date (assets/tailwind.css matches index.html)
+        run: |
+          npx --yes tailwindcss@3.4.17 -c tools/tailwind/tailwind.config.js -i tools/tailwind/input.css -o /tmp/tailwind.css --minify
+          cmp -s /tmp/tailwind.css assets/tailwind.css || { echo '::error::assets/tailwind.css قديم — شغّل: npx tailwindcss@3.4.17 -c tools/tailwind/tailwind.config.js -i tools/tailwind/input.css -o assets/tailwind.css --minify'; exit 1; }
       - name: Install Chromium
         run: npm install --no-save --no-package-lock playwright@1.49.1 && npx playwright install --with-deps chromium
       - name: Smoke test (page opens without JavaScript errors)

@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Speak Up: management PWA for a speech-therapy center (clients, sessions, payments, purchases, staff, branches, calendar, therapist dashboards, a parent portal). UI language is Egyptian Arabic, RTL by default (`<html lang="ar" dir="rtl">`); English is toggled at runtime via `localStorage.SU_LANG`. Code comments are also mostly in Arabic.
 
-There is **no build system or package manager**. It is a static site: open `index.html` through any static server (e.g. `python3 -m http.server`) — a server is needed for the service worker. Tailwind (`cdn.tailwindcss.com/3.4.17`) and `@supabase/supabase-js@2.78.0` (UMD) are loaded from CDNs.
+There is **no build system or package manager**. It is a static site: open `index.html` through any static server (e.g. `python3 -m http.server`) — a server is needed for the service worker. `@supabase/supabase-js@2.78.0` (UMD) is loaded from a CDN. Tailwind 3.4.17 is prebuilt into `assets/tailwind.css` (linked at the end of `<head>`, where the old play CDN injected its styles): after adding or changing Tailwind classes in `index.html`, rebuild it with `npx tailwindcss@3.4.17 -c tools/tailwind/tailwind.config.js -i tools/tailwind/input.css -o assets/tailwind.css --minify`. CI fails when the file is stale, and `tests/static-checks.mjs` fails if the CDN script comes back. Classes built at runtime from string pieces aren't seen by the scan, so add those to `safelist` in the config.
 
 ## Checks (`tests/`, no dependencies except Playwright for the smoke test; Node 22+)
 

@@ -39,6 +39,11 @@ for (const s of ['suSplash', '</html>']) {
   if (!html.includes(s)) fail(`index.html: لازم يفضل فيه "${s}" (service-worker.js بيرفض يخزّن الصفحة من غيره)`);
 }
 
+// Tailwind مبني مسبقاً في assets/tailwind.css (الـ CDN كان بيبني الستايل على الجهاز كل فتحة)
+if (/cdn\.tailwindcss\.com/.test(html)) fail('index.html: رجع Tailwind CDN — الستايل في assets/tailwind.css (شوف tools/tailwind/tailwind.config.js)');
+if (!html.includes('href="assets/tailwind.css"')) fail('index.html: لازم يفضل فيه <link rel="stylesheet" href="assets/tailwind.css">');
+try { statSync(join(root, 'assets', 'tailwind.css')); } catch { fail('assets/tailwind.css مش موجود'); }
+
 // البيانات بتتقري من app_state_v (فيها الفلترة حسب الأطفال المسموحين)، مش من app_state مباشرة
 for (const m of html.matchAll(/from\(["']app_state["']\)\.select\(["']([^"']*)["']/g)) {
   if (/\bdata\b|\*/.test(m[1])) fail(`index.html (سطر ${lineOf(m.index)}): قراية "${m[1]}" من app_state — استخدم app_state_v`);
