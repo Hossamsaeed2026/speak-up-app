@@ -3843,7 +3843,7 @@ html.su-dark .rpl{background:#0b1220}
 })();
 </script>
 <style id="su-desk-hdr-css">/* الشريط العلوي على الكمبيوتر كان ارتفاعه ~107px: الصف 88px + لوجو 80px + سطر زيادة من زرار القايمة (مخفي على الكمبيوتر) */
-@media (min-width:821px){html body #mainHeader>div>div{height:64px!important}html body #headerLogoContainer{height:48px!important}html body #mainHeader #suMenuBtn{position:absolute!important}}</style>
+@media (min-width:821px){html body #mainHeader>div>div{height:68px!important}html body #headerLogoContainer{height:54px!important}html body #mainHeader #suMenuBtn{position:absolute!important}}</style>
 <style id="pph9-css">
 /* ===== التابلت: عناصر الصفحة الرئيسية بتملا العرض، ومن غير شريط سكرول ظاهر ===== */
 @media (min-width:700px) and (min-height:520px){
@@ -3851,11 +3851,17 @@ html.su-dark .rpl{background:#0b1220}
   #parentPortal .pph.pph2{padding-left:clamp(14px,2.5vw,32px)!important;padding-right:clamp(14px,2.5vw,32px)!important;scrollbar-width:none}
   #parentPortal .pph.pph2::-webkit-scrollbar{width:0;height:0}
 }
-/* بالعرض: الصورة اللي فوق بتاخد مساحة أقل عشان الكروت كلها تبان من غير سكرول */
+/* الكروت بتبدأ تحت الرسمة (البيت والجنينة) مش فوقها. صورة الخلفية عرضها 100vw ومن تحت الشريط العلوي،
+   والرسمة بتخلص عند 27.7% من العرض في صورة العرض و 38.9% في صورة الطول (parent-bg-tablet-*.webp) */
 @media (min-width:700px) and (min-height:520px) and (orientation:landscape){
-  #parentPortal{--pph-P:calc(var(--pph-bar) + 27dvh)}
+  #parentPortal{--pph-P:calc(var(--pph-bar) + 27.7vw + 12px)}
+  /* الشريط اللي تحت مش ظاهر بالعرض، فمفيش داعي للمسافة اللي كانت محجوزاله */
+  #parentPortal .pph.pph2{padding-bottom:calc(16px + env(safe-area-inset-bottom,0px))!important}
   #parentPortal .pph-fit{gap:12px}
   #parentPortal .pph-tile{min-height:84px}
+}
+@media (min-width:700px) and (min-height:520px) and (orientation:portrait){
+  #parentPortal{--pph-P:calc(var(--pph-bar) + 38.9vw + 28px)}
 }
 /* تابلت 1000–1099 بالعرض: نفس توزيع التلات أعمدة بتاع الشاشات الأعرض */
 @media (min-width:1000px) and (max-width:1099px) and (min-height:520px) and (orientation:landscape){
