@@ -3873,5 +3873,22 @@ html.su-dark .rpl{background:#0b1220}
   #parentPortal .pph-fit>.pph-tiles{grid-column:span 3;order:5;grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 </style>
+<style id="su-topbar-logo-css">/* لوجو المركز العريض في كل الشرايط اللي فوق (الإدارة/السكرتارية، بوابة الأخصائي، بوابة الأهل) بنفس الارتفاع على كل الأجهزة */
+html body #mainHeader #headerLogoContainer{height:44px!important;width:auto!important;max-width:60vw!important;overflow:visible!important}
+html body #mainHeader #headerLogoImg,html body .pp-mini-logo,html body .pph-toplogo{height:44px!important;width:auto!important;max-width:60vw!important;object-fit:contain!important;border-radius:0!important;background:none!important;box-shadow:none!important;border:0!important;padding:0!important}
+html body #mainHeader #headerLogoEmoji{display:none!important}</style>
+<script id="su-topbar-logo-js">
+// اللوجو ثابت لكل المستخدمين وكل الأجهزة: assets/brand/logo-wide.webp (من «Black Green and Pink … Brand Board … .png»)
+(function(){
+  const L=window.SU_TOPBAR_LOGO=new URL("assets/brand/logo-wide.webp",document.baseURI).href;
+  const SEL="#headerLogoImg,.pp-mini-logo,.pph-toplogo";
+  function apply(){document.querySelectorAll(SEL).forEach(i=>{if(i.getAttribute("src")!==L){i.onerror=null;i.src=L}i.classList.remove("hidden");i.alt="Speak Up"})}
+  let q=0;const later=()=>{if(!q)q=requestAnimationFrame(()=>{q=0;apply()})};
+  const _a=applyLogoToHeader;applyLogoToHeader=function(){const r=_a.apply(this,arguments);apply();return r};
+  new MutationObserver(ms=>{for(const m of ms){if(m.type==="attributes"||[...m.addedNodes].some(n=>n.nodeType===1&&(n.matches(SEL)||n.querySelector(SEL)))){later();return}}})
+    .observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:["src"]});
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",apply);else apply();
+})();
+</script>
 </body>
 </html>

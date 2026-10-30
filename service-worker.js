@@ -1,10 +1,10 @@
 importScripts('push-sw.js?v=4');
-const VERSION = 'v9';
+const VERSION = 'v10';
 const CACHE = 'speakup-' + VERSION;
 const SHELL = ['./index.html', './assets/tailwind.css', './manifest.json', './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png',
   // اللوجوهات وصورة كود الدفع (كانت جوه index.html كـ base64)
   './assets/brand/default-logo.webp', './assets/brand/header-logo.webp', './assets/brand/dock-logo.webp',
-  './assets/brand/nav-mascot.webp', './assets/brand/parent-logo.webp', './assets/brand/pay-qr.png'];
+  './assets/brand/nav-mascot.webp', './assets/brand/parent-logo.webp', './assets/brand/pay-qr.png', './assets/brand/logo-wide.webp'];
 // مكتبات خارجية بتتخزن من أول تثبيت عشان التطبيق يفتح كامل حتى أوفلاين
 const CDN = ['https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.78.0/dist/umd/supabase.js'];
 const MAX_ENTRIES = 80;
