@@ -3893,6 +3893,28 @@ html.su-dark .rpl{background:#0b1220}
 @media (min-width:700px) and (min-height:520px) and (orientation:portrait){
   #parentPortal{--pph-P:calc(var(--pph-bar) + 38.9vw + 28px)}
 }
+/* تابلت بالعرض وارتفاعه قليل (زي 960×560): الرسمة واخدة نص الشاشة، فالكروت في تلات أعمدة زي الشاشات الأعرض
+   وكارت الطفل أصغر شوية علشان الاسم مايتقطعش */
+@media (min-width:700px) and (max-width:1099px) and (max-height:700px) and (min-height:420px) and (orientation:landscape){
+  #parentPortal .pph-fit{grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}
+  #parentPortal .pph-fit>.pph-who{grid-column:span 2;order:1}
+  #parentPortal .pph-fit>.pph-sess{grid-column:span 2;order:2}
+  #parentPortal .pph-fit>.pph-prog{grid-column:span 2;order:3}
+  #parentPortal .pph-fit>.pph-act{grid-column:span 3;order:4}
+  #parentPortal .pph-fit>.pph-tiles{grid-column:span 3;order:5;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  #parentPortal .pph2 .pph-pav{width:84px!important;height:84px!important}
+  #parentPortal .pph2 .pph-who .pph-name{font-size:18px!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #parentPortal .pph-fit>.pph-who{margin-top:0!important;align-self:stretch;min-height:0!important}
+  #parentPortal .pph2 .pph-who .pph-pill{display:none!important}
+  #parentPortal .pph2 .pph-ring,#parentPortal .pph2 .pph-ring svg{width:64px!important;height:64px!important}
+  #parentPortal .pph2 .pph-prog-t{font-size:16px!important}
+  #parentPortal .pph-tile{min-height:72px!important}
+}
+/* تابلت صغير بالطول (560–699 زي 600×936): كان بياخد تصميم الموبايل في عمود 480 في النص — دلوقتي بيملا العرض */
+@media (min-width:560px) and (max-width:699px) and (orientation:portrait){
+  #parentPortal{--pph-hw:100vw}
+  #parentPortal .pph.pph2{max-width:none!important;width:100%!important;padding-left:20px!important;padding-right:20px!important}
+}
 /* تابلت 1000–1099 بالعرض: نفس توزيع التلات أعمدة بتاع الشاشات الأعرض */
 @media (min-width:1000px) and (max-width:1099px) and (min-height:520px) and (orientation:landscape){
   #parentPortal .pph-fit{grid-template-columns:repeat(6,minmax(0,1fr))}
@@ -4012,6 +4034,11 @@ html body #sideNav .side-tab.hidden,html body #sideNav .side-tab.su-perm-hid{dis
     const j=Object.keys(c).length?JSON.stringify(c):null;if(localStorage.getItem("SU_SPLASH")!==j){if(j)localStorage.setItem("SU_SPLASH",j);else localStorage.removeItem("SU_SPLASH")}}catch(e){}}
   // كلام القائمة بس (البنود وعناوين المجموعات)؛ كارت المستخدم وزرار الإعدادات فوق خلفيتهم بيضا فبيفضلوا زي ما هم
   const side=(fg,muted)=>`html body #sideNav#sideNav .side-tab:not(.active){color:${fg}!important}html body #sideNav#sideNav .side-group-title{color:${muted}!important}`;
+  const PO=["who","sess","act","prog","tiles"];
+  const PN={who:"👦 كارت الطفل",sess:"📅 أقرب جلسة",act:"🧩 نشاط اليوم في المنزل",prog:"📈 رحلة التطور",tiles:"🔲 الأزرار الكبيرة"};
+  const parOrder=l=>{const o=Array.isArray(l.parOrder)?l.parOrder.filter(k=>PO.includes(k)):[];return o.concat(PO.filter(k=>!o.includes(k)))};
+  window.suLookParMove=function(k,d){const o=parOrder(look()),i=o.indexOf(k),j=i+d;if(i<0||j<0||j>=o.length)return;[o[i],o[j]]=[o[j],o[i]];suLookSet("parOrder",o.join()===PO.join()?"":o)};
+  window.suLookParHide=function(k){const h=Array.isArray(look().parHide)?look().parHide.slice():[];const i=h.indexOf(k);if(i>=0)h.splice(i,1);else h.push(k);suLookSet("parHide",h.length?h:"")};
   function css(){
     const l=look(),adv=(state&&state.settings&&state.settings.adv)||{};let c="";
     const hD=num(l.logoD,28,90,44),hM=num(l.logoM,24,64,44);
@@ -4032,6 +4059,15 @@ html body #sideNav .side-tab.hidden,html body #sideNav .side-tab.su-perm-hid{dis
     if(hex(l.parBar))c+=`html body #parentPortal .pph-topbar{background:${l.parBar}!important}`;
     if(hex(l.parSess))c+=`html body #parentPortal .pph-sess{background:${grad(l.parSess)}!important}`;
     if(hex(l.parTiles))c+=`html body #parentPortal .pph-tile{background:${grad(l.parTiles)}!important}`;
+    // بوابة الأهل: ترتيب الكروت وإخفاؤها، حجم الرسمة، المسافات
+    const PP="html body #parentPortal",ord=parOrder(l);
+    if(ord.join()!==PO.join()){c+=`@media not all and (min-width:700px) and (min-height:520px){${PP} .pph-fit{display:flex!important;flex-direction:column}}${PP} .pph-fit{grid-auto-flow:row dense}`;
+      ord.forEach((k,i)=>{c+=`${PP} .pph-fit>.pph-${k}{order:${i+1}!important}`;if(k==="who")c+=`${PP} .pph-fit>.pph-dots{order:${i+1}!important}`})}
+    (Array.isArray(l.parHide)?l.parHide:[]).filter(k=>PO.includes(k)&&k!=="who").forEach(k=>{c+=`${PP} .pph-fit>.pph-${k}{display:none!important}`});
+    if(l.parArt==="small")c+=`${PP} .pph.pph2{padding-top:calc(var(--pph-bar) + (var(--pph-P) - var(--pph-bar))*.7)!important}`;
+    if(l.parArt==="none")c+=`${PP} .pph.pph2{padding-top:calc(var(--pph-bar) + 16px)!important}${PP} .pph.pph2::before,${PP} .pph.pph2::after{display:none!important}`;
+    const G={tight:8,wide:22}[l.parGap];
+    if(G)c+=`@media not all and (min-width:700px) and (min-height:520px){${PP} .pph-fit>.pph-card,${PP} .pph-fit>.pph-sess{margin-bottom:${G}px!important}${PP} .pph-fit>.pph-tiles{gap:${G}px!important}}@media (min-width:700px) and (min-height:520px){${PP} .pph-fit,${PP} .pph-fit>.pph-tiles{gap:${G}px!important}}`;
     const R={sharp:4,mid:12,round:22}[l.radius];
     if(R!=null)c+=`html body main .rounded-xl{border-radius:${R}px!important}html body main .rounded-2xl,html body main .rounded-3xl{border-radius:${R+4}px!important}`;
     return c}
@@ -4095,6 +4131,10 @@ html body #sideNav .side-tab.hidden,html body #sideNav .side-tab.su-perm-hid{dis
      +'<div class="lk-x">لون كارت الترحيب اللي فوق من «🟢 لون كارت الترحيب» تحت.</div>'
      +'<h3 class="font-extrabold text-slate-900 text-sm border-b pb-3 pt-3">👪 بوابة أولياء الأمور</h3>'
      +crow("parBar","لون البار العلوي")+crow("parSess","لون كارت «أقرب جلسة»")+crow("parTiles","لون الأزرار الكبيرة","✕ ملونة زي ما هي")
+     +'<div class="lk-row"><span class="lk-lbl">🖼️ الرسمة اللي فوق (البيت)</span>'+chips("parArt",[["","عادية"],["small","أصغر (الكروت تطلع لفوق)"],["none","من غير رسمة"]])+'</div>'
+     +'<div class="lk-row"><span class="lk-lbl">↕️ المسافة بين الكروت</span>'+chips("parGap",[["","عادية"],["tight","ضيقة"],["wide","واسعة"]])+'</div>'
+     +'<div class="lk-row" style="align-items:flex-start"><span class="lk-lbl">🔀 ترتيب الكروت وإظهارها</span><div id="lkParOrder" class="space-y-1.5"></div></div>'
+     +'<div class="lk-x">الترتيب بيمشي على الموبايل والتابلت. على التابلت الكروت بتتوزع في أعمدة بنفس الترتيب.</div>'
      +'<h3 class="font-extrabold text-slate-900 text-sm border-b pb-3 pt-3">✨ شاشة البداية (الانترو اللي بتظهر أول ما التطبيق يفتح)</h3>'
      +'<div class="lk-row"><span class="lk-lbl">🖼️ الصورة / الحركة</span>'+chips("spMedia",[["","الأيقونة (الأصلي)"],["wide","اللوجو العريض"],["custom","صورة أو GIF أو فيديو من عندي"]])+'</div>'
      +'<div class="lk-row"><span class="lk-lbl">📤 ارفع ملف</span><label class="lk-chip cursor-pointer">📁 اختار صورة / GIF / فيديو<input type="file" accept="image/png,image/jpeg,image/webp,image/gif,video/mp4,video/webm" class="hidden" onchange="suSplashUpload(this)"></label><span class="lk-x" data-v="spFile"></span></div>'
@@ -4117,6 +4157,11 @@ html body #sideNav .side-tab.hidden,html body #sideNav .side-tab.su-perm-hid{dis
     d.querySelectorAll("input[data-k]").forEach(i=>{const v=l[i.dataset.k];if(i.type==="range")i.value=v;else if(i.type==="text")i.value=v||"";else i.value=hex(v)?v:(DEF[i.dataset.k]||"#7e3ab8")});
     d.querySelectorAll("[data-lg]").forEach(b=>b.classList.toggle("on",(l.loginLogo||"")===b.dataset.lg));
     d.querySelectorAll("[data-ck]").forEach(b=>b.classList.toggle("on",String(l[b.dataset.ck]||"")===b.dataset.cv));
+    const po=d.querySelector("#lkParOrder");if(po){const o=parOrder(l),h=Array.isArray(l.parHide)?l.parHide:[];
+      po.innerHTML=o.map((k,i)=>'<div class="lk-row" style="gap:6px"><span class="lk-chip'+(h.includes(k)?'" style="opacity:.45;text-decoration:line-through"':'"')+'>'+PN[k]+'</span>'
+        +'<button type="button" class="lk-chip"'+(i?'':' disabled style="opacity:.3"')+' onclick="suLookParMove(\''+k+'\',-1)" title="لفوق">▲</button>'
+        +'<button type="button" class="lk-chip"'+(i<o.length-1?'':' disabled style="opacity:.3"')+' onclick="suLookParMove(\''+k+'\',1)" title="لتحت">▼</button>'
+        +(k==="who"?'':'<button type="button" class="lk-x" onclick="suLookParHide(\''+k+'\')">'+(h.includes(k)?"👁️ إظهار":"🙈 إخفاء")+'</button>')+'</div>').join("")}
     const sz=d.querySelector('input[data-k="spSize"]');if(sz&&!+l.spSize)sz.value=170;
     const sm=d.querySelector('input[data-k="spMin"]');if(sm)sm.value=+l.spMin||0;
     d.querySelectorAll("[data-v]").forEach(x=>{const k=x.dataset.v,v=l[k];x.textContent=k==="spMin"?(+v||0)+" ث":k==="spSize"?(+v?v+"px":"تلقائي"):k==="spFile"?(l.spMedia==="custom"&&l.spUrl?"✅ "+(l.spKind==="video"?"فيديو":"صورة")+" مرفوع":""):v+"px"});
