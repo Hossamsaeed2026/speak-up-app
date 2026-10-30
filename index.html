@@ -3912,8 +3912,9 @@ html.su-dark .rpl{background:#0b1220}
 }
 /* تابلت صغير بالطول (560–699 زي 600×936): كان بياخد تصميم الموبايل في عمود 480 في النص — دلوقتي بيملا العرض */
 @media (min-width:560px) and (max-width:699px) and (orientation:portrait){
-  #parentPortal{--pph-hw:100vw}
-  #parentPortal .pph.pph2{max-width:none!important;width:100%!important;padding-left:20px!important;padding-right:20px!important}
+  /* الرسمة هنا بتخلص عند ~40% من العرض تحت الشريط؛ صورة الطفل (اللي طالعة فوق الكارت) لازم تبدأ بعدها */
+  #parentPortal{--pph-hw:100vw;--pph-P:calc(var(--pph-bar) + 100vw*.40 + 24px)}
+  #parentPortal .pph.pph2{max-width:none!important;width:100%!important;padding-left:20px!important;padding-right:20px!important;padding-top:var(--pph-P)!important}
 }
 /* تابلت 1000–1099 بالعرض: نفس توزيع التلات أعمدة بتاع الشاشات الأعرض */
 @media (min-width:1000px) and (max-width:1099px) and (min-height:520px) and (orientation:landscape){
