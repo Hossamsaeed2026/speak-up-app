@@ -4220,5 +4220,310 @@ html[data-su-motion="fast"]{--su-mo:.18s}
   if(typeof applyThemeSystem==="function"){const _a=applyThemeSystem;applyThemeSystem=function(){const r=_a.apply(this,arguments);setMode();return r}}
 })();
 </script>
+<style id="su-analytics-css">/* «📊 لوحة التحليلات» في أول لوحة التحكم (للأدمن): كروت أرقام + رسوم + فلاتر، زي تقرير Power BI */
+.su-an{--an-p:var(--su-primary,#7e3ab8);--an-o:#f59e0b;--an-g:#10b981;--an-r:#e11d48;--an-line:#ebe8f3;background:#fff;border:1px solid var(--an-line);border-radius:22px;padding:14px;box-shadow:0 6px 24px rgba(60,30,110,.06)}
+.su-an .an-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+.su-an .an-title{font-weight:900;font-size:16px;color:#1f1b2e}
+.su-an .an-sub{font-size:11px;font-weight:700;color:#8b86a0}
+.su-an .an-x{font-size:11px;font-weight:800;color:#6b6880;border:1px solid var(--an-line);border-radius:10px;padding:5px 10px;background:#fff}
+.su-an .an-x:hover{color:var(--an-p);border-color:var(--an-p)}
+.su-an .an-body{display:grid;grid-template-columns:1fr;gap:12px}
+@media (min-width:1000px){.su-an .an-body:not(.an-top){grid-template-columns:210px minmax(0,1fr)}}
+.su-an .an-top>.an-filt{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+.su-an .an-filt{background:linear-gradient(180deg,#faf7ff,#fff);border:1px solid var(--an-line);border-radius:18px;padding:10px;display:flex;flex-direction:column;gap:10px;align-self:start}
+@media (max-width:999px){.su-an .an-filt{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}}
+.su-an .an-fg b{display:block;font-size:12px;font-weight:900;color:#1f1b2e;margin-bottom:5px}
+.su-an .an-chips{display:flex;flex-wrap:wrap;gap:4px;max-height:132px;overflow:auto}
+.su-an .an-chip{font-size:11px;font-weight:800;padding:4px 9px;border-radius:999px;border:1px solid var(--an-line);background:#fff;color:#4b4760;white-space:nowrap}
+.su-an .an-chip.on{background:var(--an-p);border-color:var(--an-p);color:#fff}
+.su-an .an-main{display:flex;flex-direction:column;gap:12px;min-width:0}
+.su-an .an-kpis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+@media (min-width:640px){.su-an .an-kpis{grid-template-columns:repeat(min(4,var(--an-kcols,4)),minmax(0,1fr))}}
+@media (min-width:1000px){.su-an .an-kpis{grid-template-columns:repeat(var(--an-kcols,4),minmax(0,1fr))}}
+.su-an .an-k{border:1.5px solid var(--an-kc,color-mix(in srgb,var(--an-p) 28%,#fff));border-radius:16px;padding:10px 8px;text-align:center;background:#fff}
+.su-an .an-k i{display:block;font-style:normal;font-size:11.5px;font-weight:800;color:#6b6880}
+.su-an .an-k strong{display:block;font-size:22px;font-weight:900;color:#1f1b2e;line-height:1.25;font-variant-numeric:tabular-nums}
+.su-an .an-k small{display:block;font-size:10px;font-weight:700;color:#9a96ad}
+.su-an .an-k.neg strong{color:var(--an-r)}
+.su-an .an-grid6{display:grid;grid-template-columns:1fr;gap:12px}
+@media (min-width:760px){.su-an .an-grid6{grid-template-columns:repeat(6,minmax(0,1fr))}.su-an .an-s-third,.su-an .an-s-half{grid-column:span 3}.su-an .an-s-two,.su-an .an-s-full{grid-column:span 6}}
+@media (min-width:1200px){.su-an .an-s-third{grid-column:span 2}.su-an .an-s-two{grid-column:span 4}}
+/* شكل الكروت */
+.su-an.an-card-shadow .an-k,.su-an.an-card-shadow .an-card{border-color:transparent;box-shadow:0 4px 18px rgba(60,30,110,.10)}
+.su-an.an-card-filled .an-k{background:color-mix(in srgb,var(--an-kc,var(--an-p)) 10%,#fff);border-color:transparent}
+.su-an.an-card-filled .an-card{background:#fbfaff}
+.su-an.an-ks-s .an-k strong{font-size:17px}.su-an.an-ks-l .an-k strong{font-size:28px}
+#tab-dashboard.an-only>:not(#suAn){display:none!important}
+/* محرر «📊 لوحة التحكم» في الإعدادات */
+.dz-h{font-weight:900;font-size:13px;color:#1f1b2e;border-bottom:1px solid #eee;padding:10px 0 8px;margin:0}
+.dz-list{display:flex;flex-direction:column;gap:6px}
+.dz-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;border:1px solid #ebe8f3;border-radius:12px;padding:6px 8px;background:#fff}
+.dz-row.off{opacity:.55;background:#f8fafc}
+.dz-on{font-size:16px;line-height:1}.dz-ic{font-size:15px}
+.dz-in{border:1px solid #e2e8f0;border-radius:10px;padding:5px 8px;font-weight:800;min-width:160px;flex:1;max-width:320px}
+.dz-col{width:34px;height:28px;border:1px solid #e2e8f0;border-radius:8px;cursor:pointer;padding:0}
+.dz-x{font-size:11px;font-weight:800;color:#64748b}.dz-x:hover{color:#e11d48}
+.dz-mv{font-size:11px;font-weight:900;border:1px solid #e2e8f0;border-radius:8px;padding:3px 7px;background:#fff}.dz-mv[disabled]{opacity:.3}
+.dz-opts{display:flex;align-items:center;gap:4px;flex-wrap:wrap;width:100%;padding-inline-start:30px}
+.dz-opts span,.dz-line>span{font-size:11px;font-weight:800;color:#6b6880;margin-inline:4px}
+.dz-line{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.dz-grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}.dz-grid2 label{display:flex;flex-direction:column;gap:4px;font-weight:800;color:#334155}.dz-grid2 .dz-in{max-width:none}
+.dz-note{font-size:11px;color:#94a3b8;font-weight:700}
+.dz-row .an-chip,.dz-line .an-chip{font-size:11px;font-weight:800;padding:4px 9px;border-radius:999px;border:1px solid #ebe8f3;background:#fff;color:#4b4760}
+.dz-row .an-chip.on,.dz-line .an-chip.on{background:var(--su-primary,#7e3ab8);border-color:var(--su-primary,#7e3ab8);color:#fff}
+.su-an .an-card{border:1px solid var(--an-line);border-radius:16px;padding:10px 12px;background:#fff;min-width:0}
+.su-an .an-card h4{font-size:13px;font-weight:900;color:#1f1b2e;margin:0 0 6px}
+.su-an .an-empty{font-size:12px;color:#9a96ad;font-weight:700;text-align:center;padding:18px 0}
+.su-an svg{display:block;width:100%;height:auto}
+.su-an .an-leg{display:flex;flex-wrap:wrap;gap:10px;font-size:11px;font-weight:800;color:#4b4760;margin-top:4px}
+.su-an .an-leg span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:3px;background:var(--c);margin-inline-end:5px;vertical-align:-1px}
+.su-an .an-bar{display:grid;grid-template-columns:96px 1fr 44px;align-items:center;gap:6px;font-size:11.5px;font-weight:800;color:#4b4760;margin:5px 0}
+.su-an .an-bar u{display:block;height:14px;border-radius:6px;background:var(--c,var(--an-o));text-decoration:none;min-width:2px}
+.su-an .an-bar em{font-style:normal;text-align:left;font-variant-numeric:tabular-nums}
+.su-an .an-fun{display:flex;flex-direction:column;align-items:center;gap:5px}
+.su-an .an-fun div{display:flex;align-items:center;justify-content:space-between;width:100%;gap:8px;font-size:11.5px;font-weight:800;color:#4b4760}
+.su-an .an-fun span{min-width:104px}
+.su-an .an-fun u{display:flex;align-items:center;justify-content:center;height:26px;border-radius:7px;background:var(--c,var(--an-o));color:#fff;font-size:11.5px;font-weight:900;text-decoration:none;margin:0 auto;min-width:34px}
+.su-an table{width:100%;border-collapse:collapse;font-size:12px}
+.su-an th{background:#1f1b2e;color:#fff;font-weight:800;padding:7px 8px;text-align:right;white-space:nowrap}
+.su-an td{padding:6px 8px;border-bottom:1px solid #f1eff6;font-weight:700;color:#2e2a40;white-space:nowrap;font-variant-numeric:tabular-nums}
+.su-an td.n,.su-an th.n{text-align:left}
+.su-an tr.l0 td{font-weight:900;background:#faf7ff;cursor:pointer}
+.su-an tr.l1 td:first-child{padding-inline-start:22px;cursor:pointer}
+.su-an tr.l2 td:first-child{padding-inline-start:40px;color:#6b6880}
+.su-an tr.tot td{background:#1f1b2e;color:#fff;font-weight:900}
+.su-an .neg{color:var(--an-r)}
+.su-an .an-tw{overflow:auto;max-height:340px;border-radius:12px;border:1px solid var(--an-line)}
+html.su-dark .su-an,html.su-dark .su-an .an-card,html.su-dark .su-an .an-k,html.su-dark .su-an .an-chip{background:#1a1a1a;color:#eee}
+html.su-dark .su-an .an-title,html.su-dark .su-an .an-k strong,html.su-dark .su-an .an-card h4,html.su-dark .su-an td{color:#eee}
+html.su-dark .su-an .an-filt,html.su-dark .su-an tr.l0 td{background:#222}</style>
+<script id="su-analytics-js">
+// لوحة التحليلات (للأدمن بس، فيها فلوس): الإيراد = المدفوعات، المصروفات = المشتريات (الكمية × السعر)، الربح = الفرق
+// — نفس تعريفات «جدول الأرباح». الفلاتر: السنة/الربع/الشهر (على تاريخ الجلسة والدفع والشراء)، الفرع، التشخيص (على العملاء
+// وجلساتهم ومدفوعاتهم؛ المصروفات مش مربوطة بعميل فمابتتأثرش بالتشخيص).
+// كل شكلها من الإعدادات ← «📊 لوحة التحكم» (state.settings.dash): الكروت والرسوم (إظهار/ترتيب/اسم/لون/نوع/حجم)، الفلاتر، الشكل.
+(function(){
+  const AN=window.SUAN={y:null,q:[],m:[],br:[],dx:[],open:{},dirty:true};
+  const MN=["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
+  const PAL=["#7c3aed","#f59e0b","#10b981","#e11d48","#0ea5e9","#ea580c","#64748b","#db2777","#65a30d","#a78bfa"];
+  const LOC=()=>localStorage.getItem("SU_LANG")==="en"?"en-US":"ar-EG";
+  const fmt=n=>Math.round(+n||0).toLocaleString(LOC());
+  const kfmt=n=>{const a=Math.abs(n);return a>=1e6?(n/1e6).toFixed(1)+"M":a>=1e3?(n/1e3).toFixed(a>=1e5?0:1)+"K":String(Math.round(n))};
+  const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const jsq=s=>esc(String(s)).replace(/\\/g,"\\\\").replace(/'/g,"\\'");
+  const hex=v=>/^#[0-9a-f]{6}$/i.test(v||"");
+  const norm=d=>String(d==null?"":d).replace(/\//g,"-").slice(0,10);
+  const isAdmin=()=>{try{return!!currentUser&&(window._realRole||currentUser.role)==="admin"}catch(e){return false}};
+  const dxOf=c=>String(c&&c.diagnosis||"").trim()||"غير محدد";
+  const brName=id=>{const b=(state.branches||[]).find(x=>String(x.branch_id||x.id)===String(id));return b?(b.branch_name||b.name||id):(id||"غير محدد")};
+  const staffName=id=>{const s=(state.staff||[]).find(x=>String(x.id||x.staff_id)===String(id));return s?s.name:(id||"غير محدد")};
+  const ST={Active:"نشط",Stopped:"متوقف",Completed:"أنهى",Paused:"موقوف مؤقتاً","Not Started":"لم يبدأ",Inactive:"غير نشط"};
+  const sum=a=>a.reduce((x,r)=>x+r.v,0);
+  function sessBranch(s,cm){try{if(typeof dashSessBranch==="function")return dashSessBranch(s)}catch(e){}return s.branch||(cm[s.clientId]||{}).branch||""}
+
+  // ---------- الكروت ----------
+  const pct=(a,b)=>b?fmt(a/b*100)+"٪":"—";
+  const KPI={
+    rev:{t:"الإيراد",ic:"💰",f:D=>({v:fmt(D.inc),s:"ج.م — من المدفوعات"})},
+    exp:{t:"المصروفات",ic:"🛒",f:D=>({v:fmt(D.out),s:"ج.م — من المشتريات"})},
+    profit:{t:"الربح",ic:"📈",f:D=>({v:fmt(D.inc-D.out),s:D.inc?"هامش "+pct(D.inc-D.out,D.inc):"ج.م",neg:D.inc-D.out<0})},
+    margin:{t:"هامش الربح",ic:"📊",f:D=>({v:pct(D.inc-D.out,D.inc),s:"من الإيراد",neg:D.inc-D.out<0})},
+    avgClient:{t:"متوسط الإيراد لكل عميل",ic:"👤",f:D=>({v:D.payers?fmt(D.inc/D.payers):"0",s:fmt(D.payers)+" عميل دفع"})},
+    payCount:{t:"عدد سندات القبض",ic:"🧾",f:D=>({v:fmt(D.pays.length),s:""})},
+    clients:{t:"إجمالي العملاء",ic:"👥",f:D=>({v:fmt(D.clients.length),s:"نشط: "+fmt(D.active)})},
+    active:{t:"العملاء النشطين",ic:"🟢",f:D=>({v:fmt(D.active),s:"من "+fmt(D.clients.length)})},
+    newClients:{t:"عملاء جدد",ic:"✨",f:D=>({v:fmt(D.newC),s:"بدأوا في الفترة"})},
+    sessions:{t:"إجمالي الجلسات",ic:"📅",f:D=>({v:fmt(D.sess.length-D.c.CAN),s:D.c.CAN?"+ "+fmt(D.c.CAN)+" ملغية":""})},
+    att:{t:"نسبة الحضور",ic:"✅",f:D=>({v:pct(D.c.ATT,D.base),s:D.base?"من "+fmt(D.base)+" جلسة اتسجلت":""})},
+    exc:{t:"نسبة الغياب بعذر",ic:"❌",f:D=>({v:pct(D.c.EXC,D.base),s:fmt(D.c.EXC)+" جلسة"})},
+    sde:{t:"نسبة الغياب بدون عذر",ic:"⚠️",f:D=>({v:pct(D.c.SDE,D.base),s:fmt(D.c.SDE)+" جلسة"})},
+    cancel:{t:"الجلسات الملغية",ic:"🚫",f:D=>({v:fmt(D.c.CAN+D.c.TCA),s:"ملغية "+fmt(D.c.CAN)+" • من المركز "+fmt(D.c.TCA)})},
+    sched:{t:"جلسات محجوزة",ic:"🗓️",f:D=>({v:fmt(D.c.SCHEDULED),s:"لسه ماتسجلتش"})}
+  };
+  const KPI_DEF=["rev","exp","profit","avgClient","clients","sessions","att","exc"];
+
+  // ---------- الرسوم ----------
+  const VIS={
+    trend:{t:"الإيراد والمصروفات والربح حسب الشهر",ic:"📈",types:[["line","خطوط"],["area","مساحة"],["bars","أعمدة"]],def:"line",size:"half"},
+    clientStatus:{t:"حالة العملاء",ic:"👥",types:[["bars","أشرطة"],["donut","دائرة"]],def:"bars",size:"third"},
+    age:{t:"العملاء حسب السن",ic:"🎂",types:[["donut","دائرة"],["bars","أشرطة"]],def:"donut",size:"third"},
+    sessStatus:{t:"حالات الجلسات",ic:"📋",types:[["funnel","قمع"],["bars","أشرطة"],["donut","دائرة"]],def:"funnel",size:"half"},
+    branchTable:{t:"الفروع — الإيراد والمصروفات والربح",ic:"🏢",types:[["table","جدول"]],def:"table",size:"half"},
+    area:{t:"العملاء حسب المنطقة (من العنوان)",ic:"📍",types:[["bars","أشرطة"],["donut","دائرة"]],def:"bars",size:"half"},
+    topPayers:{t:"أكتر العملاء دفعًا (ج.م)",ic:"💳",types:[["bars","أشرطة"]],def:"bars",size:"half"},
+    diagnosis:{t:"العملاء حسب التشخيص",ic:"🩺",types:[["bars","أشرطة"],["donut","دائرة"]],def:"donut",size:"third"},
+    therapists:{t:"الجلسات اللي اتعملت لكل أخصائي",ic:"👩‍⚕️",types:[["bars","أشرطة"],["donut","دائرة"]],def:"bars",size:"third"},
+    expCat:{t:"المصروفات حسب البند",ic:"🧾",types:[["bars","أشرطة"],["donut","دائرة"]],def:"donut",size:"third"}
+  };
+  const VIS_DEF=["trend","clientStatus","age","sessStatus","branchTable","area","topPayers"];
+  const SIZES=[["third","تلت"],["half","نص"],["two","تلتين"],["full","العرض كله"]];
+
+  // ---------- الإعدادات ----------
+  function cfg(){const d=(state&&state.settings&&state.settings.dash)||{};
+    const kOrd=(Array.isArray(d.kpis)?d.kpis.filter(x=>x&&KPI[x.id]):[]);Object.keys(KPI).forEach(id=>{if(!kOrd.some(x=>x.id===id))kOrd.push({id,on:KPI_DEF.includes(id)})});
+    const vOrd=(Array.isArray(d.vis)?d.vis.filter(x=>x&&VIS[x.id]):[]);Object.keys(VIS).forEach(id=>{if(!vOrd.some(x=>x.id===id))vOrd.push({id,on:VIS_DEF.includes(id)})});
+    const f=Object.assign({y:true,q:true,m:true,br:true,dx:true},d.filters||{});
+    return{title:d.title||"",sub:d.sub||"",kpis:kOrd,vis:vOrd,filters:f,filtPos:d.filtPos==="top"?"top":"side",defYear:d.defYear||"",kpiCols:Math.min(6,Math.max(2,+d.kpiCols||4)),card:d.card||"outline",accent:hex(d.accent)?d.accent:"",hideOld:!!d.hideOld,kpiSize:d.kpiSize||"m"}}
+  function setDash(mut){if(!state.settings.dash)state.settings.dash={};const c=cfg(),d=state.settings.dash;d.kpis=c.kpis;d.vis=c.vis;mut(d);clearTimeout(AN.st);AN.st=setTimeout(()=>{try{saveState()}catch(e){}},500);render();renderPreview();paintEditor()}
+
+  // ---------- البيانات ----------
+  function compute(){
+    const cm={};(state.clients||[]).forEach(c=>{cm[c.id]=c});
+    const bOk=b=>{try{if(!matchBranch(b))return false}catch(e){}return!AN.br.length||AN.br.includes(String(b||""))};
+    const yr=AN.y||"";const dOk=d=>{if(!/^\d{4}-\d{2}/.test(d))return false;if(yr&&d.slice(0,4)!==yr)return false;const mo=+d.slice(5,7);if(AN.q.length&&!AN.q.includes(Math.ceil(mo/3)))return false;if(AN.m.length&&!AN.m.includes(mo))return false;return true};
+    const dxOk=id=>!AN.dx.length||(cm[id]&&AN.dx.includes(dxOf(cm[id])));
+    const clients=(state.clients||[]).filter(c=>bOk(c.branch)&&(!AN.dx.length||AN.dx.includes(dxOf(c))));
+    const pays=[],buys=[],sess=[];
+    (state.payments||[]).forEach(p=>{const d=norm(p.date);if(bOk(p.branch)&&dOk(d)&&dxOk(p.clientId))pays.push({d,b:String(p.branch||""),c:p.clientId,v:Number(p.amount)||0})});
+    (state.purchases||[]).forEach(p=>{const d=norm(p.purchase_date),b=p.branch||p.branch_id||"";if(bOk(b)&&dOk(d))buys.push({d,b:String(b),cat:String(p.category||"").trim()||"غير محدد",v:(Number(p.quantity)||1)*(Number(p.unit_price)||0)})});
+    (state.sessions||[]).forEach(s=>{const d=norm(s.date),b=sessBranch(s,cm);if(bOk(b)&&dOk(d)&&dxOk(s.clientId))sess.push({d,b:String(b),st:s.status||"SCHEDULED",th:s.therapistId||""})});
+    const c={ATT:0,SDE:0,EXC:0,TCA:0,CAN:0,SCHEDULED:0};sess.forEach(s=>{c[s.st]=(c[s.st]||0)+1});
+    const newC=clients.filter(x=>{const d=norm(x.startDate);return d&&dOk(d)}).length;
+    const D={cm,clients,pays,buys,sess,c,newC,inc:sum(pays),out:sum(buys),payers:new Set(pays.map(r=>r.c).filter(Boolean)).size,base:c.ATT+c.SDE+c.EXC+c.TCA,active:clients.filter(x=>x.status==="Active").length};
+    return D}
+
+  // ---------- رسوم SVG ----------
+  function lineChart(labels,series,kind){if(!labels.length)return'<div class="an-empty">مفيش بيانات في الفترة دي</div>';
+    const W=AN.cw||420,H=210,L=44,R=8,T=12,B=34,all=series.flatMap(s=>s.v),mx=Math.max(0,...all),mn=Math.min(0,...all),rg=(mx-mn)||1;
+    const n=labels.length,bw=(W-L-R)/n,x=i=>kind==="bars"?L+bw*(i+.5):L+(n===1?(W-L-R)/2:i*(W-L-R)/(n-1)),y=v=>T+(mx-v)/rg*(H-T-B);
+    let g="";for(let k=0;k<=4;k++){const v=mn+rg*k/4,yy=y(v);g+=`<line x1="${L}" x2="${W-R}" y1="${yy}" y2="${yy}" stroke="#eee" stroke-dasharray="3 3"/><text x="${L-6}" y="${yy+4}" font-size="12" fill="#9a96ad" text-anchor="end">${kfmt(v)}</text>`}
+    if(mn<0)g+=`<line x1="${L}" x2="${W-R}" y1="${y(0)}" y2="${y(0)}" stroke="#c9c5d6"/>`;
+    const step=Math.ceil(n/6);labels.forEach((l,i)=>{if(i%step===0||i===n-1)g+=`<text x="${x(i)}" y="${H-12}" font-size="12" fill="#6b6880" text-anchor="middle">${esc(l)}</text>`});
+    if(kind==="bars"){const k=series.length,w=Math.max(3,bw*.8/k);series.forEach((s,j)=>s.v.forEach((v,i)=>{const x0=L+bw*i+bw*.1+j*w,y0=y(Math.max(v,0)),h=Math.abs(y(v)-y(0));g+=`<rect x="${x0}" y="${y0}" width="${w-1}" height="${Math.max(1,h)}" rx="2" fill="${s.c}"><title>${esc(s.n)} — ${esc(labels[i])}: ${fmt(v)}</title></rect>`}))}
+    else series.forEach(s=>{const pts=s.v.map((v,i)=>x(i)+","+y(v)).join(" ");if(kind==="area"||s.area)g+=`<polygon points="${x(0)},${y(Math.max(mn,0))} ${pts} ${x(s.v.length-1)},${y(Math.max(mn,0))}" fill="${s.c}" opacity="${kind==="area"?.16:.10}"/>`;
+      g+=`<polyline points="${pts}" fill="none" stroke="${s.c}" stroke-width="${s.w||2}" stroke-linejoin="round" stroke-linecap="round"/>`+s.v.map((v,i)=>`<circle cx="${x(i)}" cy="${y(v)}" r="${s.w>2?3.2:2.2}" fill="${s.c}"><title>${esc(s.n)} — ${esc(labels[i])}: ${fmt(v)}</title></circle>`).join("")});
+    return`<svg viewBox="0 0 ${W} ${H}" role="img" direction="ltr" style="direction:ltr">${g}</svg><div class="an-leg">${series.map(s=>`<span style="--c:${s.c}">${esc(s.n)}</span>`).join("")}</div>`}
+  function donut(items){const tot=items.reduce((a,b)=>a+b.v,0);if(!tot)return'<div class="an-empty">مفيش بيانات</div>';
+    const C=2*Math.PI*42;let off=0,arcs="";items.forEach(it=>{const len=it.v/tot*C;arcs+=`<circle cx="60" cy="60" r="42" fill="none" stroke="${it.c}" stroke-width="20" stroke-dasharray="${len} ${C-len}" stroke-dashoffset="${-off}" transform="rotate(-90 60 60)"><title>${esc(it.l)}: ${fmt(it.v)}</title></circle>`;off+=len});
+    return`<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><svg viewBox="0 0 120 120" style="max-width:150px;direction:ltr">${arcs}<text x="60" y="64" font-size="15" font-weight="900" text-anchor="middle" fill="#1f1b2e">${fmt(tot)}</text></svg><div class="an-leg" style="flex-direction:column;gap:4px">${items.map(it=>`<span style="--c:${it.c}">${esc(it.l)} — ${fmt(it.v)} (${fmt(it.v/tot*100)}٪)</span>`).join("")}</div></div>`}
+  function bars(items,color){if(!items.length)return'<div class="an-empty">مفيش بيانات</div>';const mx=Math.max(...items.map(i=>i.v))||1;
+    return items.map(i=>`<div class="an-bar" title="${esc(i.l)}: ${fmt(i.v)}"><span style="overflow:hidden;text-overflow:ellipsis">${esc(i.l)}</span><u style="width:${Math.max(2,i.v/mx*100)}%;--c:${i.c||color}"></u><em>${fmt(i.v)}</em></div>`).join("")}
+  const colorize=(items,color)=>{const p=[color].concat(PAL.filter(c=>c!==color));return items.map((it,i)=>Object.assign({c:it.c||p[i%p.length]},it))};
+  const listOr=(type,items,color)=>type==="donut"?donut(colorize(items,color)):bars(items,color);
+  const countBy=(arr,fn)=>{const m={};arr.forEach(x=>{const k=fn(x);if(k!=null)m[k]=(m[k]||0)+1});return Object.keys(m).map(k=>({l:k,v:m[k]})).sort((a,b)=>b.v-a.v)};
+
+  const DRAW={
+    trend(D,type,color){let keys;
+      if(AN.y)keys=MN.map((n,i)=>AN.y+"-"+String(i+1).padStart(2,"0")).filter(k=>{const mo=+k.slice(5);return(!AN.q.length||AN.q.includes(Math.ceil(mo/3)))&&(!AN.m.length||AN.m.includes(mo))});
+      else{const s=new Set();D.pays.concat(D.buys).forEach(r=>s.add(r.d.slice(0,7)));keys=[...s].sort().slice(-12)}
+      const inc={},out={};D.pays.forEach(r=>{const k=r.d.slice(0,7);inc[k]=(inc[k]||0)+r.v});D.buys.forEach(r=>{const k=r.d.slice(0,7);out[k]=(out[k]||0)+r.v});
+      const one=AN.y||new Set(keys.map(k=>k.slice(0,4))).size<=1;const lab=keys.map(k=>MN[+k.slice(5,7)-1]+(one?"":" "+k.slice(2,4)));
+      return lineChart(lab,[{n:"الإيراد",c:"#10b981",v:keys.map(k=>inc[k]||0)},{n:"المصروفات",c:"#f59e0b",v:keys.map(k=>out[k]||0)},{n:"الربح",c:color,w:3,area:type==="line",v:keys.map(k=>(inc[k]||0)-(out[k]||0))}],type)},
+    clientStatus:(D,type,color)=>listOr(type,countBy(D.clients,c=>ST[c.status]||c.status||"غير محدد"),color),
+    age(D,type,color){const t=typeof todayCairo==="function"?todayCairo():new Date().toISOString().slice(0,10);const G=[["أقل من 3",0,3],["3–5",3,6],["6–8",6,9],["9–12",9,13],["13+",13,200]];const n=G.map(()=>0);let unk=0;
+      D.clients.forEach(c=>{const b=norm(c.dob);if(!/^\d{4}-\d{2}-\d{2}$/.test(b)){unk++;return}let a=+t.slice(0,4)-+b.slice(0,4);if(t.slice(5)<b.slice(5))a--;const i=G.findIndex(g=>a>=g[1]&&a<g[2]);if(i>=0)n[i]++;else unk++});
+      const it=G.map((g,i)=>({l:g[0]+" سنين",v:n[i]})).filter(x=>x.v);if(unk)it.push({l:"من غير تاريخ ميلاد",v:unk,c:"#cbd5e1"});return listOr(type,it,color)},
+    sessStatus(D,type,color){const c=D.c,tot=D.sess.length-c.CAN;
+      const rows=[["حضر",c.ATT,"#10b981"],["غياب بدون عذر",c.SDE,"#f59e0b"],["غياب بعذر",c.EXC,"#eab308"],["إلغاء من المركز",c.TCA,"#94a3b8"],["محجوزة",c.SCHEDULED,"#38bdf8"],["ملغية (مش محسوبة)",c.CAN,"#cbd5e1"]].filter(r=>r[1]);
+      if(type==="donut")return donut(rows.map(r=>({l:r[0],v:r[1],c:r[2]})));if(type==="bars")return bars(rows.map(r=>({l:r[0],v:r[1],c:r[2]})),color);
+      const all=[["إجمالي الجلسات",tot,"#1f1b2e"]].concat(rows),mx=Math.max(1,...all.map(r=>r[1]));
+      return`<div class="an-fun">${all.map(r=>`<div><span>${r[0]}</span><u style="width:${Math.max(8,r[1]/mx*100)}%;--c:${r[2]};${r[2]==="#cbd5e1"?"color:#475569":""}">${fmt(r[1])}</u></div>`).join("")}</div>`},
+    branchTable(D){const T={};const add=(r,f)=>{const b=r.b||"",y=r.d.slice(0,4),m=r.d.slice(0,7);const B=T[b]=T[b]||{i:0,o:0,Y:{}};const Y=B.Y[y]=B.Y[y]||{i:0,o:0,M:{}};const M=Y.M[m]=Y.M[m]||{i:0,o:0};B[f]+=r.v;Y[f]+=r.v;M[f]+=r.v};
+      D.pays.forEach(r=>add(r,"i"));D.buys.forEach(r=>add(r,"o"));const bs=Object.keys(T).sort();if(!bs.length)return'<div class="an-empty">مفيش بيانات في الفترة دي</div>';
+      const cell=o=>`<td class="n">${fmt(o.o)}</td><td class="n">${fmt(o.i)}</td><td class="n ${o.i-o.o<0?"neg":""}">${fmt(o.i-o.o)}</td>`;let h="",ti=0,to=0;
+      bs.forEach(b=>{const B=T[b];ti+=B.i;to+=B.o;const kb="b:"+b,ob=AN.open[kb];h+=`<tr class="l0" onclick="suAnSet('open','${jsq(kb)}')"><td>${ob?"⊟":"⊞"} ${esc(brName(b))}</td>${cell(B)}</tr>`;
+        if(ob)Object.keys(B.Y).sort().forEach(y=>{const Y=B.Y[y],ky=kb+"|"+y,oy=AN.open[ky];h+=`<tr class="l1" onclick="suAnSet('open','${jsq(ky)}')"><td>${oy?"⊟":"⊞"} ${y}</td>${cell(Y)}</tr>`;
+          if(oy)Object.keys(Y.M).sort().forEach(m=>{h+=`<tr class="l2"><td>${MN[+m.slice(5,7)-1]}</td>${cell(Y.M[m])}</tr>`})})});
+      return`<div class="an-tw"><table><thead><tr><th>الفرع ← السنة ← الشهر</th><th class="n">المصروفات</th><th class="n">الإيراد</th><th class="n">الربح</th></tr></thead><tbody>${h}<tr class="tot"><td>الإجمالي</td>${cell({i:ti,o:to})}</tr></tbody></table></div>`},
+    area(D,type,color){const fn=window.RV&&RV.fns&&RV.fns.area;if(!fn)return'<div class="an-empty">—</div>';return listOr(type,countBy(D.clients,c=>fn(c).l).slice(0,8),color)},
+    topPayers(D,type,color){const m={};D.pays.forEach(r=>{if(r.c)m[r.c]=(m[r.c]||0)+r.v});return bars(Object.keys(m).map(k=>({l:(D.cm[k]||{}).name||k,v:m[k]})).sort((a,b)=>b.v-a.v).slice(0,8),color)},
+    diagnosis:(D,type,color)=>listOr(type,countBy(D.clients,dxOf).slice(0,10),color),
+    therapists:(D,type,color)=>listOr(type,countBy(D.sess.filter(s=>s.st==="ATT"),s=>staffName(s.th)).slice(0,10),color),
+    expCat(D,type,color){const m={};D.buys.forEach(r=>{m[r.cat]=(m[r.cat]||0)+r.v});return listOr(type,Object.keys(m).map(k=>({l:k,v:m[k]})).sort((a,b)=>b.v-a.v).slice(0,10),color)}
+  };
+
+  // ---------- الرسم ----------
+  function chip(kind,val,label,on){return`<button type="button" class="an-chip${on?" on":""}" onclick="suAnSet('${kind}','${jsq(val)}')">${esc(label)}</button>`}
+  function filters(C){const F=C.filters;if(!F.y&&!F.q&&!F.m&&!F.br&&!F.dx)return"";
+    const years=new Set();(state.payments||[]).forEach(p=>years.add(norm(p.date).slice(0,4)));(state.sessions||[]).forEach(s=>years.add(norm(s.date).slice(0,4)));(state.purchases||[]).forEach(p=>years.add(norm(p.purchase_date).slice(0,4)));
+    const ys=[...years].filter(y=>/^\d{4}$/.test(y)).sort();
+    const brs=[...new Set((state.clients||[]).map(c=>String(c.branch||"")).concat((state.branches||[]).map(b=>String(b.branch_id||b.id||""))))].filter(b=>{try{return matchBranch(b)}catch(e){return true}});
+    const dxs=[...new Set((state.clients||[]).map(dxOf))].sort((a,b)=>a.localeCompare(b,"ar"));
+    const mOpts=MN.map((n,i)=>i+1).filter(m=>!AN.q.length||AN.q.includes(Math.ceil(m/3)));
+    return`<div class="an-filt">
+      ${F.y?`<div class="an-fg"><b>📅 السنة</b><div class="an-chips">${chip("y","","الكل",!AN.y)}${ys.map(y=>chip("y",y,y,AN.y===y)).join("")}</div></div>`:""}
+      ${F.q?`<div class="an-fg"><b>🗓️ الربع</b><div class="an-chips">${[1,2,3,4].map(q=>chip("q",q,"ربع "+q,AN.q.includes(q))).join("")}</div></div>`:""}
+      ${F.m?`<div class="an-fg"><b>📆 الشهر</b><div class="an-chips">${mOpts.map(m=>chip("m",m,MN[m-1],AN.m.includes(m))).join("")}</div></div>`:""}
+      ${F.br?`<div class="an-fg"><b>📍 الفرع</b><div class="an-chips">${brs.map(b=>chip("br",b,brName(b),AN.br.includes(b))).join("")}</div></div>`:""}
+      ${F.dx?`<div class="an-fg"><b>🩺 التشخيص</b><div class="an-chips">${dxs.map(d=>chip("dx",d,d,AN.dx.includes(d))).join("")}</div></div>`:""}
+      ${(AN.y||AN.q.length||AN.m.length||AN.br.length||AN.dx.length)?'<button type="button" class="an-x" onclick="suAnSet(\'reset\')">✕ مسح الفلاتر</button>':""}
+    </div>`}
+  function board(C,D){const acc=C.accent||"var(--su-primary,#7e3ab8)";
+    const ks=C.kpis.filter(k=>k.on).map(k=>{const K=KPI[k.id],r=K.f(D),col=hex(k.color)?k.color:"";return`<div class="an-k${r.neg?" neg":""}"${col?` style="--an-kc:${col}"`:""}><i>${K.ic} ${esc(k.label||K.t)}</i><strong>${r.v}</strong>${r.s?`<small>${esc(r.s)}</small>`:""}</div>`}).join("");
+    const vs=C.vis.filter(v=>v.on).map(v=>{const V=VIS[v.id],type=V.types.some(t=>t[0]===v.type)?v.type:V.def,col=hex(v.color)?v.color:acc;let body;try{AN.cw={third:340,half:420,two:640,full:900}[v.size||V.size]||420;body=DRAW[v.id](D,type,col)}catch(e){suLog("su-analytics "+v.id,e);body='<div class="an-empty">—</div>'}
+      return`<div class="an-card an-s-${v.size||V.size}"><h4>${V.ic} ${esc(v.title||V.t)}</h4>${body}</div>`}).join("");
+    return`${ks?`<div class="an-kpis" style="--an-kcols:${C.kpiCols}">${ks}</div>`:""}${vs?`<div class="an-grid6">${vs}</div>`:""}`}
+  function panelHTML(C,D,preview){let hidden=false;try{hidden=!preview&&localStorage.getItem("SU_AN_HIDE")==="1"}catch(e){}
+    const head=`<div class="an-head"><div><div class="an-title">${esc(C.title||"📊 لوحة التحليلات")}</div><div class="an-sub">${esc(hidden?"مقفولة — دوس «إظهار» تفتحها":(C.sub||"الإيراد والمصروفات والربح والجلسات والعملاء — دوس على أي فلتر"))}</div></div>${preview?"":`<button type="button" class="an-x" onclick="suAnSet('hide')">${hidden?"👁️ إظهار":"🙈 إخفاء"}</button>`}</div>`;
+    if(hidden)return head;const f=filters(C);
+    return head+`<div class="an-body${C.filtPos==="top"||!f?" an-top":""}">${f}<div class="an-main">${board(C,D)}</div></div>`}
+  function style(el,C){el.className="su-an an-card-"+C.card+" an-ks-"+C.kpiSize;if(C.accent)el.style.setProperty("--an-p",C.accent);else el.style.removeProperty("--an-p")}
+  function render(){const tab=document.getElementById("tab-dashboard");if(!tab)return;let el=document.getElementById("suAn");
+    if(!isAdmin()){if(el)el.remove();tab.classList.remove("an-only");return}
+    if(tab.classList.contains("hidden")){AN.dirty=true;return}
+    AN.dirty=false;const C=cfg();if(AN.y===null)AN.y=C.defYear==="current"?(typeof todayCairo==="function"?todayCairo():new Date().toISOString()).slice(0,4):"";
+    if(!el){el=document.createElement("section");el.id="suAn";tab.insertBefore(el,tab.firstChild)}
+    tab.classList.toggle("an-only",C.hideOld);style(el,C);el.innerHTML=panelHTML(C,compute(),false)}
+  function renderPreview(){const pv=document.getElementById("suAnPreview");if(!pv||!isAdmin())return;const C=cfg();if(AN.y===null)AN.y="";style(pv,C);pv.innerHTML=panelHTML(C,compute(),true)}
+  window.suAnRender=render;
+  window.suAnSet=function(kind,val){
+    if(kind==="reset"){AN.y="";AN.q=[];AN.m=[];AN.br=[];AN.dx=[]}
+    else if(kind==="hide"){try{const h=localStorage.getItem("SU_AN_HIDE")==="1";localStorage.setItem("SU_AN_HIDE",h?"0":"1")}catch(e){}}
+    else if(kind==="open"){AN.open[val]=!AN.open[val]}
+    else if(kind==="y"){AN.y=AN.y===val?"":val}
+    else{const v=(kind==="q"||kind==="m")?+val:val,a=AN[kind],i=a.indexOf(v);if(i>=0)a.splice(i,1);else a.push(v);if(kind==="q")AN.m=AN.m.filter(m=>!AN.q.length||AN.q.includes(Math.ceil(m/3)))}
+    render();renderPreview()};
+
+  // ---------- قسم الإعدادات «📊 لوحة التحكم» ----------
+  const E=window.suDash={
+    kOn(id){setDash(d=>{const k=d.kpis.find(x=>x.id===id);k.on=!k.on})},
+    kMove(id,dir){setDash(d=>{const i=d.kpis.findIndex(x=>x.id===id),j=i+dir;if(j<0||j>=d.kpis.length)return;[d.kpis[i],d.kpis[j]]=[d.kpis[j],d.kpis[i]]})},
+    kLabel(id,v){setDash(d=>{const k=d.kpis.find(x=>x.id===id);v=String(v||"").trim().slice(0,40);if(v&&v!==KPI[id].t)k.label=v;else delete k.label})},
+    kColor(id,v){setDash(d=>{const k=d.kpis.find(x=>x.id===id);if(hex(v))k.color=v;else delete k.color})},
+    vOn(id){setDash(d=>{const k=d.vis.find(x=>x.id===id);k.on=!k.on})},
+    vMove(id,dir){setDash(d=>{const i=d.vis.findIndex(x=>x.id===id),j=i+dir;if(j<0||j>=d.vis.length)return;[d.vis[i],d.vis[j]]=[d.vis[j],d.vis[i]]})},
+    vSet(id,k,v){setDash(d=>{const x=d.vis.find(y=>y.id===id);if(k==="title"){v=String(v||"").trim().slice(0,60);if(v===VIS[id].t)v=""}if(v===""||v==null)delete x[k];else x[k]=v})},
+    set(k,v){setDash(d=>{if(v===""||v==null)delete d[k];else d[k]=v;if(k==="defYear")AN.y=null})},
+    filt(k){setDash(d=>{const f=Object.assign({y:true,q:true,m:true,br:true,dx:true},d.filters||{});f[k]=!f[k];d.filters=f})},
+    reset(){if(!confirm("ترجّع كل إعدادات لوحة التحكم للأصل؟"))return;delete state.settings.dash;AN.y=null;try{saveState()}catch(e){}render();renderPreview();paintEditor()}
+  };
+  function seg(cur,opts,on){return opts.map(o=>`<button type="button" class="an-chip${String(cur)===String(o[0])?" on":""}" onclick="${on(o[0])}">${esc(o[1])}</button>`).join("")}
+  function paintEditor(){const box=document.getElementById("suDashEd");if(!box)return;const C=cfg();
+    const kRows=C.kpis.map((k,i)=>{const K=KPI[k.id];return`<div class="dz-row${k.on?"":" off"}"><button type="button" class="dz-on" onclick="suDash.kOn('${k.id}')" title="إظهار/إخفاء">${k.on?"✅":"⬜"}</button><span class="dz-ic">${K.ic}</span>
+      <input type="text" class="dz-in" value="${esc(k.label||K.t)}" onchange="suDash.kLabel('${k.id}',this.value)">
+      <input type="color" class="dz-col" value="${hex(k.color)?k.color:"#c4b5fd"}" onchange="suDash.kColor('${k.id}',this.value)" title="لون الإطار">${k.color?`<button type="button" class="dz-x" onclick="suDash.kColor('${k.id}','')" title="اللون الأصلي">✕</button>`:""}
+      <button type="button" class="dz-mv" ${i?"":"disabled"} onclick="suDash.kMove('${k.id}',-1)">▲</button><button type="button" class="dz-mv" ${i<C.kpis.length-1?"":"disabled"} onclick="suDash.kMove('${k.id}',1)">▼</button></div>`}).join("");
+    const vRows=C.vis.map((v,i)=>{const V=VIS[v.id],type=v.type||V.def,size=v.size||V.size;return`<div class="dz-row dz-v${v.on?"":" off"}"><button type="button" class="dz-on" onclick="suDash.vOn('${v.id}')">${v.on?"✅":"⬜"}</button><span class="dz-ic">${V.ic}</span>
+      <input type="text" class="dz-in" value="${esc(v.title||V.t)}" onchange="suDash.vSet('${v.id}','title',this.value)">
+      <button type="button" class="dz-mv" ${i?"":"disabled"} onclick="suDash.vMove('${v.id}',-1)">▲</button><button type="button" class="dz-mv" ${i<C.vis.length-1?"":"disabled"} onclick="suDash.vMove('${v.id}',1)">▼</button>
+      <div class="dz-opts">${V.types.length>1?`<span>النوع:</span>${seg(type,V.types,t=>`suDash.vSet('${v.id}','type','${t}')`)}`:""}<span>الحجم:</span>${seg(size,SIZES,s=>`suDash.vSet('${v.id}','size','${s}')`)}<span>اللون:</span><input type="color" class="dz-col" value="${hex(v.color)?v.color:"#7c3aed"}" onchange="suDash.vSet('${v.id}','color',this.value)">${v.color?`<button type="button" class="dz-x" onclick="suDash.vSet('${v.id}','color','')">✕</button>`:""}</div></div>`}).join("");
+    const F=C.filters,FL=[["y","📅 السنة"],["q","🗓️ الربع"],["m","📆 الشهر"],["br","📍 الفرع"],["dx","🩺 التشخيص"]];
+    box.innerHTML=`
+      <h3 class="dz-h">📝 العنوان</h3>
+      <div class="dz-grid2"><label>العنوان<input type="text" class="dz-in" placeholder="📊 لوحة التحليلات" value="${esc(C.title)}" onchange="suDash.set('title',this.value.trim())"></label><label>السطر اللي تحته<input type="text" class="dz-in" placeholder="الإيراد والمصروفات والربح…" value="${esc(C.sub)}" onchange="suDash.set('sub',this.value.trim())"></label></div>
+      <h3 class="dz-h">🔢 الكروت (الأرقام) — علّم اللي يظهر، غيّر الاسم واللون، ورتّب بـ ▲▼</h3><div class="dz-list">${kRows}</div>
+      <div class="dz-line"><span>عدد الكروت في الصف (كمبيوتر):</span>${seg(C.kpiCols,[[2,"2"],[3,"3"],[4,"4"],[5,"5"],[6,"6"]],n=>`suDash.set('kpiCols',${n})`)}<span>حجم الرقم:</span>${seg(C.kpiSize,[["s","صغير"],["m","عادي"],["l","كبير"]],s=>`suDash.set('kpiSize','${s}')`)}</div>
+      <h3 class="dz-h">📊 الرسوم — نوعها وحجمها ولونها وترتيبها</h3><div class="dz-list">${vRows}</div>
+      <h3 class="dz-h">🎚️ الفلاتر</h3>
+      <div class="dz-line"><span>الفلاتر اللي تظهر:</span>${FL.map(f=>`<button type="button" class="an-chip${F[f[0]]?" on":""}" onclick="suDash.filt('${f[0]}')">${f[1]}</button>`).join("")}</div>
+      <div class="dz-line"><span>مكانها:</span>${seg(C.filtPos,[["side","على الجنب"],["top","فوق"]],p=>`suDash.set('filtPos','${p}')`)}<span>أول ما تفتح:</span>${seg(C.defYear,[["","كل السنين"],["current","السنة الحالية"]],y=>`suDash.set('defYear','${y}')`)}</div>
+      <h3 class="dz-h">🎨 الشكل</h3>
+      <div class="dz-line"><span>شكل الكروت:</span>${seg(C.card,[["outline","إطار"],["shadow","ظل"],["filled","ملون"]],c=>`suDash.set('card','${c}')`)}<span>اللون الأساسي:</span><input type="color" class="dz-col" value="${C.accent||"#7c3aed"}" onchange="suDash.set('accent',this.value)">${C.accent?`<button type="button" class="dz-x" onclick="suDash.set('accent','')">✕ لون النظام</button>`:""}</div>
+      <div class="dz-line"><span>أجزاء لوحة التحكم القديمة (تحت):</span>${seg(C.hideOld?1:0,[[0,"تفضل ظاهرة"],[1,"تختفي — اللوحة دي بس"]],v=>`suDash.set('hideOld',${v?"true":"''"})`)}</div>
+      <div class="dz-line"><button type="button" class="an-x" onclick="suDash.reset()">↺ رجّع كل حاجة للأصل</button><span class="dz-note">كل تغيير بيتحفظ لوحده ويظهر في المعاينة تحت وفي لوحة التحكم.</span></div>`}
+  function setupTab(){if(document.getElementById("settings-sub-dash"))return;const tb=document.getElementById("subtab-btn-theme"),th=document.getElementById("settings-sub-theme");if(!tb||!th)return;
+    const b=document.createElement("button");b.type="button";b.id="subtab-btn-dash";b.className="px-3 py-1.5 rounded-lg text-xs font-medium text-indigo-200 hover:text-white hover:bg-indigo-800";b.textContent="📊 لوحة التحكم (الداشبورد)";b.setAttribute("onclick","switchSettingsSubTab('dash')");tb.insertAdjacentElement("afterend",b);
+    const s=document.createElement("div");s.id="settings-sub-dash";s.className="settings-subtab space-y-6 hidden";
+    s.innerHTML='<div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-5 text-xs"><div class="rounded-xl p-3 bg-violet-50 border border-violet-200 text-violet-800 font-bold">📊 تصميم «لوحة التحليلات» اللي في أول لوحة التحكم — زي Power BI: اختار الكروت والرسوم ونوعها وحجمها وألوانها وترتيبها والفلاتر. بتظهر للأدمن بس.</div><div id="suDashEd"></div><h3 class="dz-h">👁️ معاينة</h3><section id="suAnPreview"></section></div>';
+    th.insertAdjacentElement("afterend",s)}
+  if(typeof switchSettingsSubTab==="function"){const _ss=switchSettingsSubTab;switchSettingsSubTab=function(t){const r=_ss.apply(this,arguments);try{const b=document.getElementById("subtab-btn-dash");if(b)b.className=t==="dash"?"px-3 py-1.5 rounded-lg text-xs font-bold transition bg-white text-indigo-900 shadow":"px-3 py-1.5 rounded-lg text-xs font-medium text-indigo-200 hover:text-white hover:bg-indigo-800";if(t==="dash"){paintEditor();renderPreview()}}catch(e){suLog("su-dash tab",e)}return r}}
+  // الزرار للأدمن بس (السكرتارية أصلاً مالهاش الإعدادات)
+  function gate(){const b=document.getElementById("subtab-btn-dash");if(b)b.style.display=isAdmin()?"":"none";const row=[...document.querySelectorAll("#suSetMenu .sul-row")].find(r=>/لوحة التحكم \(الداشبورد\)/.test(r.textContent));if(row){row.style.display=isAdmin()?"":"none";const sm=row.querySelector("small");if(sm&&!sm.textContent)sm.textContent="الكروت والرسوم والفلاتر والألوان — زي Power BI"}}
+  setupTab();
+  if(typeof renderDashboard==="function"){const _rd=renderDashboard;renderDashboard=function(){const r=_rd.apply(this,arguments);try{render()}catch(e){suLog("su-analytics",e)}return r}}
+  const _sw=window.switchTab;window.switchTab=function(id){const r=_sw.apply(this,arguments);try{if(id==="dashboard"&&AN.dirty)render();if(id==="settings")gate()}catch(e){suLog("su-analytics tab",e)}return r};
+  try{render()}catch(e){}
+})();
+</script>
 </body>
 </html>
