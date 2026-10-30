@@ -4220,5 +4220,169 @@ html[data-su-motion="fast"]{--su-mo:.18s}
   if(typeof applyThemeSystem==="function"){const _a=applyThemeSystem;applyThemeSystem=function(){const r=_a.apply(this,arguments);setMode();return r}}
 })();
 </script>
+<style id="su-analytics-css">/* «📊 لوحة التحليلات» في أول لوحة التحكم (للأدمن): كروت أرقام + رسوم + فلاتر، زي تقرير Power BI */
+#suAn{--an-p:var(--su-primary,#7e3ab8);--an-o:#f59e0b;--an-g:#10b981;--an-r:#e11d48;--an-line:#ebe8f3;background:#fff;border:1px solid var(--an-line);border-radius:22px;padding:14px;box-shadow:0 6px 24px rgba(60,30,110,.06)}
+#suAn .an-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+#suAn .an-title{font-weight:900;font-size:16px;color:#1f1b2e}
+#suAn .an-sub{font-size:11px;font-weight:700;color:#8b86a0}
+#suAn .an-x{font-size:11px;font-weight:800;color:#6b6880;border:1px solid var(--an-line);border-radius:10px;padding:5px 10px;background:#fff}
+#suAn .an-x:hover{color:var(--an-p);border-color:var(--an-p)}
+#suAn .an-body{display:grid;grid-template-columns:1fr;gap:12px}
+@media (min-width:1000px){#suAn .an-body{grid-template-columns:210px minmax(0,1fr)}}
+#suAn .an-filt{background:linear-gradient(180deg,#faf7ff,#fff);border:1px solid var(--an-line);border-radius:18px;padding:10px;display:flex;flex-direction:column;gap:10px;align-self:start}
+@media (max-width:999px){#suAn .an-filt{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}}
+#suAn .an-fg b{display:block;font-size:12px;font-weight:900;color:#1f1b2e;margin-bottom:5px}
+#suAn .an-chips{display:flex;flex-wrap:wrap;gap:4px;max-height:132px;overflow:auto}
+#suAn .an-chip{font-size:11px;font-weight:800;padding:4px 9px;border-radius:999px;border:1px solid var(--an-line);background:#fff;color:#4b4760;white-space:nowrap}
+#suAn .an-chip.on{background:var(--an-p);border-color:var(--an-p);color:#fff}
+#suAn .an-main{display:flex;flex-direction:column;gap:12px;min-width:0}
+#suAn .an-kpis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+@media (min-width:640px){#suAn .an-kpis{grid-template-columns:repeat(4,minmax(0,1fr))}}
+#suAn .an-k{border:1.5px solid color-mix(in srgb,var(--an-p) 28%,#fff);border-radius:16px;padding:10px 8px;text-align:center;background:#fff}
+#suAn .an-k i{display:block;font-style:normal;font-size:11.5px;font-weight:800;color:#6b6880}
+#suAn .an-k strong{display:block;font-size:22px;font-weight:900;color:#1f1b2e;line-height:1.25;font-variant-numeric:tabular-nums}
+#suAn .an-k small{display:block;font-size:10px;font-weight:700;color:#9a96ad}
+#suAn .an-k.neg strong{color:var(--an-r)}
+#suAn .an-grid{display:grid;grid-template-columns:1fr;gap:12px}
+@media (min-width:760px){#suAn .an-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (min-width:1200px){#suAn .an-grid.g3{grid-template-columns:1.4fr 1fr 1fr}}
+#suAn .an-card{border:1px solid var(--an-line);border-radius:16px;padding:10px 12px;background:#fff;min-width:0}
+#suAn .an-card h4{font-size:13px;font-weight:900;color:#1f1b2e;margin:0 0 6px}
+#suAn .an-empty{font-size:12px;color:#9a96ad;font-weight:700;text-align:center;padding:18px 0}
+#suAn svg{display:block;width:100%;height:auto}
+#suAn .an-leg{display:flex;flex-wrap:wrap;gap:10px;font-size:11px;font-weight:800;color:#4b4760;margin-top:4px}
+#suAn .an-leg span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:3px;background:var(--c);margin-inline-end:5px;vertical-align:-1px}
+#suAn .an-bar{display:grid;grid-template-columns:96px 1fr 44px;align-items:center;gap:6px;font-size:11.5px;font-weight:800;color:#4b4760;margin:5px 0}
+#suAn .an-bar u{display:block;height:14px;border-radius:6px;background:var(--c,var(--an-o));text-decoration:none;min-width:2px}
+#suAn .an-bar em{font-style:normal;text-align:left;font-variant-numeric:tabular-nums}
+#suAn .an-fun{display:flex;flex-direction:column;align-items:center;gap:5px}
+#suAn .an-fun div{display:flex;align-items:center;justify-content:space-between;width:100%;gap:8px;font-size:11.5px;font-weight:800;color:#4b4760}
+#suAn .an-fun span{min-width:104px}
+#suAn .an-fun u{display:flex;align-items:center;justify-content:center;height:26px;border-radius:7px;background:var(--c,var(--an-o));color:#fff;font-size:11.5px;font-weight:900;text-decoration:none;margin:0 auto;min-width:34px}
+#suAn table{width:100%;border-collapse:collapse;font-size:12px}
+#suAn th{background:#1f1b2e;color:#fff;font-weight:800;padding:7px 8px;text-align:right;white-space:nowrap}
+#suAn td{padding:6px 8px;border-bottom:1px solid #f1eff6;font-weight:700;color:#2e2a40;white-space:nowrap;font-variant-numeric:tabular-nums}
+#suAn td.n,#suAn th.n{text-align:left}
+#suAn tr.l0 td{font-weight:900;background:#faf7ff;cursor:pointer}
+#suAn tr.l1 td:first-child{padding-inline-start:22px;cursor:pointer}
+#suAn tr.l2 td:first-child{padding-inline-start:40px;color:#6b6880}
+#suAn tr.tot td{background:#1f1b2e;color:#fff;font-weight:900}
+#suAn .neg{color:var(--an-r)}
+#suAn .an-tw{overflow:auto;max-height:340px;border-radius:12px;border:1px solid var(--an-line)}
+html.su-dark #suAn,html.su-dark #suAn .an-card,html.su-dark #suAn .an-k,html.su-dark #suAn .an-chip{background:#1a1a1a;color:#eee}
+html.su-dark #suAn .an-title,html.su-dark #suAn .an-k strong,html.su-dark #suAn .an-card h4,html.su-dark #suAn td{color:#eee}
+html.su-dark #suAn .an-filt,html.su-dark #suAn tr.l0 td{background:#222}</style>
+<script id="su-analytics-js">
+// لوحة التحليلات (للأدمن بس، فيها فلوس): الإيراد = المدفوعات، المصروفات = المشتريات (الكمية × السعر)، الربح = الفرق
+// — نفس تعريفات «جدول الأرباح». الفلاتر: السنة/الربع/الشهر (على تاريخ الجلسة والدفع والشراء)، الفرع، التشخيص (على العملاء
+// وجلساتهم ومدفوعاتهم؛ المصروفات مش مربوطة بعميل فمابتتأثرش بالتشخيص).
+(function(){
+  const AN=window.SUAN={y:"",q:[],m:[],br:[],dx:[],open:{},dirty:true};
+  const MN=["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
+  const LOC=()=>localStorage.getItem("SU_LANG")==="en"?"en-US":"ar-EG";
+  const fmt=n=>Math.round(+n||0).toLocaleString(LOC());
+  const kfmt=n=>{const a=Math.abs(n);return a>=1e6?(n/1e6).toFixed(1)+"M":a>=1e3?(n/1e3).toFixed(a>=1e5?0:1)+"K":String(Math.round(n))};
+  const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const norm=d=>String(d==null?"":d).replace(/\//g,"-").slice(0,10);
+  const isAdmin=()=>{try{return!!currentUser&&(window._realRole||currentUser.role)==="admin"}catch(e){return false}};
+  const dxOf=c=>String(c&&c.diagnosis||"").trim()||"غير محدد";
+  const brName=id=>{const b=(state.branches||[]).find(x=>String(x.branch_id||x.id)===String(id));return b?(b.branch_name||b.name||id):(id||"غير محدد")};
+  const ST={Active:"نشط",Stopped:"متوقف",Completed:"أنهى",Paused:"موقوف مؤقتاً","Not Started":"لم يبدأ",Inactive:"غير نشط"};
+  function sessBranch(s,cm){try{if(typeof dashSessBranch==="function")return dashSessBranch(s)}catch(e){}return s.branch||(cm[s.clientId]||{}).branch||""}
+  function compute(){
+    const cm={};(state.clients||[]).forEach(c=>{cm[c.id]=c});
+    const bOk=b=>{try{if(!matchBranch(b))return false}catch(e){}return!AN.br.length||AN.br.includes(String(b||""))};
+    const dOk=d=>{if(!/^\d{4}-\d{2}/.test(d))return false;if(AN.y&&d.slice(0,4)!==AN.y)return false;const mo=+d.slice(5,7);if(AN.q.length&&!AN.q.includes(Math.ceil(mo/3)))return false;if(AN.m.length&&!AN.m.includes(mo))return false;return true};
+    const dxOk=id=>!AN.dx.length||(cm[id]&&AN.dx.includes(dxOf(cm[id])));
+    const clients=(state.clients||[]).filter(c=>bOk(c.branch)&&(!AN.dx.length||AN.dx.includes(dxOf(c))));
+    const pays=[],buys=[],sess=[];
+    (state.payments||[]).forEach(p=>{const d=norm(p.date);if(bOk(p.branch)&&dOk(d)&&dxOk(p.clientId))pays.push({d,b:String(p.branch||""),c:p.clientId,v:Number(p.amount)||0})});
+    (state.purchases||[]).forEach(p=>{const d=norm(p.purchase_date),b=p.branch||p.branch_id||"";if(bOk(b)&&dOk(d))buys.push({d,b:String(b),v:(Number(p.quantity)||1)*(Number(p.unit_price)||0)})});
+    (state.sessions||[]).forEach(s=>{const d=norm(s.date),b=sessBranch(s,cm);if(bOk(b)&&dOk(d)&&dxOk(s.clientId))sess.push({d,b:String(b),st:s.status||"SCHEDULED"})});
+    return{cm,clients,pays,buys,sess}}
+  const sum=a=>a.reduce((x,r)=>x+r.v,0);
+  // ---------- رسوم SVG ----------
+  function lineChart(labels,series){if(!labels.length)return'<div class="an-empty">مفيش بيانات في الفترة دي</div>';
+    const W=420,H=210,L=44,R=8,T=12,B=34,all=series.flatMap(s=>s.v),mx=Math.max(0,...all),mn=Math.min(0,...all),rg=(mx-mn)||1;
+    const x=i=>L+(labels.length===1?(W-L-R)/2:i*(W-L-R)/(labels.length-1)),y=v=>T+(mx-v)/rg*(H-T-B);
+    let g="";for(let k=0;k<=4;k++){const v=mn+rg*k/4,yy=y(v);g+=`<line x1="${L}" x2="${W-R}" y1="${yy}" y2="${yy}" stroke="#eee" stroke-dasharray="3 3"/><text x="${L-6}" y="${yy+3}" font-size="12" fill="#9a96ad" text-anchor="end">${kfmt(v)}</text>`}
+    if(mn<0)g+=`<line x1="${L}" x2="${W-R}" y1="${y(0)}" y2="${y(0)}" stroke="#c9c5d6"/>`;
+    const step=Math.ceil(labels.length/6);labels.forEach((l,i)=>{if(i%step===0||i===labels.length-1)g+=`<text x="${x(i)}" y="${H-12}" font-size="12" fill="#6b6880" text-anchor="middle">${esc(l)}</text>`});
+    series.forEach(s=>{const pts=s.v.map((v,i)=>x(i)+","+y(v)).join(" ");if(s.area)g+=`<polygon points="${x(0)},${y(Math.max(mn,0))} ${pts} ${x(s.v.length-1)},${y(Math.max(mn,0))}" fill="${s.c}" opacity=".10"/>`;
+      g+=`<polyline points="${pts}" fill="none" stroke="${s.c}" stroke-width="${s.w||2}" stroke-linejoin="round" stroke-linecap="round"/>`+s.v.map((v,i)=>`<circle cx="${x(i)}" cy="${y(v)}" r="${s.w>2?3.2:2.2}" fill="${s.c}"><title>${esc(s.n)} — ${esc(labels[i])}: ${fmt(v)}</title></circle>`).join("")});
+    return`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="الربح حسب الشهر">${g}</svg><div class="an-leg">${series.map(s=>`<span style="--c:${s.c}">${esc(s.n)}</span>`).join("")}</div>`}
+  function donut(items){const tot=items.reduce((a,b)=>a+b.v,0);if(!tot)return'<div class="an-empty">مفيش بيانات</div>';
+    const C=2*Math.PI*42;let off=0,arcs="";items.forEach(it=>{const len=it.v/tot*C;arcs+=`<circle cx="60" cy="60" r="42" fill="none" stroke="${it.c}" stroke-width="20" stroke-dasharray="${len} ${C-len}" stroke-dashoffset="${-off}" transform="rotate(-90 60 60)"><title>${esc(it.l)}: ${it.v}</title></circle>`;off+=len});
+    return`<div style="display:flex;align-items:center;gap:10px"><svg viewBox="0 0 120 120" style="max-width:150px">${arcs}<text x="60" y="64" font-size="15" font-weight="900" text-anchor="middle" fill="#1f1b2e">${fmt(tot)}</text></svg><div class="an-leg" style="flex-direction:column;gap:4px">${items.map(it=>`<span style="--c:${it.c}">${esc(it.l)} — ${fmt(it.v)} (${fmt(it.v/tot*100)}٪)</span>`).join("")}</div></div>`}
+  function bars(items,color){if(!items.length)return'<div class="an-empty">مفيش بيانات</div>';const mx=Math.max(...items.map(i=>i.v))||1;
+    return items.map(i=>`<div class="an-bar" title="${esc(i.l)}: ${i.v}"><span style="overflow:hidden;text-overflow:ellipsis">${esc(i.l)}</span><u style="width:${Math.max(2,i.v/mx*100)}%;--c:${i.c||color}"></u><em>${fmt(i.v)}</em></div>`).join("")}
+  // ---------- الأجزاء ----------
+  function chip(kind,val,label,on){return`<button type="button" class="an-chip${on?" on":""}" onclick="suAnSet('${kind}','${esc(String(val)).replace(/'/g,"\\'")}')">${esc(label)}</button>`}
+  function filters(){
+    const years=new Set();(state.payments||[]).forEach(p=>years.add(norm(p.date).slice(0,4)));(state.sessions||[]).forEach(s=>years.add(norm(s.date).slice(0,4)));(state.purchases||[]).forEach(p=>years.add(norm(p.purchase_date).slice(0,4)));
+    const ys=[...years].filter(y=>/^\d{4}$/.test(y)).sort();
+    const brs=[...new Set((state.clients||[]).map(c=>String(c.branch||"")).concat((state.branches||[]).map(b=>String(b.branch_id||b.id||""))))].filter(b=>{try{return matchBranch(b)}catch(e){return true}});
+    const dxs=[...new Set((state.clients||[]).map(dxOf))].sort((a,b)=>a.localeCompare(b,"ar"));
+    const mOpts=MN.map((n,i)=>i+1).filter(m=>!AN.q.length||AN.q.includes(Math.ceil(m/3)));
+    return`<div class="an-filt">
+      <div class="an-fg"><b>📅 السنة</b><div class="an-chips">${chip("y","","الكل",!AN.y)}${ys.map(y=>chip("y",y,y,AN.y===y)).join("")}</div></div>
+      <div class="an-fg"><b>🗓️ الربع</b><div class="an-chips">${[1,2,3,4].map(q=>chip("q",q,"ربع "+q,AN.q.includes(q))).join("")}</div></div>
+      <div class="an-fg"><b>📆 الشهر</b><div class="an-chips">${mOpts.map(m=>chip("m",m,MN[m-1],AN.m.includes(m))).join("")}</div></div>
+      <div class="an-fg"><b>📍 الفرع</b><div class="an-chips">${brs.map(b=>chip("br",b,brName(b),AN.br.includes(b))).join("")}</div></div>
+      <div class="an-fg"><b>🩺 التشخيص</b><div class="an-chips">${dxs.map(d=>chip("dx",d,d,AN.dx.includes(d))).join("")}</div></div>
+      ${(AN.y||AN.q.length||AN.m.length||AN.br.length||AN.dx.length)?'<button type="button" class="an-x" onclick="suAnSet(\'reset\')">✕ مسح الفلاتر</button>':""}
+    </div>`}
+  function monthsSeries(D){let keys;
+    if(AN.y)keys=MN.map((n,i)=>AN.y+"-"+String(i+1).padStart(2,"0")).filter(k=>{const mo=+k.slice(5);return(!AN.q.length||AN.q.includes(Math.ceil(mo/3)))&&(!AN.m.length||AN.m.includes(mo))});
+    else{const s=new Set();D.pays.concat(D.buys).forEach(r=>s.add(r.d.slice(0,7)));keys=[...s].sort().slice(-12)}
+    const inc={},out={};D.pays.forEach(r=>{const k=r.d.slice(0,7);inc[k]=(inc[k]||0)+r.v});D.buys.forEach(r=>{const k=r.d.slice(0,7);out[k]=(out[k]||0)+r.v});
+    const oneYear=AN.y||new Set(keys.map(k=>k.slice(0,4))).size<=1;const lab=keys.map(k=>MN[+k.slice(5,7)-1]+(oneYear?"":" "+k.slice(2,4)));
+    return lineChart(lab,[{n:"الإيراد",c:"#10b981",v:keys.map(k=>inc[k]||0)},{n:"المصروفات",c:"#f59e0b",v:keys.map(k=>out[k]||0)},{n:"الربح",c:"var(--an-p)",w:3,area:true,v:keys.map(k=>(inc[k]||0)-(out[k]||0))}])}
+  function ageDonut(D){const t=typeof todayCairo==="function"?todayCairo():new Date().toISOString().slice(0,10);const G=[["أقل من 3",0,3,"#a78bfa"],["3–5",3,6,"#7c3aed"],["6–8",6,9,"#f59e0b"],["9–12",9,13,"#ea580c"],["13+",13,200,"#e11d48"]];const n=G.map(()=>0);let unk=0;
+    D.clients.forEach(c=>{const b=norm(c.dob);if(!/^\d{4}-\d{2}-\d{2}$/.test(b)){unk++;return}let a=+t.slice(0,4)-+b.slice(0,4);if(t.slice(5)<b.slice(5))a--;const i=G.findIndex(g=>a>=g[1]&&a<g[2]);if(i>=0)n[i]++;else unk++});
+    const it=G.map((g,i)=>({l:g[0]+" سنين",v:n[i],c:g[3]})).filter(x=>x.v);if(unk)it.push({l:"من غير تاريخ ميلاد",v:unk,c:"#cbd5e1"});return donut(it)}
+  function statusBars(D){const m={};D.clients.forEach(c=>{const k=ST[c.status]||c.status||"غير محدد";m[k]=(m[k]||0)+1});return bars(Object.keys(m).map(k=>({l:k,v:m[k]})).sort((a,b)=>b.v-a.v),"var(--an-o)")}
+  function funnel(D){const c={ATT:0,SDE:0,EXC:0,TCA:0,SCHEDULED:0,CAN:0};D.sess.forEach(s=>{c[s.st]=(c[s.st]||0)+1});const tot=D.sess.length-c.CAN;
+    const rows=[["إجمالي الجلسات",tot,"#1f1b2e"],["حضر",c.ATT,"#10b981"],["غياب بدون عذر",c.SDE,"#f59e0b"],["غياب بعذر",c.EXC,"#eab308"],["إلغاء من المركز",c.TCA,"#94a3b8"],["محجوزة",c.SCHEDULED,"#38bdf8"],["ملغية (مش محسوبة)",c.CAN,"#e2e8f0"]].filter(r=>r[1]||r[0]==="إجمالي الجلسات");
+    const mx=Math.max(1,...rows.map(r=>r[1]));return`<div class="an-fun">${rows.map(r=>`<div><span>${r[0]}</span><u style="width:${Math.max(8,r[1]/mx*100)}%;--c:${r[2]};${r[2]==="#e2e8f0"?"color:#475569":""}">${fmt(r[1])}</u></div>`).join("")}</div>`}
+  function areaBars(D){const fn=window.RV&&RV.fns&&RV.fns.area;if(!fn)return'<div class="an-empty">—</div>';const m={};D.clients.forEach(c=>{const a=fn(c);(m[a.k]=m[a.k]||{l:a.l,v:0}).v++});return bars(Object.values(m).sort((a,b)=>b.v-a.v).slice(0,8),"var(--an-p)")}
+  function branchTable(D){const T={};const add=(r,f)=>{const b=r.b||"",y=r.d.slice(0,4),m=r.d.slice(0,7);const B=T[b]=T[b]||{i:0,o:0,Y:{}};const Y=B.Y[y]=B.Y[y]||{i:0,o:0,M:{}};const M=Y.M[m]=Y.M[m]||{i:0,o:0};B[f]+=r.v;Y[f]+=r.v;M[f]+=r.v};
+    D.pays.forEach(r=>add(r,"i"));D.buys.forEach(r=>add(r,"o"));const bs=Object.keys(T).sort();if(!bs.length)return'<div class="an-empty">مفيش بيانات في الفترة دي</div>';
+    const cell=(o)=>`<td class="n">${fmt(o.o)}</td><td class="n">${fmt(o.i)}</td><td class="n ${o.i-o.o<0?"neg":""}">${fmt(o.i-o.o)}</td>`;let h="",ti=0,to=0;
+    bs.forEach(b=>{const B=T[b];ti+=B.i;to+=B.o;const kb="b:"+b,ob=AN.open[kb];h+=`<tr class="l0" onclick="suAnSet('open','${esc(kb).replace(/'/g,"\\'")}')"><td>${ob?"⊟":"⊞"} ${esc(brName(b))}</td>${cell(B)}</tr>`;
+      if(ob)Object.keys(B.Y).sort().forEach(y=>{const Y=B.Y[y],ky=kb+"|"+y,oy=AN.open[ky];h+=`<tr class="l1" onclick="suAnSet('open','${esc(ky).replace(/'/g,"\\'")}')"><td>${oy?"⊟":"⊞"} ${y}</td>${cell(Y)}</tr>`;
+        if(oy)Object.keys(Y.M).sort().forEach(m=>{h+=`<tr class="l2"><td>${MN[+m.slice(5,7)-1]}</td>${cell(Y.M[m])}</tr>`})})});
+    return`<div class="an-tw"><table><thead><tr><th>الفرع ← السنة ← الشهر</th><th class="n">المصروفات</th><th class="n">الإيراد</th><th class="n">الربح</th></tr></thead><tbody>${h}<tr class="tot"><td>الإجمالي</td>${cell({i:ti,o:to})}</tr></tbody></table></div>`}
+  function kpis(D){const inc=sum(D.pays),out=sum(D.buys),pr=inc-out,payers=new Set(D.pays.map(r=>r.c).filter(Boolean)).size;
+    const c={ATT:0,SDE:0,EXC:0,TCA:0,CAN:0};D.sess.forEach(s=>{c[s.st]=(c[s.st]||0)+1});const base=c.ATT+c.SDE+c.EXC+c.TCA,act=D.clients.filter(x=>x.status==="Active").length;
+    const k=(ic,t,v,s,neg)=>`<div class="an-k${neg?" neg":""}"><i>${ic} ${t}</i><strong>${v}</strong>${s?`<small>${s}</small>`:""}</div>`;
+    return`<div class="an-kpis">${k("💰","الإيراد",fmt(inc),"ج.م — من المدفوعات")}${k("🛒","المصروفات",fmt(out),"ج.م — من المشتريات")}${k(pr<0?"📉":"📈","الربح",fmt(pr),inc?"هامش "+fmt(pr/inc*100)+"٪":"ج.م",pr<0)}${k("👤","متوسط الإيراد لكل عميل",payers?fmt(inc/payers):"0",fmt(payers)+" عميل دفع")}
+      ${k("👥","إجمالي العملاء",fmt(D.clients.length),"نشط: "+fmt(act))}${k("📅","إجمالي الجلسات",fmt(D.sess.length-c.CAN),c.CAN?"+ "+fmt(c.CAN)+" ملغية":"")}${k("✅","نسبة الحضور",base?fmt(c.ATT/base*100)+"٪":"—",base?"من "+fmt(base)+" جلسة اتسجلت":"")}${k("❌","نسبة الغياب بعذر",base?fmt(c.EXC/base*100)+"٪":"—","")}</div>`}
+  function render(){const tab=document.getElementById("tab-dashboard");if(!tab)return;let el=document.getElementById("suAn");
+    if(!isAdmin()){if(el)el.remove();return}
+    if(tab.classList.contains("hidden")){AN.dirty=true;return}
+    AN.dirty=false;if(!el){el=document.createElement("section");el.id="suAn";tab.insertBefore(el,tab.firstChild)}
+    let hidden=false;try{hidden=localStorage.getItem("SU_AN_HIDE")==="1"}catch(e){}
+    const head=`<div class="an-head"><div><div class="an-title">📊 لوحة التحليلات</div><div class="an-sub">${hidden?"مقفولة — دوس «إظهار» تفتحها":"الإيراد والمصروفات والربح والجلسات والعملاء — دوس على أي فلتر"}</div></div><button type="button" class="an-x" onclick="suAnSet('hide')">${hidden?"👁️ إظهار":"🙈 إخفاء"}</button></div>`;
+    if(hidden){el.innerHTML=head;return}
+    const D=compute();
+    el.innerHTML=head+`<div class="an-body">${filters()}<div class="an-main">${kpis(D)}
+      <div class="an-grid g3"><div class="an-card"><h4>📈 الإيراد والمصروفات والربح حسب الشهر</h4>${monthsSeries(D)}</div><div class="an-card"><h4>👥 حالة العملاء</h4>${statusBars(D)}</div><div class="an-card"><h4>🎂 العملاء حسب السن</h4>${ageDonut(D)}</div></div>
+      <div class="an-grid"><div class="an-card"><h4>📋 حالات الجلسات</h4>${funnel(D)}</div><div class="an-card"><h4>🏢 الفروع — الإيراد والمصروفات والربح</h4>${branchTable(D)}</div></div>
+      <div class="an-grid"><div class="an-card"><h4>📍 العملاء حسب المنطقة (من العنوان)</h4>${areaBars(D)}</div><div class="an-card"><h4>💳 أكتر العملاء دفعًا (ج.م)</h4>${bars((()=>{const m={};D.pays.forEach(r=>{if(r.c)m[r.c]=(m[r.c]||0)+r.v});return Object.keys(m).map(k=>({l:(D.cm[k]||{}).name||k,v:m[k]})).sort((a,b)=>b.v-a.v).slice(0,8)})(),"#10b981")}</div></div>
+    </div></div>`}
+  window.suAnRender=render;
+  window.suAnSet=function(kind,val){
+    if(kind==="reset"){AN.y="";AN.q=[];AN.m=[];AN.br=[];AN.dx=[]}
+    else if(kind==="hide"){try{const h=localStorage.getItem("SU_AN_HIDE")==="1";localStorage.setItem("SU_AN_HIDE",h?"0":"1")}catch(e){}}
+    else if(kind==="open"){AN.open[val]=!AN.open[val]}
+    else if(kind==="y"){AN.y=AN.y===val?"":val}
+    else{const v=(kind==="q"||kind==="m")?+val:val,a=AN[kind],i=a.indexOf(v);if(i>=0)a.splice(i,1);else a.push(v);if(kind==="q")AN.m=AN.m.filter(m=>!AN.q.length||AN.q.includes(Math.ceil(m/3)))}
+    render()};
+  if(typeof renderDashboard==="function"){const _rd=renderDashboard;renderDashboard=function(){const r=_rd.apply(this,arguments);try{render()}catch(e){suLog("su-analytics",e)}return r}}
+  const _sw=window.switchTab;window.switchTab=function(id){const r=_sw.apply(this,arguments);try{if(id==="dashboard"&&AN.dirty)render()}catch(e){suLog("su-analytics tab",e)}return r};
+  try{render()}catch(e){}
+})();
+</script>
 </body>
 </html>
