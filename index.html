@@ -4253,7 +4253,13 @@ html[data-su-motion="fast"]{--su-mo:.18s}
 .su-an.an-card-filled .an-k{background:color-mix(in srgb,var(--an-kc,var(--an-p)) 10%,#fff);border-color:transparent}
 .su-an.an-card-filled .an-card{background:#fbfaff}
 .su-an.an-ks-s .an-k strong{font-size:17px}.su-an.an-ks-l .an-k strong{font-size:28px}
-#tab-dashboard.an-only>:not(#suAn){display:none!important}
+/* صفحة واحدة: الترحيب وبانر «إليك نظرة سريعة» (موبايل/تابلت) فوق خالص زي ما كانوا، وبعدهم اللوحة؛ الكروت الصغيرة اللي في البانر القديم اتشالت لأن كروت اللوحة بتغطيها */
+#tab-dashboard.an-only>:not(#suAn):not(#suMDash){display:none!important}
+#tab-dashboard.an-only #suMDash>:not(.md-top):not(.md-hero){display:none!important}
+#tab-dashboard.an-only>#suAn{order:2}
+/* الموبايل: الفلاتر ورا زرار «🎚️ الفلاتر» علشان الأرقام تبان على طول */
+.su-an .an-fbtn-m{display:none}
+@media (max-width:760px){.su-an .an-fbtn-m{display:inline-flex}.su-an:not(.an-fopen) .an-filt{display:none!important}}
 /* تفاعل */
 .su-an .an-click{cursor:pointer}
 .su-an .an-bar.an-click:hover u,.su-an .an-stk:hover b{filter:brightness(1.08) saturate(1.15)}
@@ -4515,19 +4521,20 @@ html.su-dark .su-an .an-filt,html.su-dark .su-an tr.l0 td{background:#222}</styl
       return`<div class="an-card an-s-${v.size||V.size}"><h4>${V.ic} ${esc(v.title||V.t)}</h4>${body}</div>`}).join("");
     return`${ks?`<div class="an-kpis" style="--an-kcols:${C.kpiCols}">${ks}</div>`:""}${vs?`<div class="an-grid6">${vs}</div>`:""}`}
   function panelHTML(C,D,preview){let hidden=false;try{hidden=!preview&&localStorage.getItem("SU_AN_HIDE")==="1"}catch(e){}
-    const head=`<div class="an-head"><div><div class="an-title">${esc(C.title||"📊 لوحة التحليلات")}</div><div class="an-sub">${esc(hidden?"مقفولة — دوس «إظهار» تفتحها":(C.sub||"الإيراد والمصروفات والربح والجلسات والعملاء — دوس على أي فلتر"))}</div></div>${preview?"":`<button type="button" class="an-x" onclick="suAnSet('hide')">${hidden?"👁️ إظهار":"🙈 إخفاء"}</button>`}</div>`;
+    const head=`<div class="an-head"><div><div class="an-title">${esc(C.title||"📊 لوحة التحليلات")}</div><div class="an-sub">${esc(hidden?"مقفولة — دوس «إظهار» تفتحها":(C.sub||"الإيراد والمصروفات والربح والجلسات والعملاء — دوس على أي فلتر"))}</div></div>${preview?"":`<div style="display:flex;gap:6px">${hidden?"":`<button type="button" class="an-x an-fbtn-m" onclick="suAnSet('fopen')">🎚️ الفلاتر${(AN.y?1:0)+AN.q.length+AN.m.length+FK.reduce((a,k)=>a+AN[k].length,0)?" ("+fmt((AN.y?1:0)+AN.q.length+AN.m.length+FK.reduce((a,k)=>a+AN[k].length,0))+")":""}</button>`}<button type="button" class="an-x" onclick="suAnSet('hide')">${hidden?"👁️ إظهار":"🙈 إخفاء"}</button></div>`}</div>`;
     if(hidden)return head;const f=filters(C);
     const LBL={br:brName,dx:x=>x,st:x=>"الحالة: "+(ST[x]||x||"غير محدد"),age:x=>"السن: "+x,area:x=>"المنطقة: "+x,sst:x=>"الجلسات: "+(SSL[x]||x),th:x=>"الأخصائي: "+staffName(x),cat:x=>"البند: "+x};
     const act=[];if(AN.y)act.push(chip("y",AN.y,"📅 "+AN.y+" ✕",true));AN.q.forEach(q=>act.push(chip("q",q,"ربع "+q+" ✕",true)));AN.m.forEach(m=>act.push(chip("m",m,MN[m-1]+" ✕",true)));
     FK.forEach(k=>AN[k].forEach(v=>act.push(chip(k,v,LBL[k](v)+" ✕",true))));
     const bar=act.length?`<div class="an-active"><span>🔎 الفلاتر الشغالة:</span>${act.join("")}<button type="button" class="an-x" onclick="suAnSet('reset')">مسح الكل</button></div>`:`<div class="an-active an-hint">💡 دوس على أي عمود أو جزء في الرسوم يفلتر الصفحة كلها، ودوس على أي كارت يفتح صفحته.</div>`;
     return head+bar+`<div class="an-body${C.filtPos==="top"||!f?" an-top":""}">${f}<div class="an-main">${board(C,D)}</div></div>`}
-  function style(el,C){el.className="su-an an-card-"+C.card+" an-ks-"+C.kpiSize;if(C.accent)el.style.setProperty("--an-p",C.accent);else el.style.removeProperty("--an-p")}
+  function style(el,C){el.className="su-an an-card-"+C.card+" an-ks-"+C.kpiSize+(AN.fopen?" an-fopen":"");if(C.accent)el.style.setProperty("--an-p",C.accent);else el.style.removeProperty("--an-p")}
   function render(){const tab=document.getElementById("tab-dashboard");if(!tab)return;let el=document.getElementById("suAn");
     if(!isAdmin()){if(el)el.remove();tab.classList.remove("an-only");return}
     if(tab.classList.contains("hidden")){AN.dirty=true;return}
     AN.dirty=false;const C=cfg();if(AN.y===null)AN.y=C.defYear==="current"?(typeof todayCairo==="function"?todayCairo():new Date().toISOString()).slice(0,4):"";
     if(!el){el=document.createElement("section");el.id="suAn";tab.insertBefore(el,tab.firstChild)}
+    const md=document.getElementById("suMDash");if(md&&md.parentElement===tab&&md.nextElementSibling!==el)tab.insertBefore(el,md.nextSibling);
     tab.classList.toggle("an-only",C.hideOld);style(el,C);el.innerHTML=panelHTML(C,compute(),false)}
   function renderPreview(){const pv=document.getElementById("suAnPreview");if(!pv||!isAdmin())return;const C=cfg();if(AN.y===null)AN.y="";style(pv,C);pv.innerHTML=panelHTML(C,compute(),true)}
   window.suAnRender=render;
@@ -4536,6 +4543,7 @@ html.su-dark .su-an .an-filt,html.su-dark .su-an tr.l0 td{background:#222}</styl
     else if(kind==="ym"){const y=val.slice(0,4),mo=+val.slice(5,7);if(AN.y===y&&AN.m.length===1&&AN.m[0]===mo){AN.m=[]}else{AN.y=y;AN.q=[];AN.m=[mo]}}
     else if(kind==="drill"){AN.drill=val||null}
     else if(kind==="pbi"){AN.pbiOn=!AN.pbiOn}
+    else if(kind==="fopen"){AN.fopen=!AN.fopen}
     else if(kind==="hide"){try{const h=localStorage.getItem("SU_AN_HIDE")==="1";localStorage.setItem("SU_AN_HIDE",h?"0":"1")}catch(e){}}
     else if(kind==="open"){AN.open[val]=!AN.open[val]}
     else if(kind==="y"){AN.y=AN.y===val?"":val}
