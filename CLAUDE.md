@@ -6,22 +6,23 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Speak Up: management PWA for a speech-therapy center (clients, sessions, payments, purchases, staff, branches, calendar, therapist dashboards, a parent portal). UI language is Egyptian Arabic, RTL by default (`<html lang="ar" dir="rtl">`); English is toggled at runtime via `localStorage.SU_LANG`. Code comments are also mostly in Arabic.
 
-There is **no build system or package manager**. It is a static site: open `index.html` through any static server (e.g. `python3 -m http.server`) — a server is needed for the service worker. Tailwind (`cdn.tailwindcss.com/3.4.17`) and `@supabase/supabase-js@2.78.0` (UMD) are loaded from CDNs.
+There is **no build system or package manager**. It is a static site: open `index.html` through any static server (e.g. `python3 -m http.server`) — a server is needed for the service worker. `@supabase/supabase-js@2.78.0` (UMD) is loaded from a CDN. Tailwind 3.4.17 is prebuilt into `assets/tailwind.css` (linked at the end of `<head>`, where the old play CDN injected its styles): after adding or changing Tailwind classes in `index.html`, rebuild it with `npx tailwindcss@3.4.17 -c tools/tailwind/tailwind.config.js -i tools/tailwind/input.css -o assets/tailwind.css --minify`. CI fails when the file is stale, and `tests/static-checks.mjs` fails if the CDN script comes back. Classes built at runtime from string pieces aren't seen by the scan, so add those to `safelist` in the config.
 
 ## Checks (`tests/`, no dependencies except Playwright for the smoke test; Node 22+)
 
 - `node tests/static-checks.mjs`: compiles every inline `<script>` in `index.html`, checks the `suSplash`/`</html>` markers the service worker needs, flags duplicate block ids, syntax-checks `supabase/functions/*/index.ts`, and fails on data files (`.sql`/`.csv`/`.xlsx`… outside `supabase/migrations/`) or any tracked text file with more than 10 distinct Egyptian mobile numbers (the repo is public).
 - `node tests/merge.test.mjs`: sync merge cases, run against `canon`/`cloudMerge*` and the notebooks patch extracted from `index.html` itself. Add a case here when you touch the merge.
 - `node tests/smoke.mjs`: serves the repo, opens `index.html` in Chromium at phone and desktop widths, and fails on any page error. The CDNs and Supabase may be unreachable from a sandbox; the page should still load cleanly.
-- `.github/workflows/checks.yml` runs all three on every push to `main` (including web uploads) and on pull requests.
+- `node tests/billing.test.mjs`: opens `index.html` in Chromium (same local server as the smoke test, `tests/serve.mjs`) and checks `calculateSessionFee`/`calculateClientInvoice` against the billing rules (status prices, next-month credit, cancelled sessions, estimates, rescheduling). Update its cases when a billing rule changes on purpose.
+- `.github/workflows/checks.yml` runs all four on every push to `main` (including web uploads) and on pull requests.
 
 ## Files that matter
 
-- `index.html` (~1.6 MB, ~2.9k lines) — the entire app: all CSS, HTML and JS inline. Some lines are hundreds of KB (line ~2612 holds the core app logic; base64 images live in others), so **never read the file whole** — use `grep -n`/`grep -o` with a narrow pattern and `cut -c` to slice lines, and make edits with exact unique strings.
+- `index.html` (~1.5 MB, ~3k lines) — the entire app: all CSS, HTML and JS inline. Some lines are hundreds of KB (line ~2612 holds the core app logic; base64 images live in others), so **never read the file whole** — use `grep -n`/`grep -o` with a narrow pattern and `cut -c` to slice lines, and make edits with exact unique strings.
 - `service-worker.js` — cache-first app shell + CDN libs, background refresh of `index.html` that posts `SU_UPDATE_AVAILABLE` to the page when it changed. It refuses to cache a fetched shell lacking `suSplash` or `</html>`, so keep both in `index.html`. Supabase hosts are never cached. Bump `VERSION` when changing cached-asset behavior; the `importScripts('push-sw.js?v=N')` query string must be bumped when `push-sw.js` changes.
 - `push-sw.js` — Web Push display + notification click handling.
 - `supabase/functions/admin-users/index.ts` — Deno edge function (admin-only create/update/delete of auth users; verifies caller's `profiles.role === 'admin'` with the service-role key). Deploy with `supabase functions deploy admin-users`. `parent-data` (the parent portal's only data source), `push-notify` and `push-reminders` are also in `supabase/functions/`. The app also invokes a `portrait-ai` function whose source is not in this repo.
-- `manifest.json`, `icons/`, `assets/` (logos, backgrounds, `assets/act/*.jpg` activity images).
+- `manifest.json`, `icons/`, `assets/` (logos, backgrounds, `assets/act/*.jpg` activity images). `assets/brand/` holds the built-in logos and the payment QR that used to be base64 inside `index.html` (`window.SU_*_LOGO`, `SU_NAV_MASCOT`, `PP_PAY_QR` point at them with absolute URLs so printed/PDF invoices still resolve them); they are in the service worker's `SHELL` list, so add any new built-in image there too.
 - Not part of the running app: the brand-board PNG. (Old snapshots — `index_مرحلة4.html` and the phase `.zip` archives — were removed; they are still in git history.)
 
 ## index.html architecture
