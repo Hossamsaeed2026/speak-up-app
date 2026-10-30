@@ -1,1 +1,5 @@
 node_modules/
+# ملفات النسخ الاحتياطية بتاعة التطبيق (فيها بيانات العملاء) — ماتترفعش أبداً على GitHub (الريبو عام)
+SpeakUp-Data*.sql
+SpeakUp-Backup-*.sql
+*.backup.sql
