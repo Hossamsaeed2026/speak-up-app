@@ -4097,7 +4097,7 @@ html body #sideNav .side-tab.hidden,html body #sideNav .side-tab.su-perm-hid{dis
     const ms=Math.max(2500,(c&&+c.min||0)*1000);const close=()=>{s.classList.add("out");setTimeout(()=>s.remove(),700)};s.addEventListener("click",close);setTimeout(close,ms)};
   window.suSplashReset=function(){if(!state.settings.look)return;Object.keys(state.settings.look).filter(k=>/^sp[A-Z]/.test(k)).forEach(k=>delete state.settings.look[k]);apply();paint();saveState();showToast("✅ شاشة البداية رجعت للأصل","green")};
   let tm=0;
-  window.suLookSet=function(k,v){if(!state.settings.look)state.settings.look={};if(v===""||v==null)delete state.settings.look[k];else state.settings.look[k]=v;apply();paint();clearTimeout(tm);tm=setTimeout(()=>{try{saveState()}catch(e){suLog("su-look save",e)}},500)};
+  window.suLookSet=function(k,v){if(!state.settings.look)state.settings.look={};if(v===""||v==null)delete state.settings.look[k];else state.settings.look[k]=v;apply();paint();try{window.suMotionApply&&suMotionApply()}catch(e){}clearTimeout(tm);tm=setTimeout(()=>{try{saveState()}catch(e){suLog("su-look save",e)}},500)};
   // قيم التطبيق/السيستم المتغطّي عليها مابقتش بتتطبق (القيم نفسها فاضلة في الداتا)
   const DEAD=["logoStyle","logoHeight","logoUrl","headerColor","fontScale","zebra","width"];
   if(typeof applySurfaceSettings==="function"){const _as=applySurfaceSettings;applySurfaceSettings=function(){const st=state&&state.settings;if(!st)return _as.apply(this,arguments);const a=st.app,y=st.sys;const strip=o=>{if(!o)return o;const c=Object.assign({},o);DEAD.forEach(k=>delete c[k]);return c};st.app=strip(a);st.sys=strip(y);try{return _as.apply(this,arguments)}finally{st.app=a;st.sys=y}}}
@@ -4121,6 +4121,7 @@ html body #sideNav .side-tab.hidden,html body #sideNav .side-tab.su-perm-hid{dis
      +'<div class="lk-row"><span class="lk-lbl">📏 حجم لوجو البار العلوي — موبايل/تابلت</span><input type="range" min="24" max="64" data-k="logoM" class="w-48"><span class="lk-v" data-v="logoM"></span><button type="button" class="lk-x" onclick="suLookSet(\'logoD\',\'\');suLookSet(\'logoM\',\'\')">↺ 44px</button></div>'
      +'<div class="lk-row"><span class="lk-lbl">🖌️ لون خلفية الصفحات</span><input type="color" data-k="pageBg" class="w-12 h-9 rounded cursor-pointer border"><button type="button" class="lk-x" onclick="suLookSet(\'pageBg\',\'\')">✕ الافتراضي</button></div>'
      +'<div class="lk-row"><span class="lk-lbl">🔤 لون كلام القائمة الجانبية</span><input type="color" data-k="sideText" class="w-12 h-9 rounded cursor-pointer border"><button type="button" class="lk-x" onclick="suLookSet(\'sideText\',\'\')">✕ تلقائي</button><span class="lk-x">لون خلفية القائمة نفسها من «ألوان الشريطين» تحت</span></div>'
+     +'<div class="lk-row"><span class="lk-lbl">✨ حركة التنقل بين الصفحات</span>'+chips("motion",[["","ناعمة"],["fast","سريعة"],["off","من غير حركة"]])+'</div>'
      +'<div class="lk-row"><span class="lk-lbl">⬜ استدارة الكروت والمربعات</span>'+OPT.map(o=>'<button type="button" class="lk-chip" data-r="'+o[0]+'" onclick="suLookSet(\'radius\',\''+o[0]+'\')">'+o[1]+'</button>').join("")+'</div>'
      +'<h3 class="font-extrabold text-slate-900 text-sm border-b pb-3 pt-3">🔑 شاشة الدخول</h3>'
      +crow("loginBg","لون الخلفية")+crow("loginBtn","لون زرار الدخول")
@@ -4171,6 +4172,52 @@ html body #sideNav .side-tab.hidden,html body #sideNav .side-tab.su-perm-hid{dis
   switchSettingsSubTab=function(t){const r=_ss.apply(this,arguments);try{hideDups();if(t==="theme"){box();paint()}}catch(e){suLog("su-look tab",e)}return r};
   try{hideDups()}catch(e){}
   apply();
+})();
+</script>
+<style id="su-motion-css">/* حركة ناعمة بين الصفحات والنوافذ — من «🎨 المظهر ← حركة التنقل»: ناعمة (الأصلي) / سريعة / من غير حركة */
+html{--su-mo:.34s}
+html[data-su-motion="fast"]{--su-mo:.18s}
+@media (prefers-reduced-motion:no-preference){
+  html:not([data-su-motion="off"]) .su-pg-in{animation:suPgIn var(--su-mo) cubic-bezier(.2,.8,.2,1) both}
+  html:not([data-su-motion="off"]) .su-pg-fade{animation:suPgFade var(--su-mo) ease-out both}
+  html:not([data-su-motion="off"]) .su-md-in{animation:suPgFade calc(var(--su-mo)*.8) ease-out both}
+  html:not([data-su-motion="off"]) .su-md-in>:first-child{animation:suMdPop var(--su-mo) cubic-bezier(.2,.9,.3,1.15) both}
+  /* إحساس بالضغط على الأزرار الكبيرة */
+  html:not([data-su-motion="off"]) :is(.pph-tile,.th-gate,.pp-bar button,#mNav button,.side-tab,.lk-chip){transition:transform .14s ease,filter .14s ease}
+  html:not([data-su-motion="off"]) :is(.pph-tile,.th-gate,.pp-bar button,#mNav button):active{transform:scale(.96)}
+  html:not([data-su-motion="off"]) .side-tab:active{transform:scale(.98)}
+}
+@keyframes suPgIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes suPgFade{from{opacity:0}to{opacity:1}}
+@keyframes suMdPop{from{opacity:0;transform:translateY(18px) scale(.97)}to{opacity:1;transform:none}}</style>
+<script id="su-motion-js">
+// انتقال ناعم: الصفحة الجديدة بتظهر بحركة خفيفة لفوق. الصفحات اللي جواها حاجة ثابتة (زرار + العائم، شريط ثابت)
+// بتاخد ظهور تدريجي بس، لأن الـ transform بيخلّي العناصر الثابتة تتحرك معاها لحظة الحركة.
+(function(){
+  const mode=()=>{try{return(state&&state.settings&&state.settings.look&&state.settings.look.motion)||""}catch(e){return""}};
+  function setMode(){const m=mode();if(m)document.documentElement.setAttribute("data-su-motion",m);else document.documentElement.removeAttribute("data-su-motion")}
+  window.suMotionApply=setMode;
+  function hasFixed(el){if(el.matches&&el.matches(".pph"))return true;
+    const all=el.getElementsByTagName("*"),n=Math.min(all.length,3000);for(let i=0;i<n;i++){const p=getComputedStyle(all[i]).position;if(p==="fixed"||p==="sticky")return true}return false}
+  // الفحص بيتعمل مرة واحدة لكل صفحة (الجداول الكبيرة فيها آلاف العناصر)
+  const FX={};const fixedOf=el=>el.id?(FX[el.id]!=null?FX[el.id]:(FX[el.id]=hasFixed(el))):hasFixed(el);
+  function play(el,cls){if(!el||mode()==="off")return;cls=cls||(fixedOf(el)?"su-pg-fade":"su-pg-in");
+    el.classList.remove("su-pg-in","su-pg-fade","su-md-in");void el.offsetWidth;el.classList.add(cls);
+    const done=()=>{el.classList.remove(cls);el.removeEventListener("animationend",done)};el.addEventListener("animationend",done);setTimeout(done,900)}
+  window.suMotionPlay=play;
+  const visTab=()=>{const t=document.querySelector(".tab-content:not(.hidden)");return t&&t.id};
+  const _sw=window.switchTab;
+  window.switchTab=function(id){const before=visTab();const r=_sw.apply(this,arguments);try{const now=visTab();if(now&&now!==before)play(document.getElementById(now))}catch(e){}return r};
+  if(typeof switchSettingsSubTab==="function"){const _ss=switchSettingsSubTab;switchSettingsSubTab=function(t){const r=_ss.apply(this,arguments);try{play(document.getElementById("settings-sub-"+t))}catch(e){}return r}}
+  // بوابة الأهل: الصفحة بتتبني من جديد، فالحركة على المحتوى الجديد (مش على الخلفية الثابتة)
+  if(typeof ppSet==="function"){const _pp=ppSet;ppSet=function(k,v){let prev;try{prev=k==="tab"?document.querySelector("#parentPortal .pp-pagebody,#parentPortal .pph-fit"):null}catch(e){}const r=_pp.apply(this,arguments);
+    try{if(k==="tab"||k==="child"){const P=document.getElementById("parentPortal");const el=P&&(P.querySelector(".pp-pagebody")||P.querySelector(".pph-fit"));if(el&&el!==prev)play(el,"su-pg-in")}}catch(e){}return r}}
+  // النوافذ (فورم العميل/الجلسة/الدفع…): بتظهر بـ fade والكارت اللي جوه بيطلع لفوق
+  new MutationObserver(ms=>{for(const m of ms){const t=m.target;if(!t.id||!/Modal$/.test(t.id))continue;
+      if(/\bhidden\b/.test(m.oldValue||"")&&!t.classList.contains("hidden")&&mode()!=="off"){t.classList.remove("su-md-in");void t.offsetWidth;t.classList.add("su-md-in");setTimeout(()=>t.classList.remove("su-md-in"),900)}}})
+    .observe(document.body,{subtree:true,attributes:true,attributeFilter:["class"],attributeOldValue:true});
+  setMode();
+  if(typeof applyThemeSystem==="function"){const _a=applyThemeSystem;applyThemeSystem=function(){const r=_a.apply(this,arguments);setMode();return r}}
 })();
 </script>
 </body>
