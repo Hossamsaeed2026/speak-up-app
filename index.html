@@ -3801,5 +3801,45 @@ html.su-dark .rpl{background:#0b1220}
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",addBtn);else addBtn();
 })();
 </script>
+<style id="su-bk-auto-css">#suBkAutoBar{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);z-index:9998;background:#1e1b4b;color:#fff;border-radius:14px;padding:10px 12px 10px 16px;display:flex;align-items:center;gap:10px;font-size:13px;font-weight:800;box-shadow:0 8px 24px rgba(0,0,0,.25);direction:rtl;max-width:calc(100vw - 32px)}#suBkAutoBar button{border:0;border-radius:10px;font:inherit;font-weight:900;padding:6px 12px;cursor:pointer}#suBkAutoBar .ok{background:#a78bfa;color:#1e1b4b}#suBkAutoBar .no{background:transparent;color:#c4b5fd}</style>
+<script id="su-bk-auto-js">
+// نسخة احتياطية تلقائية يومية على الكمبيوتر (للإدارة، كروم/إيدج على كمبيوتر): لما تتفعّل، أول مرة التطبيق يتفتح في اليوم
+// بيحفظ النسخة في المجلد المختار (نفس backupToLaptop). لو المتصفح محتاج إذن تاني للمجلد، بيطلع زرار «احفظ نسخة اليوم» بضغطة واحدة.
+(function(){
+  const KEY="SU_BK_AUTO";
+  const on=()=>{try{return localStorage.getItem(KEY)==="1"}catch(e){return false}};
+  const can=()=>typeof BK!=="undefined"&&BK.supported&&bkIsDesktop()&&typeof currentUser!=="undefined"&&currentUser&&currentUser.role==="admin";
+  const doneToday=()=>{try{const i=JSON.parse(localStorage.getItem("SU_LAST_BACKUP")||"null");return!!(i&&i.at&&new Date(i.at).toLocaleDateString("en-CA",{timeZone:"Africa/Cairo"})===todayCairo())}catch(e){return false}};
+  let busy=false,asked="";
+  function bar(){if(document.getElementById("suBkAutoBar"))return;const b=document.createElement("div");b.id="suBkAutoBar";b.innerHTML='<span>💾 نسخة النهارده لسه ماتحفظتش على الكمبيوتر</span><button type="button" class="ok">احفظها دلوقتي</button><button type="button" class="no">بعدين</button>';
+    b.querySelector(".ok").onclick=async()=>{b.remove();busy=true;try{await backupToLaptop()}finally{busy=false}};b.querySelector(".no").onclick=()=>b.remove();document.body.appendChild(b)}
+  async function tick(){
+    if(busy||!on()||!can()||doneToday()||!(typeof cloudReady!=="undefined"&&cloudReady))return;
+    let h=null;try{h=await bkGet("dir")}catch(e){}
+    if(!h)return;
+    let p="prompt";try{p=await h.queryPermission({mode:"readwrite"})}catch(e){}
+    if(p==="granted"){busy=true;try{await backupToLaptop()}catch(e){suLog("bkAuto",e)}finally{busy=false}}
+    else if(asked!==todayCairo()){asked=todayCairo();bar()}
+  }
+  window.suBkAutoToggle=async function(cb){
+    if(!cb.checked){try{localStorage.removeItem(KEY)}catch(e){}showToast("اتقفل الحفظ التلقائي على الكمبيوتر ده","amber");return}
+    try{localStorage.setItem(KEY,"1")}catch(e){}
+    let h=null;try{h=await bkGet("dir")}catch(e){}
+    showToast("✅ الحفظ التلقائي اتفعّل: كل يوم أول ما التطبيق يتفتح على الكمبيوتر ده","green");
+    if(!h||!doneToday()){busy=true;try{await backupToLaptop(!h)}finally{busy=false}}
+  };
+  function addToggle(){
+    const pk=document.getElementById("backupPickBtn");if(!pk||document.getElementById("suBkAutoLbl"))return;
+    const l=document.createElement("label");l.id="suBkAutoLbl";l.className="excel-btn";l.style.cssText="display:none;gap:6px;align-items:center;cursor:pointer";
+    l.title="حفظ نسخة احتياطية تلقائي كل يوم على الكمبيوتر ده";
+    l.innerHTML='<input type="checkbox" style="width:16px;height:16px;accent-color:#a78bfa"><span>حفظ تلقائي كل يوم</span>';
+    const cb=l.querySelector("input");cb.checked=on();cb.onchange=()=>suBkAutoToggle(cb);
+    pk.parentNode.insertBefore(l,pk.nextSibling);
+  }
+  const _u=updateBackupUI;updateBackupUI=function(){const r=_u.apply(this,arguments);addToggle();const l=document.getElementById("suBkAutoLbl");if(l){l.style.display=can()?"inline-flex":"none";l.querySelector("input").checked=on()}return r};
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",addToggle);else addToggle();
+  setTimeout(tick,30e3);setInterval(tick,30*60e3);
+})();
+</script>
 </body>
 </html>
