@@ -13,7 +13,8 @@ There is **no build system or package manager**. It is a static site: open `inde
 - `node tests/static-checks.mjs`: compiles every inline `<script>` in `index.html`, checks the `suSplash`/`</html>` markers the service worker needs, flags duplicate block ids, syntax-checks `supabase/functions/*/index.ts`, and fails on data files (`.sql`/`.csv`/`.xlsx`… outside `supabase/migrations/`) or any tracked text file with more than 10 distinct Egyptian mobile numbers (the repo is public).
 - `node tests/merge.test.mjs`: sync merge cases, run against `canon`/`cloudMerge*` and the notebooks patch extracted from `index.html` itself. Add a case here when you touch the merge.
 - `node tests/smoke.mjs`: serves the repo, opens `index.html` in Chromium at phone and desktop widths, and fails on any page error. The CDNs and Supabase may be unreachable from a sandbox; the page should still load cleanly.
-- `.github/workflows/checks.yml` runs all three on every push to `main` (including web uploads) and on pull requests.
+- `node tests/billing.test.mjs`: opens `index.html` in Chromium (same local server as the smoke test, `tests/serve.mjs`) and checks `calculateSessionFee`/`calculateClientInvoice` against the billing rules (status prices, next-month credit, cancelled sessions, estimates, rescheduling). Update its cases when a billing rule changes on purpose.
+- `.github/workflows/checks.yml` runs all four on every push to `main` (including web uploads) and on pull requests.
 
 ## Files that matter
 

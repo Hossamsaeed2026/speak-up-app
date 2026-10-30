@@ -1,26 +1,12 @@
 // اختبار فتح الصفحة في متصفح حقيقي: node tests/smoke.mjs
 // بيشغّل سيرفر محلي، يفتح index.html في Chromium، ويفشل لو ظهر أي خطأ JavaScript في الصفحة.
 // محتاج playwright (موجود في جلسات Claude Code، وفي GitHub Actions بيتسطّب من package.json).
-import { createServer } from 'node:http';
-import { readFile } from 'node:fs/promises';
-import { join, dirname, extname, normalize } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
+import { serve } from './serve.mjs';
 
-const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const { chromium } = createRequire(import.meta.url)('playwright');
-
-const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.json': 'application/json', '.png': 'image/png', '.jpg': 'image/jpeg', '.webp': 'image/webp', '.svg': 'image/svg+xml' };
-const server = createServer(async (req, res) => {
-  const path = normalize(decodeURIComponent(new URL(req.url, 'http://x').pathname)).replace(/^([/\\])+/, '');
-  if (path.startsWith('..')) { res.writeHead(403).end(); return; }
-  try {
-    const body = await readFile(join(root, path || 'index.html'));
-    res.writeHead(200, { 'Content-Type': TYPES[extname(path)] || 'application/octet-stream' }).end(body);
-  } catch { res.writeHead(404).end(); }
-});
-await new Promise((r) => server.listen(0, '127.0.0.1', r));
-const url = `http://127.0.0.1:${server.address().port}/index.html`;
+const server = await serve();
+const url = server.url;
 
 const browser = await chromium.launch();
 const errors = [];

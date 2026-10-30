@@ -27,3 +27,5 @@ jobs:
         run: npm install --no-save --no-package-lock playwright@1.49.1 && npx playwright install --with-deps chromium
       - name: Smoke test (page opens without JavaScript errors)
         run: node tests/smoke.mjs
+      - name: Billing tests (session fees and invoices)
+        run: node tests/billing.test.mjs
