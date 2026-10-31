@@ -4607,7 +4607,7 @@ html.su-dark .su-an .an-filt,html.su-dark .su-an tr.l0 td{background:#222}</styl
 #mNav .pp-logo-btn,#mNav .pp-logo-btn img{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
 html body #mNav .pp-logo-btn{transition:transform .38s cubic-bezier(.34,1.56,.64,1)}
 html body #mNav .pp-logo-btn.su-hold-up{transform:translateX(-50%) translateY(-16px)!important}
-#suHold{position:fixed;inset:0;z-index:60;background:transparent;-webkit-tap-highlight-color:transparent}
+#suHold{position:fixed;inset:0;z-index:60;background:transparent;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;touch-action:none}
 #suHold .hb{position:fixed;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:50%;border:0;padding:0;display:grid;place-items:center;
   background:#fff;color:#111827;box-shadow:0 4px 14px rgba(15,23,42,.16),0 0 0 1px rgba(15,23,42,.05);
   transform:translate(0,0) scale(.3);opacity:0;transition:transform .45s cubic-bezier(.34,1.56,.64,1),opacity .2s ease;transition-delay:var(--d)}
@@ -4629,7 +4629,9 @@ html[data-su-motion="off"] #suHold.on .hb::before,html[data-su-motion="off"] #su
     sessions:'<svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2.5"/><path d="M8 3v4M16 3v4M4 10h16M8.5 14h3M8.5 17h6"/></svg>',
     settings:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>'};
   const ITEMS=[{k:"clients",t:"العملاء",c:"#a5f3fc"},{k:"sessions",t:"الجلسات",c:"#ddd6fe"},{k:"settings",t:"الإعدادات",c:"#fde68a"}];
-  let timer=0,sx=0,sy=0,btn=null,swallow=false;
+  // pressing = الصباع لسه على اللوجو؛ في الوقت ده وطول ما الدواير مفتوحة بنمنع قايمة كروم (Back/Forward/Reload…)
+  // لأن لما الدواير بتظهر الطبقة بتاعتها بتبقى تحت الصباع، فكروم كان بيفتكرها دوسة طويلة على الصفحة
+  let timer=0,sx=0,sy=0,btn=null,swallow=false,pressing=false;
   function allowed(k){try{const role=window._realRole||(currentUser&&currentUser.role);if(k==="settings")return role==="admin";const pm=getUserEffectivePermissions(currentUser)||{};return pm[k]!==false}catch(e){return true}}
   function close(go){const ov=document.getElementById("suHold");const b=document.querySelector(SEL);if(b)b.classList.remove("su-hold-up");
     if(ov){ov.classList.remove("on");setTimeout(()=>ov.remove(),300)}if(go)setTimeout(()=>{try{switchTab(go)}catch(e){suLog("su-hold",e)}},90)}
@@ -4647,13 +4649,13 @@ html[data-su-motion="off"] #suHold.on .hb::before,html[data-su-motion="off"] #su
     document.body.appendChild(ov);try{navigator.vibrate&&navigator.vibrate(12)}catch(e){}
     requestAnimationFrame(()=>ov.classList.add("on"))}
   function cancel(){clearTimeout(timer);timer=0}
-  document.addEventListener("pointerdown",e=>{const b=e.target.closest&&e.target.closest(SEL);if(!b||e.button>0)return;btn=b;sx=e.clientX;sy=e.clientY;swallow=false;
+  document.addEventListener("pointerdown",e=>{const b=e.target.closest&&e.target.closest(SEL);if(!b||e.button>0)return;btn=b;sx=e.clientX;sy=e.clientY;swallow=false;pressing=true;
     timer=setTimeout(()=>{timer=0;swallow=true;open(b)},HOLD)},true);
   document.addEventListener("pointermove",e=>{if(timer&&(Math.abs(e.clientX-sx)>12||Math.abs(e.clientY-sy)>12))cancel()},true);
-  ["pointerup","pointercancel"].forEach(t=>document.addEventListener(t,()=>{if(timer)cancel()},true));
+  ["pointerup","pointercancel"].forEach(t=>document.addEventListener(t,()=>{pressing=false;if(timer)cancel()},true));
   // بعد الدوسة الطويلة: الكليك اللي بييجي بعدها مايفتحش القايمة
   document.addEventListener("click",e=>{if(swallow&&e.target.closest&&e.target.closest(SEL)){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();swallow=false}},true);
-  document.addEventListener("contextmenu",e=>{if(e.target.closest&&e.target.closest(SEL))e.preventDefault()},true);
+  document.addEventListener("contextmenu",e=>{if(pressing||document.getElementById("suHold")||(e.target.closest&&e.target.closest(SEL))){e.preventDefault();e.stopPropagation()}},true);
   document.addEventListener("keydown",e=>{if(e.key==="Escape"&&document.getElementById("suHold"))close()});
   window.addEventListener("popstate",()=>{if(document.getElementById("suHold"))close()});
 })();
