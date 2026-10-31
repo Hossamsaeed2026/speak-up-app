@@ -4661,7 +4661,7 @@ html[data-su-motion="off"] #suHold.on .hb::before,html[data-su-motion="off"] #su
 })();
 </script>
 <style id="su-enter-css">/* أنيميشن الدخول باللوجو — بيظهر مرة واحدة بعد ما المستخدم يسجّل دخول بنفسه (مش مع الجلسة المحفوظة، دي ليها شاشة البداية) */
-#suEnter{position:fixed;inset:0;z-index:10000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:radial-gradient(circle at 50% 42%,#fff 0,#faf5ff 45%,#ede9fe 100%);overflow:hidden;cursor:pointer;-webkit-tap-highlight-color:transparent;animation:seBg .35s ease-out both}
+#suEnter{position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 42%,#fff 0,#faf5ff 45%,#ede9fe 100%);overflow:hidden;cursor:pointer;-webkit-tap-highlight-color:transparent;animation:seBg .35s ease-out both}
 #suEnter .se-logo{position:relative;z-index:1;width:min(78vw,380px);aspect-ratio:532/176;animation:sePop .9s cubic-bezier(.2,1.4,.4,1) .1s both}
 #suEnter .se-logo img{position:relative;width:100%;height:100%;display:block;filter:drop-shadow(0 10px 24px rgba(124,58,237,.22))}
 #suEnter .se-shine{position:absolute;inset:0;z-index:1;-webkit-mask:url(assets/brand/logo-wide.webp) center/100% 100% no-repeat;mask:url(assets/brand/logo-wide.webp) center/100% 100% no-repeat;background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.6) 50%,transparent 58%) -150% 0/250% 100% no-repeat;animation:seShine .9s ease-in-out .95s both}
@@ -4669,47 +4669,34 @@ html[data-su-motion="off"] #suHold.on .hb::before,html[data-su-motion="off"] #su
 #suEnter .se-ring.r2{border-color:#facc15;animation-delay:.55s}
 #suEnter .se-dot{position:absolute;left:50%;top:50%;width:var(--s,12px);height:var(--s,12px);margin:calc(var(--s,12px)/-2);background:var(--c);border-radius:50%;opacity:0;animation:seBurst 1.1s cubic-bezier(.15,.8,.3,1) var(--d,.45s) both;pointer-events:none}
 #suEnter .se-dot.st{border-radius:0;clip-path:polygon(50% 0,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%)}
-#suEnter .se-hi{font:900 clamp(18px,4.6vw,24px)/1.4 inherit;color:#5b21b6;text-align:center;opacity:0;animation:seUp .6s ease-out 1.15s both;padding:0 20px}
-#suEnter .se-hi small{display:block;font-size:.62em;font-weight:700;color:#65a30d;margin-top:2px}
-#suEnter .se-bar{width:120px;height:4px;border-radius:9px;background:#ede9fe;overflow:hidden;opacity:0;animation:seUp .4s ease-out 1.3s both}
-#suEnter .se-bar i{display:block;height:100%;width:100%;background:linear-gradient(90deg,#7c3aed,#facc15,#22c55e);transform-origin:right;animation:seFill 1.1s ease-in-out 1.35s both}
-html[dir=ltr] #suEnter .se-bar i{transform-origin:left}
-#suEnter.out{animation:seOut .55s cubic-bezier(.6,0,.4,1) both;pointer-events:none}
+html[dir=ltr] #suEnter.out{animation:seOut .55s cubic-bezier(.6,0,.4,1) both;pointer-events:none}
 #suEnter.out .se-logo{animation:seLogoOut .55s cubic-bezier(.6,0,.4,1) both}
 @keyframes seBg{from{opacity:0}}
 @keyframes sePop{0%{opacity:0;transform:scale(.35) rotate(-8deg)}60%{opacity:1}100%{opacity:1;transform:none}}
 @keyframes seShine{to{background-position:250% 0}}
 @keyframes seRing{0%{opacity:.8;transform:translate(-50%,-50%) scale(.2)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.15)}}
 @keyframes seBurst{0%{opacity:0;transform:translate(0,0) scale(.2)}15%{opacity:1}100%{opacity:0;transform:translate(var(--x),var(--y)) scale(1) rotate(200deg)}}
-@keyframes seUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
-@keyframes seFill{from{transform:scaleX(0)}to{transform:scaleX(1)}}
 @keyframes seOut{to{opacity:0;clip-path:circle(0% at 50% 45%)}}
 @keyframes seLogoOut{to{transform:scale(1.25);opacity:0}}
 html.su-dark #suEnter{background:radial-gradient(circle at 50% 42%,#2a2238 0,#1c1925 60%,#121016 100%)}
-html.su-dark #suEnter .se-hi{color:#e9d5ff}
-html.su-dark #suEnter .se-bar{background:#2a2238}
-@media (prefers-reduced-motion:reduce){#suEnter,#suEnter *{animation-duration:.01s!important;animation-delay:0s!important}}
+html.su-dark html.su-dark @media (prefers-reduced-motion:reduce){#suEnter,#suEnter *{animation-duration:.01s!important;animation-delay:0s!important}}
 </style>
 <script id="su-enter-js">
 // أنيميشن الدخول: لما المستخدم يدوس «دخول» وينجح (الشاشة loginOverlay تختفي) يظهر لوجو Speak Up بحركة وبعدين يفتح السيستم
 (function(){
   var armed=0,busy=false;
   function off(){var m="";try{m=document.documentElement.getAttribute("data-su-motion")||""}catch(e){}return m==="off"}
-  function esc(s){return String(s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
-  function hiText(){var en=false;try{en=localStorage.getItem("SU_LANG")==="en"}catch(e){}
-    var n="";try{var u=window.currentUser;n=u&&u.name||"";if(/@/.test(n))n="";n=String(n).trim().split(/\s+/)[0]||""}catch(e){}
-    return (en?"Welcome"+(n?", "+esc(n):"")+" 👋":"أهلاً بيك"+(n?" يا "+esc(n):"")+" 👋")+"<small>"+(en?"Opening Speak Up…":"جاري فتح السيستم…")+"</small>"}
   function play(){
     if(busy||off())return;busy=true;
     var C=["#7c3aed","#a855f7","#facc15","#22c55e","#22d3ee","#f472b6"],dots="";
     for(var i=0;i<18;i++){var a=i/18*Math.PI*2+Math.random()*.3,r=120+Math.random()*110;
       dots+='<span class="se-dot'+(i%3===0?" st":"")+'" style="--c:'+C[i%C.length]+';--s:'+(8+Math.round(Math.random()*10))+'px;--x:'+Math.round(Math.cos(a)*r)+'px;--y:'+Math.round(Math.sin(a)*r)+'px;--d:'+(.4+Math.random()*.25).toFixed(2)+'s"></span>'}
     var el=document.createElement("div");el.id="suEnter";el.setAttribute("role","status");
-    el.innerHTML='<div class="se-logo"><span class="se-ring"></span><span class="se-ring r2"></span>'+dots+'<img src="assets/brand/logo-wide.webp" alt="Speak Up"><span class="se-shine"></span></div><div class="se-hi">'+hiText()+'</div><div class="se-bar"><i></i></div>';
+    el.innerHTML='<div class="se-logo"><span class="se-ring"></span><span class="se-ring r2"></span>'+dots+'<img src="assets/brand/logo-wide.webp" alt="Speak Up"><span class="se-shine"></span></div>';
     document.body.appendChild(el);
     var done=false;function close(){if(done)return;done=true;el.classList.add("out");setTimeout(function(){el.remove();busy=false},560)}
     el.addEventListener("click",close);
-    setTimeout(close,2600);
+    setTimeout(close,2000);
   }
   window.suEnterPlay=play;
   function init(){
