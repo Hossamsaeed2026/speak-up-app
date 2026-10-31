@@ -4612,13 +4612,11 @@ html body #mNav .pp-logo-btn.su-hold-up{transform:translateX(-50%) translateY(-1
   background:#fff;color:#111827;box-shadow:0 4px 14px rgba(15,23,42,.16),0 0 0 1px rgba(15,23,42,.05);
   transform:translate(0,0) scale(.3);opacity:0;transition:transform .45s cubic-bezier(.34,1.56,.64,1),opacity .2s ease;transition-delay:var(--d)}
 #suHold.on .hb{transform:translate(var(--x),var(--y)) scale(1);opacity:1}
-#suHold .hb svg{width:21px;height:21px;stroke:#111827;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+#suHold .hb svg{width:21px;height:21px;stroke:var(--ic,#7571a8);fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 #suHold .hb::before,#suHold .hb::after{content:"";position:absolute;inset:0;border-radius:50%;border:2px solid var(--c);opacity:0;pointer-events:none}
 #suHold.on .hb::before{animation:suHoldRing 1.8s ease-out calc(var(--d) + .3s) infinite}
 #suHold.on .hb::after{animation:suHoldRing 1.8s ease-out calc(var(--d) + 1.2s) infinite}
 @keyframes suHoldRing{0%{opacity:.85;transform:scale(1)}100%{opacity:0;transform:scale(1.32)}}
-#suHold .hb span{position:absolute;bottom:100%;margin-bottom:5px;white-space:nowrap;font-size:10.5px;font-weight:800;color:#111827;background:#fff;padding:1px 7px;border-radius:999px;box-shadow:0 2px 8px rgba(15,23,42,.12);opacity:0;transition:opacity .2s ease;transition-delay:calc(var(--d) + .2s)}
-#suHold.on .hb span{opacity:1}
 #suHold .hb:active{transform:translate(var(--x),var(--y)) scale(.9)}
 html[data-su-motion="off"] #suHold .hb,html[data-su-motion="off"] #mNav .pp-logo-btn{transition:none}
 html[data-su-motion="off"] #suHold.on .hb::before,html[data-su-motion="off"] #suHold.on .hb::after{animation:none}
@@ -4642,7 +4640,9 @@ html[data-su-motion="off"] #suHold.on .hb::before,html[data-su-motion="off"] #su
     // قوس صغير فوق اللوجو: أول عنصر يمين، والتاني فوق، والتالت شمال
     const angs=items.length===1?[-90]:items.length===2?[-55,-125]:[-30,-90,-150];
     const ov=document.createElement("div");ov.id="suHold";ov.setAttribute("role","menu");
-    ov.innerHTML=items.map((it,i)=>{const a=angs[i]*Math.PI/180;return`<button type="button" class="hb" role="menuitem" data-k="${it.k}" style="left:${cx}px;top:${cy}px;--x:${Math.round(Math.cos(a)*R)}px;--y:${Math.round(Math.sin(a)*R)}px;--d:${i*.05}s;--c:${it.c}" aria-label="${it.t}">${IC[it.k]}<span>${it.t}</span></button>`}).join("");
+    // لون الرموز نفس لون أيقونات الشريط السفلي (بيتغير مع الثيم)
+    try{const nb=document.querySelector("#mNav button:not(.pp-logo-btn)");if(nb)ov.style.setProperty("--ic",getComputedStyle(nb).color)}catch(e){}
+    ov.innerHTML=items.map((it,i)=>{const a=angs[i]*Math.PI/180;return`<button type="button" class="hb" role="menuitem" data-k="${it.k}" style="left:${cx}px;top:${cy}px;--x:${Math.round(Math.cos(a)*R)}px;--y:${Math.round(Math.sin(a)*R)}px;--d:${i*.05}s;--c:${it.c}" aria-label="${it.t}" title="${it.t}">${IC[it.k]}</button>`}).join("");
     ov.addEventListener("click",e=>{const f=e.target.closest(".hb");close(f?f.dataset.k:null)});
     document.body.appendChild(ov);try{navigator.vibrate&&navigator.vibrate(12)}catch(e){}
     requestAnimationFrame(()=>ov.classList.add("on"))}
