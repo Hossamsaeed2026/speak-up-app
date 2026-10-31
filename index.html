@@ -4699,6 +4699,12 @@ html.su-dark html.su-dark @media (prefers-reduced-motion:reduce){#suEnter,#suEnt
     setTimeout(close,2000);
   }
   window.suEnterPlay=play;
+  // الدخول بجلسة محفوظة: أول ما السيستم يفتح (شاشة البداية لسه ظاهرة واللوجين مستخبي) نشغّل نفس الأنيميشن مكان شاشة البداية
+  var auto=false,origDone=window.suAuthDone;
+  if(typeof origDone==="function")window.suAuthDone=function(){
+    try{var ov=document.getElementById("loginOverlay"),sp=document.getElementById("suSplash");
+      if(!auto&&ov&&ov.classList.contains("hidden")&&sp&&!sp.classList.contains("out")&&document.body){auto=true;play();if(busy)sp.remove()}}catch(e){try{suLog("suEnter auto",e)}catch(x){}}
+    return origDone.apply(this,arguments)};
   function init(){
     var form=document.getElementById("loginForm"),ov=document.getElementById("loginOverlay");if(!form||!ov)return;
     form.addEventListener("submit",function(){armed=Date.now()},true);
