@@ -3,3 +3,6 @@ node_modules/
 SpeakUp-Data*.sql
 SpeakUp-Backup-*.sql
 *.backup.sql
+
+# ملفات بتتعمل للتحميل بس (فيديو/جيف) — مش جزء من التطبيق
+export/
