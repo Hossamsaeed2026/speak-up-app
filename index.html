@@ -4183,8 +4183,9 @@ html[data-su-motion="fast"]{--su-mo:.18s}
   html:not([data-su-motion="off"]) .su-md-in{animation:suPgFade calc(var(--su-mo)*.8) ease-out both}
   html:not([data-su-motion="off"]) .su-md-in>:first-child{animation:suMdPop var(--su-mo) cubic-bezier(.2,.9,.3,1.15) both}
   /* إحساس بالضغط على الأزرار الكبيرة */
-  html:not([data-su-motion="off"]) :is(.pph-tile,.th-gate,.pp-bar button,#mNav button,.side-tab,.lk-chip){transition:transform .14s ease,filter .14s ease}
-  html:not([data-su-motion="off"]) :is(.pph-tile,.th-gate,.pp-bar button,#mNav button):active{transform:scale(.96)}
+  /* لوجو النص (.pp-logo-btn) متمركز بـ translateX(-50%) فمالوش scale هنا — كان بيخليه يتنطط يمين */
+  html:not([data-su-motion="off"]) :is(.pph-tile,.th-gate,.pp-bar button:not(.pp-logo-btn),#mNav button:not(.pp-logo-btn),.side-tab,.lk-chip){transition:transform .14s ease,filter .14s ease}
+  html:not([data-su-motion="off"]) :is(.pph-tile,.th-gate,.pp-bar button:not(.pp-logo-btn),#mNav button:not(.pp-logo-btn)):active{transform:scale(.96)}
   html:not([data-su-motion="off"]) .side-tab:active{transform:scale(.98)}
 }
 @keyframes suPgIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
@@ -4601,55 +4602,55 @@ html.su-dark .su-an .an-filt,html.su-dark .su-an tr.l0 td{background:#222}</styl
   try{render()}catch(e){}
 })();
 </script>
-<style id="su-hold-css">/* دوسة طويلة على لوجو المركز في الشريط السفلي: اللوجو يطلع لفوق وتطلع حواليه 3 دواير اختصارات */
+<style id="su-hold-css">/* دوسة طويلة على لوجو الشريط السفلي: اللوجو يطلع لفوق بنعومة وتطلع 3 دواير صغيرة بيضا حواليه.
+   مهم: الزرار متمركز بـ translateX(-50%)، فأي transform هنا لازم يحتفظ بيه وإلا الزرار بيتنطط يمين */
 #mNav .pp-logo-btn,#mNav .pp-logo-btn img{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
-#mNav .pp-logo-btn{transition:transform .32s cubic-bezier(.34,1.56,.64,1),box-shadow .32s ease}
-#mNav .pp-logo-btn.su-fab-press{transform:scale(.92)}
-#mNav .pp-logo-btn.su-fab-lift{transform:translateY(-14px) scale(1.08);box-shadow:0 0 0 6px rgba(255,255,255,.75),0 14px 30px rgba(91,33,182,.38)!important;z-index:61;position:relative}
-#suHold{position:fixed;inset:0;z-index:60;background:rgba(30,16,60,.0);backdrop-filter:blur(0);-webkit-backdrop-filter:blur(0);transition:background .3s ease,backdrop-filter .3s ease}
-#suHold.on{background:rgba(30,16,60,.28);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px)}
-/* نسخة من اللوجو فوق الخلفية الضبابية (الزرار الأصلي جوه الشريط تحت الطبقة) */
-#suHold .fl{position:fixed;width:var(--s);height:var(--s);margin:calc(var(--s)/-2) 0 0 calc(var(--s)/-2);border-radius:50%;border:0;padding:0;background:#fff;display:grid;place-items:center;overflow:hidden;
-  box-shadow:0 0 0 6px rgba(255,255,255,.8),0 16px 34px rgba(91,33,182,.45);transform:translateY(14px) scale(.92);transition:transform .42s cubic-bezier(.34,1.56,.64,1)}
-#suHold.on .fl{transform:translateY(0) scale(1.08)}
-#suHold .fl img{width:100%;height:100%;object-fit:contain}
-#suHold .fb{position:fixed;width:62px;height:62px;margin:-31px 0 0 -31px;border-radius:50%;border:0;display:grid;place-items:center;color:#fff;font-size:24px;
-  background:var(--g);box-shadow:0 10px 24px rgba(30,16,60,.28),inset 0 2px 0 rgba(255,255,255,.35);
-  transform:translate(0,0) scale(.2) rotate(-90deg);opacity:0;transition:transform .5s cubic-bezier(.34,1.56,.64,1),opacity .25s ease;transition-delay:var(--d)}
-#suHold.on .fb{transform:translate(var(--x),var(--y)) scale(1) rotate(0);opacity:1}
-#suHold .fb span{position:absolute;top:100%;margin-top:6px;white-space:nowrap;font-size:12px;font-weight:900;color:#fff;background:rgba(30,16,60,.72);padding:2px 9px;border-radius:999px;opacity:0;transform:translateY(-4px);transition:opacity .2s ease,transform .25s ease;transition-delay:calc(var(--d) + .18s)}
-#suHold.on .fb span{opacity:1;transform:none}
-#suHold .fb:active{transform:translate(var(--x),var(--y)) scale(.92)}
-#suHold .fb::after{content:"";position:absolute;inset:-6px;border-radius:50%;border:2px solid rgba(255,255,255,.55);opacity:0;transform:scale(.8)}
-#suHold.on .fb::after{animation:suHoldRing 1.6s ease-out calc(var(--d) + .35s) 1}
-@keyframes suHoldRing{0%{opacity:.9;transform:scale(.85)}100%{opacity:0;transform:scale(1.35)}}
-html[data-su-motion="off"] #suHold .fb,html[data-su-motion="off"] #suHold .fb span,html[data-su-motion="off"] #mNav .pp-logo-btn{transition:none}
-@media (prefers-reduced-motion:reduce){#suHold .fb,#suHold .fb span,#mNav .pp-logo-btn{transition:none}#suHold.on .fb::after{animation:none}}</style>
+html body #mNav .pp-logo-btn{transition:transform .38s cubic-bezier(.34,1.56,.64,1)}
+html body #mNav .pp-logo-btn.su-hold-up{transform:translateX(-50%) translateY(-16px)!important}
+#suHold{position:fixed;inset:0;z-index:60;background:transparent;-webkit-tap-highlight-color:transparent}
+#suHold .hb{position:fixed;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:50%;border:0;padding:0;display:grid;place-items:center;
+  background:#fff;color:#111827;box-shadow:0 4px 14px rgba(15,23,42,.16),0 0 0 1px rgba(15,23,42,.05);
+  transform:translate(0,0) scale(.3);opacity:0;transition:transform .45s cubic-bezier(.34,1.56,.64,1),opacity .2s ease;transition-delay:var(--d)}
+#suHold.on .hb{transform:translate(var(--x),var(--y)) scale(1);opacity:1}
+#suHold .hb svg{width:21px;height:21px;stroke:#111827;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+#suHold .hb::before,#suHold .hb::after{content:"";position:absolute;inset:0;border-radius:50%;border:2px solid var(--c);opacity:0;pointer-events:none}
+#suHold.on .hb::before{animation:suHoldRing 1.8s ease-out calc(var(--d) + .3s) infinite}
+#suHold.on .hb::after{animation:suHoldRing 1.8s ease-out calc(var(--d) + 1.2s) infinite}
+@keyframes suHoldRing{0%{opacity:.85;transform:scale(1)}100%{opacity:0;transform:scale(1.32)}}
+#suHold .hb span{position:absolute;bottom:100%;margin-bottom:5px;white-space:nowrap;font-size:10.5px;font-weight:800;color:#111827;background:#fff;padding:1px 7px;border-radius:999px;box-shadow:0 2px 8px rgba(15,23,42,.12);opacity:0;transition:opacity .2s ease;transition-delay:calc(var(--d) + .2s)}
+#suHold.on .hb span{opacity:1}
+#suHold .hb:active{transform:translate(var(--x),var(--y)) scale(.9)}
+html[data-su-motion="off"] #suHold .hb,html[data-su-motion="off"] #mNav .pp-logo-btn{transition:none}
+html[data-su-motion="off"] #suHold.on .hb::before,html[data-su-motion="off"] #suHold.on .hb::after{animation:none}
+@media (prefers-reduced-motion:reduce){#suHold .hb,html body #mNav .pp-logo-btn{transition:none}#suHold.on .hb::before,#suHold.on .hb::after{animation:none}}</style>
 <script id="su-hold-js">
 // دوسة عادية على لوجو الشريط السفلي = القايمة (زي ما هي). دوسة طويلة = اختصارات: العملاء، الجلسات، الإعدادات
 (function(){
-  const HOLD=430,SEL="#mNav .pp-logo-btn";
-  const ITEMS=[{k:"clients",t:"العملاء",ic:"👥",g:"linear-gradient(135deg,#22d3ee,#0e7490)"},{k:"sessions",t:"الجلسات",ic:"📋",g:"linear-gradient(135deg,#a78bfa,#6d28d9)"},{k:"settings",t:"الإعدادات",ic:"⚙️",g:"linear-gradient(135deg,#fbbf24,#ea580c)"}];
+  const HOLD=380,SEL="#mNav .pp-logo-btn";
+  const IC={clients:'<svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><circle cx="17" cy="9" r="2.4"/><path d="M15.5 14.2A4.5 4.5 0 0 1 21 18.5"/></svg>',
+    sessions:'<svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2.5"/><path d="M8 3v4M16 3v4M4 10h16M8.5 14h3M8.5 17h6"/></svg>',
+    settings:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>'};
+  const ITEMS=[{k:"clients",t:"العملاء",c:"#a5f3fc"},{k:"sessions",t:"الجلسات",c:"#ddd6fe"},{k:"settings",t:"الإعدادات",c:"#fde68a"}];
   let timer=0,sx=0,sy=0,btn=null,swallow=false;
   function allowed(k){try{const role=window._realRole||(currentUser&&currentUser.role);if(k==="settings")return role==="admin";const pm=getUserEffectivePermissions(currentUser)||{};return pm[k]!==false}catch(e){return true}}
-  function close(go){const ov=document.getElementById("suHold");const b=document.querySelector(SEL);if(b)b.classList.remove("su-fab-lift");
-    if(ov){ov.classList.remove("on");setTimeout(()=>ov.remove(),360)}if(go)setTimeout(()=>{try{switchTab(go)}catch(e){suLog("su-fab",e)}},120)}
+  function close(go){const ov=document.getElementById("suHold");const b=document.querySelector(SEL);if(b)b.classList.remove("su-hold-up");
+    if(ov){ov.classList.remove("on");setTimeout(()=>ov.remove(),300)}if(go)setTimeout(()=>{try{switchTab(go)}catch(e){suLog("su-hold",e)}},90)}
   window.suHoldClose=close;
   function open(b){const items=ITEMS.filter(i=>allowed(i.k));if(!items.length)return;
-    const r=b.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2-16,R=Math.max(104,r.width*2.1);
-    // قوس فوق اللوجو: أول عنصر يمين، والتاني فوق، والتالت شمال
-    const angs=items.length===1?[-90]:items.length===2?[-60,-120]:[-36,-90,-144];
-    const im=b.querySelector("img"),logo=im?`<button type="button" class="fl" style="left:${cx}px;top:${cy}px;--s:${Math.round(r.width)}px" aria-label="قفل"><img src="${im.getAttribute("src")}" alt=""></button>`:"";
+    b.classList.add("su-hold-up");
+    const r=b.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2-16,R=r.width/2+40;
+    // قوس صغير فوق اللوجو: أول عنصر يمين، والتاني فوق، والتالت شمال
+    const angs=items.length===1?[-90]:items.length===2?[-55,-125]:[-30,-90,-150];
     const ov=document.createElement("div");ov.id="suHold";ov.setAttribute("role","menu");
-    ov.innerHTML=logo+items.map((it,i)=>{const a=angs[i]*Math.PI/180;return`<button type="button" class="fb" role="menuitem" data-k="${it.k}" style="left:${cx}px;top:${cy}px;--x:${Math.round(Math.cos(a)*R)}px;--y:${Math.round(Math.sin(a)*R)}px;--d:${i*.06}s;--g:${it.g}" aria-label="${it.t}">${it.ic}<span>${it.t}</span></button>`}).join("");
-    ov.addEventListener("click",e=>{const f=e.target.closest(".fb");close(f?f.dataset.k:null)});
-    document.body.appendChild(ov);b.classList.add("su-fab-lift");try{navigator.vibrate&&navigator.vibrate(18)}catch(e){}
-    requestAnimationFrame(()=>requestAnimationFrame(()=>ov.classList.add("on")))}
-  function cancel(){clearTimeout(timer);timer=0;if(btn)btn.classList.remove("su-fab-press")}
-  document.addEventListener("pointerdown",e=>{const b=e.target.closest&&e.target.closest(SEL);if(!b||e.button>0)return;btn=b;sx=e.clientX;sy=e.clientY;swallow=false;b.classList.add("su-fab-press");
-    timer=setTimeout(()=>{timer=0;b.classList.remove("su-fab-press");swallow=true;open(b)},HOLD)},true);
+    ov.innerHTML=items.map((it,i)=>{const a=angs[i]*Math.PI/180;return`<button type="button" class="hb" role="menuitem" data-k="${it.k}" style="left:${cx}px;top:${cy}px;--x:${Math.round(Math.cos(a)*R)}px;--y:${Math.round(Math.sin(a)*R)}px;--d:${i*.05}s;--c:${it.c}" aria-label="${it.t}">${IC[it.k]}<span>${it.t}</span></button>`}).join("");
+    ov.addEventListener("click",e=>{const f=e.target.closest(".hb");close(f?f.dataset.k:null)});
+    document.body.appendChild(ov);try{navigator.vibrate&&navigator.vibrate(12)}catch(e){}
+    requestAnimationFrame(()=>ov.classList.add("on"))}
+  function cancel(){clearTimeout(timer);timer=0}
+  document.addEventListener("pointerdown",e=>{const b=e.target.closest&&e.target.closest(SEL);if(!b||e.button>0)return;btn=b;sx=e.clientX;sy=e.clientY;swallow=false;
+    timer=setTimeout(()=>{timer=0;swallow=true;open(b)},HOLD)},true);
   document.addEventListener("pointermove",e=>{if(timer&&(Math.abs(e.clientX-sx)>12||Math.abs(e.clientY-sy)>12))cancel()},true);
-  ["pointerup","pointercancel"].forEach(t=>document.addEventListener(t,()=>{if(timer)cancel();else if(btn)btn.classList.remove("su-fab-press")},true));
+  ["pointerup","pointercancel"].forEach(t=>document.addEventListener(t,()=>{if(timer)cancel()},true));
   // بعد الدوسة الطويلة: الكليك اللي بييجي بعدها مايفتحش القايمة
   document.addEventListener("click",e=>{if(swallow&&e.target.closest&&e.target.closest(SEL)){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();swallow=false}},true);
   document.addEventListener("contextmenu",e=>{if(e.target.closest&&e.target.closest(SEL))e.preventDefault()},true);
